@@ -4,16 +4,16 @@
     <div>
         <img src="{{ asset('images/welcome/whams.jpg') }}" alt="Welcome Image" class="mt-4 rounded-lg shadow-lg" style="width: 1500px; height: 400px;">
         <!-- style="color: #7a1b1b;" -->
-        <p class="text-2xl font-bold mt-4 text-center">Human Asset Management & Service Building</p>
+        <p class="text-2xl font-bold mt-4 text-center text-red-700">Human Asset Management & Service Building</p>
         <p class="text-sm text-center">แผนกจัดการและบำรุงรักษาอาคาร</p>
     </div>
     <div class="mt-6">
         <p><strong>บริการทั้งหมด</strong></p>
         <hr class="mb-2">
-        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <!-- Card Start -->
             <div class="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a href="">
+                <a href="{{ route('serviceshams.welcomeservice') }}">
                       <span class="absolute top-3 right-3 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow animate-pulse-fast">พร้อมใช้งาน</span>
                     <img src="{{ asset('images/welcome/servicehams.jpg') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
                     <div class="p-4">
@@ -68,7 +68,7 @@
 
             @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))
             <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')">
+                <a href="{{ route('datamanage.welcomedatamanage') }}">
                     <img src="{{ asset('images/welcome/data.png') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
                     <div class="p-4">
                         <p class="text-xs text-gray-500 mb-1">บริการหลังบ้าน</p>
@@ -85,7 +85,10 @@
     </div>
 
     <div class="mt-6">
-        <p class="text-lg font-semibold mb-2">ข่าวสารและกิจกรรม</p>
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold">ข่าวสารล่าสุด</h2>
+            <a href="{{ route('datamanage.news.newsalllist') }}" class="text-sm text-red-600 hover:underline">ดูทั้งหมด &rarr;</a>
+        </div>
         <hr class="mb-4">
         <!-- Horizontal scrollable news cards -->
         @if(isset($news) && $news->count())
@@ -100,16 +103,18 @@
                         ];
                         $badgeClass = $badgeColors[$item->newto ?? ''] ?? 'bg-gray-600';
 
-                        $rawPath = $item->image_path ?? '';
+                        // Prefer first multiple image if exists
+                        $primary = method_exists($item,'primaryImagePath') ? $item->primaryImagePath() : ($item->image_path ?? '');
+                        $rawPath = $primary ?? '';
                         $isAbsolute = preg_match('/^(https?:)?\//', (string)$rawPath) === 1;
                         $imageUrl = $rawPath
-                            ? ($isAbsolute ? $rawPath : asset($rawPath))
+                            ? ($isAbsolute ? $rawPath : asset(ltrim($rawPath,'/')))
                             : asset('images/welcome/news1.jpg');
                     @endphp
                     <article class="min-w-[300px] w-[300px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 snap-center">
-                        <a href="#" class="block">
+                        <a href="{{ route('datamanage.news.detail', $item) }}" class="block">
                             <div class="relative">
-                                <img src="{{ $imageUrl }}" alt="ภาพข่าว" class="w-full h-40 object-cover">
+                                <img src="{{ $imageUrl }}" alt="ภาพข่าว" class="w-full h-70 object-cover">
                                 <span class="absolute top-3 left-3 {{ $badgeClass }} text-white text-xs font-semibold px-3 py-1 rounded-full">{{ $item->newto ?? 'ข่าว' }}</span>
                             </div>
                             <div class="p-4">
@@ -118,6 +123,7 @@
                                 <p class="text-xs text-gray-700 mb-4">{{ \Illuminate\Support\Str::limit(strip_tags($item->content), 110) }}</p>
                                 <div class="flex items-center justify-between text-xs text-gray-500">
                                     <time datetime="{{ $item->published_date ? $item->published_date->toDateString() : '' }}">
+                                        <i class="fa-regular fa-calendar-alt mr-1"></i>
                                         {{ $item->published_date ? $item->published_date->format('d/m/Y') : '' }}
                                     </time>
                                     <span class="text-gray-700 font-medium">อ่านต่อ →</span>

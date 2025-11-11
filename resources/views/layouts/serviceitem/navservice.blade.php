@@ -1,6 +1,6 @@
 <!-- Navbar (Tailwind + DaisyUI + Font Awesome) -->
 <nav class="sticky top-0 z-50 w-full backdrop-blur-md bg-white/70 dark:bg-slate-900/60 border-b border-slate-200/70 dark:border-slate-700/60 shadow-[0_6px_24px_-12px_rgba(0,0,0,.25)]">
-    <div class="max-w-7xl mx-auto px-3 md:px-6">
+    <div class="max-w-8xl mx-auto px-3 md:px-6">
         <div class="h-16 flex items-center justify-between">
 
             <!-- Left: Brand -->
@@ -24,24 +24,61 @@
 
 
                 <!-- หน้าแรก (active) -->
-                <a href="{{ route('welcome') }}" class="pill pill-active">
+                <a href="#" class="pill pill-active">
                     <i class="fa-solid fa-house"></i>
                     <span>หน้าหลัก</span>
                 </a>
 
+                <a href="#" class="pill">
+                    <span>อุปกรณ์</span>
+                </a>
+
                 <!-- เกี่ยวกับเรา (dropdown) -->
-                <div class="dropdown dropdown-end">
+                <div class="dropdown dropdown-center">
                     <label tabindex="0" class="pill cursor-pointer">
-                        <i class="fa-regular fa-circle-question"></i>
-                        <span>เกี่ยวกับเรา</span>
+                        <i class="fa-solid fa-server"></i>
+                        <span>ข้อมูลทั่วไป</span>
                         <i class="fa-solid fa-chevron-down text-[11px]"></i>
                     </label>
                     <ul tabindex="0"
                         class="dropdown-content menu bg-white/95 backdrop-blur-sm rounded-2xl mt-2 p-2 w-52
                      shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] border border-slate-200">
-                        <li><a class="text-[13px]"><i class="fa-regular fa-building"></i> ข้อมูลบริษัท</a></li>
-                        <li><a class="text-[13px]"><i class="fa-solid fa-users"></i> ทีมงาน</a></li>
-                        <li><a class="text-[13px]"><i class="fa-regular fa-newspaper"></i> ข่าวสาร</a></li>
+                        <li>
+                            <a href="{{ route('items.index') }}">ข้อมูลอุปกรณ์</a>
+                        </li>
+                        <li>
+                            <a href="">ข้อมูลประเภทอุปกรณ์</a>
+                        </li>
+                        <li>
+                            
+                        </li>
+                    </ul>
+                </div>
+
+                <a href="#" class="pill">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Checklist</span>
+                </a>
+
+                <div class="dropdown dropdown-center">
+                    <label tabindex="0" class="pill cursor-pointer">
+                        <i class="fa-solid fa-server"></i>
+                        <span>Reports</span>
+                        <i class="fa-solid fa-chevron-down text-[11px]"></i>
+                    </label>
+                    <ul tabindex="0"
+                        class="dropdown-content menu bg-white/95 backdrop-blur-sm rounded-2xl mt-2 p-2 w-52
+                     shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] border border-slate-200 gap-2">
+                        <li>
+                            <a href="" class="pill">
+                                <i class="fa-solid fa-chart-line"></i>
+                                Dashboard</a>
+                        </li>
+                        <li>
+                            <a href="" class="pill">
+                                รายงานอุปกรณ์ทั้งหมด
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
