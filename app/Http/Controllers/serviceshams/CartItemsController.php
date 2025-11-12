@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\serviceshams;
 
-use App\Models\Cart_items;
+use App\Http\Controllers\Controller;
+use App\Models\serviceshams\Cart_items;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Models\Items;
+use App\Models\serviceshams\Items;
 use App\Models\User;
-use App\Models\Requisitions;
+use App\Models\serviceshams\Requisitions;
 
 class CartItemsController extends Controller
 {
@@ -26,14 +27,14 @@ class CartItemsController extends Controller
         $cart_items = Cart_items::where('user_id', $userID)
             ->get();
         // dd($cart_items);
-        return view('cart_items.cartshow', compact('cart_items'));
+        return view('serviceshams.cart_items.cartshow', compact('cart_items'));
     }
 
     public function addToCart(Request $request)
     {
         $request->validate([
             'item_id' => 'required|numeric|exists:items,item_id',
-            'quantity' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:1',
             // 'items_per_pack' => 'required|integer|min:0',
         ]);
 
@@ -46,12 +47,23 @@ class CartItemsController extends Controller
             ->where('cart_item_id', $itemID)
             ->first();
 
+        $item = Items::where('item_id', $itemID)->first();
+        if (!$item) {
+            return redirect()->back()->with('error', 'ไม่พบสินค้าในระบบ');
+        }
+        // Guard: requested quantity must not exceed current stock
+        if ($quantity > $item->quantity) {
+            return redirect()->back()->with('error', 'จำนวนที่เลือกเกินจำนวนสต็อกที่มีอยู่');
+        }
+
         if ($cartItem) {
-            $cartItem->cart_quantity += $quantity;
-            // $cartItem->cart_quantity_pack += $cart_quantity_pack;
+            $newQty = $cartItem->cart_quantity + $quantity;
+            if ($newQty > $item->quantity) {
+                return redirect()->back()->with('error', 'จำนวนรวมหลังเพิ่มเกินจำนวนสต็อก');
+            }
+            $cartItem->cart_quantity = $newQty;
             $cartItem->save();
         } else {
-            $item = Items::where('item_id', $itemID)->first();
             Cart_items::create([
                 'cart_item_id' => $itemID,
                 'cart_code' => $item->item_code,

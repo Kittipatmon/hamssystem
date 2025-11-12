@@ -68,7 +68,7 @@ class ItemsController extends Controller
         if ($request->hasFile('item_pic')) {
             $file = $request->file('item_pic');
             $filename = time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('images'), $filename);
+            $file->move(public_path('images/items'), $filename);
         }
 
         $item = new Items();
@@ -140,7 +140,7 @@ class ItemsController extends Controller
     public function edit(Items $item)
     {
         $items_types = Items_type::where('status', 1)->get();
-        return view('items.edit', compact('item', 'items_types'));
+        return view('serviceshams.items.edit', compact('item', 'items_types'));
     }
 
     /**
@@ -165,12 +165,12 @@ class ItemsController extends Controller
 
         if ($request->hasFile('item_pic')) {
 
-            if ($filename && file_exists(public_path('images/' . $filename))) {
-                @unlink(public_path('images/' . $filename));
+            if ($filename && file_exists(public_path('images/items/' . $filename))) {
+                @unlink(public_path('images/items/' . $filename));
             }
             $file = $request->file('item_pic');
             $filename = time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('images'), $filename);
+            $file->move(public_path('images/items'), $filename);
             $item->item_pic = $filename;
         }
 
@@ -205,14 +205,36 @@ class ItemsController extends Controller
 
     public function searchItem(Request $request)
     {
-        $query = $request->input('query');
-        $items = Items::where('name', 'LIKE', "%{$query}%")->get();
-        return response()->json($items);
+        $query = trim((string) $request->input('query', ''));
+
+        $itemsQuery = Items::query();
+
+        if ($query !== '') {
+            $itemsQuery->where(function ($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                    ->orWhere('item_code', 'LIKE', "%{$query}%");
+            });
+        }
+
+        // Return only fields needed by the UI
+        $items = $itemsQuery
+            ->orderBy('name')
+            ->get(['item_id', 'name', 'item_pic', 'item_code', 'quantity', 'per_unit']);
+
+        return response()->json([
+            'data' => $items,
+        ]);
     }
 
-    public function show()
+    public function itemsAll()
     {
-        $item = Items::all();
-        return view('items.show', compact('item'));
+        $items = Items::all();
+        return view('serviceshams.items.itemsall', compact('items'));
     }
+
+    // public function show()
+    // {
+    //     $item = Items::all();
+    //     return view('items.show', compact('item'));
+    // }
 }

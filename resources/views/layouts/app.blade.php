@@ -35,7 +35,7 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="p-6">
+        <main class="p-6 ">
             @yield('content')
         </main>
 

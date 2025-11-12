@@ -50,7 +50,7 @@
                             <a href="{{ route('items_type.index') }}" class="pill">ข้อมูลประเภทอุปกรณ์</a>
                         </li>
                         <li>
-
+                            
                         </li>
                     </ul>
                 </div>
@@ -90,18 +90,18 @@
                 </a>
 
                 @if(Auth::check())
-                @php
-                $cartCount = \App\Models\serviceshams\Cart_items::where('user_id', Auth::id())->count();
-                @endphp
-                <a href="{{ route('cartitem.index') }}" class="pill relative">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <!-- <span>Cart</span> -->
-                    @if($cartCount > 0)
-                    <span class="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 text-white text-[11px] font-semibold px-1 leading-none shadow">
-                        {{ $cartCount }}
-                    </span>
-                    @endif
-                </a>
+                    @php
+                        $cartCount = \App\Models\serviceshams\Cart_items::where('user_id', Auth::id())->count();
+                    @endphp
+                    <a href="{{ route('cartitem.index') }}" class="pill relative">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <!-- <span>Cart</span> -->
+                        @if($cartCount > 0)
+                            <span class="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 text-white text-[11px] font-semibold px-1 leading-none shadow">
+                                {{ $cartCount }}
+                            </span>
+                        @endif
+                    </a>
                 @endif
 
 
@@ -109,7 +109,7 @@
 
 
                 <!-- Login -->
-                @guest
+                 @guest
                 <a href="/login" class="pill">
                     <i class="fa-solid fa-right-to-bracket"></i>
                     <span>Login</span>
@@ -129,46 +129,36 @@
 
                     <div class="drawer-side" style="z-index: 1000;">
                         <label for="my-drawer-5" aria-label="close sidebar" class="drawer-overlay"></label>
-                        <ul class="menu bg-base-200 min-h-full w-70 pt-0">
-                        <div class="p-4 w-70 bg-gray-200 text-base-content">
+                        
+                        <div class="p-4 w-70 bg-base-200 text-base-content">
                             <div class="flex items-center space-x-3">
                                 <div class="avatar">
                                     <div class="w-12 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                                        <img src="{{ Auth::user()->avatar_url ?? 'https://via.placeholder.com/150' }}" alt="" />
+                                        <img src="{{ Auth::user()->avatar_url ?? 'https://via.placeholder.com/150' }}" alt="User Avatar" />
                                     </div>
                                 </div>
                                 <div>
                                     <div class="font-bold">{{ Auth::user()->fullname }}</div>
-                                    <div class="text-sm opacity-60">{{ Auth::user()->position ?? 'Employee' }}</div>
+                                    <div class="text-sm opacity-60">{{ Auth::user()->role ?? 'Employee' }}</div>
                                 </div>
                             </div>
                         </div>
 
-
-                            <li><span class="menu-title">รายการเบิกอุปกรณ์</span></li>
-                            <li>
-                                <a href="{{ route('requisitions.reqlistpending') }}" class="text-[13px] pill">
-                                    <i class="fa-solid fa-rotate fa-spin"></i>
-                                     รายการรอดำเนินการ</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('requisitions.reqlistall') }}" class="text-[13px] pill">
-                                    <i class="fa-solid fa-list"></i>
-                                    รายงานทั้งหมด
-                                </a>
-                            </li>
-
+                        <ul class="menu bg-base-200 min-h-full w-70 p-4 pt-0">
                             <li><span class="menu-title">บัญชีของฉัน</span></li>
-                            <li>
-                                <a href="#" class="text-[13px] pill"><i class="fa-regular fa-id-badge"></i> โปรไฟล์</a>
-                            </li>
-                            <li>
-                                <a href="#" class="text-[13px] pill"><i class="fa-solid fa-bell"></i> การแจ้งเตือน</a>
-                            </li>
+                            <li><a href="#" class="text-[13px] pill"><i class="fa-regular fa-id-badge"></i> โปรไฟล์</a></li>
+                            <li><a href="#" class="text-[13px] pill"><i class="fa-solid fa-bell"></i> การแจ้งเตือน</a></li>
 
-                            <!-- <li><span class="menu-title">การตั้งค่า</span></li>
+                            <li><span class="menu-title">การตั้งค่า</span></li>
                             <li><a href="#" class="text-[13px] pill"><i class="fa-solid fa-gear"></i> การตั้งค่าบัญชี</a></li>
-                            <li><a href="/help" class="text-[13px] pill"><i class="fa-solid fa-circle-question"></i> ช่วยเหลือ</a></li> -->
+                            <!-- <li>
+                                <label class="text-[13px] pill cursor-pointer">
+                                    <i class="fa-solid fa-circle-half-stroke"></i>
+                                    สลับโหมด
+                                    <input type="checkbox" class="toggle toggle-primary" id="theme-toggle" />
+                                </label>
+                            </li> -->
+                            <li><a href="/help" class="text-[13px] pill"><i class="fa-solid fa-circle-question"></i> ช่วยเหลือ</a></li>
 
                             <li class="mt-1 border-t border-slate-100"></li>
                             <li>
@@ -182,7 +172,7 @@
                         </ul>
                     </div>
                 </div>
-
+                
                 <!-- <div class="dropdown dropdown-end">
                     <label tabindex="0" class="pill cursor-pointer">
                         <i class="fa-solid fa-user"></i>

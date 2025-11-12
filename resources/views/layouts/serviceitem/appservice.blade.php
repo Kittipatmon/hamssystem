@@ -19,6 +19,7 @@
         }
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('styles')
 </head>
 
 <body class="font-sans antialiased">
@@ -35,12 +36,28 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="p-6 min-h-screen bg-gray-100">
+        <main class="p-6 bg-gray-100">
             @yield('content')
         </main>
 
         @include('layouts.footer')
     </div>
+
+    
+        @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            });
+        </script>
+        @endif
+    @stack('scripts')
 </body>
 
 </html>

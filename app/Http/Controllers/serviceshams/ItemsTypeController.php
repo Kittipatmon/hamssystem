@@ -4,7 +4,7 @@ namespace App\Http\Controllers\serviceshams;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Items_type;
+use App\Models\serviceshams\Items_type;
 use Illuminate\Http\Request;
 
 class ItemsTypeController extends Controller
@@ -15,7 +15,7 @@ class ItemsTypeController extends Controller
     public function index()
     {
         $items_types = Items_type::all();
-        return view('items_type.index', compact('items_types'));
+        return view('serviceshams.items_type.index', compact('items_types'));
     }
 
     /**
@@ -23,7 +23,7 @@ class ItemsTypeController extends Controller
      */
     public function create()
     {
-        return view('items_type.create');
+        return view('serviceshams.items_type.create');
     }
 
     /**
@@ -86,7 +86,7 @@ class ItemsTypeController extends Controller
             return redirect()->route('items_type.index')->with('error', 'Item type not found.');
         }
 
-        $itemsInUse = \App\Models\Items::where('type_id', $id)->exists();
+        $itemsInUse = \App\Models\serviceshams\Items::where('type_id', $id)->exists();
         if ($itemsInUse) {
             return redirect()->route('items_type.index')->with('error', 'ไม่สามารถเปลี่ยนสถานะได้ เนื่องจากมีการใช้งานอยู่ในรายการอุปกรณ์');
         }
