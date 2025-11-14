@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.serviceitem.appservice')
 @section('content')
 <div class="p-4">
     <div class="card bg-base-100 shadow-xl rounded-lg">
@@ -6,10 +6,10 @@
             <div class="breadcrumbs text-sm text-white">
                 <ul class="flex items-center justify-center gap-2">
                     <li>
-                        <a href="{{ route('requisitions.reqlistpending') }}" class="text-white/90 hover:text-white font-medium">Home</a>
+                        <a href="{{ route('requisitions.reqlistall') }}" class="text-white/90 hover:text-white font-medium">กลับไปหน้ารายการทั้งหมด</a>
                     </li>
                     <li class="font-medium">
-                        รายละเอียดในการเบิกของ (อยู่ระหว่างรอดำเนินการ) <i class="fa-solid fa-clock"></i>
+                        รายละเอียดในการเบิกของ 
                     </li>
                 </ul>
             </div>

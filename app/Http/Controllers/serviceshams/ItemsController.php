@@ -228,7 +228,7 @@ class ItemsController extends Controller
 
     public function itemsAll()
     {
-        $items = Items::all();
+        $items = Items::where('quantity', '>', 0)->get();
         return view('serviceshams.items.itemsall', compact('items'));
     }
 

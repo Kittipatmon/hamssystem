@@ -175,19 +175,16 @@ class CartItemsController extends Controller
         });
 
         // ตรวจสอบงบประมาณ user
-        $user = User::find($userID);
-        if ($user && $total_price > $user->user_per) {
-            // $user->user_per -= $total_price; // หักงบประมาณ
-            // $user->save();
-            return redirect()->back()->with('error', 'งบประมาณของคุณไม่เพียงพอสำหรับการเบิกครั้งนี้');
-        }
-        // หักงบประมาณของผู้ใช้
-        if ($user) {
-            $user->user_per -= $total_price; // หักงบประมาณ
-            $user->save();
-        } else {
-            return redirect()->back()->with('error', 'ไม่พบผู้ใช้ในระบบ');
-        }
+        // $user = User::find($userID);
+        // if ($user && $total_price > $user->user_per) {
+        //     return redirect()->back()->with('error', 'งบประมาณของคุณไม่เพียงพอสำหรับการเบิกครั้งนี้');
+        // }
+        // if ($user) {
+        //     $user->user_per -= $total_price; // หักงบประมาณ
+        //     $user->save();
+        // } else {
+        //     return redirect()->back()->with('error', 'ไม่พบผู้ใช้ในระบบ');
+        // }
 
 
         // สร้างรายการเบิก

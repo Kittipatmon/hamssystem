@@ -10,6 +10,7 @@ use App\Http\Controllers\serviceshams\RequisitionsController;
 use App\Http\Controllers\serviceshams\ItemsController;
 use App\Http\Controllers\serviceshams\CartItemsController;
 use App\Http\Controllers\serviceshams\ItemsTypeController;
+use App\Http\Controllers\serviceshams\ChecklistController;
 
 Route::get('/', function () {
     // Fetch active news ordered by newest published date
@@ -26,7 +27,10 @@ Route::get('/', function () {
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
-
+Route::prefix('datamanage')->name('datamanage.')->group(function () {
+    Route::get('news/newsall', [NewsController::class, 'newsall'])->name('news.newsalllist');
+    Route::get('news/{news}/detail', [NewsController::class, 'detail'])->name('news.detail');
+});
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -36,8 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/datamanage/welcome', [DataManagementController::class, 'welcomeDataManagement'])->name('datamanage.welcomedatamanage');
 
     Route::prefix('datamanage')->name('datamanage.')->group(function () {
-        Route::get('news/newsall', [NewsController::class, 'newsall'])->name('news.newsalllist');
-        Route::get('news/{news}/detail', [NewsController::class, 'detail'])->name('news.detail');
+
 
         Route::resource('news', NewsController::class)->except(['show']);
     });
@@ -77,7 +80,32 @@ Route::middleware('auth')->group(function () {
 
     //Requisitions routes
     Route::get('requisitions/reqpending', [RequisitionsController::class, 'ReqlistPending'])->name('requisitions.reqlistpending');
+
     Route::get('requisitions/reqlistall', [RequisitionsController::class, 'ReqlistAll'])->name('requisitions.reqlistall');
+    Route::get('requisitions/detailreqpedding/{id}', [RequisitionsController::class, 'DetailReqPending'])->name('requisitions.detailreqpedding');
+    Route::get('requisitions/detailreqlistall/{id}', [RequisitionsController::class, 'DetailReqAlllist'])->name('requisitions.detailreqlistall');
+    Route::get('requisitions/cancel/{id}', [RequisitionsController::class, 'cancel'])->name('requisitions.cancel');
+    //dashboard route
+    Route::get('requisitions/dashboard', [RequisitionsController::class, 'dashboardRequisition'])->name('requisitions.dashboard');
+    Route::get('requisitions/dashboard/data', [RequisitionsController::class, 'dashboardData'])->name('requisitions.dashboard.data');
+
+    Route::get('requisitions/reportslistall', [RequisitionsController::class, 'Reportslistall'])->name('requisitions.reportslistall');
+    Route::get('requisitions/reportslistall/export/pdf', [RequisitionsController::class, 'ReportslistallExportPdf'])->name('requisitions.reportslistall.export.pdf');
+    Route::get('requisitions/reportslistall/export/csv', [RequisitionsController::class, 'ReportslistallExportCsv'])->name('requisitions.reportslistall.export.csv');
+
+
+    //Checklist route
+    Route::get('requisitions/reqchecklist', [RequisitionsController::class, 'reqChecklist'])->name('requisitions.reqchecklist');
+    Route::get('requisitions/detailchecklist/{id}', [RequisitionsController::class, 'DetailChecklist'])->name('requisitions.detailchecklist');
+
+    // ChecklistController routes
+    Route::post('checklist/submitreq/{id}', [ChecklistController::class, 'submitReq'])->name('checklist.submitreq');
+    Route::post('checklist/cancelreq/{id}', [ChecklistController::class, 'cancelReq'])->name('checklist.cancelreq');
+    Route::get('checklist/successreq', [ChecklistController::class, 'successReq'])->name('checklist.successreq');
+
+    // updateCheckItem
+    Route::post('checklist/updatecheckitem/{id}', [ChecklistController::class, 'updateCheckItem'])->name('checklist.updatecheckitem');
+    // Route::get('requisitions/reqchecklist', [RequisitionsController::class, 'ReqlistChecklist'])->name('requisitions.reqlistchecklist');
 
 
 });

@@ -88,7 +88,7 @@ class Requisitions extends Model
         self::STATUS_REJECTED => [
             'label' => 'ไม่อนุมัติ',
             'color' => 'danger',
-            'class' => 'badge bg-danger',
+            'class' => 'badge bg-error',
             'icon' => 'fa fa-times',
         ],
         self::STATUS_RETURNED => [
@@ -100,14 +100,14 @@ class Requisitions extends Model
         self::STATUS_CANCELLED => [
             'label' => 'ยกเลิก',
             'color' => 'dark',
-            'class' => 'badge bg-dark',
+            'class' => 'badge bg-error',
             'icon' => 'fa fa-ban',
         ],
         self::STATUS_END_PROGRESS => [
-            'label' => 'กำลังดำเนินการ',
+            'label' => 'ดำเนินการเสร็จสิ้น',
             'color' => 'info',
-            'class' => 'badge bg-info',
-            'icon' => 'fa fa-spinner',
+            'class' => 'badge bg-success',
+            'icon' => 'fa fa-check',
         ],
     ];
 
@@ -115,6 +115,17 @@ class Requisitions extends Model
     {
         return self::statusOptions[$this->status]['label'] ?? 'Unknown';
     }
+
+    public function getStatusClassAttribute()
+    {
+        return self::statusOptions[$this->status]['class'] ?? 'badge bg-secondary';
+    }
+
+    public function getStatusIconAttribute()
+    {
+        return self::statusOptions[$this->status]['icon'] ?? 'fa fa-question';
+    }
+
 
     public const APPROVE_STATUS_PENDING = 0;
     public const APPROVE_STATUS_APPROVED = 1;
@@ -159,7 +170,7 @@ class Requisitions extends Model
     public const PACKING_STATUS_CANCELLED = 2;
     public const packingStatusOptions = [
         self::PACKING_STATUS_PENDING => [
-            'label' => 'รอการจัดส่ง',
+            'label' => 'รอดำเนินการจัดอุปกรณ์',
             'color' => 'warning',
             'class' => 'badge bg-warning',
             'icon' => 'fa fa-clock',
@@ -181,4 +192,14 @@ class Requisitions extends Model
     {
         return self::packingStatusOptions[$this->packing_staff_status]['label'] ?? 'Unknown';
     }
+    public function getPackingStatusClassAttribute()
+    {
+        return self::packingStatusOptions[$this->packing_staff_status]['class'] ?? 'badge bg-secondary';
+    }
+    public function getPackingStatusIconAttribute()
+    {
+        return self::packingStatusOptions[$this->packing_staff_status]['icon'] ?? 'fa fa-question';
+    }
+
+
 }

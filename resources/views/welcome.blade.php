@@ -13,7 +13,7 @@
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <!-- Card Start -->
             <div class="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a href="{{ route('serviceshams.welcomeservice') }}">
+                <a href="{{ route('items.itemsalllist') }}">
                       <span class="absolute top-3 right-3 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow animate-pulse-fast">พร้อมใช้งาน</span>
                     <img src="{{ asset('images/welcome/servicehams.jpg') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
                     <div class="p-4">
@@ -103,18 +103,40 @@
                         ];
                         $badgeClass = $badgeColors[$item->newto ?? ''] ?? 'bg-gray-600';
 
-                        // Prefer first multiple image if exists
-                        $primary = method_exists($item,'primaryImagePath') ? $item->primaryImagePath() : ($item->image_path ?? '');
-                        $rawPath = $primary ?? '';
-                        $isAbsolute = preg_match('/^(https?:)?\//', (string)$rawPath) === 1;
-                        $imageUrl = $rawPath
-                            ? ($isAbsolute ? $rawPath : asset(ltrim($rawPath,'/')))
-                            : asset('images/welcome/news1.jpg');
+                        // Collect possible multiple image paths
+                        $paths = [];
+                        if (method_exists($item, 'imagePaths')) {
+                            $paths = (array) $item->imagePaths();
+                        } else {
+                            $raw = $item->image_path ?? null;
+                            if (is_string($raw)) {
+                                $decoded = json_decode($raw, true);
+                                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                    $paths = $decoded;
+                                } elseif (trim($raw) !== '') {
+                                    $paths = [$raw];
+                                }
+                            } elseif (is_array($raw)) {
+                                $paths = $raw;
+                            }
+                        }
+
+                        // Normalize to URLs
+                        $toUrl = function ($p) {
+                            $p = str_replace('\\', '/', (string) $p);
+                            if ($p === '') return null;
+                            $isAbsolute = preg_match('/^(https?:)?\//', $p) === 1;
+                            return $isAbsolute ? $p : asset(ltrim($p, '/'));
+                        };
+                        $imageUrls = array_values(array_filter(array_map($toUrl, $paths)));
+                        $firstUrl = $imageUrls[0] ?? asset('images/welcome/news1.jpg');
+                        $imgId = 'news-img-'.($item->id ?? $loop->index);
                     @endphp
+
                     <article class="min-w-[300px] w-[300px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 snap-center">
                         <a href="{{ route('datamanage.news.detail', $item) }}" class="block">
                             <div class="relative">
-                                <img src="{{ $imageUrl }}" alt="ภาพข่าว" class="w-full h-70 object-cover">
+                                <img id="{{ $imgId }}" src="{{ $firstUrl }}" data-images='@json($imageUrls)' alt="ภาพข่าว" class="w-full h-70 object-cover">
                                 <span class="absolute top-3 left-3 {{ $badgeClass }} text-white text-xs font-semibold px-3 py-1 rounded-full">{{ $item->newto ?? 'ข่าว' }}</span>
                             </div>
                             <div class="p-4">
@@ -131,6 +153,21 @@
                             </div>
                         </a>
                     </article>
+
+                    <script>
+                        (function () {
+                            var el = document.getElementById(@json($imgId));
+                            if (!el) return;
+                            var list = [];
+                            try { list = JSON.parse(el.dataset.images || '[]'); } catch(e) {}
+                            if (!Array.isArray(list) || list.length <= 1) return;
+                            var i = 0;
+                            setInterval(function () {
+                                i = (i + 1) % list.length;
+                                el.src = list[i];
+                            }, 3000); // auto switch every 3s
+                        })();
+                    </script>
                 @endforeach
             </div>
         @else

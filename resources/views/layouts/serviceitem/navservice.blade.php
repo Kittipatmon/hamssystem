@@ -24,15 +24,15 @@
 
 
                 <!-- หน้าแรก (active) -->
-                <a href="#" class="pill pill-active">
+                <a href="{{ route('welcome') }}" class="pill pill-active">
                     <i class="fa-solid fa-house"></i>
                     <span>หน้าหลัก</span>
                 </a>
 
                 <a href="{{ route('items.itemsalllist') }}" class="pill">
-                    <span>อุปกรณ์</span>
+                    <span>รายการอุปกรณ์</span>
                 </a>
-
+                @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))   
                 <!-- เกี่ยวกับเรา (dropdown) -->
                 <div class="dropdown dropdown-center">
                     <label tabindex="0" class="pill cursor-pointer">
@@ -54,12 +54,28 @@
                         </li>
                     </ul>
                 </div>
+              
 
-                <a href="#" class="pill">
-                    <i class="fa-solid fa-list-check"></i>
+                @if(Auth::check())
+                @php
+                $requisitions = \App\Models\serviceshams\Requisitions::where(
+                    'packing_staff_status',
+                    \App\Models\serviceshams\Requisitions::PACKING_STATUS_PENDING
+                )
+                ->where('status', \App\Models\serviceshams\Requisitions::STATUS_PENDING)
+                ->orderBy('created_at', 'desc')
+                ->get();
+                $checklistCount = $requisitions->count();
+                @endphp
+                <a href="{{ route('requisitions.reqchecklist') }}" class="pill relative">
                     <span>Checklist</span>
+                     @if($checklistCount > 0)
+                    <span class="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 text-white text-[11px] font-semibold px-1 leading-none shadow">
+                        {{ $checklistCount }}
+                    </span>
+                    @endif
                 </a>
-
+                @endif
                 <div class="dropdown dropdown-center">
                     <label tabindex="0" class="pill cursor-pointer">
                         <i class="fa-solid fa-server"></i>
@@ -70,24 +86,24 @@
                         class="dropdown-content menu bg-white/95 backdrop-blur-sm rounded-2xl mt-2 p-2 w-52
                      shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] border border-slate-200 gap-1">
                         <li>
-                            <a href="" class="pill">
+                            <a href="{{ route('requisitions.dashboard') }}" class="pill">
                                 <i class="fa-solid fa-chart-line"></i>
                                 Dashboard</a>
                         </li>
                         <li>
-                            <a href="" class="pill">
+                            <a href="{{ route('requisitions.reportslistall') }}" class="pill">
                                 รายงานอุปกรณ์ทั้งหมด
                             </a>
                         </li>
                     </ul>
                 </div>
-
+                @endif
 
                 <!-- คู่มือการใช้ -->
-                <a href="#" class="pill">
+                <!-- <a href="#" class="pill">
                     <i class="fa-solid fa-bookmark"></i>
                     <span>คู่มือการใช้</span>
-                </a>
+                </a> -->
 
                 @if(Auth::check())
                 @php
@@ -134,7 +150,7 @@
                             <div class="flex items-center space-x-3">
                                 <div class="avatar">
                                     <div class="w-12 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                                        <img src="{{ Auth::user()->avatar_url ?? 'https://via.placeholder.com/150' }}" alt="" />
+                                        <img src="{{ Auth::user()->avatar_url }}" alt="" />
                                     </div>
                                 </div>
                                 <div>
@@ -155,6 +171,12 @@
                                 <a href="{{ route('requisitions.reqlistall') }}" class="text-[13px] pill">
                                     <i class="fa-solid fa-list"></i>
                                     รายงานทั้งหมด
+                                </a>
+                            </li>
+                            <li>
+                                 <a href="#" class="pill">
+                                    <i class="fa-solid fa-bookmark"></i>
+                                    <span>คู่มือการใช้</span>
                                 </a>
                             </li>
 

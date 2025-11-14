@@ -1,6 +1,6 @@
 @extends('layouts.serviceitem.appservice')
 @section('content')
-<div class="max-w-7xl mx-auto px-4 py-6">
+<div class="max-w-7xl mx-auto">
     <div class="card bg-base-100 shadow-md border border-base-200">
         
         <div class="card-body pt-0">
@@ -24,6 +24,36 @@
                         confirmButtonColor: '#3085d6'
                     });
                 });
+            </script>
+            @endpush
+            @endif
+            @if (session('error'))
+            @push('scripts')
+            <script>
+                (function run() {
+                    if (typeof Swal === 'undefined') {
+                        // Fallback if SweetAlert2 isn't ready
+                        alert(@json(session('error')));
+                        return;
+                    }
+                    if (document.readyState !== 'loading') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ไม่สำเร็จ',
+                            text: @json(session('error')),
+                            confirmButtonColor: '#d33'
+                        });
+                    } else {
+                        document.addEventListener('DOMContentLoaded', function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'ไม่สำเร็จ',
+                                text: @json(session('error')),
+                                confirmButtonColor: '#d33'
+                            });
+                        });
+                    }
+                })();
             </script>
             @endpush
             @endif
@@ -146,8 +176,16 @@
 </div>
 @endsection
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Helper: run when DOM is ready (handles late-inserted scripts too)
+    function onReady(fn) {
+        if (document.readyState !== 'loading') {
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', fn);
+        }
+    }
+
     function showImageModal(src, title, description = '') {
         const dialog = document.getElementById('imageModal');
         document.getElementById('modalImage').src = src;
@@ -156,7 +194,7 @@
         if (dialog) dialog.showModal();
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    onReady(function() {
         document.querySelectorAll('.cart-qty-form').forEach(function(form) {
             // ชิ้น
             const minusBtn = form.querySelector('.btn-qty[data-action="decrement"]');
@@ -268,34 +306,18 @@
             }
         });
     });
-    document.getElementById('checkout-btn').addEventListener('click', function(e) {
-        e.preventDefault();
-        Swal.fire({
-            title: 'ยืนยันการเบิกอุปกรณ์?',
-            text: "คุณต้องการดำเนินการต่อหรือไม่",
-            icon: 'question',
-            input: 'textarea',
-            inputLabel: 'กรุณากรอกหมายเหตุ (remarks)',
-            inputPlaceholder: 'โปรดระบุหมายเหตุ... (จำเป็นต้องกรอก)',
-            inputAttributes: {
-                'aria-label': 'ระบุหมายเหตุ'
-            },
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'ยืนยัน',
-            cancelButtonText: 'ยกเลิก',
-            preConfirm: (remarks) => {
-                if (!remarks || !remarks.trim()) {
-                    Swal.showValidationMessage('กรุณากรอกหมายเหตุ');
-                    return false;
-                }
-                return remarks;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // เพิ่ม input remarks ลงในฟอร์มก่อน submit
-                let form = document.getElementById('checkout-form');
+    // Ensure the button exists before binding (handles cases where scripts load before HTML)
+    onReady(function() {
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (!checkoutBtn) return;
+        checkoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // If SweetAlert2 isn't available, fallback to a simple prompt
+            if (typeof Swal === 'undefined') {
+                const remarks = prompt('กรุณากรอกหมายเหตุ (remarks)');
+                if (!remarks || !remarks.trim()) return;
+                const form = document.getElementById('checkout-form');
+                if (!form) return;
                 let remarksInput = form.querySelector('input[name="remarks"]');
                 if (!remarksInput) {
                     remarksInput = document.createElement('input');
@@ -303,9 +325,48 @@
                     remarksInput.name = 'remarks';
                     form.appendChild(remarksInput);
                 }
-                remarksInput.value = result.value || '';
+                remarksInput.value = remarks;
                 form.submit();
+                return;
             }
+            Swal.fire({
+                title: 'ยืนยันการเบิกอุปกรณ์?',
+                // text: "คุณต้องการดำเนินการต่อหรือไม่",
+                icon: 'warning',
+                input: 'textarea',
+                inputLabel: 'กรุณากรอกหมายเหตุ (remarks)',
+                inputPlaceholder: 'โปรดระบุหมายเหตุ... (จำเป็นต้องกรอก)',
+                inputAttributes: {
+                    'aria-label': 'ระบุหมายเหตุ'
+                },
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: (remarks) => {
+                    if (!remarks || !remarks.trim()) {
+                        Swal.showValidationMessage('กรุณากรอกหมายเหตุ');
+                        return false;
+                    }
+                    return remarks;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // เพิ่ม input remarks ลงในฟอร์มก่อน submit
+                    const form = document.getElementById('checkout-form');
+                    if (!form) return; // safety guard
+                    let remarksInput = form.querySelector('input[name="remarks"]');
+                    if (!remarksInput) {
+                        remarksInput = document.createElement('input');
+                        remarksInput.type = 'hidden';
+                        remarksInput.name = 'remarks';
+                        form.appendChild(remarksInput);
+                    }
+                    remarksInput.value = result.value || '';
+                    form.submit();
+                }
+            });
         });
     });
     </script>

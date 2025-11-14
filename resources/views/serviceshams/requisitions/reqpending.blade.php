@@ -1,43 +1,33 @@
 @extends('layouts.serviceitem.appservice')
 @section('content')
-<div class="container-fluid">
-    <div class="card">
-        <div class="card-header text-center" style="background: linear-gradient(90deg,rgb(76, 174, 206) 0%,rgb(237, 87, 227) 100%);">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0" style="background: none; padding: 0;">
-                    <li class="breadcrumb-item">
-                        <a href="{{ url('/') }}" style="color:rgb(255, 255, 255); font-weight: 500; font-size: 1.10rem; text-decoration: none;">Home</a>
+<div class="max-w-full mx-auto p-2 md:p-4 rounded-lg">
+    <div class="card bg-base-100 shadow">
+        <div class="text-center px-5 bg-gradient-to-r from-orange-600 to-orange-700 rounded-lg">
+            <div class="breadcrumbs text-sm text-white">
+                <ul class="flex">
+                    <li>
+                        <a href="{{ route('items.itemsalllist') }}" class="text-white/90 hover:text-white font-medium">
+                            รายการอุปกรณ์
+                        </a>
                     </li>
-                    <li class="breadcrumb-separator" aria-hidden="true" style="display: flex; align-items: center; color: #fff;">
-                        &nbsp;&nbsp;&nbsp;<i class="fa-solid fa-chevron-right"></i>&nbsp;&nbsp;&nbsp;
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page" style="color:rgb(255, 255, 255); font-weight: 500; font-size: 1.10rem;">
-                        รอดำเนินการเบิกของ
-                    </li>
-
-                </ol>
-            </nav>
+                    <li class="font-medium">
+                        <i class="fa-solid fa-rotate fa-spin mr-2"></i>
+                        รอดำเนินการเบิกของ</li>
+                </ul>
+            </div>
         </div>
-        <div class="card-body" width="100%">
-            @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-
-            <div
-                class="table-responsive-xl">
-                <table
-                    class="table  table-bordered table-striped table-hover">
-                    <thead class="table-primary">
+        <div class="card-body">
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead class="bg-base-200">
                         <tr>
-                            <!-- <th scope="col" style="width: 8%;">เพิ่มเติม</th> -->
-                            <!-- <th scope="col">#</th> -->
-                            <th scope="col">เลขที่ใบเบิก</th>
-                            <th scope="col">ชื่อผู้เบิก</th>
-                            <th scope="col">ชื่อแผนก</th>
-                            <th scope="col">วันที่เบิก</th>
-                            <th scope="col">สถานะ</th>
-                            <th scope="col">ราคารวม</th>
-                            <th scope="col" style="width: 13%;">ตรวจสอบ</th>
+                            <th>เลขที่ใบเบิก</th>
+                            <th>ชื่อผู้เบิก</th>
+                            <th>ชื่อแผนก</th>
+                            <th>วันที่เบิก</th>
+                            <th>ราคารวม</th>
+                            <th>สถานะ</th>
+                            <th class="w-48">ตรวจสอบ</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,47 +40,43 @@
                             </td> -->
                             <!-- <td>{{ $requisition->requisitions_id }}</td> -->
                             <td>{{ $requisition->requisitions_code }}</td>
-                            <td>{{ $requisition->user->name ?? "-" }}</td>
-                            <td>{{ $requisition->user->department->code  ?? "-" }}</td>
+                            <td>{{ $requisition->user->fullname ?? "-" }}</td>
+                            <td>{{ $requisition->user->department->department_name  ?? "-" }}</td>
                             <td>{{ \Carbon\Carbon::parse($requisition->request_date)->format('d/m/Y') ?? "-" }}</td>
                             <td>
                                 @switch($requisition->status)
-                                @case('pending')
-                                <span class="badge text-white bg-info">รอดำเนินการ</span>
-                                @break
-                                @case('approved')
-                                <span class="badge text-white bg-warning">กำลังดำเนินการ</span>
-                                @break
-                                @case('rejected')
-                                <span class="badge text-white bg-danger">ยกเลิก</span>
-                                @if ($requisition->approve_status == '2')
-                                {{ $requisition->approve_user->name ." / " .  "ผู้อนุมัติ" }} <br>
-                                <p style="color:red;">หมายเหตุ : {{ $requisition->approve_comment}}</p>
-                                @endif
-
-                                @break
-                                @case('returned')
-                                <span class="badge text-white bg-info">ส่งคืน</span>
-                                @break
-                                @case('cancelled')
-                                <span class="badge text-error bg-warning">ยกเลิก</span>
-                                <!-- APPROVE_STATUS_REJECTED -->
-                                @if ($requisition->approve_status == '0' && $requisition->packing_staff_status == '0')
-                                ผู้ขอยกเลิก <br>
-                                <span style="color: red;"> หมายเหตุ : {{ $requisition->requester_comment ?? "-"}}</span>
-                                @endif
-
-                                @if ($requisition->packing_staff_status == '2')
-                                {{ $requisition->packing_staff->name ." / " .  "ผู้จัดของ" }} <br>
-                                <p style="color:red;">หมายเหตุ : {{ $requisition->packing_staff_comment}}</p>
-                                @endif
-
-                                @break
-                                @case('endprogress')
-                                <span class="badge text-where bg-success">ดำเนินการเสร็จสิ้น</span>
-                                @break
-                                @default
-                                <span class="badge text-white bg-secondary">ไม่ทราบสถานะ</span>
+                                    @case('pending')
+                                        <span class="badge badge-warning">รอดำเนินการ</span>
+                                        @break
+                                    @case('approved')
+                                        <span class="badge badge-info">กำลังดำเนินการ</span>
+                                        @break
+                                    @case('rejected')
+                                        <span class="badge badge-error">ยกเลิก</span>
+                                        @if ($requisition->approve_status == '2')
+                                            <div class="text-xs text-base-content/80 mt-1">{{ $requisition->approve_user->name ." / " .  "ผู้อนุมัติ" }}</div>
+                                            <p class="text-xs text-error">หมายเหตุ : {{ $requisition->approve_comment}}</p>
+                                        @endif
+                                        @break
+                                    @case('returned')
+                                        <span class="badge badge-secondary">ส่งคืน</span>
+                                        @break
+                                    @case('cancelled')
+                                        <span class="badge badge-neutral">ยกเลิก</span>
+                                        @if ($requisition->approve_status == '0' && $requisition->packing_staff_status == '0')
+                                            <div class="text-xs">ผู้ขอยกเลิก</div>
+                                            <span class="text-xs text-error">หมายเหตุ : {{ $requisition->requester_comment ?? "-"}}</span>
+                                        @endif
+                                        @if ($requisition->packing_staff_status == '2')
+                                            <div class="text-xs text-base-content/80">{{ $requisition->packing_staff->name ." / " .  "ผู้จัดของ" }}</div>
+                                            <p class="text-xs text-error">หมายเหตุ : {{ $requisition->packing_staff_comment}}</p>
+                                        @endif
+                                        @break
+                                    @case('endprogress')
+                                        <span class="badge badge-success">ดำเนินการเสร็จสิ้น</span>
+                                        @break
+                                    @default
+                                        <span class="badge">ไม่ทราบสถานะ</span>
                                 @endswitch
                             </td>
                             <td>
@@ -101,14 +87,48 @@
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('requisitions.pdf' , $requisition->requisitions_id) }}" class="btn btn-info btn-sm" target="_blank"><i class="fa-solid fa-file-pdf text-white"></i></a>
-                                <a href="{{ route('requisitions.detailreqpedding', $requisition->requisitions_id) }}" class="btn btn-sm btn-warning" title="ดูรายละเอียดเพิ่มเติม">
-                                    <i class="fas fa-eye text-white"></i> ตรวจสอบรายการ
+                                
+                                <a href="{{ route('requisitions.detailreqpedding', $requisition->requisitions_id) }}" class="btn btn-warning btn-sm" title="ดูรายละเอียดเพิ่มเติม">
+                                    <i class="fas fa-eye text-white"></i> 
                                 </a>
+                                <button href="{{ route('requisitions.cancel', $requisition->requisitions_id) }}" 
+                                   class="btn btn-error btn-sm btn-cancel-req" 
+                                   data-href="{{ route('requisitions.cancel', $requisition->requisitions_id) }}"
+                                   title="ยกเลิกใบเบิกของ">
+                                    <i class="fas fa-times text-white"></i>
+                                </button>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        document.querySelectorAll('.btn-cancel-req').forEach(function (btn) {
+                                            btn.addEventListener('click', function (e) {
+                                                e.preventDefault();
+                                                const url = this.dataset.href;
+                                                Swal.fire({
+                                                    title: 'ยืนยันการยกเลิก?',
+                                                    text: 'คุณแน่ใจหรือไม่ว่าต้องการยกเลิกใบเบิกนี้',
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonText: 'ใช่',
+                                                    cancelButtonText: 'ไม่',
+                                                    reverseButtons: true
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        window.location.href = url;
+                                                    }
+                                                });
+                                            });
+                                        });
+                                    });
+                                </script>
                             </td>
                         </tr>
 
                         @endforeach
+                        @if($requisitions->isEmpty())
+                        <tr>
+                            <td colspan="7" class="text-center">ไม่มีข้อมูลใบเบิกที่รอดำเนินการ</td>
+                        </tr>
+                        @endif
                     </tbody>
                 </table>
             </div>

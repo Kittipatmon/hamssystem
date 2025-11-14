@@ -48,7 +48,7 @@
 				<h3 class="text-sm font-semibold tracking-wider text-gray-800">QUICK LINKS</h3>
 				<ul class="mt-4 space-y-3 text-sm">
 					<li><a href="{{ url('/') }}" class="text-[#E21F2D] hover:underline">หน้าแรก</a></li>
-					<li><a href="#" class="text-[#E21F2D] hover:underline">ข่าวสาร/ประชาสัมพันธ์</a></li>
+					<li><a href="{{ route('datamanage.news.newsalllist') }}" class="text-[#E21F2D] hover:underline">ข่าวสาร/ประชาสัมพันธ์</a></li>
 					<li><a href="#" class="text-[#E21F2D] hover:underline">งานสนับสนุน</a></li>
 					<li><a href="#" class="text-[#E21F2D] hover:underline">แสดงความคิดเห็น</a></li>
 				</ul>

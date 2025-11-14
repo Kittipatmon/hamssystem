@@ -8,3 +8,6 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 // Alpine.start();
 window.Swal = Swal;
+
+import Chart from 'chart.js/auto';
+window.Chart = Chart;
