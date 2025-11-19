@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Models\serviceshams\Items;
 use App\Models\User;
 use App\Models\serviceshams\Requisitions;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\RequisitionConfirmed;
 
 class CartItemsController extends Controller
 {
@@ -220,6 +222,13 @@ class CartItemsController extends Controller
                 // 'quantity_pack' => $cartItem->cart_quantity_pack,
             ]);
             $cartItem->delete();
+        }
+
+        // ส่งแจ้งเตือนไปยัง Telegram ตามรูปแบบที่ต้องการ
+        $chatId = config('services.telegram.chat_id');
+        if (!empty($chatId)) {
+            Notification::route('telegram', $chatId)
+                ->notify(new RequisitionConfirmed($requisition));
         }
 
         return redirect()->route('cartitem.index')->with('success', 'ยืนยันการเบิกอุปกรณ์สำเร็จ');

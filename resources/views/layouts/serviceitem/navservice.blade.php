@@ -182,7 +182,7 @@
 
                             <li><span class="menu-title">บัญชีของฉัน</span></li>
                             <li>
-                                <a href="#" class="text-[13px] pill"><i class="fa-regular fa-id-badge"></i> โปรไฟล์</a>
+                                <a href="{{ route('profileUser') }}" class="text-[13px] pill"><i class="fa-regular fa-id-badge"></i> โปรไฟล์</a>
                             </li>
                             <li>
                                 <a href="#" class="text-[13px] pill"><i class="fa-solid fa-bell"></i> การแจ้งเตือน</a>

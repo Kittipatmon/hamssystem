@@ -12,6 +12,11 @@ use App\Http\Controllers\serviceshams\CartItemsController;
 use App\Http\Controllers\serviceshams\ItemsTypeController;
 use App\Http\Controllers\serviceshams\ChecklistController;
 
+use App\Http\Controllers\backend\UserController;
+use App\Http\Controllers\MicrosoftAuthController;
+use App\Http\Controllers\bookingmeeting\RoomsController;
+use App\Http\Controllers\bookingmeeting\ReservationsController;
+
 Route::get('/', function () {
     // Fetch active news ordered by newest published date
     $news = News::query()
@@ -23,6 +28,10 @@ Route::get('/', function () {
 
     return view('welcome', compact('news'));
 })->name('welcome');
+
+// Microsoft (Outlook) OAuth routes (public)
+Route::get('/auth/microsoft/redirect', [MicrosoftAuthController::class, 'redirect'])->name('auth.microsoft.redirect');
+Route::get('/auth/microsoft/callback', [MicrosoftAuthController::class, 'callback'])->name('auth.microsoft.callback');
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -43,6 +52,12 @@ Route::middleware('auth')->group(function () {
 
 
         Route::resource('news', NewsController::class)->except(['show']);
+        // Send Outlook notification for a news item
+        Route::post('news/{news}/notify-outlook', [NewsController::class, 'sendOutlook'])
+            ->name('news.notifyOutlook');
+        // After Microsoft login, trigger sending via GET (used for post-login continuation)
+        Route::get('news/{news}/notify-outlook-after-login', [NewsController::class, 'sendOutlookAfterLogin'])
+            ->name('news.notifyOutlook.afterLogin');
     });
 
     Route::get('/serviceshams/welcome', [RequisitionsController::class, 'welcomeService'])->name('serviceshams.welcomeservice');
@@ -108,6 +123,12 @@ Route::middleware('auth')->group(function () {
     // Route::get('requisitions/reqchecklist', [RequisitionsController::class, 'ReqlistChecklist'])->name('requisitions.reqlistchecklist');
 
 
+    //rooms
+    Route::resource('rooms', RoomsController::class);
+    //reservations
+    Route::get('reservations/welcomemeeting', [ReservationsController::class, 'welcomeReservations'])->name('reservations.welcomemeeting');
 });
+
+Route::get('/profileUser', [UserController::class, 'profileUser'])->middleware('auth')->name('profileUser');
 
 require __DIR__.'/auth.php';

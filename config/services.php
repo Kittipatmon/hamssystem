@@ -35,4 +35,24 @@ return [
         ],
     ],
 
+    // Telegram notifications (notification-channels/telegram)
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        // Default chat to receive system notifications (group or user id)
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+    ],
+
+    // Also support the package's conventional key name
+    'telegram-bot-api' => [
+        'token' => env('TELEGRAM_BOT_TOKEN'),
+    ],
+
+    // Microsoft Azure (Outlook/Microsoft 365) OAuth via SocialiteProviders
+    'azure' => [
+        'client_id' => env('AZURE_CLIENT_ID'),
+        'client_secret' => env('AZURE_CLIENT_SECRET'),
+        'tenant' => env('AZURE_TENANT_ID', 'common'),
+        'redirect' => env('AZURE_REDIRECT_URI', env('APP_URL') . '/auth/microsoft/callback'),
+    ],
+
 ];

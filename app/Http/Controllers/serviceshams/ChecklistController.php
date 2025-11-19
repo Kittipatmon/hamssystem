@@ -40,6 +40,14 @@ class ChecklistController extends Controller
     public function submitReq(Request $request, $id)
     {
         $requisition = Requisitions::findOrFail($id);
+
+        // Guard: allow submit only if all items are checked
+        $totalItems = Requisition_items::where('requisition_id', $id)->count();
+        $checkedItems = Requisition_items::where('requisition_id', $id)->where('check_item', 1)->count();
+        if ($totalItems > 0 && $checkedItems < $totalItems) {
+            return redirect()->back()->with('error', 'กรุณาตรวจสอบรายการอุปกรณ์ให้ครบทุกชิ้นก่อนส่ง');
+        }
+
         $requisition->packing_staff_id = Auth::user()->id;
         $requisition->packing_staff_status = Requisitions::PACKING_STATUS_APPROVED;
         $requisition->packing_staff_comment = $request->input('packing_staff_comment');

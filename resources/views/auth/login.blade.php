@@ -18,7 +18,7 @@
         .soft-shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
         .card-rounded { border-radius: 1rem; }
         .glass { backdrop-filter: blur(2px); }
-        .gradient-btn { background: linear-gradient(90deg, #ff3b8a 0%, #ff6a3d 100%); }
+        .gradient-btn { background: linear-gradient(90deg, #ff3b3bff 0%, #ff3d3dff 100%); }
         .input-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #b0b0b0; }
         .input-field { padding-left: 2.25rem; }
 
@@ -60,9 +60,9 @@
                 </div>
 
                 <!-- Right: form panel -->
-                <div class="bg-[#F2F2F2] p-8 md:p-10 text-gray-800">
-                    <div class="max-w-sm ml-auto mr-auto md:mr-0">
-                        <div class="border-l-4 border-blue-700 pl-4 mb-6">
+                <div class="p-8 md:p-10 text-gray-800 mt-25">
+                    <div class="max-w-sm mx-auto border border-gray-300/60 rounded-xl shadow-xl p-6" >
+                        <div class="border-l-4 border-red-700 pl-4 mb-6">
                             <h2 class="text-lg font-semibold tracking-wide">Human Asset Management<br>&amp; Service Building</h2>
                         </div>
                         <p class="text-sm/6 mb-4 opacity-90">กรุณาเข้าสู่ระบบเพื่อใช้งานระบบ</p>
@@ -89,7 +89,7 @@
                                        </select>
                                 </div>
                                 @error('employee_code')
-                                    <p class="text-yellow-200 text-xs mt-1">{{ $message }}</p>
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -106,11 +106,13 @@
                                     </button>
                                 </div>
                                 @error('password')
-                                    <p class="text-yellow-200 text-xs mt-1">{{ $message }}</p>
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
 
-                            <button type="submit" class="w-full gradient-btn text-white font-semibold py-2.5 rounded-full shadow-md hover:opacity-95 transition">ENTER</button>
+                            <button type="submit" class="w-full gradient-btn text-white font-semibold py-2.5 rounded-full shadow-md hover:opacity-95 transition">
+                                เข้าสู่ระบบ
+                            </button>
                         </form>
                     </div>
                 </div>

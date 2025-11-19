@@ -71,6 +71,7 @@
             $has_pack = $requisition->requisition_items->where('quantity_pack', '>', 0)->count() > 0;
             $total_unit = 0;
             $total_pack = 0;
+            $allChecked = $requisition->requisition_items->where('check_item', '!=', 1)->count() === 0;
             @endphp
             
             <table class="table table-sm"> {{-- table table-zebra --}}
@@ -138,7 +139,7 @@
             </table>
 
             <div class="mt-4 flex items-center justify-center gap-2">
-                <a href="#" class="btn btn-success btn-submit-req text-white" data-id="{{ $requisition->requisitions_id }}" title="คลิกเมื่อจัดเตรียมอุปกรณ์เสร็จสิ้น">
+                <a href="#" class="btn btn-success btn-submit-req text-white {{ $allChecked ? '' : 'hidden' }}" data-id="{{ $requisition->requisitions_id }}" title="คลิกเมื่อจัดเตรียมอุปกรณ์เสร็จสิ้น">
                     <i class="fa-solid fa-check"></i> จัดเตรียมเสร็จสิ้น
                 </a>
                 <a href="#" class="btn btn-error btn-cancel-req" data-id="{{ $requisition->requisitions_id }}" title="ยกเลิกการจัดเตรียม">
@@ -246,6 +247,21 @@
         });
 
         // Checkbox change (AJAX with fetch)
+        function updateSubmitVisibility() {
+            const checkboxes = Array.from(document.querySelectorAll('.check-item-checkbox'));
+            const allChecked = checkboxes.length > 0 && checkboxes.every(cb => cb.checked);
+            document.querySelectorAll('.btn-submit-req').forEach(function (btn) {
+                if (allChecked) {
+                    btn.classList.remove('hidden');
+                } else {
+                    btn.classList.add('hidden');
+                }
+            });
+        }
+
+        // Initialize on load
+        updateSubmitVisibility();
+
         document.querySelectorAll('.check-item-checkbox').forEach(function (checkbox) {
             checkbox.addEventListener('change', function () {
                 const cb = this;
@@ -286,6 +302,7 @@
                 })
                 .finally(function () {
                     cb.disabled = false;
+                    updateSubmitVisibility();
                 });
             });
         });

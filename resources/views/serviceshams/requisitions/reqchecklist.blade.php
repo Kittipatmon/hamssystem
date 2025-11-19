@@ -61,7 +61,7 @@
                         @endphp
 
                         @if($opt)
-                            <span class="{{ $opt['class'] }} px-2 py-1 rounded-full text-sm">
+                            <span class="{{ $opt['class'] }} px-2 py-1 rounded-full text-xs">
                                 <i class="{{ $opt['icon'] }}"></i> {{ $opt['label'] }}
                             </span>
                         @else

@@ -21,6 +21,38 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Outlook Notification (News)
+
+To enable the "Send to Outlook" button for News, configure recipients in your `.env`:
+
+```
+# Comma-separated email lists
+OUTLOOK_NOTIFY_TO="someone@example.com, group@example.com"
+OUTLOOK_NOTIFY_CC=""
+OUTLOOK_NOTIFY_BCC=""
+# Optional subject prefix
+OUTLOOK_NOTIFY_SUBJECT_PREFIX="[HAMS]"
+```
+
+Note: By default `MAIL_MAILER=log` writes emails to the log. To actually deliver via Outlook/Office 365, configure your mailer (SMTP or Microsoft Graph) in `config/mail.php` and `.env`.
+
+### Require Microsoft login before sending
+
+This app asks the user to sign in with Microsoft before sending Outlook notifications. Configure Azure OAuth in `.env`:
+
+```
+AZURE_CLIENT_ID=
+AZURE_CLIENT_SECRET=
+AZURE_TENANT_ID=common
+AZURE_REDIRECT_URI=https://your-host/auth/microsoft/callback
+```
+
+Routes used:
+- `GET /auth/microsoft/redirect` → Microsoft login
+- `GET /auth/microsoft/callback` → OAuth callback
+
+If a user clicks "ส่งไปแจ้งเตือน Outlook" without being signed in, they will be redirected to Microsoft login and then the email will be sent automatically after returning.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.

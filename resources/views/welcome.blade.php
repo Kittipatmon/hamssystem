@@ -24,7 +24,7 @@
                 </a>
             </div>
             <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')">
+                <a href="{{ route('reservations.welcomemeeting') }}">
                     <img src="{{ asset('images/welcome/bookingmeet.jpg') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
                     <div class="p-4">
                         <p class="text-xs text-gray-500 mb-1">บริการหลัก</p>
@@ -121,11 +121,11 @@
                             }
                         }
 
-                        // Normalize to URLs
+                        // Normalize to URLs (treat only http(s) or protocol-relative as absolute)
                         $toUrl = function ($p) {
                             $p = str_replace('\\', '/', (string) $p);
                             if ($p === '') return null;
-                            $isAbsolute = preg_match('/^(https?:)?\//', $p) === 1;
+                            $isAbsolute = preg_match('#^(https?:)?//#', $p) === 1;
                             return $isAbsolute ? $p : asset(ltrim($p, '/'));
                         };
                         $imageUrls = array_values(array_filter(array_map($toUrl, $paths)));

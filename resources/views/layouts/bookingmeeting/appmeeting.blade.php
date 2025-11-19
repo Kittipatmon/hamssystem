@@ -24,7 +24,7 @@
 
 <body class="font-sans antialiased">
     <div class="min-h-screen">
-        @include('layouts.datamanagement.navigation')
+        @include('layouts.bookingmeeting.navmeeting')
 
         <!-- Page Heading -->
         @isset($header)

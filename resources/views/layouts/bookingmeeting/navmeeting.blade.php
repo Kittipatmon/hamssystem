@@ -1,6 +1,6 @@
 <!-- Navbar (Tailwind + DaisyUI + Font Awesome) -->
 <nav class="sticky top-0 z-50 w-full backdrop-blur-md bg-white/70 dark:bg-slate-900/60 border-b border-slate-200/70 dark:border-slate-700/60 shadow-[0_6px_24px_-12px_rgba(0,0,0,.25)]">
-    <div class="max-w-7xl mx-auto px-3 md:px-6">
+    <div class="max-w-8xl mx-auto px-3 md:px-6">
         <div class="h-16 flex items-center justify-between">
 
             <!-- Left: Brand -->
@@ -20,7 +20,7 @@
             </a>
 
             <!-- Right: Pills -->
-            <div class="hidden md:flex items-center gap-3">
+            <div class="hidden md:flex items-center gap-1">
 
 
                 <!-- หน้าแรก (active) -->
@@ -29,27 +29,38 @@
                     <span>หน้าหลัก</span>
                 </a>
 
+                <a href="#" class="pill">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>จองห้อง</span>
+                </a>
+
                 <!-- เกี่ยวกับเรา (dropdown) -->
-                <div class="dropdown dropdown-end">
+                <div class="dropdown dropdown-center">
                     <label tabindex="0" class="pill cursor-pointer">
-                        <i class="fa-regular fa-circle-question"></i>
-                        <span>เกี่ยวกับเรา</span>
+                        <i class="fa-solid fa-server"></i>
+                        <span>ข้อมูลทั่วไป</span>
                         <i class="fa-solid fa-chevron-down text-[11px]"></i>
                     </label>
                     <ul tabindex="0"
-                        class="dropdown-content menu bg-white/95 backdrop-blur-sm rounded-2xl mt-2 p-2 w-52 gap-1
+                        class="dropdown-content menu bg-white/95 backdrop-blur-sm rounded-2xl mt-2 p-2 w-52
                      shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] border border-slate-200">
-                        <li><a class="text-[13px] pill"><i class="fa-regular fa-building"></i> ข้อมูลบริษัท</a></li>
-                        <li><a class="text-[13px] pill"><i class="fa-solid fa-users"></i> ทีมงาน</a></li>
-                        <li><a class="text-[13px] pill"><i class="fa-regular fa-newspaper"></i> ข่าวสาร</a></li>
+                        <li><a href="#" class="text-[13px]">
+                            ข้อมูลห้อง
+                        </a></li>
+                        <!-- <li><a class="text-[13px]">
+
+                        </a></li>
+                        <li><a class="text-[13px]">
+
+                        </li> -->
                     </ul>
                 </div>
 
                 <!-- คู่มือการใช้ -->
-                <a href="#" class="pill">
+                <!-- <a href="#" class="pill">
                     <i class="fa-solid fa-bookmark"></i>
                     <span>คู่มือการใช้</span>
-                </a>
+                </a> -->
 
                 <!-- Login -->
                  @guest
@@ -59,7 +70,7 @@
                 </a>
                 @endguest
                 @if(Auth::check())
-                <!-- <div class="dropdown dropdown-end">
+                <div class="dropdown dropdown-end">
                     <label tabindex="0" class="pill cursor-pointer">
                         <i class="fa-solid fa-user"></i>
                         <span>{{ Auth::user()->employee_code }}</span>
@@ -76,31 +87,6 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="w-full text-left text-[13px]">
-                                    <i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </div> -->
-                <div class="dropdown dropdown-center">
-                    <label tabindex="0" class="pill cursor-pointer">
-                        <i class="fa-solid fa-user"></i>
-                        <span>{{ Auth::user()->employee_code }}</span>
-                        <i class="fa-solid fa-chevron-down text-[11px]"></i>
-                    </label>
-                    <ul tabindex="0"
-                        class="dropdown-content menu bg-white/95 backdrop-blur-sm rounded-2xl mt-2 p-2 w-52
-                     shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] border border-slate-200 gap-1">
-                        <li>
-                            <a href="{{ route('profileUser') }}" class="pill">
-                                <i class="fa-regular fa-id-badge"></i>
-                                 โปรไฟล์</a>
-                        </li>
-                        <li class="mt-1 border-t border-slate-100"></li>
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}" class="pill">
-                                @csrf
-                                <button type="submit" class="w-full text-left text-[13px] text-error">
                                     <i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ
                                 </button>
                             </form>
