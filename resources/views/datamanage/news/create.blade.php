@@ -1,4 +1,5 @@
-@extends('layouts.datamanagement.app')
+@extends('layouts.sidebar')
+@section('title', 'เพิ่มข่าวสารใหม่')
 @section('content')
 <div class="max-w-3xl mx-auto">
     <div class="flex justify-between items-center mb-3">

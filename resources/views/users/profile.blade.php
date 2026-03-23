@@ -1,170 +1,514 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- พื้นหลังเข้มทั้งหน้า -->
-<div class="text-slate-200">
-  <div class="max-w-4xl mx-auto px-8 py-8 rounded-xl background-blur-2xl shadow-lg shadow-black/50">
+    <div class="min-h-screen font-sans bg-gray-50 dark:bg-slate-950"
+        style="background: linear-gradient(160deg, #fff1f1 0%, #fff 55%, #f5f5f5 100%);">
 
-    <!-- แถวบน: การ์ดโปรไฟล์ใหญ่ + การ์ดวันที่เริ่มงาน + ปุ่มด้านขวาบน -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
+        <!-- ===== HERO BANNER (soft pink-red gradient, compact) ===== -->
+        <div class="relative overflow-hidden"
+            style="height: 200px; background: linear-gradient(135deg, #e53e3e 0%, #c53030 40%, #9b2c2c 100%);">
+            <!-- Soft light overlay -->
+            <div class="absolute inset-0"
+                style="background: radial-gradient(ellipse at 70% 50%, rgba(255,80,80,0.35) 0%, transparent 65%);"></div>
 
-      <!-- ปุ่มแก้ไข/ตั้งค่า ด้านขวาบน เหมือนภาพ -->
-      <div class="hidden lg:block absolute right-0 -top-2">
-        <div class="flex gap-3">
-          <a href=""
-            class="btn btn-sm rounded-full bg-[#FFC21A] text-black border-0 shadow hover:brightness-95">แก้ไข</a>
-          <details class="dropdown dropdown-end">
-            <summary class="btn btn-sm rounded-full bg-[#ff445a] border-0 text-white shadow hover:brightness-95">ตั้งค่า</summary>
-            <ul class="menu dropdown-content z-[1] p-2 shadow rounded-xl bg-base-100 text-base-content w-52 mt-2">
-              <li><a href="">เปลี่ยนรหัสผ่าน</a></li>
-              <li><a href="">ออกจากระบบ</a></li>
-            </ul>
-          </details>
-        </div>
-      </div>
+            <!-- Floating blobs -->
+            <div class="absolute rounded-full animate-blob-a"
+                style="width:280px;height:280px;top:-40px;right:-60px;background:rgba(255,255,255,0.07);filter:blur(50px);">
+            </div>
+            <div class="absolute rounded-full animate-blob-b"
+                style="width:200px;height:200px;bottom:-80px;left:-30px;background:rgba(0,0,0,0.12);filter:blur(60px);">
+            </div>
+            <div class="absolute rounded-full animate-blob-c"
+                style="width:160px;height:160px;top:20px;left:30%;background:rgba(255,255,255,0.05);filter:blur(40px);">
+            </div>
 
-      <!-- การ์ดโปรไฟล์ใหญ่ (เหมือนภาพซ้าย) -->
-      <section class="lg:col-span-7 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.4)] overflow-hidden border border-white/5">
-        <!-- แถบคัฟเวอร์สีแดง -->
-        <div class="h-[120px] w-full" style="background:linear-gradient(135deg,#B02525 0%,#B02525 100%);"></div>
-        <!-- <div class="h-[120px] w-full" style="background:#b0181a;"></div> -->
+            <!-- Floating border shapes -->
+            <div class="absolute border-2 rounded-3xl animate-shape-a"
+                style="width:90px;height:90px;top:18%;left:5%;border-color:rgba(255,255,255,0.18);transform:rotate(18deg);">
+            </div>
+            <div class="absolute border rounded-[2rem] animate-shape-b"
+                style="width:120px;height:120px;top:10%;right:12%;border-color:rgba(255,255,255,0.1);transform:rotate(-12deg);">
+            </div>
+            <div class="absolute border-2 rounded-xl animate-shape-c"
+                style="width:50px;height:50px;bottom:20%;left:20%;border-color:rgba(255,255,255,0.2);transform:rotate(35deg);">
+            </div>
 
-        <div class="p-6 pt-0 ">
-          <div class="-mt-14 flex items-start gap-5">
-            <!-- อวตารมีกรอบขาว -->
-            <div class="relative shrink-0">
-              <div class="avatar">
-                <div class="w-28 h-28 rounded-full ring-4 ring-white/95 shadow-lg overflow-hidden">
-                  @php $avatar = $user->avatar_path ?? null; @endphp
-                  @if($avatar)
-                  <img src="{{ asset('storage/'.$avatar) }}" alt="avatar" class="w-full h-full object-cover">
-                  @else
-                  -
-                  @endif
+            <!-- Shimmer sweep -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute h-full animate-shimmer"
+                    style="width:50%;top:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);transform:skewX(-20deg);">
                 </div>
-              </div>
-
-              <!-- ปุ่มกล้องเล็กมุมขวาล่าง -->
-              @php $inputId = 'avatarUpload-'.($user->id ?? 'me'); @endphp
-              <label for="{{ $inputId }}"
-                class="absolute -right-1 -bottom-1 grid place-items-center w-7 h-7 rounded-full bg-slate-700 text-white border border-white/30 shadow cursor-pointer hover:bg-slate-600">
-                <i class="fa-solid fa-camera text-[12px]"></i>
-                <input id="{{ $inputId }}" type="file" accept="image/*" class="hidden">
-              </label>
             </div>
 
-            <div class="flex-1">
-              <h2 class="text-2xl font-semibold tracking-tight leading-snug">
-                {{ $user->first_name ?? '' }} {{ $user->last_name ?? '' }}
-              </h2>
+            <!-- Canvas stardust -->
+            <canvas id="hero-canvas" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index:5;"></canvas>
 
-              <!-- แถวตำแหน่ง + แบ็จ -->
-              <div class="mt-2 flex flex-wrap items-center gap-2 text-[13px]">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 text-slate-900 border border-white/10">
-                  <i class="fa-solid fa-graduation-cap"></i>
-                  {{ $user->position ?? 'วิศวกรซอฟต์แวร์' }}
+            <!-- Breadcrumb -->
+            <div class="absolute top-6 left-8 z-10 hidden md:flex items-center gap-3"
+                style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3em;color:rgba(255,255,255,0.5);">
+                <span>Kumwell HAMS</span>
+                <span style="width:5px;height:5px;background:rgba(255,255,255,0.3);border-radius:50%;"></span>
+                <span style="color:rgba(255,255,255,0.9);">Employee Profile</span>
+            </div>
+        </div>
+
+        <!-- ===== MAIN WRAPPER (pulled up over the hero) ===== -->
+        <div class="max-w-5xl mx-auto px-4 sm:px-6" style="margin-top:-80px;position:relative;z-index:20;">
+
+            <!-- ===== PROFILE HEADER CARD ===== -->
+            <div
+                class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-800 p-6 md:p-8 mb-6">
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+
+                    <!-- Avatar -->
+                    <div class="relative shrink-0 group">
+                        <div
+                            class="w-36 h-36 rounded-[1.5rem] overflow-hidden border-4 border-white shadow-lg bg-gray-100 dark:bg-slate-800 ring-4 ring-gray-50 dark:ring-slate-900">
+                            @php $avatar = $user->photo_user; @endphp
+                            @if($avatar)
+                                <img id="profile-image" src="{{ asset($avatar) }}" alt="Avatar"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div id="profile-placeholder"
+                                    class="w-full h-full flex items-center justify-center text-gray-300 dark:text-slate-600">
+                                    <i class="fa-solid fa-user text-5xl"></i>
+                                </div>
+                            @endif
+                        </div>
+                        @php $inputId = 'avatar-' . ($user->id ?? 'me'); @endphp
+                        <label for="{{ $inputId }}"
+                            class="absolute -bottom-2 -right-2 w-10 h-10 bg-white dark:bg-slate-700 rounded-xl shadow-md border border-gray-200 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition z-10">
+                            <i class="fa-solid fa-camera text-gray-500 dark:text-gray-300 text-sm"></i>
+                            <input id="{{ $inputId }}" type="file" accept="image/*" class="hidden"
+                                onchange="uploadAvatar(this)">
+                        </label>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="flex-1 text-center sm:text-left space-y-3 pt-1">
+                        <!-- Badge -->
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-widest border"
+                            style="background:#fff1f1;border-color:#fecaca;color:#b91c1c;">
+                            <span
+                                class="bg-red-500 text-white px-2 py-0.5 rounded-lg">{{ strtoupper($user->usertype->description ?? 'Executive') }}</span>
+                        </div>
+
+                        <!-- Name -->
+                        <h1
+                            class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">
+                            {{ $user->first_name }} {{ $user->last_name }}
+                        </h1>
+
+                        <!-- Meta row -->
+                        <div
+                            class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-semibold text-gray-500 dark:text-slate-400">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-id-card" style="color:#b91c1c;opacity:.8;"></i>
+                                <span>{{ $user->employee_code }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-briefcase" style="color:#b91c1c;opacity:.7;"></i>
+                                <span>{{ $user->position ?: 'วิศวกรอิเล็กทรอนิกส์' }}</span>
+                            </div>
+                            <div class="flex items-center gap-2" style="color:#16a34a;">
+                                <span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                <span class="text-[11px] font-black uppercase tracking-widest">Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Button -->
+                    <div class="shrink-0 pt-1">
+                        <button
+                            class="px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+                            style="background:#1e293b;letter-spacing:.18em;">
+                            Edit Profile
+                        </button>
+                    </div>
                 </div>
-                <span class="px-3 py-1 rounded-full bg-white/10 text-slate-900 border border-white/10">
-                  {{ $user->usertype->description ?? '' }}
-                </span>
-                <span class="px-3 py-1 rounded-full bg-emerald-600/90 text-white">ใช้งาน</span>
-              </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- การ์ดวันที่เริ่มทำงาน (เหมือนภาพขวาบน) -->
-      <section class="lg:col-span-5 rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
-        <div class="p-6">
-          <h3 class=" text-[15px] mb-3 text-black">อายุงาน:
-            <span class="text-sm text-red-600">
-              @php
-              $start = \Carbon\Carbon::parse($user->startwork_date ?? \Carbon\Carbon::now());
-              $now = \Carbon\Carbon::now();
-              $diff = $start->diff($now);
-              $months = ($diff->y * 12) + $diff->m;
-              $days = $diff->d;
-              @endphp
-              ({{ $months }} เดือน {{ $days }} วัน)
-            </span>
-          </h3>
-          <div class="flex items-start gap-3">
-            <span class="mt-1 inline-block h-3 w-3 rounded-full bg-[#1DA6F0]"></span>
-            <div>
-              <div class="text-[13px] text-black">
-                {{ \Carbon\Carbon::parse($user->startwork_date)->format('d/m/Y') ?? '01/01/2020' }}
-              </div>
-              <div class="text-[13px] text-black">วันที่เริ่มทำงานของพนักงาน</div>
-            </div>
-          </div>
-          <div class="flex items-start gap-3">
-            <span class="mt-1 inline-block h-3 w-3 rounded-full bg-[#b0181a]"></span>
-            <div>
-              <div class="text-[13px] text-black">
-                <!-- {{ \Carbon\Carbon::parse($user->endwork_date)->format('d/m/Y') ?? '' }} -->
-                {{ ($user->endwork_date) ?? '-' }}
-              </div>
-              <div class="text-[13px] text-black">วันที่สิ้นสุดทำงานของพนักงาน</div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+            <!-- ===== BOTTOM GRID ===== -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- เส้นคั่นบางแบบในภาพ -->
-    <div class="my-6 border-t border-white/10"></div>
+                <!-- LEFT COLUMN -->
+                <div class="lg:col-span-4 space-y-6">
 
-    <!-- Tabs (ข้อมูลทั่วไป / ประวัติการทำงาน) -->
-    <div class="mb-3">
-      <div class="flex gap-6 text-sm">
-        <button class="relative text-black dark:text-black after:absolute after:left-0 after:-bottom-[1px] after:h-[2px] after:w-full after:bg-white">
-          ข้อมูลทั่วไป
-        </button>
-        <button class="relative text-black dark:text-black after:absolute after:left-0 after:-bottom-[1px] after:h-[2px] after:w-full after:bg-white">ประวัติการทำงาน</button>
-      </div>
-    </div>
+                    <!-- Work Statistics -->
+                    <div
+                        class="bg-white dark:bg-slate-900 rounded-3xl p-7 shadow-sm border border-gray-100 dark:border-slate-800">
+                        <div
+                            class="flex items-center gap-3 mb-7 text-gray-900 dark:text-white font-bold uppercase text-xs tracking-widest">
+                            <i class="fa-solid fa-clock-rotate-left" style="color:#dc2626;"></i>
+                            <span>Work Statistics</span>
+                        </div>
 
-    <!-- เนื้อหาภายใต้แท็บ: สองคอลัมน์เหมือนภาพ -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        @php
+                            $start = \Carbon\Carbon::parse($user->startwork_date ?? now());
+                            $diff = $start->diff(\Carbon\Carbon::now());
+                            $months = ($diff->y * 12) + $diff->m;
+                        @endphp
 
-      <!-- การ์ดซ้าย: ข้อมูลพื้นฐาน -->
-      <section class="rounded-2xl border border-white/5 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
-        <h4 class="font-semibold mb-4 text-black">ข้อมูลพื้นฐาน</h4>
-        <div class="grid grid-cols-2 gap-y-3 text-[13px]">
-          <div class="text-black">รหัสพนักงาน</div>
-          <div class="text-black">{{ $user->employee_code ?? '11648' }}</div>
+                        <!-- Large Year Number -->
+                        <div class="text-center py-4 mb-4">
+                            <div class="font-bold tabular-nums leading-none"
+                                style="font-size:5rem;color:#dc2626;text-shadow:0 2px 12px rgba(220,38,38,0.18);">
+                                {{ $diff->y }}
+                            </div>
+                            <div class="mt-1 text-[10px] font-bold uppercase tracking-widest"
+                                style="color:#9ca3af;letter-spacing:.25em;">Years in Service</div>
+                        </div>
 
-          <div class="text-black">เพศ</div>
-          <div class="text-black">{{ $user->sex ?? 'ชาย' }}</div>
+                        <div class="space-y-4">
+                            <div
+                                class="flex items-center gap-4 p-3 rounded-2xl bg-gray-50 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-700">
+                                <div
+                                    class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+                                    <i class="fa-solid fa-calendar-day text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Started
+                                        Date</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                        {{ $start->format('d M Y') }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-center gap-4 p-3 rounded-2xl bg-gray-50 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-700">
+                                <div
+                                    class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
+                                    <i class="fa-solid fa-hourglass-half text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Current
+                                        Status</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ $months }} Months
+                                        employed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-          <div class="text-black">ประเภทพนักงาน</div>
-          <div class="text-black">{{ $user->employee_type ?? 'รายเดือน' }}</div>
+                    <!-- Primary Department (solid red) -->
+                    <div class="rounded-3xl p-7 text-white shadow-xl relative overflow-hidden"
+                        style="background:linear-gradient(135deg,#dc2626 0%,#b91c1c 100%);">
+                        <!-- Ghost building icon -->
+                        <div class="absolute -right-4 -bottom-4 opacity-10 pointer-events-none"
+                            style="font-size:9rem;line-height:1;">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+                        <div class="relative z-10 space-y-4">
+                            <p class="text-[10px] font-bold uppercase tracking-widest" style="color:rgba(255,255,255,0.6);">
+                                Primary Department</p>
+                            <h4 class="text-3xl font-bold tracking-tight leading-tight">
+                                {{ optional($user->department)->department_name ?? 'ICT' }}
+                            </h4>
+                            <div class="flex items-center gap-2 rounded-2xl px-4 py-3 border"
+                                style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);">
+                                <i class="fa-solid fa-location-dot text-sm"></i>
+                                <span
+                                    class="text-xs font-bold uppercase tracking-wide">{{ $user->workplace ?: 'สนง.ใหญ่' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-          <div class="text-black">ที่ทำงาน</div>
-          <div class="text-black">{{ $user->workplace ?? 'สมุทรปราการ' }}</div>
-        </div>
-      </section>
+                <!-- RIGHT COLUMN -->
+                <div class="lg:col-span-8 space-y-6">
 
-      <!-- การ์ดขวา: หน่วยงาน -->
-      <section class="rounded-2xl border border-white/5 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
-        <h4 class="font-semibold mb-4 text-black">หน่วยงาน</h4>
-        <div class="grid grid-cols-2 gap-y-3 text-[13px]">
-          <div class="text-black">สายงาน (Section)</div>
-          <div class="text-black">{{ $user->section->section_code }}</div>
+                    <!-- Tab Bar -->
+                    <div class="border-b border-gray-200 dark:border-slate-800 flex gap-8 px-1">
+                        <button class="pb-4 text-[11px] font-bold uppercase tracking-widest relative"
+                            style="color:#dc2626;border-bottom:2.5px solid #dc2626;">
+                            Information
+                        </button>
+                        <button
+                            class="pb-4 text-[11px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition border-b-2 border-transparent">
+                            Career Path
+                        </button>
+                    </div>
 
-          <div class="text-black">ฝ่าย (Division)</div>
-          <div class="text-black">{{ optional($user->division)->division_name ?? 'ICT' }}</div>
+                    <!-- Info Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-          <div class="text-black">แผนก (Department)</div>
-          <div class="text-black">{{ optional($user->department)->department_name ?? 'ICT' }}</div>
+                        <!-- Personal Information -->
+                        <div
+                            class="bg-white dark:bg-slate-900 rounded-3xl p-7 shadow-sm border border-gray-100 dark:border-slate-800">
+                            <div class="flex items-center gap-3 mb-8">
+                                <div class="w-1 h-6 rounded-full" style="background:#dc2626;"></div>
+                                <h4 class="text-base font-bold text-gray-900 dark:text-white">Personal Information</h4>
+                            </div>
+                            <div class="space-y-7">
+                                <div>
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Employee
+                                        Code</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $user->employee_code }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Gender
+                                    </p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $user->sex ?? 'ชาย' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Employee
+                                        Type</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">
+                                        {{ $user->employee_type ?? 'รายเดือน' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
 
-          <div class="text-black">HR Level</div>
-          <div class="text-black">{{ $user->hr_level ?? 'ไม่มี' }}</div>
-        </div>
-      </section>
+                        <!-- Organizational Details -->
+                        <div
+                            class="bg-white dark:bg-slate-900 rounded-3xl p-7 shadow-sm border border-gray-100 dark:border-slate-800">
+                            <div class="flex items-center gap-3 mb-8">
+                                <div class="w-1 h-6 rounded-full" style="background:#dc2626;"></div>
+                                <h4 class="text-base font-bold text-gray-900 dark:text-white">Organizational Details</h4>
+                            </div>
+                            <div class="space-y-7">
+                                <div>
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Section
+                                        Code</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">
+                                        {{ optional($user->section)->section_code ?? 'CAO' }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Division
+                                    </p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">
+                                        {{ optional($user->division)->division_name ?? 'ICT' }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
+                                        Department</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">
+                                        {{ optional($user->department)->department_name ?? 'ICT' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    </div>
-  </div>
-</div>
+                    <!-- Corporate Classification -->
+                    <div
+                        class="bg-white dark:bg-slate-900 rounded-3xl p-7 shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner"
+                            style="background:#fff1f1;border:1px solid #fecaca;">
+                            <i class="fa-solid fa-shield-halved text-2xl" style="color:#dc2626;"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-gray-900 dark:text-white mb-1.5">Corporate Classification</h5>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                                Current HR Level: <span class="font-bold"
+                                    style="color:#dc2626;">{{ $user->usertype->description ?? 'Standard' }}</span>.
+                                This information is managed by the Human Resources department specialized for Kumwell
+                                Corporation.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- end grid -->
+        </div><!-- end wrapper -->
+
+    </div><!-- end page -->
+
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <style>
+            /* Orb blobs */
+            @keyframes blob-a {
+
+                0%,
+                100% {
+                    transform: translate(0, 0) scale(1);
+                }
+
+                50% {
+                    transform: translate(-20px, 15px) scale(1.1);
+                }
+            }
+
+            @keyframes blob-b {
+
+                0%,
+                100% {
+                    transform: translate(0, 0) scale(1);
+                }
+
+                50% {
+                    transform: translate(15px, -15px) scale(1.08);
+                }
+            }
+
+            @keyframes blob-c {
+
+                0%,
+                100% {
+                    transform: translate(0, 0) scale(1);
+                }
+
+                50% {
+                    transform: translate(10px, 20px) scale(1.15);
+                }
+            }
+
+            .animate-blob-a {
+                animation: blob-a 10s ease-in-out infinite;
+            }
+
+            .animate-blob-b {
+                animation: blob-b 8s ease-in-out infinite 1s;
+            }
+
+            .animate-blob-c {
+                animation: blob-c 12s ease-in-out infinite 2s;
+            }
+
+            /* Floating shapes */
+            @keyframes shape-a {
+
+                0%,
+                100% {
+                    transform: rotate(18deg) translateY(0);
+                }
+
+                50% {
+                    transform: rotate(24deg) translateY(-15px);
+                }
+            }
+
+            @keyframes shape-b {
+
+                0%,
+                100% {
+                    transform: rotate(-12deg) translateY(0);
+                }
+
+                50% {
+                    transform: rotate(-18deg) translateY(12px);
+                }
+            }
+
+            @keyframes shape-c {
+
+                0%,
+                100% {
+                    transform: rotate(35deg) translateY(0);
+                }
+
+                50% {
+                    transform: rotate(42deg) translateY(-10px);
+                }
+            }
+
+            .animate-shape-a {
+                animation: shape-a 8s ease-in-out infinite;
+            }
+
+            .animate-shape-b {
+                animation: shape-b 10s ease-in-out infinite 1.5s;
+            }
+
+            .animate-shape-c {
+                animation: shape-c 7s ease-in-out infinite 3s;
+            }
+
+            /* Shimmer */
+            @keyframes shimmer {
+                0% {
+                    left: -120%;
+                }
+
+                100% {
+                    left: 180%;
+                }
+            }
+
+            .animate-shimmer {
+                animation: shimmer 7s ease-in-out infinite 1s;
+            }
+        </style>
+
+        <script>
+            /* ── Canvas star-dust particles ── */
+            (function () {
+                const c = document.getElementById('hero-canvas');
+                if (!c) return;
+                const ctx = c.getContext('2d');
+                const resize = () => { c.width = c.offsetWidth; c.height = c.offsetHeight; };
+                resize();
+                window.addEventListener('resize', resize);
+
+                const rnd = (a, b) => Math.random() * (b - a) + a;
+                const dots = Array.from({ length: 70 }, () => ({
+                    x: rnd(0, c.width),
+                    y: rnd(0, c.height),
+                    r: rnd(.4, 2.2),
+                    a: rnd(.3, .9),
+                    vx: rnd(-.1, .1),
+                    vy: rnd(-.4, -.08),
+                    life: Math.random(),
+                    d: rnd(.003, .008)
+                }));
+                (function loop() {
+                    ctx.clearRect(0, 0, c.width, c.height);
+                    dots.forEach(p => {
+                        p.x += p.vx; p.y += p.vy; p.life -= p.d;
+                        if (p.life <= 0) { p.x = rnd(0, c.width); p.y = rnd(0, c.height); p.life = 1; }
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(255,255,255,${p.a * p.life})`;
+                        ctx.fill();
+                    });
+                    requestAnimationFrame(loop);
+                })();
+            })();
+
+            /* ── Avatar Upload ── */
+            function uploadAvatar(input) {
+                if (!input.files || !input.files[0]) return;
+                const file = input.files[0];
+                if (!file.type.match('image.*')) {
+                    Swal.fire({ icon: 'error', title: 'Invalid File', text: 'Please select an image.', confirmButtonColor: '#dc2626' });
+                    return;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                    Swal.fire({ icon: 'error', title: 'Too Large', text: 'Max 2MB.', confirmButtonColor: '#dc2626' });
+                    return;
+                }
+                const fd = new FormData();
+                fd.append('avatar', file);
+                Swal.fire({ title: 'Uploading…', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                fetch('{{ route("users.update_avatar") }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: fd
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.success) {
+                            const img = document.getElementById('profile-image');
+                            const ph = document.getElementById('profile-placeholder');
+                            if (img) { img.src = d.avatar_url; }
+                            else if (ph) {
+                                const ni = document.createElement('img');
+                                ni.id = 'profile-image'; ni.src = d.avatar_url; ni.alt = 'Avatar';
+                                ni.className = 'w-full h-full object-cover';
+                                ph.parentNode.replaceChild(ni, ph);
+                            }
+                            Swal.fire({ icon: 'success', title: 'Updated!', timer: 1800, showConfirmButton: false });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Failed', text: d.message || 'Error', confirmButtonColor: '#dc2626' });
+                        }
+                    })
+                    .catch(() => Swal.fire({ icon: 'error', title: 'Error', text: 'Connection failed.', confirmButtonColor: '#dc2626' }));
+            }
+        </script>
+    @endpush
 @endsection

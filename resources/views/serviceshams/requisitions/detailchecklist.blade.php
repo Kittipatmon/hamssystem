@@ -1,311 +1,346 @@
 @extends('layouts.serviceitem.appservice')
 
 @section('content')
-<div>
-    <div class="card w-full bg-base-100 shadow-xl">
-        <div class="px-4 text-center rounded-t-2xl bg-gradient-to-r from-orange-500 to-yellow-400">
-            <nav aria-label="breadcrumb">
-                <div class="text-sm breadcrumbs text-white justify-center">
-                    <ul>
-                        <li>
-                            <a href="{{ route('requisitions.reqchecklist') }}" class="text-white/90 hover:text-white font-medium">
-                                รายการอุปกรณ์
-                            </a>
-                        </li>
-                        <li>
-                            <span class="font-medium text-white/80">
-                                รายละเอียดในการเบิกของ (อยู่ระหว่างจัดเตรียมของ) <i class="fa-solid fa-box-open ml-2"></i>
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-        </div>
-        @if (session('success'))
-            @push('scripts')
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'สำเร็จ!',
-                        text: @json(session('success')),
-                        confirmButtonColor: '#3085d6'
-                    });
-                });
-            </script>
-            @endpush
-            @endif
-@if (session('error'))
-            @push('scripts')
-            <script>
-                (function run() {
-                    if (typeof Swal === 'undefined') {
-                        // Fallback if SweetAlert2 isn't ready
-                        alert(@json(session('error')));
-                        return;
-                    }
-                    if (document.readyState !== 'loading') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'ไม่สำเร็จ',
-                            text: @json(session('error')),
-                            confirmButtonColor: '#d33'
-                        });
-                    } else {
-                        document.addEventListener('DOMContentLoaded', function () {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'ไม่สำเร็จ',
-                                text: @json(session('error')),
-                                confirmButtonColor: '#d33'
-                            });
-                        });
-                    }
-                })();
-            </script>
-            @endpush
-            @endif
-        <div class="card-body overflow-x-auto"> {{-- card-body + overflow-x-auto for responsive table --}}
-            @php
-            $has_unit = $requisition->requisition_items->where('quantity', '>', 0)->count() > 0;
-            $has_pack = $requisition->requisition_items->where('quantity_pack', '>', 0)->count() > 0;
-            $total_unit = 0;
-            $total_pack = 0;
-            $allChecked = $requisition->requisition_items->where('check_item', '!=', 1)->count() === 0;
-            @endphp
-            
-            <table class="table table-sm"> {{-- table table-zebra --}}
-                {{-- Table Head --}}
-                <thead class="bg-blue-100">
-                    <tr class="text-center">
-                        <th class="w-[3%] bg-yellow-100">ลำดับ</th>
-                        <th class="w-[20%]">รายการอุปกรณ์</th>
-                        <th class="w-[8%]">จำนวน</th>
-                        <th class="w-[10%]">ราคา(ชิ้น)</th>
-                        <th class="w-[12%]">ราคารวม(ชิ้น)</th>
-                        <th class="w-[10%] bg-yellow-100">
-                            <span>ตรวจสอบ</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php $i = 1; @endphp
-                    @foreach ($requisition->requisition_items as $requisition_item)
-                    <tr>
-                        <td class="bg-yellow-100 text-center">{{ $i++ }}</td>
-                        <td>{{ $requisition_item->item->name ?? '-' }}</td>
-                        <td class="text-right">
-                            @if($requisition_item->quantity > 0)
-                            {{ $requisition_item->quantity }}
-                            @else
-                            -
-                            @endif
-                        </td>
-                        <td class="text-right">
-                            @if($requisition_item->quantity > 0 && $requisition_item->item)
-                            {{ number_format($requisition_item->item->per_unit, 2) }} บาท
-                            @else
-                            -
-                            @endif
-                        </td>
-                        <td class="text-right">
-                            @if($requisition_item->quantity > 0 && $requisition_item->item)
-                            {{ number_format($requisition_item->item->per_unit * $requisition_item->quantity, 2) }} บาท
-                            @php $total_unit += $requisition_item->item->per_unit * $requisition_item->quantity; @endphp
-                            @else
-                            -
-                            @endif
-                        </td>
-                        <td class="text-center bg-yellow-100">
-                            <input type="checkbox"
-                                class="checkbox checkbox-primary check-item-checkbox" {{-- checkbox checkbox-primary --}}
-                                data-id="{{ $requisition_item->requistionitem_id }}"
-                                @if($requisition_item->check_item) checked @endif
-                            >
-                            @if($requisition_item->check_item == '1')
-                            <i class="fa-solid fa-check text-success ml-2 check-icon"></i> {{-- ms-2 -> ml-2 --}}
-                            @else
-                            {{-- Add a hidden icon for the JS to toggle --}}
-                            <i class="fa-solid fa-check text-success ml-2 check-icon" style="display: none;"></i>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                    <tr class="bg-yellow-100">
-                        <td colspan="5" class="text-right font-bold">ราคารวมทั้งหมด</td>
-                        <td class="font-bold text-right">{{ number_format($requisition->total_price, 2) }} บาท</td>
-                    </tr>
-                </tbody>
-            </table>
+<div class="max-w-6xl mx-auto px-4 py-8 space-y-8 uppercase tracking-tight">
 
-            <div class="mt-4 flex items-center justify-center gap-2">
-                <a href="#" class="btn btn-success btn-submit-req text-white {{ $allChecked ? '' : 'hidden' }}" data-id="{{ $requisition->requisitions_id }}" title="คลิกเมื่อจัดเตรียมอุปกรณ์เสร็จสิ้น">
-                    <i class="fa-solid fa-check"></i> จัดเตรียมเสร็จสิ้น
-                </a>
-                <a href="#" class="btn btn-error btn-cancel-req" data-id="{{ $requisition->requisitions_id }}" title="ยกเลิกการจัดเตรียม">
-                    <i class="fa-solid fa-ban"></i> ยกเลิก
-                </a>
-                
-                <form id="submit-req-form-{{ $requisition->requisitions_id }}" action="{{ route('checklist.submitreq', $requisition->requisitions_id) }}" method="POST" class="hidden"> 
-                    @csrf
-                    <input type="hidden" name="packing_staff_comment" value="">
-                </form>
-                <form id="cancel-req-form-{{ $requisition->requisitions_id }}" action="{{ route('checklist.cancelreq', $requisition->requisitions_id) }}" method="POST" class="hidden"> 
-                    @csrf
-                    <input type="hidden" name="packing_staff_comment" value="">
-                </form>
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 animate-zoom-in">
+        <div class="flex items-center gap-5">
+            <div class="w-16 h-16 bg-red-600 rounded-3xl flex items-center justify-center shadow-lg shadow-red-100">
+                <i class="fa-solid fa-boxes-packing text-white text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black text-slate-800 tracking-tighter italic leading-none">กำลังจัดเตรียมพัสดุ</h1>
+                <p class="text-[13px] text-slate-400 font-bold mt-1.5 flex items-center gap-2">
+                    <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded font-mono border border-slate-200">{{ $requisition->requisitions_code }}</span>
+                    <span>•</span>
+                    <span class="italic">โปรดตรวจสอบพัสดุให้ครบถ้วนก่อนบันทึก</span>
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('requisitions.reqchecklist') }}" 
+               class="px-6 py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-black rounded-2xl border border-slate-100 transition-all active:scale-95 text-sm">
+                <i class="fa-solid fa-arrow-left mr-2"></i> กลับหน้ารายการ
+            </a>
+        </div>
+    </div>
+
+    <!-- User Info & Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="md:col-span-2 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-user-tie text-lg"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">ผู้ขอเบิก (Requester)</p>
+                <p class="text-[15px] font-black text-slate-700 leading-tight">
+                    {{ $requisition->user->fullname }}
+                    <span class="block text-[10px] text-slate-400 mt-1 italic font-medium">{{ $requisition->user->department->department_name ?? "-" }}</span>
+                </p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-list-check text-lg"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">ความคืบหน้า</p>
+                <p id="progress-text" class="text-[18px] font-black text-slate-800 font-mono italic">
+                    {{ $requisition->requisition_items->where('check_item', 1)->count() }} / {{ $requisition->requisition_items->count() }}
+                </p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-calendar-day text-lg"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">วันที่ขอ (Date)</p>
+                <p class="text-[15px] font-black text-slate-700 italic leading-none">{{ optional($requisition->request_date)->format('d/m/Y') }}</p>
             </div>
         </div>
     </div>
+
+    @if (session('success') || session('error'))
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 animate-pulse text-center text-sm font-bold text-slate-500 italic">
+            <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Initializing System Message...
+        </div>
+    @endif
+
+    <!-- Interactive Checklist -->
+    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+            <div class="flex items-center gap-3">
+                <div class="w-1.5 h-6 bg-red-600 rounded-full"></div>
+                <h2 class="text-lg font-black text-slate-800 tracking-tight italic uppercase">รายการที่ต้องจัดสิ่ง</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2">Check all item to finish</span>
+                <i class="fa-solid fa-circle-down text-slate-200 animate-bounce"></i>
+            </div>
+        </div>
+
+        <div class="p-4 md:p-8 overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                    <tr class="bg-slate-100/50">
+                        <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest rounded-l-3xl text-center">#</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">ชื่อรายการพัสดุ</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">ต้องเตรียม (ชิ้น)</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-right">ยอดรวม</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center rounded-r-3xl">ตรวจสอบ</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @foreach ($requisition->requisition_items as $index => $item)
+                    <tr class="hover:bg-red-50/20 transition-all duration-200 group {{ $item->check_item ? 'bg-emerald-50/30' : '' }}" id="row-{{ $item->requistionitem_id }}">
+                        <td class="px-6 py-6 text-center text-slate-400 font-bold italic">{{ $index + 1 }}</td>
+                        <td class="px-6 py-6 font-black text-slate-700">
+                             <div class="flex flex-col">
+                                <span class="text-[15px] group-hover:text-red-600 transition-colors">{{ $item->item->name ?? '-' }}</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase italic mt-1 leading-none">SKU: {{ $item->item->item_code ?? 'N/A' }}</span>
+                             </div>
+                        </td>
+                        <td class="px-6 py-6 text-center">
+                            <span class="inline-block px-4 py-1.5 bg-slate-800 text-white rounded-xl font-black text-[16px] italic shadow-lg shadow-slate-100">
+                                {{ $item->quantity }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-6 text-right font-black text-slate-800 font-mono italic">
+                            ฿{{ number_format(($item->item->per_unit ?? 0) * $item->quantity, 2) }}
+                        </td>
+                        <td class="px-6 py-6 text-center">
+                            <label class="inline-flex items-center cursor-pointer group/label">
+                                <div class="relative">
+                                    <input type="checkbox"
+                                        class="sr-only check-item-checkbox"
+                                        data-id="{{ $item->requistionitem_id }}"
+                                        @if($item->check_item) checked @endif
+                                    >
+                                    <div class="w-12 h-12 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center transition-all group-hover/label:border-red-400 shadow-sm
+                                                peer-checked:bg-emerald-500 peer-checked:border-emerald-500 peer-checked:shadow-emerald-100 peer-checked:scale-110">
+                                        <i class="fa-solid fa-check text-slate-200 peer-checked:text-white text-xl transition-all {{ $item->check_item ? 'text-white' : '' }}"></i>
+                                    </div>
+                                    <input type="checkbox" class="sr-only peer" @if($item->check_item) checked @endif disabled> {{-- Visual peer for style --}}
+                                </div>
+                            </label>
+                            <div class="check-indicator mt-1 text-[9px] font-black uppercase {{ $item->check_item ? 'text-emerald-500' : 'text-slate-300' }} italic">
+                                {{ $item->check_item ? 'READY' : 'WAITING' }}
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr class="bg-slate-800 text-white shadow-2xl">
+                        <td colspan="3" class="px-8 py-8 rounded-l-[2rem] font-black text-right tracking-[0.2em] italic uppercase">TOTAL ESTIMATED VALUE</td>
+                        <td colspan="2" class="px-8 py-8 rounded-r-[2rem] text-right text-3xl font-black italic font-mono text-orange-400 decoration-slate-600 decoration-4 underline-offset-8">
+                            ฿{{ number_format($requisition->total_price, 2) }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        @php $allChecked = $requisition->requisition_items->where('check_item', '!=', 1)->count() === 0; @endphp
+
+        <!-- Footer Actions -->
+        <div class="p-10 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-center gap-6">
+            <button class="w-full md:w-80 h-16 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-100 transition-all active:scale-95 flex items-center justify-center gap-3 btn-submit-req {{ $allChecked ? '' : 'hidden' }}"
+                    data-id="{{ $requisition->requisitions_id }}">
+                <i class="fa-solid fa-circle-check text-xl"></i>
+                <span>จัดเตรียมเรียบร้อยแล้ว</span>
+            </button>
+            <button class="w-full md:w-80 h-16 bg-white border-2 border-red-100 text-red-500 hover:bg-red-500 hover:text-white font-black rounded-2xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-3 btn-cancel-req"
+                    data-id="{{ $requisition->requisitions_id }}">
+                <i class="fa-solid fa-ban"></i>
+                <span>มีปัญหา / ยกเลิกรายการ</span>
+            </button>
+            
+            <form id="submit-req-form-{{ $requisition->requisitions_id }}" action="{{ route('checklist.submitreq', $requisition->requisitions_id) }}" method="POST" class="hidden"> 
+                @csrf
+                <input type="hidden" name="packing_staff_comment" value="">
+            </form>
+            <form id="cancel-req-form-{{ $requisition->requisitions_id }}" action="{{ route('checklist.cancelreq', $requisition->requisitions_id) }}" method="POST" class="hidden"> 
+                @csrf
+                <input type="hidden" name="packing_staff_comment" value="">
+            </form>
+        </div>
+    </div>
 </div>
+
 @endsection
 
 @push('scripts')
 <script>
-    // Vanilla JS implementation (no jQuery dependency)
     document.addEventListener('DOMContentLoaded', function () {
         const csrfToken = @json(csrf_token());
         const updateBaseUrl = @json(url('checklist/updatecheckitem'));
+        const totalItems = {{ $requisition->requisition_items->count() }};
 
-        // Helper: show prompt with SweetAlert2 or fallback
-        function askText({ title, text, confirmText, cancelText, placeholder }) {
-            if (window.Swal) {
-                return Swal.fire({
-                    title: title,
-                    text: text,
-                    icon: 'warning',
-                    input: 'textarea',
-                    inputPlaceholder: placeholder || '',
-                    inputAttributes: { 'aria-label': placeholder || '' },
-                    showCancelButton: true,
-                    confirmButtonText: confirmText,
-                    cancelButtonText: cancelText,
-                    inputValidator: (value) => {
-                        if (!value) {
-                            return 'กรุณากรอกข้อมูล';
-                        }
-                    }
-                });
-            }
-            // Fallback when Swal is not available
-            return new Promise((resolve) => {
-                const val = prompt(text || title || '');
-                if (val) {
-                    resolve({ isConfirmed: true, value: val });
-                } else {
-                    resolve({ isConfirmed: false });
+        // Theme-aware SweetAlert Prompt
+        async function premiumPrompt({ title, text, confirmText, cancelText, placeholder, icon, confirmColor }) {
+            return Swal.fire({
+                title: `<span class="text-slate-800 font-black tracking-tighter italic uppercase">${title}</span>`,
+                html: `<p class="text-[13px] text-slate-500 font-bold italic leading-relaxed uppercase">${text}</p>`,
+                icon: icon || 'warning',
+                input: 'textarea',
+                inputPlaceholder: placeholder || 'Type your message here...',
+                showCancelButton: true,
+                confirmButtonText: confirmText,
+                cancelButtonText: cancelText,
+                confirmButtonColor: confirmColor || '#10b981',
+                cancelButtonColor: '#1e293b',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-[2.5rem] border-none shadow-2xl',
+                    confirmButton: 'rounded-xl px-10 py-4 font-black uppercase text-sm',
+                    cancelButton: 'rounded-xl px-10 py-4 font-black uppercase text-sm',
+                    input: 'rounded-2xl border-slate-100 focus:ring-red-100 font-medium'
+                },
+                inputValidator: (value) => {
+                    if (!value && icon === 'error') return 'Please provide a reason for cancellation';
                 }
             });
         }
 
-        // Submit done button
-        document.querySelectorAll('.btn-submit-req').forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                const id = this.getAttribute('data-id');
-                askText({
-                    title: 'ยืนยันการจัดเตรียมเสร็จสิ้น?',
-                    text: 'คุณต้องการส่งรายการนี้หรือไม่',
-                    confirmText: 'ใช่, ส่งรายการ',
-                    cancelText: 'ยกเลิก',
-                    placeholder: 'ระบุหมายเหตุ...'
-                }).then(function (result) {
-                    if (result && result.isConfirmed) {
-                        const form = document.getElementById('submit-req-form-' + id);
-                        if (form) {
-                            const input = form.querySelector('input[name="packing_staff_comment"]');
-                            if (input) input.value = result.value || '';
-                            form.submit();
-                        }
-                    }
-                });
+        // Action Handlers
+        document.querySelector('.btn-submit-req').addEventListener('click', function (e) {
+            e.preventDefault();
+            const id = this.dataset.id;
+            premiumPrompt({
+                title: 'Confirm Preparation?',
+                text: 'Have you double-checked all items in this pack?',
+                confirmText: 'YES, SHIP IT',
+                cancelText: 'NOT YET',
+                placeholder: 'Add optional notes for the requester...',
+                confirmColor: '#10b981'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('submit-req-form-' + id);
+                    form.querySelector('input[name="packing_staff_comment"]').value = result.value || '';
+                    form.submit();
+                }
             });
         });
 
-        // Cancel button
-        document.querySelectorAll('.btn-cancel-req').forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                const id = this.getAttribute('data-id');
-                askText({
-                    title: 'ยืนยันการยกเลิก?',
-                    text: 'คุณต้องการยกเลิกรายการนี้ใช่หรือไม่',
-                    confirmText: 'ใช่, ยกเลิก',
-                    cancelText: 'กลับ',
-                    placeholder: 'ระบุเหตุผล...'
-                }).then(function (result) {
-                    if (result && result.isConfirmed) {
-                        const form = document.getElementById('cancel-req-form-' + id);
-                        if (form) {
-                            const input = form.querySelector('input[name="packing_staff_comment"]');
-                            if (input) input.value = result.value || '';
-                            form.submit();
-                        }
-                    }
-                });
+        document.querySelector('.btn-cancel-req').addEventListener('click', function (e) {
+            e.preventDefault();
+            const id = this.dataset.id;
+            premiumPrompt({
+                title: 'Cancel Request?',
+                text: 'Please state the reason for rejecting or cancelling this pack.',
+                confirmText: 'CONFIRM CANCEL',
+                cancelText: 'KEEP WORKING',
+                placeholder: 'e.g. Items out of stock, incorrect spec...',
+                icon: 'error',
+                confirmColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('cancel-req-form-' + id);
+                    form.querySelector('input[name="packing_staff_comment"]').value = result.value || '';
+                    form.submit();
+                }
             });
         });
 
-        // Checkbox change (AJAX with fetch)
-        function updateSubmitVisibility() {
+        // Interactive Checkboxes
+        function refreshUI() {
             const checkboxes = Array.from(document.querySelectorAll('.check-item-checkbox'));
-            const allChecked = checkboxes.length > 0 && checkboxes.every(cb => cb.checked);
-            document.querySelectorAll('.btn-submit-req').forEach(function (btn) {
-                if (allChecked) {
-                    btn.classList.remove('hidden');
-                } else {
-                    btn.classList.add('hidden');
-                }
-            });
+            const checkedCount = checkboxes.filter(cb => cb.checked).length;
+            const allDone = checkedCount === totalItems;
+            
+            document.getElementById('progress-text').textContent = `${checkedCount} / ${totalItems}`;
+            
+            const submitBtn = document.querySelector('.btn-submit-req');
+            if (allDone) {
+                submitBtn.classList.remove('hidden');
+                submitBtn.classList.add('animate-zoom-in');
+            } else {
+                submitBtn.classList.add('hidden');
+            }
         }
-
-        // Initialize on load
-        updateSubmitVisibility();
 
         document.querySelectorAll('.check-item-checkbox').forEach(function (checkbox) {
             checkbox.addEventListener('change', function () {
                 const cb = this;
-                const id = cb.getAttribute('data-id');
+                const id = cb.dataset.id;
                 const checked = cb.checked ? 1 : 0;
-                const icon = cb.parentElement ? cb.parentElement.querySelector('.check-icon') : null;
-                const url = updateBaseUrl + '/' + encodeURIComponent(id);
-
+                const row = document.getElementById('row-' + id);
+                const indicator = row.querySelector('.check-indicator');
+                const iIcon = row.querySelector('.fa-check');
+                const boxDiv = cb.nextElementSibling;
+                
                 cb.disabled = true;
-
-                fetch(url, {
+                
+                fetch(`${updateBaseUrl}/${id}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json'
                     },
-                    credentials: 'same-origin',
                     body: JSON.stringify({ check_item: checked })
                 })
-                .then(function (res) {
-                    if (!res.ok) throw new Error('Network response was not ok');
-                    return res.json().catch(() => ({}));
-                })
-                .then(function () {
-                    if (icon) {
-                        icon.style.display = checked ? '' : 'none';
-                    }
-                })
-                .catch(function () {
-                    if (window.Swal) {
-                        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถอัปเดตสถานะได้', 'error');
+                .then(res => res.json())
+                .then(() => {
+                    if (checked) {
+                        row.classList.add('bg-emerald-50/30');
+                        indicator.textContent = 'READY';
+                        indicator.classList.replace('text-slate-300', 'text-emerald-500');
+                        iIcon.classList.add('text-white');
+                        boxDiv.classList.add('bg-emerald-500', 'border-emerald-500', 'scale-110');
                     } else {
-                        alert('ไม่สามารถอัปเดตสถานะได้');
+                        row.classList.remove('bg-emerald-50/30');
+                        indicator.textContent = 'WAITING';
+                        indicator.classList.replace('text-emerald-500', 'text-slate-300');
+                        iIcon.classList.remove('text-white');
+                        boxDiv.classList.remove('bg-emerald-500', 'border-emerald-500', 'scale-110');
                     }
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'Failed to synchronize with server', 'error');
                     cb.checked = !cb.checked;
                 })
-                .finally(function () {
+                .finally(() => {
                     cb.disabled = false;
-                    updateSubmitVisibility();
+                    refreshUI();
                 });
             });
         });
+
+        // Session Messages
+        @if(session('success'))
+            Swal.fire({ 
+                icon: 'success', 
+                title: 'SUCCESS', 
+                text: @json(session('success')),
+                customClass: { popup: 'rounded-[2rem]' }
+            });
+        @endif
+        @if(session('error'))
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'FAILED', 
+                text: @json(session('error')),
+                customClass: { popup: 'rounded-[2rem]' }
+            });
+        @endif
     });
 </script>
+
+<style>
+    @keyframes zoom-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .animate-zoom-in { animation: zoom-in 0.4s ease-out forwards; }
+    .check-item-checkbox:checked + div {
+        background-color: #10b981 !important;
+        border-color: #10b981 !important;
+        transform: scale(1.1);
+    }
+    .check-item-checkbox:checked + div i {
+        color: white !important;
+    }
+</style>
 @endpush
+@endsection

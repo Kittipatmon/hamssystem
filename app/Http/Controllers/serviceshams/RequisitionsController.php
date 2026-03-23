@@ -22,12 +22,34 @@ class RequisitionsController extends Controller
 {
     public function welcomeService()
     {
-        return view('serviceshams.welcomeservice');
+        // HAMS-only stats panel data
+        $pendingApproveCount = Requisitions::where('approve_status', Requisitions::APPROVE_STATUS_PENDING)
+            ->where('status', Requisitions::STATUS_PENDING)
+            ->count();
+        $updatedCount = Requisitions::where('approve_status', '!=', Requisitions::APPROVE_STATUS_PENDING)
+            ->where('status', Requisitions::STATUS_PENDING)
+            ->count();
+        $allReqCount = Requisitions::count();
+
+        $checklistPendingCount = Requisitions::where('packing_staff_status', Requisitions::PACKING_STATUS_PENDING)
+            ->where('status', Requisitions::STATUS_PENDING)
+            ->count();
+        $packingDoneCount = Requisitions::where('packing_staff_status', '!=', Requisitions::PACKING_STATUS_PENDING)
+            ->count();
+
+        $statsCount = Requisitions::where('status', Requisitions::STATUS_END_PROGRESS)->count();
+        $reportsAllCount = Requisitions::count();
+
+        return view('serviceshams.welcomeservice', compact(
+            'pendingApproveCount', 'updatedCount', 'allReqCount',
+            'checklistPendingCount', 'packingDoneCount',
+            'statsCount', 'reportsAllCount'
+        ));
     }
 
     public function ReqlistPending()
     {
-         $requisitions = Requisitions::where('approve_status', Requisitions::APPROVE_STATUS_PENDING)
+        $requisitions = Requisitions::where('approve_status', Requisitions::APPROVE_STATUS_PENDING)
             ->where('status', Requisitions::STATUS_PENDING)
             ->where('requester_id', Auth::user()->id)
             ->orderBy('created_at', 'desc')
@@ -41,7 +63,7 @@ class RequisitionsController extends Controller
         $requisitions = Requisitions::where('requester_id', Auth::user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
-        $requisition_items = Requisition_items::with('item')->get();    
+        $requisition_items = Requisition_items::with('item')->get();
         return view('serviceshams.requisitions.reqlistall', compact('requisitions', 'requisition_items'));
     }
 
@@ -79,7 +101,7 @@ class RequisitionsController extends Controller
     }
 
 
-    public function cancel(Request $request ,$id)
+    public function cancel(Request $request, $id)
     {
         $requisition = Requisitions::findOrFail($id);
         $requisition->status = Requisitions::STATUS_CANCELLED;
@@ -102,8 +124,8 @@ class RequisitionsController extends Controller
     public function dashboardRequisition()
     {
         // Lightweight initial data for SSR; heavy aggregations done once here then AJAX for filters.
-        $requisitions = Requisitions::select('requisitions_id','status','created_at','total_price')->get();
-        $requisition_items = Requisition_items::with(['item:item_id,name'])->select('requistionitem_id','requisition_id','item_id','quantity')->get();
+        $requisitions = Requisitions::select('requisitions_id', 'status', 'created_at', 'total_price')->get();
+        $requisition_items = Requisition_items::with(['item:item_id,name'])->select('requistionitem_id', 'requisition_id', 'item_id', 'quantity')->get();
 
         $totalRequisitions = $requisitions->count();
         $pendingRequisitions = $requisitions->where('status', Requisitions::STATUS_PENDING)->count();
@@ -118,12 +140,14 @@ class RequisitionsController extends Controller
         $monthlyRequisitionCounts = []; // counts of requisition records per month grouped by status
         foreach ($requisition_items as $ri) {
             $req = $requisitions->firstWhere('requisitions_id', $ri->requisition_id);
-            if (!$req) { continue; }
+            if (!$req) {
+                continue;
+            }
             $monthKey = $req->created_at ? Carbon::parse($req->created_at)->format('Y-m') : 'unknown';
             $name = $ri->item->name ?? 'ไม่ทราบชื่อ';
             $monthlyStats[$monthKey][$name] = ($monthlyStats[$monthKey][$name] ?? 0) + $ri->quantity;
             $itemTotals[$name] = ($itemTotals[$name] ?? 0) + $ri->quantity;
-            $monthlyExpenseTotals[$monthKey] = ($monthlyExpenseTotals[$monthKey] ?? 0) + (float)($req->total_price ?? 0);
+            $monthlyExpenseTotals[$monthKey] = ($monthlyExpenseTotals[$monthKey] ?? 0) + (float) ($req->total_price ?? 0);
             // We will compute requisition counts separately below to avoid double counting inside item loop.
         }
 
@@ -134,23 +158,23 @@ class RequisitionsController extends Controller
             $monthlyRequisitionCounts[$monthKey][$status] = ($monthlyRequisitionCounts[$monthKey][$status] ?? 0) + 1;
         }
 
-        $sections = Section::all(['section_id','section_code','section_fullname']);
-        $divisions = Division::all(['division_id','division_name','division_fullname','section_id']);
-        $departments = Department::all(['department_id','department_name','department_fullname','division_id','section_id']);
+        $sections = Section::all(['section_id', 'section_code', 'section_fullname']);
+        $divisions = Division::all(['division_id', 'division_name', 'division_fullname', 'section_id']);
+        $departments = Department::all(['department_id', 'department_name', 'department_fullname', 'division_id', 'section_id']);
 
         // Build hierarchical maps for cascading filters (section -> divisions, division -> departments)
-        $divisionMap = $divisions->groupBy('section_id')->map(function($group){
-            return $group->map(fn($d)=>[
-                'id'=>$d->division_id,
-                'name'=>$d->division_name,
-                'fullname'=>$d->division_fullname
+        $divisionMap = $divisions->groupBy('section_id')->map(function ($group) {
+            return $group->map(fn($d) => [
+                'id' => $d->division_id,
+                'name' => $d->division_name,
+                'fullname' => $d->division_fullname
             ])->values();
         });
-        $departmentMap = $departments->groupBy('division_id')->map(function($group){
-            return $group->map(fn($d)=>[
-                'id'=>$d->department_id,
-                'name'=>$d->department_name,
-                'fullname'=>$d->department_fullname
+        $departmentMap = $departments->groupBy('division_id')->map(function ($group) {
+            return $group->map(fn($d) => [
+                'id' => $d->department_id,
+                'name' => $d->department_name,
+                'fullname' => $d->department_fullname
             ])->values();
         });
 
@@ -179,7 +203,7 @@ class RequisitionsController extends Controller
     public function dashboardData(Request $request)
     {
         // Base query (date filters only). Structural filters will be applied via requester (User) relation.
-        $reqQuery = Requisitions::query()->select('requisitions_id','status','created_at','total_price','requester_id')
+        $reqQuery = Requisitions::query()->select('requisitions_id', 'status', 'created_at', 'total_price', 'requester_id')
             ->with(['user:id,section_id,division_id,department_id']);
 
         if ($request->filled('date_from')) {
@@ -224,12 +248,12 @@ class RequisitionsController extends Controller
         // Monthly item usage
         $monthlyRows = $itemsQuery->clone()
             ->selectRaw("DATE_FORMAT(r.created_at, '%Y-%m') as month_key, COALESCE(i.name,'ไม่ทราบชื่อ') as item_name, SUM(ri.quantity) as qty")
-            ->groupBy('month_key','item_name')
+            ->groupBy('month_key', 'item_name')
             ->orderBy('month_key')
             ->get();
         $monthlyStats = [];
         foreach ($monthlyRows as $row) {
-            $monthlyStats[$row->month_key][$row->item_name] = (int)$row->qty;
+            $monthlyStats[$row->month_key][$row->item_name] = (int) $row->qty;
         }
 
         // Top items (limit 10)
@@ -239,17 +263,19 @@ class RequisitionsController extends Controller
             ->orderByDesc('qty')
             ->limit(5)
             ->get();
-        $topItems = $topItemsRows->map(fn($r) => [ 'name' => $r->item_name, 'quantity' => (int)$r->qty ]);
+        $topItems = $topItemsRows->map(fn($r) => ['name' => $r->item_name, 'quantity' => (int) $r->qty]);
 
         // Monthly totals (sum of all items each month)
         $monthlyTotals = [];
-        foreach ($monthlyStats as $m => $items) { $monthlyTotals[$m] = array_sum($items); }
+        foreach ($monthlyStats as $m => $items) {
+            $monthlyTotals[$m] = array_sum($items);
+        }
 
         // Monthly expense totals (sum of requisition total_price per month)
         $monthlyExpenseTotals = [];
         foreach ($filteredRequisitions as $req) {
             $monthKey = $req->created_at ? Carbon::parse($req->created_at)->format('Y-m') : 'unknown';
-            $monthlyExpenseTotals[$monthKey] = ($monthlyExpenseTotals[$monthKey] ?? 0) + (float)($req->total_price ?? 0);
+            $monthlyExpenseTotals[$monthKey] = ($monthlyExpenseTotals[$monthKey] ?? 0) + (float) ($req->total_price ?? 0);
         }
 
         // Monthly requisition counts per status

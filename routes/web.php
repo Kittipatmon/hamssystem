@@ -16,6 +16,8 @@ use App\Http\Controllers\backend\UserController;
 use App\Http\Controllers\MicrosoftAuthController;
 use App\Http\Controllers\bookingmeeting\RoomsController;
 use App\Http\Controllers\bookingmeeting\ReservationsController;
+use App\Http\Controllers\backend\BackendVehicleController;
+use App\Http\Controllers\bookingcar\BookingCarController;
 
 Route::get('/', function () {
     // Fetch active news ordered by newest published date
@@ -46,7 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
-    Route::get('/datamanage/welcome', [DataManagementController::class, 'welcomeDataManagement'])->name('datamanage.welcomedatamanage');
+    Route::get('/backend/welcome', [DataManagementController::class, 'welcomeDataManagement'])->name('backend.welcomedatamanage');
 
     Route::prefix('datamanage')->name('datamanage.')->group(function () {
 
@@ -78,7 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::get('items/itemsall', [ItemsController::class, 'itemsAll'])->name('items.itemsalllist');
 
 
-        Route::get('/cartitem', [CartItemsController::class, 'showitems'])->name('cartitem.index');
+    Route::get('/cartitem', [CartItemsController::class, 'showitems'])->name('cartitem.index');
     Route::post('/cartitem/add', [CartItemsController::class, 'addToCart'])->name('cartitem.add');
 
     Route::delete('/cartitem/{id}', [CartItemsController::class, 'destroy'])->name('cartitem.destroy');
@@ -127,8 +129,43 @@ Route::middleware('auth')->group(function () {
     Route::resource('rooms', RoomsController::class);
     //reservations
     Route::get('reservations/welcomemeeting', [ReservationsController::class, 'welcomeReservations'])->name('reservations.welcomemeeting');
+    Route::post('reservations/store', [ReservationsController::class, 'store'])->name('reservations.store');
+    Route::get('reservations/events', [ReservationsController::class, 'events'])->name('reservations.events');
+    Route::post('reservations/cancel/{id}', [ReservationsController::class, 'cancel'])->name('reservations.cancel');
+
+    // Backend Booking Meeting
+    Route::prefix('backend/bookingmeeting')->name('backend.bookingmeeting.')->group(function () {
+        Route::resource('rooms', \App\Http\Controllers\bookingmeeting\BackendRoomsController::class);
+        Route::resource('reservations', \App\Http\Controllers\bookingmeeting\BackendReservationsController::class);
+        Route::get('report', [\App\Http\Controllers\bookingmeeting\BackendReportController::class, 'index'])->name('report.index');
+    });
+
+    //bookingcar
+    Route::prefix('bookingcar')->name('bookingcar.')->group(function () {
+        Route::get('welcome', [BookingCarController::class, 'welcome'])->name('welcome');
+        Route::get('vehicles', [BookingCarController::class, 'vehicles'])->name('vehicles');
+        Route::post('store', [BookingCarController::class, 'store'])->name('store');
+
+        // Admin / Management routes
+        Route::get('dashboard', [BookingCarController::class, 'dashboard'])->name('dashboard');
+        Route::get('report', [BookingCarController::class, 'report'])->name('report');
+        Route::get('edit/{id}', [BookingCarController::class, 'edit'])->name('edit');
+        Route::put('update/{id}', [BookingCarController::class, 'update'])->name('update');
+        Route::put('approve/{id}', [BookingCarController::class, 'approve'])->name('approve');
+        Route::post('{id}/cancel', [BookingCarController::class, 'cancel'])->name('cancel');
+        Route::post('{id}/return', [BookingCarController::class, 'returnCar'])->name('returnCar');
+    });
+
+    // Backend Vehicles Management
+    Route::prefix('backend/vehicles')->name('backend.vehicles.')->group(function () {
+        Route::get('dashboard', [BackendVehicleController::class, 'dashboard'])->name('dashboard');
+        Route::get('table', [BackendVehicleController::class, 'table'])->name('table');
+        Route::get('{id}/edit', [BackendVehicleController::class, 'edit'])->name('edit');
+        Route::put('{id}', [BackendVehicleController::class, 'update'])->name('update');
+    });
 });
 
 Route::get('/profileUser', [UserController::class, 'profileUser'])->middleware('auth')->name('profileUser');
+Route::post('/profile/update-avatar', [UserController::class, 'updateAvatar'])->middleware('auth')->name('users.update_avatar');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

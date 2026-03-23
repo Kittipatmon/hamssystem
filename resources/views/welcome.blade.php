@@ -1,182 +1,334 @@
 @extends('layouts.app')
 @section('content')
-<div class="max-w-7xl mx-auto">
-    <div>
-        <img src="{{ asset('images/welcome/whams.jpg') }}" alt="Welcome Image" class="mt-4 rounded-lg shadow-lg" style="width: 1500px; height: 400px;">
-        <!-- style="color: #7a1b1b;" -->
-        <p class="text-2xl font-bold mt-4 text-center text-red-700">Human Asset Management & Service Building</p>
-        <p class="text-sm text-center">แผนกจัดการและบำรุงรักษาอาคาร</p>
-    </div>
-    <div class="mt-6">
-        <p><strong>บริการทั้งหมด</strong></p>
-        <hr class="mb-2">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <!-- Card Start -->
-            <div class="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a href="{{ route('items.itemsalllist') }}">
-                      <span class="absolute top-3 right-3 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow animate-pulse-fast">พร้อมใช้งาน</span>
-                    <img src="{{ asset('images/welcome/servicehams.jpg') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
-                    <div class="p-4">
-                        <p class="text-xs text-gray-500 mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold mb-2">ระบบเบิกอุปกรณ์สำนักงาน</h3>
-                        <p class="text-xs text-gray-700">จัดการการเบิกอุปกรณ์สำนักงาน ติดตามสถานะและควบคุมสต็อก</p>
+    <style>
+        .hero-banner {
+            position: relative;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .hero-banner img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.85) 0%, rgba(220, 38, 38, 0.6) 50%, rgba(0, 0, 0, 0.2) 100%);
+            display: flex;
+            align-items: center;
+            padding: 2.5rem;
+        }
+
+        .hero-overlay h1 {
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .svc-card {
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .svc-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -12px rgba(220, 38, 38, 0.18);
+            border-color: #fecaca;
+        }
+
+        .svc-card img {
+            transition: transform 0.5s ease;
+        }
+
+        .svc-card:hover img {
+            transform: scale(1.06);
+        }
+
+        .news-item {
+            transition: all 0.3s ease;
+        }
+
+        .news-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12);
+        }
+
+        .news-item:hover .news-thumb {
+            transform: scale(1.05);
+        }
+
+        .news-thumb {
+            transition: transform 0.5s ease;
+        }
+
+        .section-line {
+            height: 3px;
+            width: 48px;
+            background: linear-gradient(90deg, #dc2626, #ef4444);
+            border-radius: 999px;
+        }
+
+        .scroll-hide {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+
+    <div class="max-w-7xl mx-auto space-y-8">
+
+        {{-- ============ HERO BANNER ============ --}}
+        <div class="hero-banner shadow-xl">
+            <img src="{{ asset('images/welcome/whams.jpg') }}" alt="HAMS Welcome">
+            <div class="hero-overlay">
+                <div class="max-w-xl">
+                    <div
+                        class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-4 border border-white/25">
+                        <i class="fa-solid fa-building-columns"></i> HAMS&nbsp;System
                     </div>
-                </a>
+                    <h1 class="text-white text-3xl md:text-4xl font-bold leading-tight mb-2">
+                        Human Asset Management<br class="hidden sm:block">& Service Building
+                    </h1>
+                    <p class="text-white/85 text-sm md:text-base leading-relaxed">
+                        แผนกจัดการและบำรุงรักษาอาคาร — บริหารจัดการอุปกรณ์ ห้องประชุม รถส่วนกลาง ครบจบในที่เดียว
+                    </p>
+                </div>
             </div>
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a href="{{ route('reservations.welcomemeeting') }}">
-                    <img src="{{ asset('images/welcome/bookingmeet.jpg') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
-                    <div class="p-4">
-                        <p class="text-xs text-gray-500 mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold mb-2">ระบบจองห้องประชุม</h3>
-                        <p class="text-xs text-gray-700">จัดการการจองห้องประชุม ติดตามสถานะและควบคุมการใช้งาน</p>
+        </div>
+
+        {{-- ============ SERVICES SECTION ============ --}}
+        <div>
+            <div class="mb-5">
+                <h2 class="group text-xl font-bold text-slate-800 inline-block px-3 py-2 rounded transition-all duration-500 
+                                               bg-gradient-to-r from-red-500 to-red-700 bg-[length:0%_100%] bg-no-repeat
+                                               hover:bg-[length:100%_100%] hover:text-white">บริการทั้งหมด</h2>
+                <div class="section-line mt-2"></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+                {{-- Card 1 --}}
+                <a href="{{ route('items.itemsalllist') }}"
+                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block">
+                    <div class="relative overflow-hidden">
+                        <img src="{{ asset('images/welcome/servicehams.jpg') }}" alt="เบิกอุปกรณ์"
+                            class="w-full h-40 object-cover">
+                        <span
+                            class="absolute top-3 right-3 bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
+                            พร้อมใช้งาน
+                        </span>
                     </div>
-                </a>
-            </div>
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')">
-                    <img src="{{ asset('images/welcome/bookingcar.jpg') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
                     <div class="p-4">
-                        <p class="text-xs text-gray-500 mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold mb-2">ระบบจองรถส่วนกลาง</h3>
-                        <p class="text-xs text-gray-700">จัดการการจองรถส่วนกลาง ติดตามสถานะและควบคุมการใช้งาน</p>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')">
-                    <img src="{{ asset('images/welcome/repairrequest.jpg') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
-                    <div class="p-4">
-                        <p class="text-xs text-gray-500 mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold mb-2">ระบบแจ้งซ่อม</h3>
-                        <p class="text-xs text-gray-700">จัดการการแจ้งซ่อม ติดตามสถานะและควบคุมการดำเนินการ</p>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')">
-                    <img src="{{ asset('images/welcome/residence.jpg') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
-                    <div class="p-4">
-                        <p class="text-xs text-gray-500 mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold mb-2">ระบบบ้านพักพนักงาน</h3>
-                        <p class="text-xs text-gray-700">
-                            จัดการบ้านพักพนักงาน ติดตามสถานะและควบคุมการใช้งาน
+                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบเบิกอุปกรณ์สำนักงาน</h3>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการเบิกอุปกรณ์ ติดตามสถานะและควบคุมสต็อก
                         </p>
                     </div>
                 </a>
-            </div>
 
-            @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-700  hover:scale-[1.02]">
-                <a href="{{ route('datamanage.welcomedatamanage') }}">
-                    <img src="{{ asset('images/welcome/data.png') }}" alt="อุปกรณ์สำนักงาน" class="w-full h-65 object-cover">
+                {{-- Card 2 --}}
+                <a href="{{ route('reservations.welcomemeeting') }}"
+                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block">
+                    <div class="relative overflow-hidden">
+                        <img src="{{ asset('images/welcome/bookingmeet.jpg') }}" alt="จองห้องประชุม"
+                            class="w-full h-40 object-cover">
+                    </div>
                     <div class="p-4">
-                        <p class="text-xs text-gray-500 mb-1">บริการหลังบ้าน</p>
-                        <h3 class="text-sm font-bold mb-2">ระบบจัดการข้อมูลทั่วไป</h3>
-                        <p class="text-xs text-gray-700">
-                            จัดการข้อมูลทั่วไป เช่น ข้อมูลพนักงาน ข้อมูลอาคาร และข้อมูลอุปกรณ์
-                        </p>
+                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบจองห้องประชุม</h3>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการจองห้องประชุม
+                            ติดตามสถานะและควบคุมการใช้งาน</p>
                     </div>
                 </a>
+
+                {{-- Card 3 --}}
+                <a href="{{ route('bookingcar.welcome') }}"
+                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block">
+                    <div class="relative overflow-hidden">
+                        <img src="{{ asset('images/welcome/bookingcar.jpg') }}" alt="จองรถส่วนกลาง"
+                            class="w-full h-40 object-cover">
+                    </div>
+                    <div class="p-4">
+                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบจองรถส่วนกลาง</h3>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการจองรถส่วนกลาง
+                            ติดตามสถานะและควบคุมการใช้งาน</p>
+                    </div>
+                </a>
+
+                {{-- Card 4 --}}
+                <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')"
+                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block cursor-pointer">
+                    <div class="relative overflow-hidden">
+                        <img src="{{ asset('images/welcome/repairrequest.jpg') }}" alt="แจ้งซ่อม"
+                            class="w-full h-40 object-cover">
+                        <span
+                            class="absolute top-3 right-3 bg-orange-400 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
+                            เร็วๆ นี้
+                        </span>
+                    </div>
+                    <div class="p-4">
+                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบแจ้งซ่อม</h3>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการแจ้งซ่อม
+                            ติดตามสถานะและควบคุมการดำเนินการ</p>
+                    </div>
+                </a>
+
+                {{-- Card 5 --}}
+                <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')"
+                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block cursor-pointer">
+                    <div class="relative overflow-hidden">
+                        <img src="{{ asset('images/welcome/residence.jpg') }}" alt="บ้านพัก"
+                            class="w-full h-40 object-cover">
+                        <span
+                            class="absolute top-3 right-3 bg-orange-400 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
+                            เร็วๆ นี้
+                        </span>
+                    </div>
+                    <div class="p-4">
+                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบบ้านพักพนักงาน</h3>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการบ้านพักพนักงาน
+                            ติดตามสถานะและควบคุมการใช้งาน</p>
+                    </div>
+                </a>
+
+                {{-- Card 6: Admin --}}
+                @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))
+                    <a href="{{ route('backend.welcomedatamanage') }}"
+                        class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block">
+                        <div class="relative overflow-hidden">
+                            <img src="{{ asset('images/welcome/data.png') }}" alt="จัดการข้อมูล"
+                                class="w-full h-40 object-cover">
+                        </div>
+                        <div class="p-4">
+                            <p class="text-[10px] text-indigo-400 font-semibold uppercase tracking-widest mb-1">บริการหลังบ้าน
+                            </p>
+                            <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบจัดการข้อมูลทั่วไป</h3>
+                            <p class="text-[11px] text-slate-400 leading-relaxed">จัดการข้อมูลทั่วไป เช่น ข้อมูลพนักงาน อาคาร
+                                และอุปกรณ์</p>
+                        </div>
+                    </a>
+                @endif
             </div>
-            @endif
-            <!-- Card End -->
         </div>
-    </div>
 
-    <div class="mt-6">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">ข่าวสารล่าสุด</h2>
-            <a href="{{ route('datamanage.news.newsalllist') }}" class="text-sm text-red-600 hover:underline">ดูทั้งหมด &rarr;</a>
-        </div>
-        <hr class="mb-4">
-        <!-- Horizontal scrollable news cards -->
-        @if(isset($news) && $news->count())
-            <div class="flex space-x-6 overflow-x-auto pb-4 -mx-2 snap-x snap-mandatory">
-                @foreach($news as $item)
-                    @php
-                        $badgeColors = [
-                            'ประกาศ' => 'bg-green-600',
-                            'กิจกรรม' => 'bg-yellow-600',
-                            'ข่าว' => 'bg-blue-600',
-                            'แจ้ง' => 'bg-indigo-600',
-                        ];
-                        $badgeClass = $badgeColors[$item->newto ?? ''] ?? 'bg-gray-600';
+        {{-- ============ NEWS SECTION ============ --}}
+        <div>
+            <div class="flex items-center justify-between mb-1">
 
-                        // Collect possible multiple image paths
-                        $paths = [];
-                        if (method_exists($item, 'imagePaths')) {
-                            $paths = (array) $item->imagePaths();
-                        } else {
-                            $raw = $item->image_path ?? null;
-                            if (is_string($raw)) {
-                                $decoded = json_decode($raw, true);
-                                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                                    $paths = $decoded;
-                                } elseif (trim($raw) !== '') {
-                                    $paths = [$raw];
+                <h2 class="group text-xl font-bold text-slate-800 inline-block px-3 py-2 rounded transition-all duration-500 
+                                               bg-gradient-to-r from-red-500 to-red-700 bg-[length:0%_100%] bg-no-repeat
+                                               hover:bg-[length:100%_100%] hover:text-white">
+                    ข่าวสาร/<span
+                        class="text-red-600 group-hover:text-white transition-colors duration-300">ประชาสัมพันธ์</span>
+                </h2>
+                <a href="{{ route('datamanage.news.newsalllist') }}"
+                    class="text-sm text-red-600 hover:text-red-700 font-semibold hover:underline flex items-center gap-1">
+                    ดูทั้งหมด <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+            <div class="section-line mb-5"></div>
+
+            @if(isset($news) && $news->count())
+                <div class="flex space-x-5 overflow-x-auto pb-4 scroll-hide snap-x snap-mandatory">
+                    @foreach($news as $item)
+                        @php
+                            $badgeColors = [
+                                'ประกาศ' => 'bg-green-600',
+                                'กิจกรรม' => 'bg-yellow-600',
+                                'ข่าว' => 'bg-blue-600',
+                                'แจ้ง' => 'bg-indigo-600',
+                            ];
+                            $badgeClass = $badgeColors[$item->newto ?? ''] ?? 'bg-gray-600';
+
+                            $paths = [];
+                            if (method_exists($item, 'imagePaths')) {
+                                $paths = (array) $item->imagePaths();
+                            } else {
+                                $raw = $item->image_path ?? null;
+                                if (is_string($raw)) {
+                                    $decoded = json_decode($raw, true);
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                        $paths = $decoded;
+                                    } elseif (trim($raw) !== '') {
+                                        $paths = [$raw];
+                                    }
+                                } elseif (is_array($raw)) {
+                                    $paths = $raw;
                                 }
-                            } elseif (is_array($raw)) {
-                                $paths = $raw;
                             }
-                        }
 
-                        // Normalize to URLs (treat only http(s) or protocol-relative as absolute)
-                        $toUrl = function ($p) {
-                            $p = str_replace('\\', '/', (string) $p);
-                            if ($p === '') return null;
-                            $isAbsolute = preg_match('#^(https?:)?//#', $p) === 1;
-                            return $isAbsolute ? $p : asset(ltrim($p, '/'));
-                        };
-                        $imageUrls = array_values(array_filter(array_map($toUrl, $paths)));
-                        $firstUrl = $imageUrls[0] ?? asset('images/welcome/news1.jpg');
-                        $imgId = 'news-img-'.($item->id ?? $loop->index);
-                    @endphp
+                            $toUrl = function ($p) {
+                                $p = str_replace('\\', '/', (string) $p);
+                                if ($p === '')
+                                    return null;
+                                $isAbsolute = preg_match('#^(https?:)?//#', $p) === 1;
+                                return $isAbsolute ? $p : asset(ltrim($p, '/'));
+                            };
+                            $imageUrls = array_values(array_filter(array_map($toUrl, $paths)));
+                            $firstUrl = $imageUrls[0] ?? asset('images/welcome/news1.jpg');
+                            $imgId = 'news-img-' . ($item->id ?? $loop->index);
+                        @endphp
 
-                    <article class="min-w-[300px] w-[300px] bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 snap-center">
-                        <a href="{{ route('datamanage.news.detail', $item) }}" class="block">
-                            <div class="relative">
-                                <img id="{{ $imgId }}" src="{{ $firstUrl }}" data-images='@json($imageUrls)' alt="ภาพข่าว" class="w-full h-70 object-cover">
-                                <span class="absolute top-3 left-3 {{ $badgeClass }} text-white text-xs font-semibold px-3 py-1 rounded-full">{{ $item->newto ?? 'ข่าว' }}</span>
-                            </div>
-                            <div class="p-4">
-                                <p class="text-xs text-gray-500 mb-1">{{ $item->newto ?? 'ข่าว' }}</p>
-                                <h3 class="text-sm font-bold mb-2">{{ $item->title }}</h3>
-                                <p class="text-xs text-gray-700 mb-4">{{ \Illuminate\Support\Str::limit(strip_tags($item->content), 110) }}</p>
-                                <div class="flex items-center justify-between text-xs text-gray-500">
-                                    <time datetime="{{ $item->published_date ? $item->published_date->toDateString() : '' }}">
-                                        <i class="fa-regular fa-calendar-alt mr-1"></i>
-                                        {{ $item->published_date ? $item->published_date->format('d/m/Y') : '' }}
-                                    </time>
-                                    <span class="text-gray-700 font-medium">อ่านต่อ →</span>
+                        <article
+                            class="news-item min-w-[300px] w-[300px] bg-white rounded-2xl shadow-sm overflow-hidden snap-center flex-shrink-0 border border-slate-100/80">
+                            <a href="{{ route('datamanage.news.detail', $item) }}" class="block">
+                                <div class="relative overflow-hidden">
+                                    <img id="{{ $imgId }}" src="{{ $firstUrl }}" data-images='@json($imageUrls)' alt="ภาพข่าว"
+                                        class="news-thumb w-full h-44 object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                                    <span
+                                        class="absolute top-3 left-3 {{ $badgeClass }} text-white text-[10px] font-bold px-3 py-1 rounded-full shadow">
+                                        {{ $item->newto ?? 'ข่าว' }}
+                                    </span>
                                 </div>
-                            </div>
-                        </a>
-                    </article>
+                                <div class="p-4">
+                                    <p class="text-[10px] text-slate-400 mb-1">{{ $item->newto ?? 'ข่าว' }}</p>
+                                    <h3 class="text-sm font-bold text-slate-800 mb-2 leading-snug line-clamp-2">{{ $item->title }}
+                                    </h3>
+                                    <p class="text-[11px] text-slate-400 mb-3 leading-relaxed line-clamp-2">
+                                        {{ \Illuminate\Support\Str::limit(strip_tags($item->content), 110) }}
+                                    </p>
+                                    <div class="flex items-center justify-between text-[11px]">
+                                        <time class="text-slate-400 flex items-center gap-1">
+                                            <i class="fa-regular fa-calendar-days"></i>
+                                            {{ $item->published_date ? $item->published_date->format('d/m/Y') : '' }}
+                                        </time>
+                                        <span class="text-red-500 font-semibold">อ่านต่อ →</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </article>
 
-                    <script>
-                        (function () {
-                            var el = document.getElementById(@json($imgId));
-                            if (!el) return;
-                            var list = [];
-                            try { list = JSON.parse(el.dataset.images || '[]'); } catch(e) {}
-                            if (!Array.isArray(list) || list.length <= 1) return;
-                            var i = 0;
-                            setInterval(function () {
-                                i = (i + 1) % list.length;
-                                el.src = list[i];
-                            }, 3000); // auto switch every 3s
-                        })();
-                    </script>
-                @endforeach
-            </div>
-        @else
-            <div class="text-sm text-gray-500">ยังไม่มีข่าวหรือกิจกรรมให้แสดงในขณะนี้</div>
-        @endif
+                        <script>
+                            (function () {
+                                var el = document.getElementById(@json($imgId));
+                                if (!el) return;
+                                var list = [];
+                                try { list = JSON.parse(el.dataset.images || '[]'); } catch (e) { }
+                                if (!Array.isArray(list) || list.length <= 1) return;
+                                var i = 0;
+                                setInterval(function () {
+                                    i = (i + 1) % list.length;
+                                    el.src = list[i];
+                                }, 3000);
+                            })();
+                        </script>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-sm text-slate-400 bg-white rounded-2xl border border-slate-100 p-10 text-center">
+                    <i class="fa-solid fa-newspaper text-2xl text-slate-200 mb-3 block"></i>
+                    ยังไม่มีข่าวหรือกิจกรรมให้แสดงในขณะนี้
+                </div>
+            @endif
+        </div>
+
     </div>
-
-</div>
-
-
-
 @endsection

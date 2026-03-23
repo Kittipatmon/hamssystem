@@ -17,8 +17,8 @@ class NewsController extends Controller
     {
         // For data management, list all news (active and inactive) by publish date, then creation time
         $news = News::orderByDesc('published_date')
-                    ->orderByDesc('created_at')
-                    ->get();
+            ->orderByDesc('created_at')
+            ->get();
 
         return view('datamanage.news.index', compact('news'));
     }
@@ -45,7 +45,9 @@ class NewsController extends Controller
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                if (!$file) { continue; }
+                if (!$file) {
+                    continue;
+                }
                 $filename = now()->format('YmdHis') . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
                 $file->move($destination, $filename);
                 $uploadedPaths[] = 'images/news/' . $filename;
@@ -60,7 +62,7 @@ class NewsController extends Controller
 
         $data['image_path'] = !empty($uploadedPaths) ? json_encode($uploadedPaths) : null;
 
-        $data['is_active'] = isset($data['is_active']) ? (bool)$data['is_active'] : false;
+        $data['is_active'] = isset($data['is_active']) ? (bool) $data['is_active'] : false;
         $news = News::create($data);
 
         return redirect()->route('datamanage.news.index')->with('success', 'บันทึกข่าวสารเรียบร้อยแล้ว');
@@ -87,10 +89,14 @@ class NewsController extends Controller
             // Remove old images
             foreach ($existingImages as $img) {
                 $path = public_path(ltrim($img, '/'));
-                if (is_file($path)) { @unlink($path); }
+                if (is_file($path)) {
+                    @unlink($path);
+                }
             }
             foreach ($request->file('images') as $file) {
-                if (!$file) { continue; }
+                if (!$file) {
+                    continue;
+                }
                 $filename = now()->format('YmdHis') . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
                 $file->move($destination, $filename);
                 $uploadedPaths[] = 'images/news/' . $filename;
@@ -100,7 +106,9 @@ class NewsController extends Controller
             // Remove old images
             foreach ($existingImages as $img) {
                 $path = public_path(ltrim($img, '/'));
-                if (is_file($path)) { @unlink($path); }
+                if (is_file($path)) {
+                    @unlink($path);
+                }
             }
             $file = $request->file('image');
             $filename = now()->format('YmdHis') . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
@@ -111,7 +119,7 @@ class NewsController extends Controller
             unset($data['image_path']);
         }
 
-        $data['is_active'] = isset($data['is_active']) ? (bool)$data['is_active'] : false;
+        $data['is_active'] = isset($data['is_active']) ? (bool) $data['is_active'] : false;
 
         $news->update($data);
 
@@ -124,7 +132,9 @@ class NewsController extends Controller
         $images = $this->normalizeImagePaths($news->image_path);
         foreach ($images as $img) {
             $path = public_path(ltrim($img, '/'));
-            if (is_file($path)) { @unlink($path); }
+            if (is_file($path)) {
+                @unlink($path);
+            }
         }
 
         $news->delete();
@@ -144,10 +154,14 @@ class NewsController extends Controller
      */
     private function normalizeImagePaths($imagePath): array
     {
-        if (empty($imagePath)) { return []; }
+        if (empty($imagePath)) {
+            return [];
+        }
 
         // If already an array
-        if (is_array($imagePath)) { return $imagePath; }
+        if (is_array($imagePath)) {
+            return $imagePath;
+        }
 
         // Try JSON decode
         $decoded = json_decode($imagePath, true);
@@ -161,7 +175,9 @@ class NewsController extends Controller
         }
 
         // Single path string
-        if (is_string($imagePath)) { return [trim($imagePath)]; }
+        if (is_string($imagePath)) {
+            return [trim($imagePath)];
+        }
 
         return [];
     }
@@ -173,16 +189,19 @@ class NewsController extends Controller
         $query = News::where('is_active', true);
 
         if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%")
-                  ->orWhere('newto', 'like', "%{$search}%");
-            });
+            $keywords = array_filter(preg_split('/\s+/', $search));
+            foreach ($keywords as $keyword) {
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('title', 'like', "%{$keyword}%")
+                        ->orWhere('content', 'like', "%{$keyword}%")
+                        ->orWhere('newto', 'like', "%{$keyword}%");
+                });
+            }
         }
 
         $news = $query->orderByDesc('published_date')
-                      ->orderByDesc('created_at')
-                      ->get();
+            ->orderByDesc('created_at')
+            ->get();
 
         return view('datamanage.news.newsall', compact('news'));
     }
@@ -199,8 +218,8 @@ class NewsController extends Controller
         }
 
         $news = $query->orderByDesc('published_date')
-                      ->orderByDesc('created_at')
-                      ->get();
+            ->orderByDesc('created_at')
+            ->get();
 
         return view('datamanage.news.newsall', compact('news'));
     }
@@ -273,8 +292,12 @@ class NewsController extends Controller
         try {
             $mailable = new NewsOutlookNotification($news);
             $mailer = Mail::to($to);
-            if ($cc) { $mailer->cc($cc); }
-            if ($bcc) { $mailer->bcc($bcc); }
+            if ($cc) {
+                $mailer->cc($cc);
+            }
+            if ($bcc) {
+                $mailer->bcc($bcc);
+            }
             $mailer->send($mailable);
             Log::info('News Outlook mail sent via Laravel Mail driver.', [
                 'news_id' => $news->id,
@@ -313,7 +336,9 @@ class NewsController extends Controller
         $clean = [];
         foreach ($rawArray as $em) {
             $em = strtolower(trim($em));
-            if ($em === '') { continue; }
+            if ($em === '') {
+                continue;
+            }
             if (filter_var($em, FILTER_VALIDATE_EMAIL)) {
                 $clean[] = $em;
             }
@@ -333,9 +358,9 @@ class NewsController extends Controller
         }
         $subjectPrefix = (string) env('OUTLOOK_NOTIFY_SUBJECT_PREFIX', '[HAMS]');
         $subject = trim($subjectPrefix . ' ข่าวสารใหม่: ' . ($news->title ?? ''));
-        $detailUrl = route('datamanage.news.detail', ['news' => $news->news_id ]);
+        $detailUrl = route('datamanage.news.detail', ['news' => $news->news_id]);
 
-        $buildRecipients = function(array $emails) {
+        $buildRecipients = function (array $emails) {
             return array_map(fn($e) => ['emailAddress' => ['address' => $e]], $emails);
         };
 
@@ -345,7 +370,8 @@ class NewsController extends Controller
         $parts = preg_split('/\R+/', $content);
         $contentParagraphs = array_values(array_filter(array_map('trim', $parts ?? [])));
         $relativePaths = $this->normalizeImagePaths($news->image_path);
-        $absolutePaths = array_map(function ($p) { return asset(ltrim($p, '/')); }, $relativePaths);
+        $absolutePaths = array_map(function ($p) {
+            return asset(ltrim($p, '/')); }, $relativePaths);
         // จำกัดให้ส่งเฉพาะรูปแรก
         $absolutePaths = array_slice($absolutePaths, 0, 1);
         $contentHtml = view('emails.news_outlook_notification', [
