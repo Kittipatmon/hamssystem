@@ -11,7 +11,7 @@
                 <i class="fa-solid fa-shield-halved text-4xl"></i>
             </div>
             <h2 class="text-3xl font-black text-slate-800 mb-4 tracking-tight">สิทธิ์การเข้าถึงจำกัด</h2>
-            <p class="text-slate-500 font-medium mb-10 leading-relaxed italic">"เฉพาะพนักงานแผนก HAMS เท่านั้นที่สามารถจัดสรรและตรวจสอบรายการรอเบิกได้"</p>
+            <p class="text-slate-500 font-medium mb-10 leading-relaxed ">"เฉพาะพนักงานแผนก HAMS เท่านั้นที่สามารถจัดสรรและตรวจสอบรายการรอเบิกได้"</p>
             <a href="{{ route('welcome') }}" class="inline-flex items-center gap-3 px-10 py-4 bg-slate-800 hover:bg-slate-900 text-white font-black rounded-2xl shadow-xl shadow-slate-100 transition-all active:scale-95">
                 <i class="fa-solid fa-house-chimney text-sm"></i>
                 <span>กลับสู่หน้าหลัก</span>
@@ -31,7 +31,7 @@
                     <i class="fa-solid fa-rotate text-white text-2xl fa-spin-pulse"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tight italic">รายการที่ต้องรอดำเนินการ</h1>
+                    <h1 class="text-2xl font-black text-slate-800 tracking-tight ">รายการที่ต้องรอดำเนินการ</h1>
                     <p class="text-sm text-slate-500 font-medium">รอการอนุมัติหรือการจัดเตรียมจากฝ่ายพัสดุ</p>
                 </div>
             </div>
@@ -55,7 +55,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">ดำเนินการทันที</div>
-                <div class="text-2xl font-black text-red-600 font-mono italic">{{ $requisitions->count() > 0 ? 'HIGH' : 'NORMAL' }}</div>
+                <div class="text-2xl font-black text-red-600 font-mono ">{{ $requisitions->count() > 0 ? 'HIGH' : 'NORMAL' }}</div>
             </div>
         </div>
     </div>
@@ -106,12 +106,12 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-[14px] font-bold text-slate-600 italic">
+                                <span class="text-[14px] font-bold text-slate-600 ">
                                     {{ \Carbon\Carbon::parse($requisition->request_date)->format('d/m/Y') ?? "-" }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-[15px] font-black text-orange-600 font-mono italic underline decoration-orange-100 p-1 underline-offset-4">
+                                <span class="text-[15px] font-black text-orange-600 font-mono  underline decoration-orange-100 p-1 underline-offset-4">
                                     ฿{{ number_format((float)$requisition->total_price, 2) }}
                                 </span>
                             </td>
@@ -162,7 +162,7 @@
                     <div class="space-y-1">
                         <span class="text-[10px] font-mono font-black text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100 w-fit">{{ $requisition->requisitions_code }}</span>
                         <h3 class="text-xl font-black text-slate-800 tracking-tighter leading-none pt-1">{{ $requisition->user->fullname ?? "-" }}</h3>
-                        <p class="text-[11px] font-bold text-slate-400 italic">Department: {{ $requisition->user->department->department_name ?? "-" }}</p>
+                        <p class="text-[11px] font-bold text-slate-400 ">Department: {{ $requisition->user->department->department_name ?? "-" }}</p>
                     </div>
                     <div class="flex flex-col items-end gap-1">
                         <span class="text-[10px] font-black text-slate-300 uppercase">Wait Approval</span>
@@ -173,11 +173,11 @@
                 <div class="grid grid-cols-2 gap-4 bg-slate-50 p-5 rounded-[1.5rem] border border-slate-100">
                     <div class="flex flex-col">
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Date</span>
-                        <span class="text-[14px] font-black text-slate-700 italic">{{ \Carbon\Carbon::parse($requisition->request_date)->format('d/m/Y') }}</span>
+                        <span class="text-[14px] font-black text-slate-700 ">{{ \Carbon\Carbon::parse($requisition->request_date)->format('d/m/Y') }}</span>
                     </div>
                     <div class="flex flex-col border-l border-slate-200 pl-4 text-right">
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Value</span>
-                        <span class="text-[16px] font-black text-orange-600 italic">฿{{ number_format((float)$requisition->total_price, 0) }}</span>
+                        <span class="text-[16px] font-black text-orange-600 ">฿{{ number_format((float)$requisition->total_price, 0) }}</span>
                     </div>
                 </div>
 
@@ -197,7 +197,7 @@
                 <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fa-solid fa-layer-group text-2xl text-slate-200"></i>
                 </div>
-                <p class="text-slate-400 font-extrabold tracking-tighter uppercase italic">ไม่มีใบเบิกพัสดุที่รอการดําเนินการ</p>
+                <p class="text-slate-400 font-extrabold tracking-tighter uppercase ">ไม่มีใบเบิกพัสดุที่รอการดําเนินการ</p>
             </div>
             @endforelse
         </div>
@@ -212,7 +212,7 @@
                 const url = this.dataset.href;
                 Swal.fire({
                     title: '<span class="text-slate-800 font-black tracking-tight">ยืนยันการยกเลิกใบเข้าเบิก?</span>',
-                    html: '<p class="text-sm text-slate-500 font-medium leading-relaxed italic">"หากคุณยกเลิก ใบเบิกฉบับนี้จะถูกส่งคืนและไม่สามารถดำเนินการต่อได้"</p>',
+                    html: '<p class="text-sm text-slate-500 font-medium leading-relaxed ">"หากคุณยกเลิก ใบเบิกฉบับนี้จะถูกส่งคืนและไม่สามารถดำเนินการต่อได้"</p>',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'ใช่, ฉันต้องการยกเลิก',

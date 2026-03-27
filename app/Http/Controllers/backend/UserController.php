@@ -7,56 +7,131 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
+use App\Models\Department;
+use App\Models\Division;
+use App\Models\Section;
+use App\Models\UserType;
 
 class UserController extends Controller
 {
-    public function profileUser(){
-        // Get the currently authenticated user as a single model instance
-        $user = Auth::user();
+    public function index(Request $request)
+    {
+        $query = User::with(['department', 'division', 'section', 'usertype']);
 
-        // If not authenticated, redirect to login (or handle as you prefer)
-        if (!$user) {
-            return redirect()->route('login');
+        // Filtering Logic
+        if ($request->filled('employee_code')) {
+            $query->where('employee_code', 'like', '%' . $request->employee_code . '%');
+        }
+        if ($request->filled('fullname')) {
+            $query->where(function($q) use ($request) {
+                $q->where('first_name', 'like', '%' . $request->fullname . '%')
+                  ->orWhere('last_name', 'like', '%' . $request->fullname . '%');
+            });
+        }
+        if ($request->filled('position')) {
+            $query->where('position', 'like', '%' . $request->position . '%');
+        }
+        if ($request->filled('employee_type')) {
+            $query->where('employee_type', $request->employee_type);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('department')) {
+            $query->where('department_id', $request->department);
+        }
+        if ($request->filled('division')) {
+            $query->where('division_id', $request->division);
+        }
+        if ($request->filled('section')) {
+            $query->where('section_id', $request->section);
+        }
+        if ($request->filled('level_user')) {
+            $query->where('level_user', $request->level_user);
+        }
+        if ($request->filled('hr_status')) {
+            $query->where('hr_status', $request->hr_status);
         }
 
-        // Pass a single $user to the view
-        return view('users.profile', compact('user'));
+        $perPage = $request->get('per_page', 50);
+        $users = $query->paginate($perPage);
+
+        if ($request->expectsJson()) {
+            return response()->json($users);
+        }
+
+        $departments = Department::all();
+        $divisions = Division::all();
+        $sections = Section::all();
+        $userTypes = UserType::all();
+
+        return view('backend.users.index', compact('users', 'departments', 'divisions', 'sections', 'userTypes'));
     }
 
-    public function updateAvatar(Request $request)
+    public function create()
+    {
+        $departments = Department::all();
+        $divisions = Division::all();
+        $sections = Section::all();
+        $userTypes = UserType::all();
+        return view('backend.users.create', compact('departments', 'divisions', 'sections', 'userTypes'));
+    }
+
+    public function store(Request $request)
     {
         $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'employee_code' => 'required|unique:userskml,employee_code',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            // Add other validations as needed
         ]);
 
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        $user = User::create($request->all());
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'user' => $user]);
         }
 
-        if ($request->hasFile('avatar')) {
-            $file = $request->file('avatar');
-            $filename = time() . '_' . $user->id . '.' . $file->getClientOriginalExtension();
-            
-            // Ensure directory exists
-            $path = public_path('uploads/avatars');
-            if (!file_exists($path)) {
-                mkdir($path, 0777, true);
-            }
+        return redirect()->route('users.index')->with('success', 'เพิ่มพนักงานเรียบร้อยแล้ว');
+    }
 
-            $file->move($path, $filename);
+    public function show($id)
+    {
+        $user = User::with(['department', 'division', 'section', 'usertype'])->findOrFail($id);
+        return view('backend.users.detail', compact('user'));
+    }
 
-            // Correct column name is photo_user
-            $user->photo_user = 'uploads/avatars/' . $filename;
-            /** @var \App\Models\User $user */
-            $user->save();
+    public function edit($id)
+    {
+        $user = User::findOrFail($id);
+        $departments = Department::all();
+        $divisions = Division::all();
+        $sections = Section::all();
+        $userTypes = UserType::all();
+        return view('backend.users.edit', compact('user', 'departments', 'divisions', 'sections', 'userTypes'));
+    }
 
-            return response()->json([
-                'success' => true,
-                'avatar_url' => asset($user->photo_user)
-            ]);
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $user->update($request->all());
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
         }
 
-        return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
+        return redirect()->route('users.index')->with('success', 'อัปเดตข้อมูลพนักงานเรียบร้อยแล้ว');
+    }
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('users.index')->with('success', 'ลบพนักงานเรียบร้อยแล้ว');
     }
 }

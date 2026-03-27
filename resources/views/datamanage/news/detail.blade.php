@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.datamanagement.app')
 
 @section('content')
 <!-- <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-gray-900 to-white -z-10"></div> -->

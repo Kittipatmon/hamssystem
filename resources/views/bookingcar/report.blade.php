@@ -22,7 +22,7 @@
 
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
                 <div class="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-check-double"></i>
+                    <i class="fa-solid fa-check"></i>
                 </div>
                 <div>
                     <div class="text-[12px] font-semibold text-slate-400 uppercase tracking-widest">อนุมัติแล้ว</div>
@@ -52,10 +52,64 @@
             </div>
         </div>
 
+        <!-- Search & Filter Card -->
+        <div class="bg-slate-50 rounded-2xl shadow-sm border border-slate-200 p-6 mb-8 bg-gradient-to-br from-slate-50 to-white/50">
+            <h3 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2 uppercase tracking-wide">
+                <i class="fa-solid fa-filter text-red-500"></i> ตัวกรองข้อมูล
+            </h3>
+            <form action="{{ route('bookingcar.report') }}" method="GET">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+                    <!-- Transaction Date -->
+                    <div class="form-control w-full">
+                        <label class="label py-1">
+                            <span class="label-text font-bold text-slate-700 text-[12px] uppercase">วันที่ทำรายการ</span>
+                        </label>
+                        <input type="date" name="transaction_date" value="{{ request('transaction_date') }}" 
+                               class="input input-bordered w-full bg-white border-slate-200 focus:border-red-500 focus:ring-red-500 text-sm h-11 shadow-sm" />
+                    </div>
+
+                    <!-- Unified Search -->
+                    <div class="form-control w-full">
+                        <label class="label py-1">
+                            <span class="label-text font-bold text-slate-700 text-[12px] uppercase">ค้นหา (ผู้จอง / จุดหมายปลายทาง)</span>
+                        </label>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="ชื่อผู้จอง หรือ สถานที่ปลายทาง..."
+                               class="input input-bordered w-full bg-white border-slate-200 focus:border-red-500 focus:ring-red-500 text-sm h-11 shadow-sm" />
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-control w-full">
+                        <label class="label py-1">
+                            <span class="label-text font-bold text-slate-700 text-[12px] uppercase">สถานะ</span>
+                        </label>
+                        <select name="status" class="select select-bordered w-full bg-white border-slate-200 focus:border-red-500 focus:ring-red-500 text-sm h-11 shadow-sm">
+                            <option value="">ทั้งหมด</option>
+                            <option value="รออนุมัติ" {{ request('status') === 'รออนุมัติ' ? 'selected' : '' }}>รออนุมัติ</option>
+                            <option value="อนุมัติแล้ว" {{ request('status') === 'อนุมัติแล้ว' ? 'selected' : '' }}>อนุมัติแล้ว</option>
+                            <option value="ไม่อนุมัติ" {{ request('status') === 'ไม่อนุมัติ' ? 'selected' : '' }}>ไม่อนุมัติ</option>
+                            <option value="ยกเลิก" {{ request('status') === 'ยกเลิก' ? 'selected' : '' }}>ยกเลิก</option>
+                        </select>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="lg:col-span-3 flex justify-end gap-2 mt-2">
+                        <a href="{{ route('bookingcar.report') }}" class="btn btn-ghost hover:bg-slate-100 text-slate-500 h-10 px-6 font-semibold border border-slate-200">
+                            ล้างค่า
+                        </a>
+                        <button type="submit" class="btn bg-red-500 hover:bg-red-600 border-none text-white h-10 px-8 font-semibold shadow-md shadow-red-100">
+                            <i class="fa-solid fa-magnifying-glass mr-2"></i> ค้นหา
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <!-- Recent Activity -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-            <h3 class="font-bold text-slate-700 text-lg mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> ความเคลื่อนไหวล่าสุด (10 รายการ)
+            <h3 class="font-bold text-slate-700 text-lg mb-4 flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> ความเคลื่อนไหวล่าสุด ({{ $recentBookings->total() }} รายการ)
+                </span>
             </h3>
 
             <div class="overflow-x-auto">
@@ -86,6 +140,11 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-6 flex justify-center pagination-premium">
+                {{ $recentBookings->links() }}
             </div>
         </div>
     </div>

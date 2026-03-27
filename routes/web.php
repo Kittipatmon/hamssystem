@@ -18,6 +18,7 @@ use App\Http\Controllers\bookingmeeting\RoomsController;
 use App\Http\Controllers\bookingmeeting\ReservationsController;
 use App\Http\Controllers\backend\BackendVehicleController;
 use App\Http\Controllers\bookingcar\BookingCarController;
+use App\Http\Controllers\housing\EmployeeHousingController;
 
 Route::get('/', function () {
     // Fetch active news ordered by newest published date
@@ -28,8 +29,12 @@ Route::get('/', function () {
         ->limit(4)
         ->get();
 
-    return view('welcome', compact('news'));
+    $policies = \App\Models\Policy::where('type', 'policy')->orderBy('order')->get();
+    $operations = \App\Models\Policy::where('type', 'operation')->orderBy('order')->get();
+
+    return view('welcome', compact('news', 'policies', 'operations'));
 })->name('welcome');
+
 
 // Microsoft (Outlook) OAuth routes (public)
 Route::get('/auth/microsoft/redirect', [MicrosoftAuthController::class, 'redirect'])->name('auth.microsoft.redirect');
@@ -49,6 +54,8 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/backend/welcome', [DataManagementController::class, 'welcomeDataManagement'])->name('backend.welcomedatamanage');
+    Route::resource('backend/policy', \App\Http\Controllers\Backend\PolicyController::class, ['as' => 'backend']);
+
 
     Route::prefix('datamanage')->name('datamanage.')->group(function () {
 
@@ -144,25 +151,68 @@ Route::middleware('auth')->group(function () {
     Route::prefix('bookingcar')->name('bookingcar.')->group(function () {
         Route::get('welcome', [BookingCarController::class, 'welcome'])->name('welcome');
         Route::get('vehicles', [BookingCarController::class, 'vehicles'])->name('vehicles');
+        Route::get('check-availability', [BookingCarController::class, 'checkAvailability'])->name('checkAvailability');
         Route::post('store', [BookingCarController::class, 'store'])->name('store');
 
         // Admin / Management routes
         Route::get('dashboard', [BookingCarController::class, 'dashboard'])->name('dashboard');
+        Route::get('export-excel', [BookingCarController::class, 'exportExcel'])->name('export.excel');
         Route::get('report', [BookingCarController::class, 'report'])->name('report');
         Route::get('edit/{id}', [BookingCarController::class, 'edit'])->name('edit');
         Route::put('update/{id}', [BookingCarController::class, 'update'])->name('update');
         Route::put('approve/{id}', [BookingCarController::class, 'approve'])->name('approve');
         Route::post('{id}/cancel', [BookingCarController::class, 'cancel'])->name('cancel');
         Route::post('{id}/return', [BookingCarController::class, 'returnCar'])->name('returnCar');
+        Route::get('get-districts', [BookingCarController::class, 'getDistricts'])->name('getDistricts');
     });
 
     // Backend Vehicles Management
-    Route::prefix('backend/vehicles')->name('backend.vehicles.')->group(function () {
+    Route::prefix('backend/bookingcar')->name('backend.bookingcar.')->group(function () {
         Route::get('dashboard', [BackendVehicleController::class, 'dashboard'])->name('dashboard');
         Route::get('table', [BackendVehicleController::class, 'table'])->name('table');
+        // Route::get('addvehicles', [BackendVehicleController::class, 'addvehicles'])->name('addvehicles');
+        Route::post('store', [BackendVehicleController::class, 'store'])->name('store');
         Route::get('{id}/edit', [BackendVehicleController::class, 'edit'])->name('edit');
         Route::put('{id}', [BackendVehicleController::class, 'update'])->name('update');
+        Route::delete('{id}', [BackendVehicleController::class, 'destroy'])->name('destroy');
+        Route::post('inspections', [BackendVehicleController::class, 'storeInspection'])->name('inspections.store');
+        Route::put('inspections/{id}', [BackendVehicleController::class, 'updateInspection'])->name('inspections.update');
+        Route::delete('inspections/{id}', [BackendVehicleController::class, 'destroyInspection'])->name('inspections.destroy');
     });
+
+    // Backend Management
+    Route::resource('users', UserController::class);
+    Route::resource('usertypes', \App\Http\Controllers\backend\UserTypeController::class);
+    Route::resource('sections', \App\Http\Controllers\backend\SectionController::class);
+    Route::resource('divisions', \App\Http\Controllers\backend\DivisionController::class);
+    Route::resource('departments', \App\Http\Controllers\backend\DepartmentController::class);
+
+    // API-like route for User filtering (as used in users/index.blade.php)
+    Route::get('api/users', [UserController::class, 'index'])->name('api.users.index');
+
+    // Employee Housing System
+    Route::prefix('housing')->name('housing.')->group(function () {
+        Route::get('welcome', [EmployeeHousingController::class, 'welcome'])->name('welcome');
+        Route::get('houselist', [EmployeeHousingController::class, 'houselist'])->name('houselist');
+        Route::get('request/create', [EmployeeHousingController::class, 'requestForm'])->name('request.create');
+        Route::post('request/store', [EmployeeHousingController::class, 'storeRequest'])->name('request.store');
+        Route::get('agreement/create', [EmployeeHousingController::class, 'agreementForm'])->name('agreement.create');
+        Route::post('agreement/store', [EmployeeHousingController::class, 'storeAgreement'])->name('agreement.store');
+        Route::get('guest/create', [EmployeeHousingController::class, 'guestForm'])->name('guest.create');
+        Route::post('guest/store', [EmployeeHousingController::class, 'storeGuest'])->name('guest.store');
+        Route::get('leave/create', [EmployeeHousingController::class, 'leaveForm'])->name('leave.create');
+        Route::post('leave/store', [EmployeeHousingController::class, 'storeLeave'])->name('leave.store');
+        Route::get('management', [EmployeeHousingController::class, 'management'])->name('management');
+        Route::delete('destroy/{type}/{id}', [EmployeeHousingController::class, 'destroy'])->name('destroy');
+        Route::post('approve/{type}/{id}', [EmployeeHousingController::class, 'approve'])->name('approve');
+        Route::post('update-approver', [EmployeeHousingController::class, 'updateApprover'])->name('update_approver');
+        Route::post('assign-room', [EmployeeHousingController::class, 'assignRoom'])->name('assign_room');
+        Route::get('room-detail/{id}', [EmployeeHousingController::class, 'roomDetail'])->name('room_detail');
+        Route::get('my-requests', [EmployeeHousingController::class, 'myRequests'])->name('my_requests');
+    });
+
+
+
 });
 
 Route::get('/profileUser', [UserController::class, 'profileUser'])->middleware('auth')->name('profileUser');

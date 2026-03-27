@@ -1,7 +1,7 @@
 @extends('layouts.bookingcar.appcar')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
 
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
@@ -12,7 +12,7 @@
                 <p class="text-slate-500 mt-1 text-sm">Dashboard แสดงสถิติและภาพรวมทั้งหมดของระบบ</p>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('backend.vehicles.table') }}"
+                <a href="{{ route('backend.bookingcar.table') }}"
                     class="btn btn-sm bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-sm rounded-full px-4">
                     <i class="fa-solid fa-table border-slate-200"></i> ดูข้อมูลแบบตาราง
                 </a>
@@ -93,7 +93,7 @@
                     <i class="fa-solid fa-list-ul text-slate-400"></i>
                     รายการจองล่าสุด (5 รายการ)
                 </h3>
-                <a href="{{ route('backend.vehicles.table') }}"
+                <a href="{{ route('backend.bookingcar.table') }}"
                     class="text-blue-500 hover:text-blue-700 text-xs font-medium">ดูทั้งหมด &rarr;</a>
             </div>
             <div class="overflow-x-auto">

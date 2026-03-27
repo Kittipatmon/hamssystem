@@ -62,6 +62,12 @@ class ReservationsController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
+        $now = now();
+        $startDateTime = \Carbon\Carbon::parse($reservation->reservation_date . ' ' . $reservation->start_time);
+        if ($now->greaterThan($startDateTime)) {
+            return response()->json(['success' => false, 'message' => 'ไม่สามารถยกเลิกการจองที่เริ่มไปแล้วได้'], 403);
+        }
+
         // ลบไฟล์ที่เกี่ยวข้องถ้ามี
         if (!empty($reservation->attached_file)) {
             $attachedPath = public_path('documents/reservations/' . $reservation->attached_file);
@@ -127,7 +133,7 @@ class ReservationsController extends Controller
             ->where('status', '!=', 'cancelled')
             ->where(function ($query) use ($newStart, $newEnd) {
                 $query->whereRaw("CONCAT(reservation_date, ' ', start_time) < ?", [$newEnd])
-                      ->whereRaw("CONCAT(COALESCE(reservation_dateend, reservation_date), ' ', end_time) > ?", [$newStart]);
+                    ->whereRaw("CONCAT(COALESCE(reservation_dateend, reservation_date), ' ', end_time) > ?", [$newStart]);
             })->exists();
 
         if ($conflict) {

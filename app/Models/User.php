@@ -28,6 +28,7 @@ class User extends Authenticatable
         'employee_type',
         'startwork_date',
         'endwork_date',
+        'endwork_comment',
         'workplace',
         'section_id',
         'division_id',
@@ -46,6 +47,19 @@ class User extends Authenticatable
         'updated_at' => 'datetime',
         'startwork_date' => 'datetime',
         'endwork_date' => 'datetime',
+    ];
+
+    protected $appends = [
+        'fullname',
+        'level_user_label',
+        'level_user_color',
+        'level_user_icon',
+        'hams_status_label',
+        'hams_status_color',
+        'hams_status_icon',
+        'status_label',
+        'status_color',
+        'status_icon',
     ];
 
     public function usertype()
@@ -125,49 +139,6 @@ class User extends Authenticatable
         return $query; // no-op when no known column exists
     }
 
-    // const LEVEL_USER_ADMIN = '0';
-    // const LEVEL_USER_CEO = '1';
-    // const LEVEL_USER_HEADDIVISION = '2';
-    // const LEVEL_USER_MANAGER = '3';
-    // const LEVEL_USER_USER = '4'; // พนักงาน
-    // const LEVEL_USER_SECSTIONS = '5'; // หัวหน้าสายงาน
-
-    // public static function getLevelUserOptions()
-    // {
-    //     return [
-    //         self::LEVEL_USER_ADMIN => [
-    //             'label' => 'ผู้ดูแลระบบ',
-    //             'color' => 'error', // daisyUI: btn-primary, badge-primary
-    //             'icon' => 'mdi mdi-shield-account', // Example: Material Design Icons
-    //         ],
-    //         self::LEVEL_USER_CEO => [
-    //             'label' => 'CEO',
-    //             'color' => 'success', // daisyUI: btn-error, badge-error
-    //             'icon' => 'mdi mdi-account-tie',
-    //         ],
-    //         self::LEVEL_USER_HEADDIVISION => [
-    //             'label' => 'หัวหน้าฝ่าย',
-    //             'color' => 'accent', // daisyUI: btn-warning, badge-warning
-    //             'icon' => 'mdi mdi-account-tie',
-    //         ],
-    //         self::LEVEL_USER_MANAGER => [
-    //             'label' => 'หัวหน้าแผนก',
-    //             'color' => 'warning', // daisyUI: btn-success, badge-success
-    //             'icon' => 'mdi mdi-account-cog',
-    //         ],
-    //         self::LEVEL_USER_USER => [
-    //             'label' => 'พนักงาน',
-    //             'color' => 'info', // daisyUI: btn-secondary, badge-secondary
-    //             'icon' => 'mdi mdi-account',
-    //         ],
-    //         self::LEVEL_USER_SECSTIONS => [
-    //             'label' => 'หัวหน้าสายงาน',
-    //             'color' => 'primary', // daisyUI: btn-secondary, badge-secondary
-    //             'icon' => 'mdi mdi-account',
-    //         ],
-    //     ];
-    // }
-
     // ระดับผู้ใช้งาน
     const LEVEL_USER_SYSTEM_ADMIN = '0'; // System Administrator
     const LEVEL_USER_OPERATION_STAFF = '1'; // พนักงานปฏิบัติการ
@@ -236,20 +207,6 @@ class User extends Authenticatable
         ];
     }
 
-    // public static function getLevelUserOptions()
-    // {
-    //     $usertypes = UserType::all();
-    //     $options = [];
-    //     foreach ($usertypes as $ut) {
-    //         $options[$ut->id] = [
-    //             'label' => $ut->type_name,
-    //             'color' => 'primary', // You can customize colors based on your needs
-    //             'icon' => 'mdi mdi-account', // You can customize icons based on your needs
-    //         ];
-    //     }
-    //     return $options;
-    // }
-
     public function getLevelUserLabelAttribute()
     {
         return self::getLevelUserOptions()[$this->level_user]['label'] ?? '-';
@@ -266,19 +223,19 @@ class User extends Authenticatable
     }
 
 
-    const HR_STATUS_ACTIVE = '0';
-    const HR_STATUS_INACTIVE = '1';
-    // 0 = เป็น hr   1 = ไม่ได้เป้น HR 
+    const HAMS_STATUS_ACTIVE = '0';
+    const HAMS_STATUS_INACTIVE = '1';
+    // 0 = เป็น HAMS   1 = ไม่ได้เป็น HAMS 
 
-    public static function getHrStatusOptions()
+    public static function getHamsStatusOptions()
     {
         return [
-            self::HR_STATUS_ACTIVE => [
+            self::HAMS_STATUS_ACTIVE => [
                 'label' => 'เป็น',
                 'color' => 'warning',
                 'icon' => '<svg class="size-[1em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="currentColor" stroke-linejoin="miter" stroke-linecap="butt"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-linecap="square" stroke-miterlimit="10" stroke-width="2"></circle><polyline points="7 13 10 16 17 8" fill="none" stroke="currentColor" stroke-linecap="square" stroke-miterlimit="10" stroke-width="2"></polyline></g></svg>',
             ],
-            self::HR_STATUS_INACTIVE => [
+            self::HAMS_STATUS_INACTIVE => [
                 'label' => 'ไม่เป็น',
                 'color' => 'secondary',
                 'icon' => '<svg class="size-[1em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="currentColor"><rect x="1.972" y="11" width="20.056" height="2" transform="translate(-4.971 12) rotate(-45)" fill="currentColor" stroke-width="0"></rect><path d="m12,23c-6.065,0-11-4.935-11-11S5.935,1,12,1s11,4.935,11,11-4.935,11-11,11Zm0-20C7.038,3,3,7.037,3,12s4.038,9,9,9,9-4.037,9-9S16.962,3,12,3Z" stroke-width="0" fill="currentColor"></path></g></svg>',
@@ -286,17 +243,17 @@ class User extends Authenticatable
         ];
     }
 
-    public function getHrStatusLabelAttribute()
+    public function getHamsStatusLabelAttribute()
     {
-        return self::getHrStatusOptions()[$this->hr_status]['label'] ?? '-';
+        return self::getHamsStatusOptions()[$this->hr_status]['label'] ?? '-';
     }
-    public function getHrStatusColorAttribute()
+    public function getHamsStatusColorAttribute()
     {
-        return self::getHrStatusOptions()[$this->hr_status]['color'] ?? 'default';
+        return self::getHamsStatusOptions()[$this->hr_status]['color'] ?? 'default';
     }
-    public function getHrStatusIconAttribute()
+    public function getHamsStatusIconAttribute()
     {
-        return self::getHrStatusOptions()[$this->hr_status]['icon'] ?? '';
+        return self::getHamsStatusOptions()[$this->hr_status]['icon'] ?? '';
     }
 
     // เพศ
@@ -330,6 +287,11 @@ class User extends Authenticatable
     public function getSexColorAttribute()
     {
         return self::getSexOptions()[$this->sex]['color'] ?? 'default';
+    }
+
+    public function trainingApplies()
+    {
+        return $this->hasMany(TrainingApply::class, 'employee_code', 'employee_code');
     }
 
 }

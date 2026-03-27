@@ -109,6 +109,24 @@
                         จัดการบ้านพักพนักงาน ติดตามสถานะและควบคุมการใช้งาน</p>
                 </div>
             </a>
+            <!-- Card 6: ระบบจัดการนโยบายและการดำเนินงาน -->
+            <a href="{{ route('backend.policy.index') }}"
+                class="bg-white dark:bg-[#1e2128] rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col cursor-pointer">
+                <div class="relative h-36 w-full overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=800&auto=format&fit=crop"
+                        alt="Policy"
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-4 flex flex-col flex-1">
+                    <span class="text-indigo-500 text-[11px] font-semibold tracking-wider mb-1">ข้อมูลทั่วไป</span>
+                    <h3
+                        class="text-gray-900 dark:text-white text-[15px] font-bold mb-1.5 leading-tight group-hover:text-red-600 transition-colors">
+                        ระบบจัดการนโยบายและการดำเนินงาน</h3>
+                    <p class="text-gray-400 dark:text-gray-500 text-[12px] leading-relaxed line-clamp-2 mt-auto">
+                        จัดการข้อมูลนโยบายและขั้นตอนการดำเนินงาน</p>
+                </div>
+            </a>
         </div>
+
     </div>
 @endsection

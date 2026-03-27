@@ -3,15 +3,72 @@
     <style>
         .hero-banner {
             position: relative;
-            border-radius: 1rem;
             overflow: hidden;
+            background-color: #000;
         }
 
-        .hero-banner img {
+        .hero-slide {
+            position: absolute;
+            inset: 0;
             width: 100%;
-            height: 320px;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: 1;
+        }
+
+        .hero-slide.active {
+            opacity: 1;
+        }
+
+        /* Ken Burns effect for non-stretched feel */
+        .hero-slide img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            display: block;
+            object-position: center;
+            transform: scale(1.05);
+            transition: transform 10s linear;
+        }
+
+        .hero-slide.active img {
+            transform: scale(1);
+        }
+
+        /* Floating Preview Box */
+        .preview-box {
+            position: relative;
+            width: 320px;
+            height: 200px;
+            border-radius: 1.5rem;
+            background: white;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 4px solid white;
+        }
+
+        @media (max-width: 1024px) {
+            .preview-box {
+                display: none;
+            }
+        }
+
+        .preview-slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .preview-slide.active {
+            opacity: 1;
+        }
+
+        .preview-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 1.2rem;
         }
 
         .hero-overlay {
@@ -63,13 +120,6 @@
             transition: transform 0.5s ease;
         }
 
-        .section-line {
-            height: 3px;
-            width: 48px;
-            background: linear-gradient(90deg, #dc2626, #ef4444);
-            border-radius: 999px;
-        }
-
         .scroll-hide {
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -78,36 +128,117 @@
         .scroll-hide::-webkit-scrollbar {
             display: none;
         }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        }
     </style>
 
-    <div class="max-w-7xl mx-auto space-y-8">
+    {{-- ============ HERO BANNER (Full Width Slider) ============ --}}
+    <div class="-mx-6 -mt-6 mb-12">
+        <div class="hero-banner shadow-2xl relative h-[calc(100vh-60px)] min-h-[400px]">
 
-        {{-- ============ HERO BANNER ============ --}}
-        <div class="hero-banner shadow-xl">
-            <img src="{{ asset('images/welcome/whams.jpg') }}" alt="HAMS Welcome">
-            <div class="hero-overlay">
-                <div class="max-w-xl">
+            {{-- Slider Images --}}
+            <div id="hero-slider">
+                <div class="hero-slide active">
+                    <img src="{{ asset('images/welcome/whams.jpg') }}" alt="HAMS Building">
+                </div>
+                <div class="hero-slide">
+                    <img src="{{ asset('images/welcome/kmlhq.jpg') }}" alt="Kumwell HQ">
+                </div>
+                <div class="hero-slide">
+                    <img src="{{ asset('images/welcome/servicehams.jpg') }}" alt="Service Equipment">
+                </div>
+            </div>
+
+            {{-- Enhanced Overlay --}}
+            <div
+                class="absolute inset-0 bg-gradient-to-r from-red-900/95 via-red-800/80 to-black/40 mix-blend-multiply z-10">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-900/20 to-transparent z-10"></div>
+
+            <div class="absolute inset-0 flex flex-col justify-center px-8 sm:px-12 lg:px-20 max-w-7xl mx-auto w-full z-20">
+                <div class="max-w-2xl animate-fade-in-up">
+                    {{-- Badge --}}
                     <div
-                        class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-4 border border-white/25">
-                        <i class="fa-solid fa-building-columns"></i> HAMS&nbsp;System
+                        class="inline-flex items-center gap-2.5 bg-white/10 backdrop-blur-md text-white/90 text-[11px] font-bold px-4 py-2 rounded-full mb-6 border border-white/20 shadow-lg tracking-widest uppercase">
+                        <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
+                        HAMS System
                     </div>
-                    <h1 class="text-white text-3xl md:text-4xl font-bold leading-tight mb-2">
-                        Human Asset Management<br class="hidden sm:block">& Service Building
+
+                    {{-- Main Heading --}}
+                    <h1
+                        class="text-white text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.15] mb-6 tracking-tight drop-shadow-2xl">
+                        Human Asset <br class="hidden sm:block">
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-200 to-white">Management</span>
+                        <br class="hidden sm:block">
+                        <span class="text-white/90 font-extrabold">& Service Building</span>
                     </h1>
-                    <p class="text-white/85 text-sm md:text-base leading-relaxed">
+
+                    {{-- Subtitle --}}
+                    <p
+                        class="text-white/80 text-base sm:text-lg leading-relaxed max-w-xl font-medium drop-shadow-md border-l-4 border-red-500 pl-4 py-1">
                         แผนกจัดการและบำรุงรักษาอาคาร — บริหารจัดการอุปกรณ์ ห้องประชุม รถส่วนกลาง ครบจบในที่เดียว
                     </p>
+
+                    {{-- Action Buttons (Optional/Placeholder for future) --}}
+                    <div class="mt-10 flex items-center gap-4 hidden">
+                        <button
+                            class="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-bold shadow-lg shadow-red-900/20 transition-all hover:scale-105 active:scale-95">เริ่มต้นใช้งาน</button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Right Side: Floating Preview Box & Dots --}}
+            <div class="hidden lg:flex flex-col items-center gap-6 animate-fade-in-up" style="animation-delay: 0.2s">
+                <div class="preview-box">
+                    <div id="preview-slider">
+                        <div class="preview-slide active">
+                            <img src="{{ asset('images/welcome/whams.jpg') }}" alt="Preview 1">
+                        </div>
+                        <div class="preview-slide">
+                            <img src="{{ asset('images/welcome/kmlhq.jpg') }}" alt="Preview 2">
+                        </div>
+                        <div class="preview-slide">
+                            <img src="{{ asset('images/welcome/servicehams.jpg') }}" alt="Preview 3">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Slider Controls (Dots) --}}
+                <div class="flex gap-4" id="hero-dots">
+                    <button
+                        class="w-2.5 h-2.5 rounded-full bg-white shadow-md opacity-100 transition-all hover:scale-125 focus:outline-none"></button>
+                    <button
+                        class="w-2.5 h-2.5 rounded-full bg-white shadow-md opacity-40 hover:opacity-100 transition-all hover:scale-125 focus:outline-none"></button>
+                    <button
+                        class="w-2.5 h-2.5 rounded-full bg-white shadow-md opacity-40 hover:opacity-100 transition-all hover:scale-125 focus:outline-none"></button>
                 </div>
             </div>
         </div>
 
-        {{-- ============ SERVICES SECTION ============ --}}
-        <div>
-            <div class="mb-5">
-                <h2 class="group text-xl font-bold text-slate-800 inline-block px-3 py-2 rounded transition-all duration-500 
-                                               bg-gradient-to-r from-red-500 to-red-700 bg-[length:0%_100%] bg-no-repeat
-                                               hover:bg-[length:100%_100%] hover:text-white">บริการทั้งหมด</h2>
-                <div class="section-line mt-2"></div>
+        {{-- Scroll Indicator --}}
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/50 animate-bounce z-20 cursor-pointer lg:left-1/3"
+            onclick="document.getElementById('services').scrollIntoView({behavior: 'smooth'})">
+            <span class="text-[10px] tracking-widest uppercase font-bold">เลื่อนลง</span>
+            <i class="fa-solid fa-chevron-down text-sm"></i>
+        </div>
+    </div>
+    </div>
+
+    {{-- ============ SERVICES SECTION ============ --}}
+    <div class="bg-slate-50/70 border-y border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+            <div id="services" class="scroll-mt-20 mb-6">
+                <div class="flex items-center gap-3 mb-1">
+                    <div
+                        class="w-9 h-9 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-grip text-white text-sm"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800">งานสนับสนุน</h2>
+                </div>
+                <p class="text-xs text-slate-400 ml-12">ระบบบริการสนับสนุนภายในองค์กร</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
@@ -161,6 +292,25 @@
                 </a>
 
                 {{-- Card 4 --}}
+                <a href="{{ route('housing.welcome') }}"
+                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block">
+                    <div class="relative overflow-hidden">
+                        <img src="{{ asset('images/welcome/residence.jpg') }}" alt="บ้านพัก"
+                            class="w-full h-40 object-cover">
+                        <span
+                            class="absolute top-3 right-3 bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
+                            พร้อมใช้งาน
+                        </span>
+                    </div>
+                    <div class="p-4">
+                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบบ้านพักพนักงาน</h3>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการบ้านพักพนักงาน
+                            ติดตามสถานะและควบคุมการใช้งาน</p>
+                    </div>
+                </a>
+
+                {{-- Card 5 --}}
                 <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')"
                     class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block cursor-pointer">
                     <div class="relative overflow-hidden">
@@ -176,25 +326,6 @@
                         <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบแจ้งซ่อม</h3>
                         <p class="text-[11px] text-slate-400 leading-relaxed">จัดการแจ้งซ่อม
                             ติดตามสถานะและควบคุมการดำเนินการ</p>
-                    </div>
-                </a>
-
-                {{-- Card 5 --}}
-                <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')"
-                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block cursor-pointer">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ asset('images/welcome/residence.jpg') }}" alt="บ้านพัก"
-                            class="w-full h-40 object-cover">
-                        <span
-                            class="absolute top-3 right-3 bg-orange-400 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
-                            เร็วๆ นี้
-                        </span>
-                    </div>
-                    <div class="p-4">
-                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบบ้านพักพนักงาน</h3>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการบ้านพักพนักงาน
-                            ติดตามสถานะและควบคุมการใช้งาน</p>
                     </div>
                 </a>
 
@@ -217,23 +348,109 @@
                 @endif
             </div>
         </div>
+    </div>
 
-        {{-- ============ NEWS SECTION ============ --}}
-        <div>
-            <div class="flex items-center justify-between mb-1">
+    {{-- ============ POLICY & OPERATIONS SECTION ============ --}}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+        <div class="mb-6">
+            <div class="flex items-center gap-3 mb-1">
+                <div
+                    class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-book-open text-white text-sm"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-800">นโยบายและการดำเนินงาน</h2>
+            </div>
+            <p class="text-xs text-slate-400 ml-12">ข้อกำหนด แนวทางปฏิบัติ และขั้นตอนการทำงาน</p>
+        </div>
 
-                <h2 class="group text-xl font-bold text-slate-800 inline-block px-3 py-2 rounded transition-all duration-500 
-                                               bg-gradient-to-r from-red-500 to-red-700 bg-[length:0%_100%] bg-no-repeat
-                                               hover:bg-[length:100%_100%] hover:text-white">
-                    ข่าวสาร/<span
-                        class="text-red-600 group-hover:text-white transition-colors duration-300">ประชาสัมพันธ์</span>
-                </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Policy Section -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-bullhorn text-blue-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-blue-900 leading-tight">หมวดหมู่นโยบาย</h3>
+                        <p class="text-[11px] text-slate-400">ข้อกำหนดและแนวทางปฏิบัติขององค์กร</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    @forelse($policies as $policy)
+                        <div
+                            class="bg-blue-50/50 rounded-xl p-4 border border-blue-100/50 hover:border-blue-200 transition-all">
+                            <div class="flex gap-3">
+                                <div
+                                    class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                                    {{ $loop->iteration }}
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm text-blue-900 font-bold mb-1">{{ $policy->title }}</h4>
+                                    <p class="text-[12px] text-blue-800/60 leading-relaxed">{{ $policy->content }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-center text-slate-400 py-8 italic text-sm">ยังไม่มีข้อมูลนโยบาย</p>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Operations Section -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-clipboard-list text-emerald-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-emerald-900 leading-tight">หมวดหมู่การดำเนินงาน</h3>
+                        <p class="text-[11px] text-slate-400">ขั้นตอนและแนวทางการปฏิบัติงาน</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    @forelse($operations as $op)
+                        <div
+                            class="bg-emerald-50/50 rounded-xl p-4 border border-emerald-100/50 hover:border-emerald-200 transition-all">
+                            <div class="flex gap-3">
+                                <div
+                                    class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                                    {{ $loop->iteration }}
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm text-emerald-900 font-bold mb-1">{{ $op->title }}</h4>
+                                    <p class="text-[12px] text-emerald-800/60 leading-relaxed">{{ $op->content }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-center text-slate-400 py-8 italic text-sm">ยังไม่มีข้อมูลการดำเนินงาน</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ============ NEWS SECTION ============ --}}
+    <div class="bg-slate-50/70 border-y border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+            <div id="news" class="scroll-mt-20 flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-9 h-9 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-newspaper text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">ข่าวสาร/ประชาสัมพันธ์</h2>
+                        <p class="text-xs text-slate-400">อัปเดตข่าวสารล่าสุด</p>
+                    </div>
+                </div>
                 <a href="{{ route('datamanage.news.newsalllist') }}"
-                    class="text-sm text-red-600 hover:text-red-700 font-semibold hover:underline flex items-center gap-1">
+                    class="text-sm text-red-600 hover:text-red-700 font-semibold hover:underline flex items-center gap-1.5 bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:shadow transition-all">
                     ดูทั้งหมด <i class="fa-solid fa-arrow-right text-xs"></i>
                 </a>
             </div>
-            <div class="section-line mb-5"></div>
 
             @if(isset($news) && $news->count())
                 <div class="flex space-x-5 overflow-x-auto pb-4 scroll-hide snap-x snap-mandatory">
@@ -274,6 +491,7 @@
                             $imageUrls = array_values(array_filter(array_map($toUrl, $paths)));
                             $firstUrl = $imageUrls[0] ?? asset('images/welcome/news1.jpg');
                             $imgId = 'news-img-' . ($item->id ?? $loop->index);
+                            $dotsId = 'news-dots-' . ($item->id ?? $loop->index);
                         @endphp
 
                         <article
@@ -287,6 +505,15 @@
                                         class="absolute top-3 left-3 {{ $badgeClass }} text-white text-[10px] font-bold px-3 py-1 rounded-full shadow">
                                         {{ $item->newto ?? 'ข่าว' }}
                                     </span>
+                                    @if(count($imageUrls) > 1)
+                                        <div class="absolute bottom-3 right-3 flex items-center gap-1" id="{{ $dotsId }}">
+                                            @foreach($imageUrls as $key => $url)
+                                                <button
+                                                    class="w-2 h-2 rounded-full bg-white transition-opacity duration-300 {{ $key === 0 ? 'opacity-100' : 'opacity-40' }}"
+                                                    data-index="{{ $key }}"></button>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="p-4">
                                     <p class="text-[10px] text-slate-400 mb-1">{{ $item->newto ?? 'ข่าว' }}</p>
@@ -329,6 +556,5 @@
                 </div>
             @endif
         </div>
-
     </div>
 @endsection

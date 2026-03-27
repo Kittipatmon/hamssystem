@@ -59,7 +59,7 @@
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
                         </label>
                         <ul tabindex="0"
-                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-2 w-64 shadow-xl border border-red-50 gap-1 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-64 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] right-0 origin-top-right">
                             <li>
                                 <a href="{{ route('bookingcar.dashboard') }}"
                                     class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('bookingcar.dashboard') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
@@ -74,6 +74,15 @@
                                     <i
                                         class="fa-solid fa-chart-pie w-4 text-center {{ request()->routeIs('bookingcar.report') ? 'text-red-600' : 'text-red-400' }}"></i>
                                     รายงาน
+                                </a>
+                            </li>
+                            <!-- <li class="border-t border-slate-50 my-1"></li> -->
+                            <li>
+                                <a href="{{ route('backend.bookingcar.table') }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('backend.bookingcar.table') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i
+                                        class="fa-solid fa-car-side w-4 text-center {{ request()->routeIs('backend.bookingcar.table') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                    จัดการข้อมูลรถ
                                 </a>
                             </li>
                         </ul>
@@ -109,8 +118,8 @@
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                         </label>
                         <ul tabindex="0"
-                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-2 w-56 shadow-xl border border-red-50 gap-1 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
-                            <li class="px-4 py-3 border-b border-slate-100 mb-1">
+                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-64 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                            <li class="px-4 py-3 border-b border-slate-100 mb-0 bg-slate-50/50 rounded-t-2xl">
                                 <div
                                     class="flex items-center gap-3 cursor-default hover:bg-transparent px-1 p-0 focus:!bg-transparent active:!bg-transparent focus:!text-current active:!text-current">
                                     @if(Auth::user()->photo_user)
@@ -151,12 +160,12 @@
                                 </a>
                             </li>
                             <li class="mt-1 border-t border-slate-100"></li>
-                            <li>
-                                <form method="POST" action="{{ route('logout') }}" class="p-0 m-0">
+                            <li class="p-0">
+                                <form method="POST" action="{{ route('logout') }}" class="p-0 m-0 w-full">
                                     @csrf
                                     <button type="submit"
-                                        class="flex items-center w-full gap-3 px-4 py-2.5 text-[14px] font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors text-left">
-                                        <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> ออกจากระบบ
+                                        class="flex items-center w-full gap-6 px-16 py-2.5 text-[14px] font-semibold text-red-600 hover:bg-red-50 rounded-b-2xl transition-colors">
+                                        <i class="fa-solid fa-right-from-bracket w-5 text-center"></i> ออกจากระบบ
                                     </button>
                                 </form>
                             </li>
@@ -219,6 +228,12 @@
                                 <i
                                     class="fa-solid fa-chart-pie w-4 text-center {{ request()->routeIs('bookingcar.report') ? 'text-red-600' : 'text-red-400' }}"></i>
                                 รายงาน
+                            </a>
+                            <a href="{{ route('backend.bookingcar.table') }}"
+                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-lg transition-colors {{ request()->routeIs('backend.bookingcar.table') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                                <i
+                                    class="fa-solid fa-car-side w-4 text-center {{ request()->routeIs('backend.bookingcar.table') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                จัดการข้อมูลรถ
                             </a>
                         </div>
                     </details>

@@ -1,0 +1,1347 @@
+@extends('layouts.bookingcar.appcar')
+
+@section('content')
+    <style>
+        /* Custom Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* slate-300 */
+            border-radius: 20px;
+            border: 1px solid transparent;
+            background-clip: content-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* slate-400 */
+        }
+
+        /* Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+    </style>
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
+
+        <!-- New Premium Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center shadow-sm border border-red-100">
+                    <i class="fa-solid fa-car text-red-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-black tracking-tight text-slate-800">จัดการข้อมูลรถส่วนกลาง</h2>
+                    <p class="text-slate-500 mt-1 flex items-center gap-2 text-sm font-medium">
+                        <i class="fa-solid fa-circle-info text-blue-500"></i>
+                        เพิ่ม ลบ หรือแก้ไขข้อมูลรถยนต์ในระบบจองรถ
+                    </p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:flex gap-3 w-full md:w-auto">
+                <a href="{{ route('backend.bookingcar.dashboard') }}"
+                    class="btn btn-ghost border-slate-200 text-slate-600 hover:bg-slate-100 rounded-2xl px-4 sm:px-6 text-xs sm:text-sm h-10 sm:h-12">
+                    <i class="fa-solid fa-chart-line mr-1 sm:mr-2"></i> แดชบอร์ด
+                </a>
+                <button onclick="add_vehicle_modal.showModal()"
+                    class="btn bg-red-600 hover:bg-red-700 text-white border-0 shadow-lg shadow-red-200 rounded-2xl px-4 sm:px-8 transition-all hover:scale-105 active:scale-95 text-xs sm:text-sm h-10 sm:h-12">
+                    <i class="fa-solid fa-plus mr-1 sm:mr-2 text-base sm:text-lg"></i> เพิ่มรถ
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs tabs-boxed bg-slate-100/50 p-1 rounded-2xl mb-8 grid grid-cols-2 sm:inline-flex backdrop-blur-sm border border-slate-200/50"
+            role="tablist">
+            <a class="tab tab-active font-bold text-[12px] sm:text-[13px] h-10 sm:h-11 px-2 sm:px-8 rounded-xl transition-all gap-2"
+                onclick="showTab('tab-vehicles')" id="btn-vehicles">
+                <i class="fa-solid fa-car-side"></i> <span>ข้อมูลรถยนต์</span>
+            </a>
+            <a class="tab font-bold text-[12px] sm:text-[13px] h-10 sm:h-11 px-2 sm:px-8 rounded-xl transition-all gap-2"
+                onclick="showTab('tab-inspections')" id="btn-inspections">
+                <i class="fa-solid fa-microscope"></i> <span>ตรวจเช็คสภาพ</span>
+            </a>
+        </div>
+
+        <!-- Validation Error Feedback -->
+        @if ($errors->any())
+            <div class="mb-8 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm animate-shake">
+                <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-600 shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-red-800 text-sm">พบข้อผิดพลาดในการบันทึกข้อมูล:</h4>
+                    <ul class="mt-1 text-xs text-red-600 list-disc list-inside space-y-0.5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        @endif
+
+        <!-- Tab 1: Vehicles -->
+        <div id="tab-vehicles" class="tab-pane active space-y-4">
+            <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-white">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-list-ul text-red-500 text-lg"></i>
+                        <h3 class="font-bold text-slate-700 text-lg">รายชื่อรถทั้งหมดในระบบ</h3>
+                    </div>
+                    <span
+                        class="bg-slate-50 text-slate-500 px-4 py-1.5 rounded-full text-xs font-bold border border-slate-100">
+                        {{ $vehicles->count() }} คัน
+                    </span>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="grid grid-cols-1 gap-4 p-4 sm:hidden">
+                    @forelse($vehicles as $vehicle)
+                        <div class="bg-white rounded-[2rem] p-4 border border-slate-100 shadow-sm relative group active:scale-[0.98] transition-all"
+                             onclick="viewVehicleDetails({{ $vehicle->toJson() }})">
+                            <div class="flex gap-4">
+                                <div class="w-20 h-20 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 shrink-0 shadow-inner">
+                                    @php
+                                        $images = json_decode($vehicle->images, true);
+                                        $firstImage = is_array($images) && count($images) > 0 ? $images[0] : null;
+                                    @endphp
+                                    @if($firstImage)
+                                        <img src="{{ asset('images/vehicle/' . $firstImage) }}" class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-slate-200">
+                                            <i class="fa-solid fa-car text-xl"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="font-black text-slate-800 text-[15px] truncate">{{ $vehicle->name }}</h4>
+                                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{{ $vehicle->brand }} {{ $vehicle->model_name }}</p>
+                                        </div>
+                                        @if($vehicle->status === 'available')
+                                            <span class="bg-green-50 text-green-600 text-[9px] font-black px-2 py-1 rounded-full border border-green-100">ว่าง</span>
+                                        @else
+                                            <span class="bg-orange-50 text-orange-600 text-[9px] font-black px-2 py-1 rounded-full border border-orange-100">ไม่ว่าง</span>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-end justify-between">
+                                        <div class="flex flex-col">
+                                            <span class="text-[8px] text-slate-300 font-bold uppercase tracking-tighter">Current Mileage</span>
+                                            <span class="text-blue-600 font-black text-[13px] leading-tight">{{ $vehicle->latest_mileage ? number_format($vehicle->latest_mileage) : '0' }} <span class="text-[9px] font-bold text-slate-400">KM</span></span>
+                                        </div>
+                                        <div class="flex gap-1.5">
+                                            <a href="{{ route('backend.bookingcar.edit', $vehicle->vehicle_id) }}" onclick="event.stopPropagation()"
+                                               class="w-8 h-8 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+                                                <i class="fa-solid fa-edit text-xs"></i>
+                                            </a>
+                                            <button onclick="event.stopPropagation(); confirmDelete({{ $vehicle->vehicle_id }}, '{{ $vehicle->name }}')"
+                                                    class="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="py-20 text-center flex flex-col items-center gap-3">
+                            <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-200">
+                                <i class="fa-solid fa-car-side text-3xl"></i>
+                            </div>
+                            <span class="text-slate-400 font-medium text-sm">ไม่พบข้อมูลรถยนต์ในระบบ</span>
+                        </div>
+                    @endforelse
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="table w-full">
+                        <thead
+                            class="bg-slate-50/50 text-slate-400 font-bold text-[11px] uppercase tracking-widest border-b border-slate-100">
+                            <tr>
+                                <th class="py-5 pl-8 bg-transparent">รูปภาพ</th>
+                                <th class="py-5 bg-transparent text-center">ทะเบียน / ชื่อเรียก</th>
+                                <th class="py-5 bg-transparent">ยี่ห้อ & รุ่น</th>
+                                <th class="py-5 bg-transparent text-center">ประเภท</th>
+                                <th class="py-5 bg-transparent text-center">เลขไมล์ล่าสุด (กม.)</th>
+                                <th class="py-5 bg-transparent text-center">สถานะ</th>
+                                <th class="py-5 pr-8 bg-transparent text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 text-slate-600">
+                            @forelse($vehicles as $vehicle)
+                                <tr class="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                                    onclick="viewVehicleDetails({{ $vehicle->toJson() }})">
+                                    <td class="py-6 pl-8">
+                                        <div
+                                            class="w-20 h-14 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-slate-50 flex items-center justify-center">
+                                            @php
+                                                $images = json_decode($vehicle->images, true);
+                                                $firstImage = is_array($images) && count($images) > 0 ? $images[0] : null;
+                                            @endphp
+                                            @if($firstImage)
+                                                <img src="{{ asset('images/vehicle/' . $firstImage) }}"
+                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                            @else
+                                                <i class="fa-solid fa-car text-slate-200 text-2xl"></i>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="py-6">
+                                        <div class="flex flex-col items-center">
+                                            <span class="font-black text-slate-800 text-[16px]">{{ $vehicle->name }}</span>
+                                            <span class="text-[11px] font-bold text-slate-400 mt-0.5">ID:
+                                                {{ $vehicle->vehicle_id }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-6">
+                                        <div class="flex flex-col">
+                                            <span
+                                                class="font-black text-slate-700 text-[14px] uppercase tracking-wide">{{ $vehicle->brand ?? '-' }}</span>
+                                            <span
+                                                class="text-[12px] text-slate-400 font-medium">{{ $vehicle->model_name ?? '-' }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-6 text-center">
+                                        <span
+                                            class="inline-flex items-center px-4 py-1.5 rounded-full text-[12px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                                            {{ $vehicle->type ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="py-6 text-center">
+                                        <span
+                                            class="text-[14px] font-black {{ $vehicle->latest_mileage > 0 ? 'text-blue-600' : 'text-slate-300' }}">
+                                            {{ $vehicle->latest_mileage ? number_format($vehicle->latest_mileage) : '0' }}
+                                        </span>
+                                    </td>
+                                    <td class="py-6 text-center">
+                                        @if($vehicle->status === 'available')
+                                            <span
+                                                class="inline-flex items-center px-4 py-1.5 rounded-full text-[12px] font-bold bg-green-50 text-green-600 border border-green-100 ring-4 ring-green-50/50">
+                                                ว่าง
+                                            </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center px-4 py-1.5 rounded-full text-[12px] font-bold bg-orange-50 text-orange-600 border border-orange-100">
+                                                ไม่ว่าง
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="py-6 pr-8 text-center">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <a href="{{ route('backend.bookingcar.edit', $vehicle->vehicle_id) }}"
+                                                onclick="event.stopPropagation()"
+                                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm border border-blue-100">
+                                                <i class="fa-solid fa-edit text-sm"></i>
+                                            </a>
+                                            <button
+                                                onclick="event.stopPropagation(); confirmDelete({{ $vehicle->vehicle_id }}, '{{ $vehicle->name }}')"
+                                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm border border-red-100">
+                                                <i class="fa-solid fa-trash text-sm"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="py-20 text-center">
+                                        <div class="flex flex-col items-center gap-3">
+                                            <div
+                                                class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-200">
+                                                <i class="fa-solid fa-car-side text-3xl"></i>
+                                            </div>
+                                            <span class="text-slate-400 font-medium">ไม่พบข้อมูลรถยนต์ในระบบ</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Inspections -->
+        <div id="tab-inspections" class="tab-pane hidden space-y-8">
+            <!-- Maintenance Summary Grid -->
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 shadow-inner">
+                            <i class="fa-solid fa-gauge-high"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-800 text-lg">Maintenance Dashboard</h3>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">ติดตามสภาพรถตามระยะทาง</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($vehicles as $v)
+                        @php
+                            $latestInsp = $v->inspections->sortByDesc('inspection_date')->first();
+                            $goalMileage = $latestInsp->next_mileage ?? ($v->latest_mileage + 10000);
+                            $progress = ($v->latest_mileage / $goalMileage) * 100;
+                            $isOverdue = $v->latest_mileage >= $goalMileage;
+                            $isWarning = $v->latest_mileage >= ($goalMileage - 1000) && !$isOverdue;
+                        @endphp
+                        <div
+                            class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-md transition-all group overflow-hidden relative">
+                            @if($isOverdue)
+                                <div class="absolute -top-1 -right-1 w-20 h-20 bg-red-500/10 rounded-full blur-2xl"></div>
+                            @endif
+
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 class="font-black text-slate-800 text-lg group-hover:text-orange-600 transition-colors">
+                                        {{ $v->name }}</h4>
+                                    <p class="text-xs text-slate-400 font-medium">{{ $v->brand }} {{ $v->model_name }}</p>
+                                </div>
+                                <div class="text-right">
+                                    @if($isOverdue)
+                                        <span
+                                            class="badge badge-error text-white font-black text-[10px] py-3 px-3 animate-pulse">OVERDUE</span>
+                                    @elseif($isWarning)
+                                        <span class="badge badge-warning text-white font-black text-[10px] py-3 px-3">DUE
+                                            SOON</span>
+                                    @else
+                                        <span class="badge badge-success text-white font-black text-[10px] py-3 px-3">HEALTHY</span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-end">
+                                    <div>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Current Mileage</p>
+                                        <p class="text-xl font-black text-slate-800">{{ number_format($v->latest_mileage) }}
+                                            <span class="text-xs font-medium text-slate-400">km</span></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Goal (Maintenance)</p>
+                                        <p class="text-sm font-bold text-slate-600">{{ number_format($goalMileage) }} km</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <progress
+                                        class="progress {{ $isOverdue ? 'progress-error' : ($isWarning ? 'progress-warning' : 'progress-success') }} w-full h-3 rounded-full"
+                                        value="{{ min($progress, 100) }}" max="100"></progress>
+                                    <div class="flex justify-between text-[10px] font-bold">
+                                        <span
+                                            class="{{ $isOverdue ? 'text-red-500' : 'text-slate-400' }}">{{ number_format($progress, 1) }}%
+                                            Complete</span>
+                                        <span class="text-slate-400">Next Service In:
+                                            {{ number_format(max(0, $goalMileage - $v->latest_mileage)) }} km</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button onclick="viewVehicleDetails({{ $v->toJson() }})"
+                                        class="flex-1 btn btn-ghost btn-sm rounded-xl text-slate-400 hover:text-orange-600 hover:bg-orange-50 border border-transparent hover:border-orange-100 transition-all gap-2">
+                                        <i class="fa-solid fa-circle-info text-xs"></i> Details
+                                    </button>
+                                    <button onclick="openInspectionModal({{ $v->toJson() }})"
+                                        class="flex-1 btn bg-orange-500 hover:bg-orange-600 text-white btn-sm rounded-xl border-0 shadow-sm shadow-orange-100 gap-2">
+                                        <i class="fa-solid fa-plus text-xs"></i> Check
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Historical Log Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-clock-rotate-left text-slate-400 text-lg"></i>
+                        <h3 class="font-bold text-slate-700 uppercase tracking-widest text-xs">Inspection History Log</h3>
+                    </div>
+                </div>
+                <!-- Mobile Inspection Cards -->
+                <div class="grid grid-cols-1 gap-4 p-4 sm:hidden">
+                    @forelse($inspections as $insp)
+                        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm relative group">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Date</span>
+                                    <span class="text-sm font-black text-slate-800">{{ \Carbon\Carbon::parse($insp->inspection_date)->format('d/m/Y') }}</span>
+                                </div>
+                                @if($insp->status == 0)
+                                    <span class="bg-green-50 text-green-600 text-[9px] font-black px-2 py-1 rounded-full border border-green-100">NORMAL</span>
+                                @else
+                                    <span class="bg-red-50 text-red-600 text-[9px] font-black px-2 py-1 rounded-full border border-red-100">ISSUE</span>
+                                @endif
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Mileage</span>
+                                    <span class="text-orange-600 font-black text-sm">{{ number_format((float) $insp->mileage) }} KM</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Vehicle</span>
+                                    <span class="text-slate-700 font-bold text-xs truncate">ID: {{ $insp->vehicle_id }} - {{ $insp->vehicle->name ?? 'N/A' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between border-t border-slate-50 pt-3">
+                                <div class="flex gap-2 text-slate-400">
+                                    @if($insp->file_vehicle)
+                                        <a href="{{ asset('uploads/vehicl_file_maintenance/' . $insp->file_vehicle) }}" target="_blank" class="text-blue-500 hover:text-blue-700">
+                                            <i class="fa-solid fa-file-pdf"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="openEditInspectionModal({{ json_encode($insp) }})"
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 border border-orange-100">
+                                        <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    </button>
+                                    <form action="{{ route('backend.bookingcar.inspections.destroy', $insp->inspection_id) }}" method="POST" onsubmit="return confirm('ยืนยันการลบ?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-100">
+                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-10 text-slate-400">ไม่พบกขรตรวจเช็ค</div>
+                    @endforelse
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="table w-full text-[12px]">
+                        <thead class="bg-white text-slate-500 font-medium border-b border-slate-100">
+                            <tr>
+                                <th class="bg-white"># ID</th>
+                                <th class="bg-white">รถ (vehicle_id)</th>
+                                <th class="bg-white">วันที่ตรวจ (inspection_date)</th>
+                                <th class="bg-white">สถานที่ (location)</th>
+                                <th class="bg-white">เลขไมล์ (mileage)</th>
+                                <th class="bg-white">เป้าหมายถัดไป (next_mileage)</th>
+                                <th class="bg-white">ผู้ตรวจเช็ค (inspector_name)</th>
+                                <th class="bg-white">เอกสาร (file)</th>
+                                <th class="bg-white">สถานะ (status)</th>
+                                <th class="bg-white text-center">จัดการ (Actions)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-slate-600">
+                            @forelse($inspections as $insp)
+                                <tr class="hover:bg-slate-50/50 border-b border-slate-50">
+                                    <td>{{ $insp->inspection_id }}</td>
+                                    <td>Id: {{ $insp->vehicle_id }} - {{ $insp->vehicle->name ?? 'N/A' }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($insp->inspection_date)->format('d/m/Y') }}</td>
+                                    <td>{{ $insp->location ?? '-' }}</td>
+                                    <td class="font-bold text-orange-600">{{ number_format((float) $insp->mileage) }} กม.</td>
+                                    <td class="text-blue-600 font-medium italic">
+                                        {{ $insp->next_mileage ? number_format((float) $insp->next_mileage) . ' กม.' : '-' }}
+                                    </td>
+                                    <td>{{ $insp->inspector_name ?? '-' }}</td>
+                                    <td>
+                                        @if($insp->file_vehicle)
+                                            <a href="{{ asset('uploads/vehicl_file_maintenance/' . $insp->file_vehicle) }}"
+                                                target="_blank"
+                                                class="btn btn-ghost btn-xs text-blue-600 hover:bg-blue-50 gap-1 rounded-lg">
+                                                <i class="fa-solid fa-file-arrow-down text-[10px]"></i>
+                                                เปิดดู
+                                            </a>
+                                        @else
+                                            <span class="text-slate-300">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($insp->status == 0)
+                                            <span
+                                                class="px-2 py-1 rounded text-[10px] font-medium bg-green-100 text-green-700 leading-none inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-check-circle text-[8px]"></i> ปกติ
+                                            </span>
+                                        @else
+                                            <span
+                                                class="px-2 py-1 rounded text-[10px] font-medium bg-red-100 text-red-700 leading-none inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-triangle-exclamation text-[8px]"></i> ไม่ปกติ
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button onclick="openEditInspectionModal({{ json_encode($insp) }})"
+                                                class="btn btn-ghost btn-xs text-orange-600 hover:bg-orange-50 rounded-lg">
+                                                <i class="fa-solid fa-pen-to-square"></i> แก้ไข
+                                            </button>
+                                            <form
+                                                action="{{ route('backend.bookingcar.inspections.destroy', $insp->inspection_id) }}"
+                                                method="POST" onsubmit="return confirm('ยืนยันการลบข้อมูลการตรวจเช็คนี้?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="btn btn-ghost btn-xs text-red-500 hover:bg-red-50 rounded-lg">
+                                                    <i class="fa-solid fa-trash-can"></i> ลบ
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="10" class="text-center py-6 text-slate-400">ไม่พบข้อมูล</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Vehicle Modal -->
+    <dialog id="add_vehicle_modal" class="modal">
+        <div class="modal-box bg-white rounded-[2rem] border border-slate-100 shadow-2xl p-0 overflow-hidden max-w-5xl w-11/12 max-h-[90vh] overflow-y-auto">
+            <div class="px-8 py-6 bg-red-50 border-b border-red-100 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center text-red-600 shadow-inner">
+                        <i class="fa-solid fa-car-side text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-xl text-slate-800 tracking-tight">เพิ่มข้อมูลรถยนต์ใหม่</h3>
+                        <p class="text-xs text-red-600 font-bold uppercase tracking-widest">New Fleet Entry</p>
+                    </div>
+                </div>
+                <form method="dialog">
+                    <button class="btn btn-circle btn-ghost btn-sm text-slate-400">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </form>
+            </div>
+
+            <form action="{{ route('backend.bookingcar.store') }}" method="POST" enctype="multipart/form-data" class="p-8">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Left Side: Basic Info -->
+                    <div class="space-y-5">
+                        <div class="form-control">
+                            <label class="label pb-1">
+                                <span class="label-text font-bold text-slate-700">ชื่อรถ / ข้อมูลทะเบียน <span class="text-red-500">*</span></span>
+                            </label>
+                            <input type="text" name="name" placeholder="เช่น Toyota Camry (กข 1234)" required
+                                class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-red-500 transition-all font-medium">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-control">
+                                <label class="label pb-1">
+                                    <span class="label-text font-bold text-slate-700">ยี่ห้อ (Brand)</span>
+                                </label>
+                                <input type="text" name="brand" placeholder="เช่น Toyota"
+                                    class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-red-500 transition-all font-medium">
+                            </div>
+                            <div class="form-control">
+                                <label class="label pb-1">
+                                    <span class="label-text font-bold text-slate-700">รุ่น (Model)</span>
+                                </label>
+                                <input type="text" name="model_name" placeholder="เช่น Camry"
+                                    class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-red-500 transition-all font-medium">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-control">
+                                <label class="label pb-1">
+                                    <span class="label-text font-bold text-slate-700">ปีที่ผลิต (Year)</span>
+                                </label>
+                                <input type="text" name="year" placeholder="เช่น 2023"
+                                    class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-red-500 transition-all font-medium">
+                            </div>
+                            <div class="form-control">
+                                <label class="label pb-1">
+                                    <span class="label-text font-bold text-slate-700">ประเภทรถ</span>
+                                </label>
+                                <select name="type" required
+                                    class="select select-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-red-500 transition-all font-medium">
+                                    <option value="" disabled selected>เลือกประเภท</option>
+                                    <option value="เก๋ง">เก๋ง</option>
+                                    <option value="กระบะ">กระบะ</option>
+                                    <option value="รถตู้">รถตู้</option>
+                                    <option value="SUV">SUV</option>
+                                    <option value="อื่นๆ">อื่นๆ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Secondary Info & Image -->
+                    <div class="space-y-5">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-control">
+                                <label class="label pb-1">
+                                    <span class="label-text font-bold text-slate-700">จำนวนที่นั่ง</span>
+                                </label>
+                                <input type="number" name="seat" placeholder="เช่น 4"
+                                    class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-red-500 transition-all font-medium">
+                            </div>
+                            <div class="form-control">
+                                <label class="label pb-1">
+                                    <span class="label-text font-bold text-slate-700">ประเภทน้ำมัน</span>
+                                </label>
+                                <input type="text" name="filling_type" placeholder="เช่น ดีเซล"
+                                    class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-red-500 transition-all font-medium">
+                            </div>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label pb-1">
+                                <span class="label-text font-bold text-slate-700">เลขไมล์ล่าสุด (กม.)</span>
+                            </label>
+                            <input type="number" name="latest_mileage" placeholder="เช่น 50000"
+                                class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-red-500 transition-all font-medium">
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label pb-1">
+                                <span class="label-text font-bold text-slate-700">รูปภาพรถ</span>
+                            </label>
+                            <input type="file" name="image"
+                                class="file-input file-input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 file:bg-slate-200 file:text-slate-700 file:border-0 hover:file:bg-slate-300 transition-all">
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label pb-1">
+                                <span class="label-text font-bold text-slate-700">รายละเอียดเพิ่มเติม</span>
+                            </label>
+                            <textarea name="desciption" rows="2"
+                                class="textarea textarea-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-red-500 transition-all font-medium"
+                                placeholder="เช่น สีขาว, ประกันภัยชั้น 1..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-10">
+                    <form method="dialog">
+                        <button class="btn btn-ghost rounded-2xl px-6 font-bold text-slate-500">ยกเลิก</button>
+                    </form>
+                    <button type="submit"
+                        class="btn bg-red-600 hover:bg-red-700 text-white border-0 shadow-lg shadow-red-200 rounded-2xl px-10 transition-all">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> บันทึกข้อมูล
+                    </button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop bg-slate-900/40 backdrop-blur-sm">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <!-- Delete Confirmation Modal -->
+    <dialog id="delete_modal" class="modal">
+        <div class="modal-box bg-white rounded-3xl border border-slate-100 shadow-2xl p-0 overflow-hidden max-w-sm">
+            <div class="p-8 text-center">
+                <div
+                    class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-600 mx-auto mb-4 border border-red-100 shadow-inner">
+                    <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                </div>
+                <h3 class="font-black text-xl text-slate-800 mb-2">ยืนยันการลบข้อมูล?</h3>
+                <p class="text-slate-500 text-sm font-medium leading-relaxed">
+                    คุณกำลังจะลบข้อมูลรถ <span id="delete_vehicle_name"
+                        class="text-red-600 font-bold underline decoration-red-200"></span>
+                    ออกจากระบบอย่างถาวร ไม่สามารถย้อนกลับได้
+                </p>
+            </div>
+            <div class="bg-slate-50 p-6 flex gap-3">
+                <form method="dialog" class="flex-1">
+                    <button class="btn btn-ghost w-full rounded-2xl font-bold text-slate-500">ยกเลิก</button>
+                </form>
+                <form id="delete_form" method="POST" class="flex-1">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                        class="btn bg-red-600 hover:bg-red-700 text-white border-0 w-full rounded-2xl shadow-md">
+                        ยืนยันการลบ
+                    </button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop bg-slate-900/40 backdrop-blur-sm">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <!-- View Vehicle Details Modal -->
+    <dialog id="view_vehicle_modal" class="modal">
+        <div class="modal-box bg-white rounded-[2rem] border border-slate-100 shadow-2xl p-0 overflow-hidden max-w-5xl w-11/12 max-h-[85vh] overflow-y-auto animate-zoomIn">
+            <div class="relative h-48 bg-slate-100 overflow-hidden">
+                <img id="view_vehicle_banner" src="" alt="Vehicle" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent"></div>
+                <div class="absolute bottom-6 left-8 text-white">
+                    <h2 id="view_vehicle_title" class="text-3xl font-black mb-1 tracking-tight"></h2>
+                    <p id="view_vehicle_subtitle" class="text-slate-300 font-medium text-sm"></p>
+                </div>
+                <form method="dialog">
+                    <button class="btn btn-circle btn-sm absolute top-4 right-4 bg-white/20 hover:bg-white/40 border-0 text-white backdrop-blur-md">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2 space-y-6">
+                    <div>
+                        <h4 class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-3">ข้อมูลทางเทคนิค (SPECIFICATIONS)</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                <p class="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-wider">ประเภท</p>
+                                <p id="view_vehicle_type" class="font-bold text-slate-700 text-sm"></p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                <p class="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-wider">จำนวนที่นั่ง</p>
+                                <p class="font-bold text-slate-700 text-sm"><span id="view_vehicle_seat"></span> ที่นั่ง</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                <p class="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-wider">ประเภทน้ำมัน</p>
+                                <p id="view_vehicle_fuel" class="font-bold text-slate-700 text-sm"></p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                <p class="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-wider">ปีที่ผลิต</p>
+                                <p id="view_vehicle_year" class="font-bold text-slate-700 text-sm"></p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 col-span-2 shadow-sm">
+                                <p class="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-wider">เลขไมล์ปัจจุบัน</p>
+                                <p class="font-black text-red-600 text-lg"><span id="view_vehicle_mileage"></span> กม.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-3">รายละเอียดเพิ่มเติม</h4>
+                        <p id="view_vehicle_desc" class="text-slate-600 leading-relaxed text-xs bg-slate-50/30 p-4 rounded-2xl border border-dashed border-slate-200 min-h-[60px]"></p>
+                    </div>
+
+                    <!-- Maintenance History Section -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-3 bg-slate-50/50 border-b border-slate-100 flex justify-between items-center">
+                            <h4 class="text-slate-700 font-bold text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-blue-500 text-xs"></i> ประวัติการตรวจเช็ค
+                            </h4>
+                        </div>
+                        <div class="max-h-[250px] overflow-y-auto">
+                            <table class="table table-compact w-full text-[11px]">
+                                <thead class="sticky top-0 bg-white/95 backdrop-blur-md z-10 border-b border-slate-50">
+                                    <tr class="text-slate-400 font-bold text-[9px] uppercase tracking-wider">
+                                        <th class="py-3 pl-6">วันที่</th>
+                                        <th class="py-3">เลขไมล์</th>
+                                        <th class="py-3 text-center">สถานะ</th>
+                                        <th class="py-3">ผู้ตรวจ</th>
+                                        <th class="py-3 pr-6 text-right">เอกสาร</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="view_vehicle_inspections_body" class="divide-y divide-slate-50">
+                                    <!-- Dynamic Content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Maintenance Progress Card (Dark Premium) -->
+                    <div class="bg-slate-900 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden group border border-slate-800">
+                       <div class="absolute -right-4 -top-4 w-24 h-24 bg-red-600/10 rounded-full blur-3xl group-hover:bg-red-600/20 transition-all duration-700"></div>
+                       
+                       <div class="flex justify-between items-start mb-6">
+                           <div>
+                               <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1.5">Progress</p>
+                               <h4 class="text-2xl font-black" id="modal_progress_percent">--%</h4>
+                           </div>
+                           <div id="modal_status_badge" class="badge badge-success text-white font-black text-[9px] py-3 px-3 rounded-lg">HEALTHY</div>
+                       </div>
+
+                       <div class="space-y-4 mb-6">
+                           <div class="flex justify-between text-[10px] font-bold">
+                               <span class="text-slate-500 italic uppercase">Current</span>
+                               <span id="modal_current_mileage" class="text-white text-xs">0 km</span>
+                           </div>
+                           <div class="w-full bg-slate-800 rounded-full h-2.5 p-0.5 shadow-inner">
+                               <div id="modal_progress_bar" class="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-1000 shadow-lg shadow-emerald-500/40" style="width: 0%"></div>
+                           </div>
+                           <div class="flex justify-between text-[10px] font-bold">
+                               <span class="text-slate-500 italic uppercase">Goal</span>
+                               <span id="modal_goal_mileage" class="text-slate-400 text-xs">0 km</span>
+                           </div>
+                       </div>
+                       
+                       <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-800">
+                           <p class="text-[9px] font-bold text-slate-500 uppercase mb-2 flex items-center gap-2 tracking-widest">
+                               <i class="fa-solid fa-microscope text-blue-400"></i> Next Service In
+                           </p>
+                           <div class="flex items-baseline gap-1">
+                               <span id="modal_remaining_km" class="text-xl font-black text-blue-400">0</span>
+                               <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">KM</span>
+                           </div>
+                       </div>
+                    </div>
+
+                    <!-- Status & Buttons Card -->
+                    <div class="bg-white rounded-[2rem] border border-slate-100 shadow-lg p-6 overflow-hidden relative">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-slate-800 font-bold text-sm">สถานะการใช้งาน</h4>
+                            <span id="view_vehicle_status_badge" class="badge font-black px-3 py-3 rounded-lg text-[10px]"></span>
+                        </div>
+                        <div class="divider opacity-50 mb-4"></div>
+                        <div class="space-y-3">
+                            <a href="{{ route('bookingcar.dashboard') }}" class="btn btn-ghost btn-block justify-start gap-3 rounded-xl text-slate-600 hover:bg-slate-50 font-bold h-10 min-h-0 text-xs">
+                                <i class="fa-solid fa-calendar-days text-purple-500 text-sm"></i> ดูประวัติการจอง
+                            </a>
+                            <button onclick="document.getElementById('view_vehicle_modal').close(); showTab('tab-inspections')" class="btn btn-ghost btn-block justify-start gap-3 rounded-xl text-slate-600 hover:bg-slate-50 font-bold h-10 min-h-0 text-xs">
+                                <i class="fa-solid fa-wrench text-orange-500 text-sm"></i> ตรวจเช็คสภาพ
+                            </button>
+                            <a id="view_vehicle_edit_link" href="#" class="btn btn-primary btn-block rounded-xl shadow-md shadow-blue-100 mt-4 font-bold h-11 min-h-0 text-xs transition-transform hover:scale-105 active:scale-95">
+                                <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไขข้อมูลรถ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop bg-slate-900/60 backdrop-blur-md">
+            <button>close</button>
+        </form>
+    </dialog>
+        <form method="dialog" class="modal-backdrop bg-slate-900/40 backdrop-blur-sm">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <!-- Quick Inspection Modal -->
+    <dialog id="inspection_modal" class="modal">
+        <div class="modal-box bg-white rounded-3xl border border-slate-100 shadow-2xl p-0 overflow-hidden max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="px-8 py-5 bg-orange-50 border-b border-orange-100 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 shadow-inner">
+                        <i class="fa-solid fa-wrench text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-xl text-slate-800 tracking-tight">บันทึกการตรวจเช็คสภาพ</h3>
+                        <p id="insp_vehicle_name" class="text-xs text-orange-600 font-bold uppercase tracking-wider"></p>
+                    </div>
+                </div>
+                <form method="dialog">
+                    <button class="btn btn-circle btn-ghost btn-sm text-slate-400">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </form>
+            </div>
+
+            <form action="{{ route('backend.bookingcar.inspections.store') }}" method="POST" enctype="multipart/form-data"
+                class="p-8 space-y-4">
+                @csrf
+                <input type="hidden" name="vehicle_id" id="insp_vehicle_id">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label pb-1">
+                            <span class="label-text font-bold text-slate-700">วันที่ตรวจเช็ค</span>
+                        </label>
+                        <input type="date" name="inspection_date" required value="{{ date('Y-m-d') }}"
+                            class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-orange-500 transition-all font-medium">
+                    </div>
+                    <div class="form-control">
+                        <label class="label pb-1">
+                            <span class="label-text font-bold text-slate-700">เลขไมล์ปัจจุบัน</span>
+                        </label>
+                        <input type="number" name="mileage" id="insp_current_mileage" required
+                            class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-orange-500 transition-all font-bold text-orange-600">
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-slate-700">เป้าหมายการตรวจเช็คครั้งถัดไป (กม.)</span>
+                    </label>
+                    <input type="number" name="next_mileage" id="insp_next_mileage" required
+                        class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-orange-500 transition-all font-medium"
+                        placeholder="เช่น 50000">
+                    <label class="label">
+                        <span class="label-text-alt text-slate-400">ระบบจะแจ้งเตือนเมื่อใกล้ถึงระยะนี้</span>
+                    </label>
+                </div>
+
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-slate-700">ชื่อผู้ตรวจเช็ค</span>
+                    </label>
+                    <input type="text" name="inspector_name" required value="{{ Auth::user()->fullname }}"
+                        class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-orange-500 transition-all font-medium">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label pb-1">
+                            <span class="label-text font-bold text-slate-700">สถานที่ไปตรวจ</span>
+                        </label>
+                        <input type="text" name="location" placeholder="เช่น ศูนย์บริการ TOYOTA"
+                            class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-orange-500 transition-all font-medium">
+                    </div>
+                    <div class="form-control">
+                        <label class="label pb-1">
+                            <span class="label-text font-bold text-slate-700">แนบไฟล์เอกสารรถ</span>
+                        </label>
+                        <input type="file" name="file_vehicle"
+                            class="file-input file-input-bordered file-input-warning w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-orange-500 transition-all font-medium text-xs">
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-slate-700">ผลการตรวจเช็ค / บันทึก</span>
+                    </label>
+                    <textarea name="description" rows="2"
+                        class="textarea textarea-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-orange-500 transition-all font-medium"
+                        placeholder="เช่น เปลี่ยนน้ำมันเครื่อง, เช็คลมยาง..."></textarea>
+                </div>
+
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-slate-700">สถานะสภาพรถ</span>
+                    </label>
+                    <select name="status"
+                        class="select select-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-orange-500 transition-all font-bold text-slate-700">
+                        <option value="0">ปกติ (พร้อมใช้งาน)</option>
+                        <option value="1">ต้องซ่อมบำรุง (งดใช้งานชั่วคราว)</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <form method="dialog">
+                        <button class="btn btn-ghost rounded-2xl px-6 font-bold text-slate-500">ยกเลิก</button>
+                    </form>
+                    <button type="submit"
+                        class="btn bg-orange-600 hover:bg-orange-700 text-white border-0 shadow-lg shadow-orange-200 rounded-2xl px-10 transition-all">
+                        <i class="fa-solid fa-check-double mr-2"></i> บันทึกการตรวจ
+                    </button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop bg-slate-900/40 backdrop-blur-sm">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <!-- Edit Inspection Modal -->
+    <dialog id="edit_inspection_modal" class="modal">
+        <div class="modal-box bg-white rounded-3xl border border-slate-100 shadow-2xl p-0 overflow-hidden max-w-lg">
+            <div class="px-8 py-6 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 shadow-inner">
+                        <i class="fa-solid fa-wrench text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-xl text-slate-800">แก้ไขข้อมูลการตรวจเช็ค</h3>
+                        <p id="edit_insp_vehicle_name" class="text-xs text-blue-600 font-bold uppercase tracking-wider"></p>
+                    </div>
+                </div>
+                <form method="dialog">
+                    <button class="btn btn-circle btn-ghost btn-sm text-slate-400">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </form>
+            </div>
+
+            <form id="edit_inspection_form" action="" method="POST" enctype="multipart/form-data" class="p-8 space-y-5">
+                @csrf
+                @method('PUT')
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label pb-1">
+                            <span class="label-text font-bold text-slate-700">วันที่ตรวจเช็ค</span>
+                        </label>
+                        <input type="date" name="inspection_date" id="edit_insp_date" required
+                            class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-blue-500 transition-all font-medium">
+                    </div>
+                    <div class="form-control">
+                        <label class="label pb-1">
+                            <span class="label-text font-bold text-slate-700">เลขไมล์ปัจจุบัน</span>
+                        </label>
+                        <input type="number" name="mileage" id="edit_insp_mileage" required
+                            class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-blue-500 transition-all font-bold text-blue-600">
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-slate-700">เป้าหมายการตรวจเช็คครั้งถัดไป (กม.)</span>
+                    </label>
+                    <input type="number" name="next_mileage" id="edit_insp_next_mileage" required
+                        class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-blue-500 transition-all font-medium"
+                        placeholder="เช่น 50000">
+                </div>
+
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-slate-700">ชื่อผู้ตรวจเช็ค</span>
+                    </label>
+                    <input type="text" name="inspector_name" id="edit_insp_inspector" required
+                        class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-blue-500 transition-all font-medium">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label pb-1">
+                            <span class="label-text font-bold text-slate-700">สถานที่ไปตรวจ</span>
+                        </label>
+                        <input type="text" name="location" id="edit_insp_location" placeholder="เช่น ศูนย์บริการ TOYOTA"
+                            class="input input-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-blue-500 transition-all font-medium">
+                    </div>
+                    <div class="form-control">
+                        <label class="label pb-1">
+                            <span class="label-text font-bold text-slate-700">แนบไฟล์เอกสารรถ</span>
+                        </label>
+                        <input type="file" name="file_vehicle"
+                            class="file-input file-input-bordered file-input-info w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-blue-500 transition-all font-medium text-xs">
+                        <label class="label">
+                            <span id="current_file_name"
+                                class="label-text-alt text-slate-400 truncate max-w-[150px]">ไฟล์เดิม: None</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-slate-700">ผลการตรวจเช็ค / บันทึก</span>
+                    </label>
+                    <textarea name="description" id="edit_insp_description" rows="2"
+                        class="textarea textarea-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-blue-500 transition-all font-medium"
+                        placeholder="เช่น เปลี่ยนน้ำมันเครื่อง..."></textarea>
+                </div>
+
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text font-bold text-slate-700">สถานะสภาพรถ</span>
+                    </label>
+                    <select name="status" id="edit_insp_status"
+                        class="select select-bordered w-full rounded-2xl bg-slate-50 border-slate-200 focus:border-blue-500 transition-all font-bold text-slate-700">
+                        <option value="0">ปกติ (พร้อมใช้งาน)</option>
+                        <option value="1">ต้องซ่อมบำรุง (งดใช้งานชั่วคราว)</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <form method="dialog">
+                        <button class="btn btn-ghost rounded-2xl px-6 font-bold text-slate-500">ยกเลิก</button>
+                    </form>
+                    <button type="submit"
+                        class="btn bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg shadow-blue-200 rounded-2xl px-10 transition-all">
+                        <i class="fa-solid fa-save mr-2"></i> บันทึกการแก้ไข
+                    </button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop bg-slate-900/40 backdrop-blur-sm">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <script>
+        function openEditInspectionModal(inspection) {
+            const form = document.getElementById('edit_inspection_form');
+            form.action = `/backend/bookingcar/inspections/${inspection.inspection_id}`;
+
+            document.getElementById('edit_insp_vehicle_name').innerText = `รถ: ${inspection.vehicle?.name || inspection.vehicle_id}`;
+            document.getElementById('edit_insp_date').value = inspection.inspection_date ? inspection.inspection_date.split(' ')[0] : '';
+            document.getElementById('edit_insp_mileage').value = inspection.mileage;
+            document.getElementById('edit_insp_next_mileage').value = inspection.next_mileage;
+            document.getElementById('edit_insp_inspector').value = inspection.inspector_name;
+            document.getElementById('edit_insp_location').value = inspection.location || '';
+            document.getElementById('edit_insp_description').value = inspection.description || '';
+            document.getElementById('edit_insp_status').value = inspection.status;
+            document.getElementById('current_file_name').innerText = inspection.file_vehicle ? `ไฟล์เดิม: ${inspection.file_vehicle}` : 'ไฟล์เดิม: ไม่มี';
+
+            document.getElementById('edit_inspection_modal').showModal();
+        }
+
+        function showTab(tabId, save = true) {
+            if (save) {
+                localStorage.setItem('activeBookingCarTab', tabId);
+            }
+            // Hide all panes
+            document.querySelectorAll('.tab-pane').forEach(el => {
+                el.classList.add('hidden');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(el => {
+                el.classList.remove('tab-active', 'bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-slate-200');
+            });
+
+            // Show selected pane
+            const target = document.getElementById(tabId);
+            if (target) {
+                target.classList.remove('hidden');
+            }
+
+            // Add active styling to selected tab
+            const activeTabStr = tabId.replace('tab-', 'btn-');
+            const activeTab = document.getElementById(activeTabStr);
+            if (activeTab) {
+                activeTab.classList.add('tab-active', 'bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-slate-200');
+            }
+        }
+
+        // Restore active tab from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeTab = localStorage.getItem('activeBookingCarTab');
+            if (activeTab && document.getElementById(activeTab)) {
+                showTab(activeTab, false);
+            }
+        });
+
+        function viewVehicleDetails(vehicle) {
+            const modal = document.getElementById('view_vehicle_modal');
+
+            // Set basic info
+            document.getElementById('view_vehicle_title').textContent = vehicle.name;
+            document.getElementById('view_vehicle_subtitle').textContent = `${vehicle.brand} ${vehicle.model_name || ''}`;
+            document.getElementById('view_vehicle_type').textContent = vehicle.type;
+            document.getElementById('view_vehicle_seat').textContent = vehicle.seat || '-';
+            document.getElementById('view_vehicle_fuel').textContent = vehicle.filling_type || '-';
+            document.getElementById('view_vehicle_year').textContent = vehicle.year || '-';
+            document.getElementById('view_vehicle_mileage').textContent = vehicle.latest_mileage ? parseInt(vehicle.latest_mileage).toLocaleString() : '0';
+            document.getElementById('view_vehicle_desc').textContent = vehicle.desciption || 'ไม่มีข้อมูลเพิ่มเติม';
+
+            // Set image
+            const images = typeof vehicle.images === 'string' ? JSON.parse(vehicle.images) : vehicle.images;
+            const banner = document.getElementById('view_vehicle_banner');
+            banner.src = (images && images.length > 0) ? `/images/vehicle/${images[0]}` : 'https://placehold.co/800x400/f8fafc/64748b?text=No+Image';
+
+            // Set status badge
+            const statusBadge = document.getElementById('view_vehicle_status_badge');
+            statusBadge.textContent = vehicle.status === 'available' ? 'ว่าง' : 'ไม่ว่าง';
+            statusBadge.className = `badge font-bold px-3 py-3 ${vehicle.status === 'available' ? 'badge-success text-white' : 'badge-error text-white'}`;
+
+            // Populating Maintenance History Table
+            const historyBody = document.getElementById('view_vehicle_inspections_body');
+            historyBody.innerHTML = '';
+
+            const inspections = vehicle.inspections || [];
+            // Sort inspections by date and ID desc (most recent first)
+            inspections.sort((a, b) => {
+                if (b.inspection_date !== a.inspection_date) {
+                    return new Date(b.inspection_date) - new Date(a.inspection_date);
+                }
+                return b.inspection_id - a.inspection_id;
+            });
+
+            if (inspections.length === 0) {
+                historyBody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-slate-400 italic">ไม่พบประวัติการตรวจเช็ค</td></tr>';
+            } else {
+                inspections.forEach(insp => {
+                    const date = new Date(insp.inspection_date).toLocaleDateString('th-TH');
+                    const statusClass = insp.status == 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+                    const statusText = insp.status == 0 ? 'ปกติ' : 'ไม่ปกติ';
+                    const fileLink = insp.file_vehicle ?
+                        `<a href="/uploads/vehicl_file_maintenance/${insp.file_vehicle}" target="_blank" class="text-blue-500 hover:text-blue-700"><i class="fa-solid fa-file-pdf"></i></a>` : '-';
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors";
+                    tr.innerHTML = `
+                                <td class="py-3 font-medium text-slate-500">${date}</td>
+                                <td class="py-3 font-bold text-slate-800">${parseInt(insp.mileage).toLocaleString()}</td>
+                                <td class="py-3 text-center">
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black ${statusClass}">${statusText}</span>
+                                </td>
+                                <td class="py-3 text-slate-500">${insp.inspector_name || '-'}</td>
+                                <td class="py-3 text-right">${fileLink}</td>
+                            `;
+                    historyBody.appendChild(tr);
+                });
+            }
+
+            // Maintenance Progress Tracker Populating
+            const latestInsp = inspections[0] || null;
+            const currentMile = parseInt(vehicle.latest_mileage || 0);
+            const goalMile = latestInsp ? parseInt(latestInsp.next_mileage || (currentMile + 10000)) : (currentMile + 10000);
+            const progress = goalMile > 0 ? Math.min((currentMile / goalMile) * 100, 100) : 0;
+            const remaining = Math.max(0, goalMile - currentMile);
+
+            document.getElementById('modal_progress_percent').textContent = progress.toFixed(1) + '%';
+            document.getElementById('modal_current_mileage').textContent = currentMile.toLocaleString() + ' km';
+            document.getElementById('modal_goal_mileage').textContent = goalMile.toLocaleString() + ' km';
+            document.getElementById('modal_remaining_km').textContent = remaining.toLocaleString();
+
+            const progressBar = document.getElementById('modal_progress_bar');
+            progressBar.style.width = progress + '%';
+
+            const mStatusBadge = document.getElementById('modal_status_badge');
+            if (currentMile >= goalMile) {
+                mStatusBadge.className = "badge badge-error text-white font-black text-[10px] py-3 px-3 animate-pulse";
+                mStatusBadge.textContent = "OVERDUE";
+                progressBar.className = "bg-gradient-to-r from-red-500 to-rose-600 h-full rounded-full transition-all duration-1000 shadow-lg shadow-rose-500/20";
+            } else if (currentMile >= (goalMile - 1000)) {
+                mStatusBadge.className = "badge badge-warning text-white font-black text-[10px] py-3 px-3";
+                mStatusBadge.textContent = "DUE SOON";
+                progressBar.className = "bg-gradient-to-r from-orange-400 to-amber-500 h-full rounded-full transition-all duration-1000 shadow-lg shadow-amber-500/20";
+            } else {
+                mStatusBadge.className = "badge badge-success text-white font-black text-[10px] py-3 px-3";
+                mStatusBadge.textContent = "HEALTHY";
+                progressBar.className = "bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-1000 shadow-lg shadow-emerald-500/20";
+            }
+
+            // Set edit link
+            document.getElementById('view_vehicle_edit_link').href = `/backend/bookingcar/${vehicle.vehicle_id}/edit`;
+
+            modal.showModal();
+        }
+
+        function openInspectionModal(vehicle) {
+            const modal = document.getElementById('inspection_modal');
+            document.getElementById('insp_vehicle_id').value = vehicle.vehicle_id;
+            document.getElementById('insp_vehicle_name').textContent = vehicle.name + ' (' + vehicle.brand + ')';
+            document.getElementById('insp_current_mileage').value = vehicle.latest_mileage || 0;
+
+            // Suggest next mileage (+10000)
+            const current = parseInt(vehicle.latest_mileage || 0);
+            document.getElementById('insp_next_mileage').value = current + 10000;
+
+            modal.showModal();
+        }
+
+        function confirmDelete(id, name) {
+            const modal = document.getElementById('delete_modal');
+            const form = document.getElementById('delete_form');
+            const nameSpan = document.getElementById('delete_vehicle_name');
+
+            nameSpan.innerText = name;
+            form.action = `/backend/bookingcar/${id}`;
+            modal.showModal();
+        }
+
+        function viewBookingDetails(booking) {
+            const modal = document.getElementById('view_booking_modal');
+
+            // Basic Info
+            document.getElementById('view_book_code').textContent = `#${booking.booking_code || 'N/A'}`;
+            document.getElementById('view_book_dest').textContent = booking.destination || 'ไม่ได้ระบุสถานที่';
+            document.getElementById('view_book_user').querySelector('span').textContent =
+                `${booking.user?.first_name} ${booking.user?.last_name} (${booking.user?.department?.department_name || '-'})`;
+
+            // Schedule
+            const startTime = booking.start_time ? new Date(booking.start_time) : null;
+            const endTime = booking.end_time ? new Date(booking.end_time) : null;
+
+            const formatDate = (date) => {
+                if (!date) return '-';
+                const d = date.getDate().toString().padStart(2, '0');
+                const m = (date.getMonth() + 1).toString().padStart(2, '0');
+                const y = date.getFullYear();
+                const h = date.getHours().toString().padStart(2, '0');
+                const min = date.getMinutes().toString().padStart(2, '0');
+                return `${d}/${m}/${y} ${h}:${min}`;
+            };
+
+            document.getElementById('view_book_start').textContent = formatDate(startTime);
+            document.getElementById('view_book_end').textContent = formatDate(endTime);
+
+            // Location & Purpose
+            document.getElementById('view_book_loc_full').textContent = `${booking.district || '-'} จ.${booking.province || '-'}`;
+            document.getElementById('view_book_passengers').textContent = `${booking.passenger_count || 1} ท่าน`;
+            document.getElementById('view_book_purpose').textContent = booking.purpose || 'ไม่มีระบุวัตถุประสงค์';
+
+            // Vehicle
+            document.getElementById('view_book_vehicle_name').textContent = booking.vehicle?.name || 'ไม่พบข้อมูลรถ';
+            document.getElementById('view_book_vehicle_plate').textContent = booking.vehicle?.license_plate || '-';
+
+            // Status
+            const statusBadge = document.getElementById('view_book_status_badge');
+            statusBadge.textContent = booking.status;
+            statusBadge.className = `badge badge-lg font-bold w-full py-4 text-sm ${booking.status === 'อนุมัติแล้ว' ? 'bg-green-500 text-white border-0' :
+                    (booking.status === 'รออนุมัติ' ? 'bg-orange-400 text-white border-0' : 'bg-red-500 text-white border-0')
+                }`;
+
+            // Return Info
+            document.getElementById('view_book_return_status').textContent = booking.return_status || 'ยังไม่ส่งคืน';
+            document.getElementById('view_book_return_note').textContent = booking.note_returning || 'ไม่มีหมายเหตุ';
+
+            // Attachments
+            const attachContainer = document.getElementById('view_book_attachments');
+            attachContainer.innerHTML = '';
+
+            // Main Attachment
+            if (booking.attachment) {
+                addAttachmentLink(attachContainer, booking.attachment, 'เอกสารหลัก', 'fa-file-pdf');
+            }
+
+            // Going Photos
+            if (booking.attachment_going) {
+                try {
+                    const going = JSON.parse(booking.attachment_going);
+                    if (Array.isArray(going)) {
+                        going.forEach((file, i) => addAttachmentLink(attachContainer, file, `รูปขาไป ${i + 1}`, 'fa-image'));
+                    } else {
+                        addAttachmentLink(attachContainer, booking.attachment_going, 'รูปขาไป', 'fa-image');
+                    }
+                } catch (e) {
+                    addAttachmentLink(attachContainer, booking.attachment_going, 'รูปขาไป', 'fa-image');
+                }
+            }
+
+            // Returning Photos
+            if (booking.attachment_returning) {
+                try {
+                    const ret = JSON.parse(booking.attachment_returning);
+                    if (Array.isArray(ret)) {
+                        ret.forEach((file, i) => addAttachmentLink(attachContainer, file, `รูปขากลับ ${i + 1}`, 'fa-image'));
+                    } else {
+                        addAttachmentLink(attachContainer, booking.attachment_returning, 'รูปขากลับ', 'fa-image');
+                    }
+                } catch (e) {
+                    addAttachmentLink(attachContainer, booking.attachment_returning, 'รูปขากลับ', 'fa-image');
+                }
+            }
+
+            if (attachContainer.innerHTML === '') {
+                attachContainer.innerHTML = '<span class="text-slate-400 text-xs italic">ไม่มีเอกสารแนบ</span>';
+            }
+
+            // Edit Link
+            document.getElementById('view_book_edit_btn').href = `/bookingcar/edit/${booking.booking_id}`;
+
+            modal.showModal();
+        }
+
+        function addAttachmentLink(container, path, label, icon) {
+            const a = document.createElement('a');
+            a.href = `/${path}`;
+            a.target = '_blank';
+            a.className = "flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-slate-600 text-[10px] font-bold hover:bg-slate-50 transition-colors";
+            a.innerHTML = `<i class="fa-solid ${icon} text-blue-500"></i> ${label}`;
+            container.appendChild(a);
+        }
+
+        // Initialize first tab
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('btn-vehicles');
+            if (btn) btn.classList.add('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-slate-200');
+        });
+    </script>
+@endsection

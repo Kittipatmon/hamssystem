@@ -238,7 +238,8 @@
                           <div class="tp-options" id="tp_start_h_options">
                             @for ($i = 0; $i < 24; $i++)
                               <div class="tp-option" onclick="setTimePart('start', 'h', '{{ sprintf('%02d', $i) }}')">
-                                {{ sprintf('%02d', $i) }}</div>
+                                {{ sprintf('%02d', $i) }}
+                              </div>
                             @endfor
                           </div>
                         </div>
@@ -247,7 +248,8 @@
                           <div class="tp-options" id="tp_start_m_options">
                             @for ($i = 0; $i < 60; $i += 1)
                               <div class="tp-option" onclick="setTimePart('start', 'm', '{{ sprintf('%02d', $i) }}')">
-                                {{ sprintf('%02d', $i) }}</div>
+                                {{ sprintf('%02d', $i) }}
+                              </div>
                             @endfor
                           </div>
                         </div>
@@ -272,7 +274,8 @@
                           <div class="tp-options" id="tp_end_h_options">
                             @for ($i = 0; $i < 24; $i++)
                               <div class="tp-option" onclick="setTimePart('end', 'h', '{{ sprintf('%02d', $i) }}')">
-                                {{ sprintf('%02d', $i) }}</div>
+                                {{ sprintf('%02d', $i) }}
+                              </div>
                             @endfor
                           </div>
                         </div>
@@ -281,7 +284,8 @@
                           <div class="tp-options" id="tp_end_m_options">
                             @for ($i = 0; $i < 60; $i += 1)
                               <div class="tp-option" onclick="setTimePart('end', 'm', '{{ sprintf('%02d', $i) }}')">
-                                {{ sprintf('%02d', $i) }}</div>
+                                {{ sprintf('%02d', $i) }}
+                              </div>
                             @endfor
                           </div>
                         </div>
@@ -799,7 +803,7 @@
         document.getElementById('booking_modal').showModal();
       @endif
 
-                                                                            var calendarEl = document.getElementById('calendar');
+                                                                              var calendarEl = document.getElementById('calendar');
       var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         headerToolbar: {
@@ -844,41 +848,44 @@
           const requesterName = props.requester_name || 'ไม่ระบุ';
           const currentUserId = {{ Auth::id() ?? 'null' }};
           const isOwner = currentUserId === props.user_id;
+          const eventStart = info.event.start;
+          const isPast = new Date(eventStart) < new Date();
+          const canCancel = isOwner && !isPast;
 
           Swal.fire({
             title: '<span class="text-[#c31919] font-bold text-xl"><i class="fa-solid fa-calendar-check mr-2"></i>รายละเอียดการจองห้อง</span>',
             html: `
-                                                                                        <div class="text-left space-y-3 mt-4 text-sm text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100">
-                                                                                          <div class="flex items-start">
-                                                                                            <i class="fa-solid fa-door-open mt-1 w-6 text-slate-400"></i>
-                                                                                            <div><span class="font-semibold text-slate-800">ห้องประชุม:</span> ${info.event.title}</div>
+                                                                                          <div class="text-left space-y-3 mt-4 text-sm text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                                                                                            <div class="flex items-start">
+                                                                                              <i class="fa-solid fa-door-open mt-1 w-6 text-slate-400"></i>
+                                                                                              <div><span class="font-semibold text-slate-800">ห้องประชุม:</span> ${info.event.title}</div>
+                                                                                            </div>
+                                                                                            <div class="flex items-start">
+                                                                                              <i class="fa-regular fa-clock mt-1 w-6 text-slate-400"></i>
+                                                                                              <div><span class="font-semibold text-slate-800">เวลา:</span> ${timeStr}</div>
+                                                                                            </div>
+                                                                                              <div class="flex items-start">
+                                                                                                <i class="fa-solid fa-clipboard-list mt-1 w-6 text-slate-400"></i>
+                                                                                                <div><span class="font-semibold text-slate-800">หัวข้อ:</span> ${topic}</div>
+                                                                                              </div>
+                                                                                              <div class="flex items-start">
+                                                                                                <i class="fa-solid fa-users mt-1 w-6 text-slate-400"></i>
+                                                                                                <div><span class="font-semibold text-slate-800">จำนวนคน:</span> ${participantCount} ท่าน</div>
+                                                                                              </div>
+                                                                                              <div class="flex items-start">
+                                                                                                <i class="fa-solid fa-user-tie mt-1 w-6 text-slate-400"></i>
+                                                                                                <div><span class="font-semibold text-slate-800">เจ้าของงานคือใคร:</span> ${requesterName}</div>
+                                                                                              </div>
+                                                                                              <div class="flex items-start">
+                                                                                                <i class="fa-solid fa-user mt-1 w-6 text-slate-400"></i>
+                                                                                                <div><span class="font-semibold text-slate-800">ผู้จอง:</span> ${bookerName}</div>
+                                                                                              </div>
                                                                                           </div>
-                                                                                          <div class="flex items-start">
-                                                                                            <i class="fa-regular fa-clock mt-1 w-6 text-slate-400"></i>
-                                                                                            <div><span class="font-semibold text-slate-800">เวลา:</span> ${timeStr}</div>
-                                                                                          </div>
-                                                                                            <div class="flex items-start">
-                                                                                              <i class="fa-solid fa-clipboard-list mt-1 w-6 text-slate-400"></i>
-                                                                                              <div><span class="font-semibold text-slate-800">หัวข้อ:</span> ${topic}</div>
-                                                                                            </div>
-                                                                                            <div class="flex items-start">
-                                                                                              <i class="fa-solid fa-users mt-1 w-6 text-slate-400"></i>
-                                                                                              <div><span class="font-semibold text-slate-800">จำนวนคน:</span> ${participantCount} ท่าน</div>
-                                                                                            </div>
-                                                                                            <div class="flex items-start">
-                                                                                              <i class="fa-solid fa-user-tie mt-1 w-6 text-slate-400"></i>
-                                                                                              <div><span class="font-semibold text-slate-800">เจ้าของงานคือใคร:</span> ${requesterName}</div>
-                                                                                            </div>
-                                                                                            <div class="flex items-start">
-                                                                                              <i class="fa-solid fa-user mt-1 w-6 text-slate-400"></i>
-                                                                                              <div><span class="font-semibold text-slate-800">ผู้จอง:</span> ${bookerName}</div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                      `,
+                                                                                        `,
             showConfirmButton: true,
             confirmButtonText: 'ปิด',
             confirmButtonColor: '#64748b',
-            showDenyButton: isOwner,
+            showDenyButton: canCancel,
             denyButtonText: '<i class="fa-solid fa-trash-can text-xs mr-1"></i> ยกเลิกการจอง',
             denyButtonColor: '#e53935',
             customClass: {

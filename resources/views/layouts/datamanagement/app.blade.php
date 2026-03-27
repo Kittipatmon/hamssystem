@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Laravel') }}@yield('title' ? ' - ' . $__env->yieldContent('title') : '')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -22,13 +22,13 @@
     @stack('styles')
 </head>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen">
+<body class="font-sans antialiased bg-slate-50/50 text-slate-900">
+    <div class="min-h-screen flex flex-col">
         @include('layouts.datamanagement.navigation')
 
         <!-- Page Heading -->
         @isset($header)
-        <header class="bg-white shadow">
+        <header class="bg-white shadow-sm border-b border-slate-100">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                 {{ $header }}
             </div>
@@ -36,26 +36,28 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="p-6 min-h-[70vh]">
+        <main class="flex-grow p-4 md:p-6 lg:p-8">
             @yield('content')
         </main>
 
         @include('layouts.footer')
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
+    
     @if (session('success'))
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Success',
+                    title: 'สำเร็จ',
                     text: "{{ session('success') }}",
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'OK'
+                    confirmButtonColor: '#D71920',
                 });
             });
         </script>
-        @endif
+    @endif
 </body>
 
 </html>

@@ -41,6 +41,62 @@
         #sidebar {
             transition: width 0.3s ease;
         }
+
+        /* Kumwell Premium UI Components */
+        .kumwell-glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .kumwell-glass {
+            background: rgba(30, 33, 41, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .kumwell-card {
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kumwell-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+        }
+
+        .btn-kumwell-red {
+            background-color: #D71920;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .btn-kumwell-red:hover {
+            background-color: #b71515;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(215, 25, 32, 0.3);
+        }
+
+        .kumwell-table-header {
+            background: rgba(243, 244, 246, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .dark .kumwell-table-header {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .kumwell-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
     </style>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -134,8 +190,9 @@
                     <i id="dashboard-icon"
                         class="fa-solid fa-chart-pie text-sm w-6 text-center group-hover:text-white transition-colors mr-3"></i>
                     <span class="sidebar-text">Dashboard</span>
-                    
-                    <div class="tooltip absolute left-14 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
+
+                    <div
+                        class="tooltip absolute left-14 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
                         Dashboard
                     </div>
                 </a>
@@ -163,6 +220,7 @@
                         </a>
                     </div>
 
+
                     <div
                         class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
                         ข้อมูลทั่วไป
@@ -170,37 +228,66 @@
                 </div>
 
                 <div class="relative group">
+                    <button onclick="toggleDropdown('dropdown-policy')"
+                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
+                        id="btn-policy">
+                        <div class="flex items-center">
+                            <i id="icon-policy" class="fa-solid fa-users-gear text-sm w-6 text-center mr-3"></i>
+                            <span class="sidebar-text">จัดการนโยบาย/ขั้นตอน</span>
+                        </div>
+                        <i id="arrow-policy"
+                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                    </button>
+
+                    <div id="dropdown-policy" class="hidden pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
+                        <a href="{{ route('backend.policy.index', ['type' => 'policy']) }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->get('type') === 'policy' ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
+                            นโยบาย</a>
+                        <a href="{{ route('backend.policy.index', ['type' => 'operation']) }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->get('type') === 'operation' ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
+                            หมวดหมู่การดำเนินงาน</a>
+
+                    </div>
+
+                    <div
+                        class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
+                        จัดการนโยบาย/ขั้นตอน
+                    </div>
+                </div>
+
+
+                <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-hr')"
                         class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
                         id="btn-hr">
                         <div class="flex items-center">
                             <i id="icon-hr" class="fa-solid fa-users-gear text-sm w-6 text-center mr-3"></i>
-                            <span class="sidebar-text">HR Settings</span>
+                            <span class="sidebar-text">HAMS Settings</span>
                         </div>
                         <i id="arrow-hr"
                             class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
                     </button>
 
                     <div id="dropdown-hr" class="hidden pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
-                        <a href=""
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">-
+                        <a href="{{ route('users.index') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('users.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
                             ข้อมูลพนักงาน</a>
-                        <a href=""
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">-
+                        <a href="{{ route('usertypes.index') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('usertypes.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
                             ข้อมูลประเภทพนักงาน</a>
-                        <a href=""
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">-
+                        <a href="{{ route('sections.index') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('sections.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
                             ข้อมูลสายงาน</a>
-                        <a href=""
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">-
+                        <a href="{{ route('divisions.index') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('divisions.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
                             ข้อมูลฝ่าย</a>
-                        <a href=""
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">-
+                        <a href="{{ route('departments.index') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('departments.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
                             ข้อมูลแผนก</a>
                     </div>
                     <div
                         class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
-                        HR Settings
+                        HAMS Settings
                     </div>
                 </div>
 
@@ -267,6 +354,52 @@
                     <div
                         class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
                         ระบบจัดการห้องประชุม
+                    </div>
+                </div>
+
+                <div class="relative group">
+                    <button onclick="toggleDropdown('dropdown-housing')"
+                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
+                        id="btn-housing">
+                        <div class="flex items-center">
+                            <i id="icon-housing" class="fa-solid fa-house-chimney text-sm w-6 text-center mr-3"></i>
+                            <span
+                                class="sidebar-text text-left break-words whitespace-normal leading-tight">ระบบจัดการบ้านพัก</span>
+                        </div>
+                        <i id="arrow-housing"
+                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                    </button>
+
+                    <div id="dropdown-housing" class="hidden pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
+                        <a href="{{ route('housing.welcome') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.welcome') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
+                            - Dashboard บ้านพัก
+                        </a>
+                        <a href="{{ route('housing.request.create') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.request.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
+                            - คำขอเข้าพักบ้านพัก
+                        </a>
+                        <a href="{{ route('housing.agreement.create') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.agreement.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
+                            - ข้อตกลงเข้าพักอาศัย
+                        </a>
+                        <a href="{{ route('housing.guest.create') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.guest.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
+                            - ขออนุญาตนำญาติเข้าพัก
+                        </a>
+                        <a href="{{ route('housing.leave.create') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.leave.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
+                            - คำร้องย้ายออก
+                        </a>
+                        <a href="{{ route('housing.management') }}"
+                            class="flex justify-between items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.management') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
+                            <span>- จัดการข้อมูลทั้งหมด</span>
+                        </a>
+                    </div>
+
+                    <div
+                        class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
+                        ระบบจัดการบ้านพัก
                     </div>
                 </div>
 

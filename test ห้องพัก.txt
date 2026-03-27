@@ -1,0 +1,546 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Mar 26, 2026 at 03:07 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+--
+-- Database: `hamssystem`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `approval_settings`
+--
+
+CREATE TABLE `approval_settings` (
+  `approval_settings_id` int(10) UNSIGNED NOT NULL COMMENT 'รหัส',
+  `department_name` varchar(100) NOT NULL COMMENT 'ชื่อแผนก',
+  `approver_user_id` int(10) UNSIGNED NOT NULL COMMENT 'user_id ของหัวหน้าแผนกที่มีสิทธิ์อนุมัติ',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='กำหนดผู้อนุมัติในแต่ละแผนก (หัวหน้า)';
+
+--
+-- Dumping data for table `approval_settings`
+--
+
+INSERT INTO `approval_settings` (`approval_settings_id`, `department_name`, `approver_user_id`, `created_at`, `updated_at`) VALUES
+(1, 'ICT', 2, '2025-06-20 10:13:34', '2025-06-20 10:13:34');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `departments`
+--
+
+CREATE TABLE `departments` (
+  `department_id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `location` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `status` int(11) DEFAULT 0,
+  `sect_id` int(11) DEFAULT NULL COMMENT 'รหัสฝ่าย'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+
+--
+-- Dumping data for table `departments`
+--
+
+INSERT INTO `departments` (`department_id`, `name`, `code`, `phone`, `email`, `location`, `created_at`, `updated_at`, `status`, `sect_id`) VALUES
+(1, 'Testing', 'TT', NULL, NULL, '3', '2025-05-14 21:26:46', '2025-06-02 06:27:13', 0, NULL),
+(2, 'Research and innovation (RI)', 'RI', NULL, NULL, NULL, '2025-05-14 23:40:44', '2025-05-15 00:04:28', 0, NULL),
+(3, 'Accounting', 'AT', NULL, NULL, NULL, '2025-05-14 23:42:32', '2025-05-14 23:42:32', 0, NULL),
+(4, 'Domestic Sale', 'DS', NULL, NULL, NULL, '2025-05-14 23:43:00', '2025-05-14 23:43:00', 0, NULL),
+(5, 'Engineering Solution', 'ES', NULL, NULL, NULL, '2025-05-14 23:43:21', '2025-05-14 23:43:21', 0, NULL),
+(6, 'Export', 'EX', NULL, NULL, NULL, '2025-05-14 23:43:49', '2025-05-14 23:43:49', 0, NULL),
+(7, 'Lab test', 'LT', NULL, NULL, NULL, '2025-05-14 23:44:03', '2025-05-14 23:44:03', 0, NULL),
+(8, 'Research and innovation (RI-1)', 'RI-1', NULL, NULL, NULL, '2025-05-14 23:44:28', '2025-05-15 00:03:28', 0, NULL),
+(9, 'Research and innovation (RI-2)', 'RI-2', NULL, NULL, NULL, '2025-05-14 23:44:37', '2025-05-15 00:03:48', 0, NULL),
+(10, 'Research and innovation (RI-3)', 'RI-3', NULL, NULL, NULL, '2025-05-14 23:44:48', '2025-05-15 00:03:58', 0, NULL),
+(11, 'Research and innovation (RI-4)', 'RI-4', NULL, NULL, NULL, '2025-05-14 23:44:56', '2025-05-15 00:04:10', 0, NULL),
+(12, 'HAMS', 'HAMS', NULL, NULL, NULL, '2025-05-14 23:46:19', '2025-05-14 23:46:19', 0, NULL),
+(13, 'HAM', 'HAM', NULL, NULL, NULL, '2025-05-29 04:50:37', '2025-05-29 04:50:37', 0, NULL),
+(14, 'ICT', 'ICT', NULL, NULL, NULL, '2025-06-02 06:27:26', '2025-06-02 06:27:26', 0, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employees`
+--
+
+CREATE TABLE `employees` (
+  `id` int(11) NOT NULL COMMENT 'รหัสพนักงาน (ลำดับอัตโนมัติ)',
+  `full_name` varchar(100) NOT NULL COMMENT 'ชื่อ-นามสกุล',
+  `nickname` varchar(50) DEFAULT NULL COMMENT 'ชื่อเล่น',
+  `email` varchar(100) DEFAULT NULL COMMENT 'อีเมลพนักงาน',
+  `department` varchar(100) DEFAULT NULL COMMENT 'แผนกที่สังกัด',
+  `phone` varchar(20) DEFAULT NULL COMMENT 'เบอร์โทรศัพท์',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'วันที่สร้างรายการจอง',
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='ตารางเก็บข้อมูลพนักงาน' ROW_FORMAT=DYNAMIC;
+
+--
+-- Dumping data for table `employees`
+--
+
+INSERT INTO `employees` (`id`, `full_name`, `nickname`, `email`, `department`, `phone`, `created_at`, `updated_at`) VALUES
+(1, 'คุณวรานันทน์ เถาธรรมพิทักษ์', 'ปูณร์', 'waranan.to@kumwell.com', 'HAMS', '3321', '2025-06-02 10:57:43', '2025-06-02 10:57:43'),
+(3, 'ป้อมรปภ', 'น้าสุทธิ', NULL, 'HAMS', '3272', '2025-06-04 02:03:04', '2025-06-04 02:11:17'),
+(4, 'คุณรุ่งทิพย์ พ่วงพันธ์', 'พี่ทิพย์', 'Rungthip.pu@kumwell.com', 'HAMS', '3001', '2025-06-04 02:03:48', '2025-06-04 02:03:58'),
+(5, 'คุณวานิสา อารมณ์ชื่น', 'น้องวิว อาคาร', 'Wanisa.Ar@kumwell.com', 'HAMS', '3330', '2025-06-04 02:05:12', '2025-06-04 02:05:12'),
+(6, 'คุณผกามาศ หาญณรงค์', 'น้องแบม', 'Phakamat.Ha@kumwell.com', 'HAMS', '3002', '2025-06-04 02:05:58', '2025-06-04 02:05:58'),
+(7, 'คุณประภาส อัมรินทร์', NULL, 'prapas.am@kumwell.com', 'Infra', '3339', '2025-06-04 02:06:54', '2025-06-04 02:11:28'),
+(8, 'คุณชลธิชา เปาชม', 'นุช', 'cholticha.po@kumwell.com', 'Infra', '3338', '2025-06-04 02:07:24', '2025-06-04 02:07:24'),
+(12, 'คุณไพศร บู', 'ศร', NULL, 'Infra', '3341', '2025-06-04 02:09:54', '2025-06-04 02:11:15');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `global_approvers`
+--
+
+CREATE TABLE `global_approvers` (
+  `global_approvers_id` int(10) UNSIGNED NOT NULL,
+  `role` enum('manager_hams','committee') NOT NULL COMMENT 'ตำแหน่ง: ผู้จัดการ HAMS หรือ กรรมการบ้านพัก',
+  `user_id` int(10) UNSIGNED NOT NULL COMMENT 'user_id ที่รับผิดชอบตำแหน่งนี้',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci COMMENT='ผู้อนุมัติระดับองค์กร เช่น ผู้จัดการ HAMS และกรรมการบ้านพัก';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residence`
+--
+
+CREATE TABLE `residence` (
+  `residence_id` int(11) NOT NULL COMMENT 'รหัสบ้านพัก',
+  `name` varchar(100) NOT NULL COMMENT 'ชื่อบ้านพัก เช่น บางใหญ่ หรือ ไทรใหญ่',
+  `address` text DEFAULT NULL COMMENT 'ที่อยู่โดยละเอียดของบ้านพัก',
+  `total_floors` int(11) NOT NULL COMMENT 'จำนวนชั้นทั้งหมดของบ้านพัก',
+  `total_rooms` int(11) NOT NULL COMMENT 'จำนวนห้องทั้งหมดในบ้านพัก',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'วันที่บันทึกข้อมูล',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `user_createdid` int(11) DEFAULT NULL COMMENT 'คนเพิ่มข้อมูล',
+  `user_updateid` int(11) DEFAULT NULL COMMENT 'คนแก้ไขข้อมูล'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='ตารางเก็บข้อมูลบ้านพักภายในบริษัท' ROW_FORMAT=DYNAMIC;
+
+--
+-- Dumping data for table `residence`
+--
+
+INSERT INTO `residence` (`residence_id`, `name`, `address`, `total_floors`, `total_rooms`, `created_at`, `updated_at`, `user_createdid`, `user_updateid`) VALUES
+(1, 'บางใหญ่', NULL, 2, 12, '2025-06-04 14:47:54', '2025-07-29 10:44:33', 0, 1),
+(2, 'ไทรใหญ่', NULL, 4, 24, '2025-06-04 14:49:32', '2025-06-04 14:54:40', 0, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residence_agreements`
+--
+
+CREATE TABLE `residence_agreements` (
+  `agreement_id` bigint(20) NOT NULL COMMENT 'รหัสข้อตกลง',
+  `agreement_code` varchar(100) DEFAULT NULL COMMENT 'เลขใบข้อตกลงการเข้าพักอาศัยบ้านพักพนักงาน',
+  `user_id` int(11) DEFAULT NULL COMMENT 'รหัสผู้ใช้งาน',
+  `agreement_date` date DEFAULT NULL COMMENT 'วันที่ทำข้อตกลง',
+  `title` varchar(10) DEFAULT NULL COMMENT 'คำนำหน้าชื่อ เช่น นาย นาง นางสาว',
+  `full_name` varchar(200) DEFAULT NULL COMMENT 'ชื่อ-นามสกุลพนักงาน',
+  `position` varchar(100) DEFAULT NULL COMMENT 'ตำแหน่งงานของพนักงาน',
+  `department` varchar(100) DEFAULT NULL COMMENT 'แผนก',
+  `section` varchar(100) DEFAULT NULL COMMENT 'ฝ่าย',
+  `residence_address` varchar(255) DEFAULT NULL COMMENT 'บ้านพักที่ได้รับอนุญาตให้พักอาศัย (เลขที่บ้าน)',
+  `residence_floor` varchar(50) DEFAULT NULL COMMENT 'ชั้นของบ้านพักที่พักอยู่',
+  `number_of_residents` int(11) DEFAULT NULL COMMENT 'จำนวนผู้อาศัยรวมทั้งหมดในบ้านพัก',
+  `send_status` int(11) NOT NULL DEFAULT 0 COMMENT 'สถานะ\r\n0 = รอผู้บังคับบัญชาอนุมัติ\r\n1 = รอผู้จัดการแผนกจัดการและบํารุงอาคารอนุมัติ\r\n2 = รอกรรมการบ้านพักตรวจสอบ\r\n3 = ดำเนินการเสร็จสิ้น\r\n4 = ส่งกลับแก้ไข\r\n5 = ยกเลิก',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'วันที่สร้างข้อมูล',
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'วันที่แก้ไขล่าสุด',
+  `commander_id` int(11) DEFAULT NULL COMMENT 'ผู้บังคับบัญชา',
+  `commander_status` int(11) NOT NULL DEFAULT 0,
+  `commander_comment` text DEFAULT NULL,
+  `commander_date` date DEFAULT NULL,
+  `managerhams_id` int(11) DEFAULT NULL COMMENT 'ผู้จัดการแผนกจัดการและบํารุงอาคาร',
+  `managerhams_status` int(11) NOT NULL DEFAULT 0,
+  `managerhams_comment` text DEFAULT NULL,
+  `managerhams_date` date DEFAULT NULL,
+  `Committee_id` int(11) DEFAULT NULL COMMENT 'กรรมการบ้านพก',
+  `Committee_status` int(11) NOT NULL DEFAULT 0,
+  `Committee_comment` text DEFAULT NULL,
+  `Committee_date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci COMMENT='ตารางเก็บข้อมูลแบบฟอร์มข้อตกลงการเข้าพักบ้านพักพนักงาน';
+
+--
+-- Dumping data for table `residence_agreements`
+--
+
+INSERT INTO `residence_agreements` (`agreement_id`, `agreement_code`, `user_id`, `agreement_date`, `title`, `full_name`, `position`, `department`, `section`, `residence_address`, `residence_floor`, `number_of_residents`, `send_status`, `created_at`, `updated_at`, `commander_id`, `commander_status`, `commander_comment`, `commander_date`, `managerhams_id`, `managerhams_status`, `managerhams_comment`, `managerhams_date`, `Committee_id`, `Committee_status`, `Committee_comment`, `Committee_date`) VALUES
+(2, 'RA-250601', 1, '2025-06-20', 'นาย', 'คุณวานิสา อารมณ์ชื่น', 'Software Engineer', 'ICT', 'ICT', 'A101', '1', 2, 0, '2025-06-20 03:18:54', '2025-06-20 03:18:54', NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residence_bill`
+--
+
+CREATE TABLE `residence_bill` (
+  `bill_id` int(11) NOT NULL COMMENT 'รหัสบิล',
+  `stay_id` int(11) NOT NULL COMMENT 'อ้างอิงรหัสการพัก',
+  `billing_year` int(11) NOT NULL COMMENT 'ปีที่คิดค่าใช้จ่าย',
+  `billing_month` tinyint(4) NOT NULL COMMENT 'เดือนที่คิดค่าใช้จ่าย',
+  `room_rate` decimal(10,2) NOT NULL COMMENT 'ค่าห้องรายเดือน',
+  `electricity_unit_start` int(11) DEFAULT 0 COMMENT 'หน่วยไฟฟ้าต้นเดือน',
+  `electricity_unit_end` int(11) DEFAULT 0 COMMENT 'หน่วยไฟฟ้าปลายเดือน',
+  `electricity_rate_per_unit` decimal(10,2) DEFAULT 5.00 COMMENT 'ค่าไฟต่อหน่วย',
+  `electricity_total` decimal(10,2) DEFAULT 0.00 COMMENT 'รวมค่าไฟฟ้า (คำนวณภายนอก)',
+  `other_fee` decimal(10,2) DEFAULT 0.00 COMMENT 'ค่าใช้จ่ายอื่น ๆ',
+  `total_amount` decimal(10,2) DEFAULT 0.00 COMMENT 'รวมยอดทั้งหมด (คำนวณภายนอก)',
+  `is_paid` tinyint(1) DEFAULT 0 COMMENT 'ชำระแล้วหรือไม่ (0=ยัง, 1=แล้ว)',
+  `paid_at` datetime DEFAULT NULL COMMENT 'วันที่ชำระเงิน',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'วันที่สร้างบิล',
+  `bill_file` varchar(255) DEFAULT NULL COMMENT 'ไฟล์บิล (เช่น PDF, รูป)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='บิลค่าใช้จ่ายห้องพักรายเดือน' ROW_FORMAT=DYNAMIC;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residence_dependents`
+--
+
+CREATE TABLE `residence_dependents` (
+  `dependents_id` bigint(20) NOT NULL COMMENT 'รหัสผู้พักร่วม',
+  `request_id` bigint(20) DEFAULT NULL COMMENT 'เชื่อมโยงกับคำร้อง (residence_requests.id)',
+  `full_name` varchar(100) DEFAULT NULL COMMENT 'ชื่อ-นามสกุลผู้พักร่วม',
+  `relation` varchar(50) DEFAULT NULL COMMENT 'ความสัมพันธ์ เช่น บุตร ภรรยา',
+  `age` int(11) DEFAULT NULL COMMENT 'อายุผู้พักร่วม',
+  `related_detail` text DEFAULT NULL COMMENT 'ข้อมูลเกี่ยวข้องเพิ่มเติม',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci COMMENT='ผู้พักร่วมในบ้านพักพนักงาน';
+
+--
+-- Dumping data for table `residence_dependents`
+--
+
+INSERT INTO `residence_dependents` (`dependents_id`, `request_id`, `full_name`, `relation`, `age`, `related_detail`, `created_at`, `updated_at`) VALUES
+(26, 22, 'public user', 'เพื่อน', 21, NULL, '2025-06-24 04:01:05', '2025-06-24 04:01:05'),
+(27, 22, 'กิตติพรรณ บุญช่วย', 'เพื่อน', 22, NULL, '2025-06-24 04:01:05', '2025-06-24 04:01:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residence_leaves`
+--
+
+CREATE TABLE `residence_leaves` (
+  `residence_leaves_id` int(10) UNSIGNED NOT NULL COMMENT 'รหัสคำร้อง',
+  `residence_leaves_code` varchar(10) DEFAULT NULL COMMENT 'เลขที่ขอ',
+  `user_id` int(11) DEFAULT NULL COMMENT 'รหัสคนขอ',
+  `request_date` date NOT NULL COMMENT 'วันที่กรอกคำร้อง',
+  `prefix` varchar(10) NOT NULL COMMENT 'คำนำหน้า',
+  `first_name` varchar(100) NOT NULL COMMENT 'ชื่อ',
+  `last_name` varchar(100) NOT NULL COMMENT 'นามสกุล',
+  `position` varchar(100) NOT NULL COMMENT 'ตำแหน่ง',
+  `department` varchar(100) NOT NULL COMMENT 'แผนก',
+  `section` varchar(100) NOT NULL COMMENT 'ฝ่าย',
+  `residence_type` enum('bangkae','kraiyai') NOT NULL COMMENT 'ประเภทบ้านพัก: บางใหญ่ หรือ ไทรใหญ่',
+  `room_number` varchar(20) NOT NULL COMMENT 'หมายเลขห้อง',
+  `floor` varchar(10) NOT NULL COMMENT 'ชั้น',
+  `move_out_date` date NOT NULL COMMENT 'วันที่ย้ายออก',
+  `reason` text NOT NULL COMMENT 'เหตุผลที่ขอย้ายออก',
+  `send_status` int(11) DEFAULT 0 COMMENT 'สถานะ\r\n0 = รอผู้บังคับบัญชาอนุมัติ\r\n1 = รอผู้จัดการแผนกจัดการและบํารุงอาคารอนุมัติ\r\n2 = รอกรรมการบ้านพักตรวจสอบ\r\n3 = ดำเนินการเสร็จสิ้น\r\n4 = ส่งกลับแก้ไข\r\n5 = ยกเลิก',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `managerhams_id` int(11) DEFAULT NULL COMMENT 'ผู้จัดการแผนกจัดการและบํารุงอาคาร',
+  `managerhams_status` int(11) NOT NULL DEFAULT 0,
+  `managerhams_comment` text DEFAULT NULL,
+  `managerhams_date` date DEFAULT NULL,
+  `Committee_id` int(11) DEFAULT NULL COMMENT 'กรรมการบ้านพก',
+  `Committee_status` int(11) NOT NULL DEFAULT 0,
+  `Committee_comment` text DEFAULT NULL,
+  `Committee_date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ตารางเก็บข้อมูลคำร้องขอย้ายออกจากบ้านพักพนักงาน';
+
+--
+-- Dumping data for table `residence_leaves`
+--
+
+INSERT INTO `residence_leaves` (`residence_leaves_id`, `residence_leaves_code`, `user_id`, `request_date`, `prefix`, `first_name`, `last_name`, `position`, `department`, `section`, `residence_type`, `room_number`, `floor`, `move_out_date`, `reason`, `send_status`, `created_at`, `updated_at`, `managerhams_id`, `managerhams_status`, `managerhams_comment`, `managerhams_date`, `Committee_id`, `Committee_status`, `Committee_comment`, `Committee_date`) VALUES
+(2, 'RL-250602', 1, '2025-06-20', 'นาง', 'กิตติพรรณ', 'บุญช่วย', 'Software Engineer', 'ICT', 'ICT', 'kraiyai', 'A101', '1', '2025-06-20', 'testtt', 5, '2025-06-20 08:00:32', '2025-06-24 03:17:04', 1, 2, NULL, '2025-06-24', 1, 1, NULL, '2025-06-24');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residence_requests`
+--
+
+CREATE TABLE `residence_requests` (
+  `id` bigint(20) NOT NULL COMMENT 'รหัสคำร้อง',
+  `requests_code` varchar(100) NOT NULL COMMENT 'รหัสการเข้าพัก',
+  `request_date` date DEFAULT NULL COMMENT 'วันที่ยื่นคำร้อง',
+  `site` varchar(255) DEFAULT NULL COMMENT 'สถานที่ปฏิบัติงาน',
+  `title` varchar(10) DEFAULT NULL COMMENT 'คำนำหน้าชื่อ เช่น นาย นาง นางสาว',
+  `first_name` varchar(100) DEFAULT NULL COMMENT 'ชื่อพนักงาน',
+  `last_name` varchar(100) DEFAULT NULL COMMENT 'นามสกุลพนักงาน',
+  `position` varchar(100) DEFAULT NULL COMMENT 'ตำแหน่งงาน',
+  `department` varchar(100) DEFAULT NULL COMMENT 'แผนก',
+  `section` varchar(100) DEFAULT NULL COMMENT 'ฝ่าย',
+  `age_work` varchar(100) DEFAULT NULL COMMENT 'อายุงาน',
+  `phone` varchar(20) DEFAULT NULL COMMENT 'เบอร์โทรศัพท์',
+  `marital_status` enum('โสด','สมรส') DEFAULT NULL COMMENT 'สถานภาพสมรส',
+  `address_original` text DEFAULT NULL COMMENT 'ที่อยู่ตามทะเบียนบ้าน',
+  `address_original_subdistrict` varchar(100) DEFAULT NULL COMMENT 'แขวง/ตำบล ที่อยู่เดิม',
+  `address_original_district` varchar(100) DEFAULT NULL COMMENT 'เขต/อำเภอ ที่อยู่เดิม',
+  `address_original_province` varchar(100) DEFAULT NULL COMMENT 'จังหวัด ที่อยู่เดิม',
+  `address_current` text DEFAULT NULL COMMENT 'ที่อยู่ปัจจุบัน',
+  `address_current_subdistrict` varchar(100) DEFAULT NULL COMMENT 'แขวง/ตำบล ที่อยู่ปัจจุบัน',
+  `address_current_district` varchar(100) DEFAULT NULL COMMENT 'เขต/อำเภอ ที่อยู่ปัจจุบัน',
+  `address_current_province` varchar(100) DEFAULT NULL COMMENT 'จังหวัด ที่อยู่ปัจจุบัน',
+  `current_house_type` enum('บ้านเดี่ยว','บ้านแฝด','อื่นๆ') DEFAULT NULL COMMENT 'ประเภทบ้านปัจจุบัน',
+  `spouse_name` varchar(100) DEFAULT NULL COMMENT 'ชื่อคู่สมรส',
+  `spouse_occupation` varchar(100) DEFAULT NULL COMMENT 'อาชีพคู่สมรส',
+  `spouse_phone` varchar(20) DEFAULT NULL COMMENT 'เบอร์โทรศัพท์คู่สมรส',
+  `workplace_spouse` varchar(255) DEFAULT NULL COMMENT 'สถานที่ทำงานของคู่สมรส',
+  `number_of_residents` int(11) DEFAULT NULL COMMENT 'จำนวนผู้พักร่วมในบ้านพัก',
+  `residence_reason` text DEFAULT NULL COMMENT 'เหตุผลที่ขอเข้าพัก',
+  `requests_file` text DEFAULT NULL COMMENT 'เอกสารสำเนา',
+  `send_status` int(11) NOT NULL DEFAULT 0 COMMENT 'สถานะ\r\n0 = รอผู้บังคับบัญชาอนุมัติ\r\n1 = รอผู้จัดการแผนกจัดการและบํารุงอาคารอนุมัติ\r\n2 = รอกรรมการบ้านพักตรวจสอบ\r\n3 = ดำเนินการเสร็จสิ้น\r\n4 = ส่งกลับแก้ไข\r\n5 = ยกเลิก',
+  `user_id` int(11) NOT NULL COMMENT 'id ผู้จอง',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `commander_id` int(11) DEFAULT NULL COMMENT 'ผู้บังคับบัญชา',
+  `commander_status` int(11) NOT NULL DEFAULT 0,
+  `commander_comment` text DEFAULT NULL,
+  `commander_date` date DEFAULT NULL,
+  `managerhams_id` int(11) DEFAULT NULL COMMENT 'ผู้จัดการแผนกจัดการและบํารุงอาคาร',
+  `managerhams_status` int(11) NOT NULL DEFAULT 0,
+  `managerhams_comment` text DEFAULT NULL,
+  `managerhams_date` date DEFAULT NULL,
+  `Committee_id` int(11) DEFAULT NULL COMMENT 'กรรมการบ้านพก',
+  `Committee_status` int(11) NOT NULL DEFAULT 0,
+  `Committee_comment` text DEFAULT NULL,
+  `Committee_date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci COMMENT='คำร้องขอเข้าพักบ้านพักพนักงาน';
+
+--
+-- Dumping data for table `residence_requests`
+--
+
+INSERT INTO `residence_requests` (`id`, `requests_code`, `request_date`, `site`, `title`, `first_name`, `last_name`, `position`, `department`, `section`, `age_work`, `phone`, `marital_status`, `address_original`, `address_original_subdistrict`, `address_original_district`, `address_original_province`, `address_current`, `address_current_subdistrict`, `address_current_district`, `address_current_province`, `current_house_type`, `spouse_name`, `spouse_occupation`, `spouse_phone`, `workplace_spouse`, `number_of_residents`, `residence_reason`, `requests_file`, `send_status`, `user_id`, `created_at`, `updated_at`, `commander_id`, `commander_status`, `commander_comment`, `commander_date`, `managerhams_id`, `managerhams_status`, `managerhams_comment`, `managerhams_date`, `Committee_id`, `Committee_status`, `Committee_comment`, `Committee_date`) VALUES
+(22, 'RR-250601', '2025-06-24', 'โรงงานไทรใหญ่', 'นาย', 'Kittiphan', 'Bunchuai', 'Software Engineer', 'HAMS', 'HAMS', '1', '0638861802', 'โสด', '192/8', 'ศรีมงคล', 'บึงสามพัน', 'เพชรบูรณ์', '192/8', 'ศรีมงคล', 'บึงสามพัน', 'เพชรบูรณ์', 'บ้านเดี่ยว', 'ketnipha Thetthae', 'พนักงานบริษัท', '0638861801', 'test', 2, 'test', '[\"1750737665_685a2301d9d95_testpdf.pdf\",\"1750737665_685a2301da384_\\u0e15\\u0e31\\u0e27\\u0e2d\\u0e22\\u0e48\\u0e32\\u0e07.pdf\"]', 1, 1, '2025-06-24 04:01:05', '2025-06-24 07:49:40', 2, 1, NULL, '2025-06-24', NULL, 0, NULL, NULL, NULL, 0, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residence_resident`
+--
+
+CREATE TABLE `residence_resident` (
+  `residence_resident_id` int(11) NOT NULL COMMENT 'รหัสผู้อยู่อาศัย',
+  `employee_code` varchar(20) NOT NULL COMMENT 'รหัสพนักงาน',
+  `full_name` varchar(100) NOT NULL COMMENT 'ชื่อ-สกุลของพนักงาน',
+  `phone` varchar(20) DEFAULT NULL COMMENT 'เบอร์โทรติดต่อ',
+  `department` varchar(100) DEFAULT NULL COMMENT 'แผนกของพนักงาน',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'วันที่บันทึกข้อมูล',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `ext_number` int(11) DEFAULT NULL COMMENT 'เบอร์ภายใน',
+  `user_createdid` int(11) DEFAULT NULL COMMENT 'คนเพิ่มข้อมูล',
+  `user_updateid` int(11) DEFAULT NULL COMMENT 'คนแก้ไขข้อมูล',
+  `residence_stay_id` int(11) DEFAULT NULL COMMENT 'รหัสการเข้าพัก',
+  `status` int(11) DEFAULT NULL COMMENT '0 เปิดใช้ 1ไม่เปิดใช้'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='ตารางเก็บข้อมูลพนักงานที่พักอยู่ในบ้านพัก' ROW_FORMAT=DYNAMIC;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residence_room`
+--
+
+CREATE TABLE `residence_room` (
+  `residence_room_id` int(11) NOT NULL COMMENT 'รหัสห้องพัก',
+  `residence_id` int(11) NOT NULL COMMENT 'รหัสบ้านพักที่ห้องนี้อยู่',
+  `room_number` varchar(20) NOT NULL COMMENT 'หมายเลขห้อง เช่น 101, 202',
+  `floor` int(11) NOT NULL COMMENT 'ชั้นของห้อง เช่น ชั้น 1 หรือ 2',
+  `residence_room_status` int(11) DEFAULT 0 COMMENT 'สถานะห้อง เช่น 0 ว่าง /1 ไม่ว่าง /2 ซ่อม/ปรับปรุง 3/ยกเลิก',
+  `note` text DEFAULT NULL COMMENT 'หมายเหตุเพิ่มเติมของห้องพัก',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'วันที่บันทึกข้อมูล',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `user_createdid` int(11) DEFAULT NULL COMMENT 'คนเพิ่มข้อมูล',
+  `user_updateid` int(11) DEFAULT NULL COMMENT 'คนแก้ไขข้อมูล',
+  `image` text DEFAULT NULL COMMENT 'รูปภาพ',
+  `price` decimal(10,2) DEFAULT NULL COMMENT 'ราคาห้อง',
+  `capacity` int(11) DEFAULT NULL COMMENT 'ความจุ'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='ตารางเก็บข้อมูลห้องพักในแต่ละบ้านพัก' ROW_FORMAT=DYNAMIC;
+
+--
+-- Dumping data for table `residence_room`
+--
+
+INSERT INTO `residence_room` (`residence_room_id`, `residence_id`, `room_number`, `floor`, `residence_room_status`, `note`, `created_at`, `updated_at`, `user_createdid`, `user_updateid`, `image`, `price`, `capacity`) VALUES
+(4, 1, '101', 1, 0, 'test', '2025-06-04 16:07:52', '2025-09-17 10:21:25', 2, 1, 'images/residence_room/1749028072_68400ce80ff55.jpg', 2000.00, 4),
+(5, 1, '102', 1, 1, 'test', '2025-06-04 16:38:49', '2025-09-17 10:21:29', 2, 1, 'images/residence_room/1749029929_684014298ebb5.jpg', 2000.00, 2),
+(6, 1, '103', 1, 0, 'test', '2025-06-04 16:39:17', '2025-09-17 10:21:33', 2, 1, 'images/residence_room/1749029957_6840144552399.jpg', 2000.00, 2),
+(7, 1, '104', 1, 0, 'test', '2025-06-04 16:39:29', '2025-09-17 10:21:39', 2, 1, 'images/residence_room/1749029969_684014518e88d.jpg', 2000.00, 2),
+(8, 1, '105', 1, 1, 'test', '2025-06-04 16:40:32', '2025-09-17 10:21:43', 2, 1, 'images/residence_room/1749030032_684014909ec6c.jpg', 2000.00, 2),
+(9, 1, '106', 1, 0, 'test', '2025-06-04 16:40:54', '2025-09-17 10:21:47', 2, 1, 'images/residence_room/1749030054_684014a6a49cf.jpg', 2000.00, 2),
+(10, 1, '201', 2, 0, 'test', '2025-06-04 16:41:11', '2025-09-17 10:21:21', 2, 1, 'images/residence_room/1749030071_684014b785d4c.jpg', 2000.00, 2),
+(12, 2, '201', 2, 0, 'test', '2025-06-04 17:02:53', '2025-09-17 10:21:11', 2, 1, 'images/residence_room/1749031373_684019cd8d24a.jpg', 2000.00, 2),
+(13, 2, '301', 3, 0, 'test', '2025-06-04 17:03:10', '2025-09-17 10:21:06', 2, 1, 'images/residence_room/1749031390_684019deafb53.jpg', 2000.00, 2),
+(18, 1, '202', 2, 0, 'ห้องพัก', '2025-09-17 10:11:57', '2025-09-17 10:11:57', 1, NULL, NULL, 1.00, 2),
+(19, 1, '203', 2, 0, 'ห้องพัก', '2025-09-17 10:12:13', '2025-09-17 10:12:13', 1, NULL, NULL, 1.00, 2),
+(20, 1, '204', 2, 0, 'ห้องพัก', '2025-09-17 10:12:19', '2025-09-17 10:12:19', 1, NULL, NULL, 1.00, 2),
+(21, 1, '205', 2, 0, 'ห้องพัก', '2025-09-17 10:12:24', '2025-09-17 10:12:24', 1, NULL, NULL, 1.00, 2),
+(22, 1, '206', 2, 0, 'ห้องพัก', '2025-09-17 10:12:30', '2025-09-17 10:12:30', 1, NULL, NULL, 1.00, 2),
+(23, 2, '202', 2, 0, 'ห้องพัก', '2025-09-17 10:16:26', '2025-09-17 10:16:26', 1, NULL, NULL, 1.00, 2),
+(24, 2, '203', 2, 0, 'ห้องพัก', '2025-09-17 10:16:47', '2025-09-17 10:16:47', 1, NULL, NULL, 1.00, 2),
+(25, 2, '204', 2, 0, 'ห้องพัก', '2025-09-17 10:17:01', '2025-09-17 10:17:01', 1, NULL, NULL, 1.00, 2),
+(26, 2, '205', 2, 0, 'ห้องพัก', '2025-09-17 10:17:07', '2025-09-17 10:17:07', 1, NULL, NULL, 1.00, 2),
+(27, 2, '206', 2, 0, 'ห้องพัก', '2025-09-17 10:17:15', '2025-09-17 10:17:15', 1, NULL, NULL, 1.00, 2),
+(28, 2, '207', 2, 0, 'ห้องพัก', '2025-09-17 10:17:34', '2025-09-17 10:17:34', 1, NULL, NULL, 1.00, 2),
+(29, 2, '208', 2, 0, 'ห้องพัก', '2025-09-17 10:17:40', '2025-09-17 10:17:40', 1, NULL, NULL, 1.00, 2),
+(30, 2, '302', 3, 0, 'ห้องพัก', '2025-09-17 10:17:57', '2025-09-17 10:17:57', 1, NULL, NULL, 1.00, 2),
+(31, 2, '303', 3, 0, 'ห้องพัก', '2025-09-17 10:18:03', '2025-09-17 10:18:03', 1, NULL, NULL, 1.00, 2),
+(32, 2, '304', 3, 0, 'ห้องพัก', '2025-09-17 10:18:09', '2025-09-17 10:18:09', 1, NULL, NULL, 1.00, 2),
+(33, 2, '305', 3, 0, 'ห้องพัก', '2025-09-17 10:18:33', '2025-09-17 10:18:33', 1, NULL, NULL, 1.00, 2),
+(34, 2, '306', 3, 0, 'ห้องพัก', '2025-09-17 10:18:40', '2025-09-17 10:18:40', 1, NULL, NULL, 1.00, 2),
+(35, 2, '307', 3, 0, 'ห้องพัก', '2025-09-17 10:18:48', '2025-09-17 10:18:48', 1, NULL, NULL, 1.00, 2),
+(36, 2, '308', 3, 0, 'ห้องพัก', '2025-09-17 10:18:53', '2025-09-17 10:18:53', 1, NULL, NULL, 1.00, 2),
+(37, 2, '401', 4, 0, 'ห้องพัก', '2025-09-17 10:19:11', '2025-09-17 10:20:13', 1, 1, NULL, 1.00, 2),
+(38, 2, '402', 4, 0, 'ห้องพัก', '2025-09-17 10:19:18', '2025-09-17 10:20:17', 1, 1, NULL, 1.00, 2),
+(39, 2, '403', 4, 0, 'ห้องพัก', '2025-09-17 10:19:25', '2025-09-17 10:20:46', 1, 1, NULL, 1.00, 2),
+(40, 2, '404', 4, 0, 'ห้องพัก', '2025-09-17 10:19:32', '2025-09-17 10:20:40', 1, 1, NULL, 1.00, 2),
+(41, 2, '405', 4, 0, 'ห้องพัก', '2025-09-17 10:19:37', '2025-09-17 10:20:36', 1, 1, NULL, 1.00, 2),
+(42, 2, '406', 4, 0, 'ห้องพัก', '2025-09-17 10:19:45', '2025-09-17 10:20:32', 1, 1, NULL, 1.00, 2),
+(43, 2, '407', 4, 0, 'ห้องพัก', '2025-09-17 10:19:54', '2025-09-17 10:20:27', 1, 1, NULL, 1.00, 2),
+(44, 2, '408', 4, 0, 'ห้องพัก', '2025-09-17 10:20:01', '2025-09-17 10:20:22', 1, 1, NULL, 1.00, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `residence_stay`
+--
+
+CREATE TABLE `residence_stay` (
+  `residence_stay_id` int(11) NOT NULL COMMENT 'รหัสการเข้าพัก',
+  `residence_room_id` int(11) NOT NULL COMMENT 'รหัสห้องที่เข้าพัก',
+  `residence_resident_id` text NOT NULL COMMENT 'รหัสพนักงานที่เข้าพัก',
+  `check_in` date NOT NULL COMMENT 'วันที่เข้าพัก',
+  `check_out` date DEFAULT NULL COMMENT 'วันที่ย้ายออก (ถ้ายังไม่ออกให้เว้นว่าง)',
+  `is_current` tinyint(1) DEFAULT 1 COMMENT 'ระบุว่าปัจจุบันยังพักอยู่หรือไม่',
+  `tel_phone` varchar(20) DEFAULT NULL COMMENT 'เบอร์โทรศัพทฺ์',
+  `note` text DEFAULT NULL COMMENT 'หมายเหตุเพิ่มเติม',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'วันที่บันทึกข้อมูล',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `user_createdid` int(11) DEFAULT NULL COMMENT 'คนเพิ่มข้อมูล',
+  `user_updateid` int(11) DEFAULT NULL COMMENT 'คนแก้ไขข้อมูล',
+  `status` int(11) DEFAULT 0 COMMENT 'สถานะ',
+  `send_status` int(11) DEFAULT 0,
+  `reason_leave` text DEFAULT NULL COMMENT 'เหตุผลในการย้ายออก',
+  `residence_stay_date` datetime DEFAULT NULL COMMENT 'วันที่เพิ่ม'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='ตารางเก็บประวัติการเข้าพักของพนักงานแต่ละคนในห้องต่างๆ' ROW_FORMAT=DYNAMIC;
+
+--
+-- Dumping data for table `residence_stay`
+--
+
+INSERT INTO `residence_stay` (`residence_stay_id`, `residence_room_id`, `residence_resident_id`, `check_in`, `check_out`, `is_current`, `tel_phone`, `note`, `created_at`, `updated_at`, `user_createdid`, `user_updateid`, `status`, `send_status`, `reason_leave`, `residence_stay_date`) VALUES
+(11, 7, '\"[1,2]\"', '2025-06-13', '2025-06-13', 0, NULL, 'ttttttttttttttttt', '2025-06-13 11:10:59', '2025-06-13 11:32:32', 1, 1, 0, 0, NULL, '2025-06-13 11:10:59'),
+(14, 5, '\"[1]\"', '2025-06-13', NULL, 1, '0638861802', 'testtt', '2025-06-13 11:44:52', '2025-06-16 10:19:39', 1, 1, 0, 0, NULL, '2025-06-13 11:44:52'),
+(15, 8, '\"[1,2]\"', '2025-06-18', NULL, 1, '0638861802', 'tttttttttt', '2025-06-16 15:38:50', '2025-06-16 15:38:50', 1, NULL, 0, 0, NULL, '2025-06-16 15:38:50');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `resident_guest_members`
+--
+
+CREATE TABLE `resident_guest_members` (
+  `id` int(10) UNSIGNED NOT NULL COMMENT 'รหัส',
+  `guest_request_id` int(10) UNSIGNED NOT NULL COMMENT 'อ้างอิงถึง resident_guest_requests.id',
+  `full_name` varchar(255) NOT NULL COMMENT 'ชื่อ-นามสกุลของญาติ',
+  `age` int(11) DEFAULT NULL COMMENT 'อายุ',
+  `relation` varchar(100) DEFAULT NULL COMMENT 'เบอร์โทรศัพท์',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='รายชื่อญาติที่ขอเข้าพักในบ้านพักพนักงาน';
+
+--
+-- Dumping data for table `resident_guest_members`
+--
+
+INSERT INTO `resident_guest_members` (`id`, `guest_request_id`, `full_name`, `age`, `relation`, `created_at`, `updated_at`) VALUES
+(1, 1, 'public user', 22, 'เพื่อน', '2025-06-20 07:43:34', '2025-06-20 07:43:34'),
+(2, 2, 'public user', 22, 'เพื่อน', '2025-06-20 07:43:58', '2025-06-20 07:43:58');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `resident_guest_requests`
+--
+
+CREATE TABLE `resident_guest_requests` (
+  `resident_guest_id` int(10) UNSIGNED NOT NULL COMMENT 'รหัสคำร้อง',
+  `resident_guest_code` varchar(100) DEFAULT NULL COMMENT 'เลขที่',
+  `user_id` int(11) DEFAULT NULL COMMENT 'รหัสพนักงาน',
+  `request_date` date NOT NULL COMMENT 'วันที่กรอกแบบฟอร์ม',
+  `prefix` varchar(10) DEFAULT NULL COMMENT 'คำนำหน้า',
+  `first_name` varchar(100) NOT NULL COMMENT 'ชื่อ',
+  `last_name` varchar(100) NOT NULL COMMENT 'นามสกุล',
+  `position` varchar(100) NOT NULL COMMENT 'ตำแหน่ง',
+  `department` varchar(100) NOT NULL COMMENT 'แผนก',
+  `section` varchar(100) NOT NULL COMMENT 'ฝ่าย',
+  `residence_type` varchar(50) NOT NULL COMMENT 'ประเภทบ้านพัก: บางใหญ่ หรือ ไทรใหญ่',
+  `room_number` varchar(20) DEFAULT NULL COMMENT 'หมายเลขห้อง',
+  `relationship` varchar(100) DEFAULT NULL COMMENT 'ความสัมพันธ์กับบุคคลที่นำเข้าพัก',
+  `start_date` date NOT NULL COMMENT 'วันที่เริ่มเข้าพัก',
+  `start_time` time NOT NULL COMMENT 'เวลาที่เริ่ม',
+  `end_date` date NOT NULL COMMENT 'วันที่สิ้นสุด',
+  `end_time` time NOT NULL COMMENT 'เวลาที่สิ้นสุด',
+  `total_days` int(11) NOT NULL COMMENT 'จำนวนวันทั้งหมด',
+  `send_status` int(11) NOT NULL DEFAULT 0 COMMENT 'สถานะ\r\n0 = รอผู้บังคับบัญชาอนุมัติ\r\n1 = รอผู้จัดการแผนกจัดการและบํารุงอาคารอนุมัติ\r\n2 = รอกรรมการบ้านพักตรวจสอบ\r\n3 = ดำเนินการเสร็จสิ้น\r\n4 = ส่งกลับแก้ไข\r\n5 = ยกเลิก',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `commander_id` int(11) DEFAULT NULL COMMENT 'ผู้บังคับบัญชา',
+  `commander_status` int(11) NOT NULL DEFAULT 0,
+  `commander_comment` text DEFAULT NULL,
+  `commander_date` date DEFAULT NULL,
+  `managerhams_id` int(11) DEFAULT NULL COMMENT 'ผู้จัดการแผนกจัดการและบํารุงอาคาร',
+  `managerhams_status` int(11) NOT NULL DEFAULT 0,
+  `managerhams_comment` text DEFAULT NULL,
+  `managerhams_date` date DEFAULT NULL,
+  `Committee_id` int(11) DEFAULT NULL COMMENT 'กรรมการบ้านพก',
+  `Committee_status` int(11) NOT NULL DEFAULT 0,
+  `Committee_comment` text DEFAULT NULL,
+  `Committee_date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='แบบฟอร์มขออนุญาตนำญาติเข้าพักอาศัย';
+
+--
+-- Dumping data for table `resident_guest_requests`
+--
+
+INSERT INTO `resident_guest_requests` (`resident_guest_id`, `resident_guest_code`, `user_id`, `request_date`, `prefix`, `first_name`, `last_name`, `position`, `department`, `section`, `residence_type`, `room_number`, `relationship`, `start_date`, `start_time`, `end_date`, `end_time`, `total_days`, `send_status`, `created_at`, `updated_at`, `commander_id`, `commander_status`, `commander_comment`, `commander_date`, `managerhams_id`, `managerhams_status`, `managerhams_comment`, `managerhams_date`, `Committee_id`, `Committee_status`, `Committee_comment`, `Committee_date`) VALUES
+(1, 'RQ-250601', 1, '2025-06-20', 'นาย', 'กิตติพรรณ', 'บุญช่วย', 'Software Engineer', 'HAMS', 'HAMS', 'kraiyai', 'A101', 'เพื่อน', '2025-06-20', '10:33:00', '2025-06-30', '05:33:00', 10, 0, '2025-06-20 07:43:34', '2025-06-20 07:43:34', NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL),
+(2, 'RQ-250602', 1, '2025-06-20', 'นาย', 'กิตติพรรณ', 'บุญช่วย', 'Software Engineer', 'HAMS', 'HAMS', 'kraiyai', 'A101', 'เพื่อน', '2025-06-20', '10:33:00', '2025-06-30', '05:33:00', 10, 0, '2025-06-20 07:43:58', '2025-06-20 07:43:58', NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `approval_settings`
+--
+ALTER TABLE `approval_settings`
+  ADD PRIMARY KEY (`approval_settings_id`);
+COMMIT;

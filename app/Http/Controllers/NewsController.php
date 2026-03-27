@@ -306,7 +306,6 @@ class NewsController extends Controller
             ]);
             dd($mailable);
             exit;
-
             // Clear any post-login stored emails
             session()->forget(['post_login_notify_news_id', 'post_login_notify_emails']);
             return back()->with('success', 'ส่งแจ้งเตือน Outlook สำเร็จ');
@@ -371,7 +370,8 @@ class NewsController extends Controller
         $contentParagraphs = array_values(array_filter(array_map('trim', $parts ?? [])));
         $relativePaths = $this->normalizeImagePaths($news->image_path);
         $absolutePaths = array_map(function ($p) {
-            return asset(ltrim($p, '/')); }, $relativePaths);
+            return asset(ltrim($p, '/'));
+        }, $relativePaths);
         // จำกัดให้ส่งเฉพาะรูปแรก
         $absolutePaths = array_slice($absolutePaths, 0, 1);
         $contentHtml = view('emails.news_outlook_notification', [

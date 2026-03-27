@@ -8,26 +8,84 @@
             <p class="text-slate-500 text-lg">แสดงรายการรถส่วนกลางที่มีในระบบ สามารถดูรายละเอียดและสเปครถได้ที่นี่</p>
         </div>
 
-        <!-- Search and Count Header -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <div class="relative w-full md:w-96">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+        <!-- Enhanced Search and Filter Header -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-8 space-y-4">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Text Search -->
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                    </div>
+                    <input type="text" id="vehicleSearch"
+                        class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-red-500/10 focus:border-red-600 transition-all text-slate-600 font-medium placeholder-slate-400"
+                        placeholder="ค้นหาชื่อรถ, เลขทะเบียน, ยี่ห้อ...">
                 </div>
-                <input type="text" id="vehicleSearch" 
-                    class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-600 transition-all text-slate-600 placeholder-slate-400" 
-                    placeholder="ค้นหายี่ห้อ, รุ่น, ประเภทรถ...">
+
+                <!-- Filters Toggle / Options -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-1.5 px-4 py-2 bg-red-50 text-red-600 rounded-xl border border-red-100">
+                        <span class="text-xs font-black uppercase tracking-wider">พบทั้งหมด:</span>
+                        <span id="vehicleCount" class="text-lg font-black tabular-nums">{{ $vehicles->count() }}</span>
+                        <span class="text-xs font-bold uppercase tracking-wider">คัน</span>
+                    </div>
+                    <button id="resetFilters" class="btn btn-ghost btn-sm rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> ล้างการค้นหา
+                    </button>
+                </div>
             </div>
-            <div class="flex items-center gap-3 text-slate-600 px-4 py-2 bg-red-50/50 rounded-lg border border-red-100/50">
-                <span class="text-sm font-medium">พบทั้งหมด:</span>
-                <span id="vehicleCount" class="text-xl font-bold text-red-600 tabular-nums">{{ $vehicles->count() }}</span>
-                <span class="text-sm font-medium text-slate-500">คัน</span>
+
+            <!-- Detailed Filters Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-50">
+                <!-- Filter: Vehicle Type -->
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-[11px] font-bold text-slate-400 uppercase">ประเภทรถ</span></label>
+                    <select id="filterType" class="select select-sm select-bordered rounded-xl bg-slate-50 border-slate-200 focus:border-red-500 font-bold text-slate-700 h-10">
+                        <option value="">ทั้งหมด</option>
+                        @foreach($types as $t) <option value="{{ $t }}">{{ $t }}</option> @endforeach
+                    </select>
+                </div>
+
+                <!-- Filter: Fuel Type -->
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-[11px] font-bold text-slate-400 uppercase">ประเภทน้ำมัน</span></label>
+                    <select id="filterFuel" class="select select-sm select-bordered rounded-xl bg-slate-50 border-slate-200 focus:border-red-500 font-bold text-slate-700 h-10">
+                        <option value="">ทั้งหมด</option>
+                        @foreach($fuels as $f) <option value="{{ $f }}">{{ $f }}</option> @endforeach
+                    </select>
+                </div>
+
+                <!-- Filter: Seats -->
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-[11px] font-bold text-slate-400 uppercase">จำนวนที่นั่ง</span></label>
+                    <select id="filterSeat" class="select select-sm select-bordered rounded-xl bg-slate-50 border-slate-200 focus:border-red-500 font-bold text-slate-700 h-10">
+                        <option value="">ทั้งหมด</option>
+                        @foreach($seats as $s) <option value="{{ $s }}">{{ $s }} ที่นั่ง</option> @endforeach
+                    </select>
+                </div>
+
+                <!-- Filter: Usage Type -->
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text text-[11px] font-bold text-slate-400 uppercase">ประเภทการใช้งาน</span></label>
+                    <select id="filterUsage" class="select select-sm select-bordered rounded-xl bg-slate-50 border-slate-200 focus:border-red-500 font-bold text-slate-700 h-10">
+                        <option value="">ทั้งหมด</option>
+                        @foreach($usageTypes as $u)
+                            <option value="{{ $u }}">{{ $u == 1 ? 'รถส่วนกลาง' : ($u == 2 ? 'รถประจำตำแหน่ง' : 'อื่น ๆ') }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @forelse($vehicles as $vehicle)
                 <div
+                    data-brand="{{ strtolower($vehicle->brand) }}"
+                    data-type="{{ $vehicle->type }}"
+                    data-fuel="{{ $vehicle->filling_type }}"
+                    data-seat="{{ $vehicle->seat }}"
+                    data-usage="{{ $vehicle->status_vehicles }}"
+                    data-name="{{ strtolower($vehicle->name) }}"
+                    data-model="{{ strtolower($vehicle->model_name) }}"
                     class="vehicle-card card bg-white shadow-md border border-slate-200 p-0 transition-transform duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden flex flex-col h-full">
                     <!-- Vehicle Image -->
                     <figure
@@ -132,8 +190,10 @@
         </div>
 
         <!-- No Results Placeholder -->
-        <div id="noResults" class="hidden text-center py-16 px-4 bg-white rounded-xl border border-slate-200 shadow-sm mt-6">
-            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+        <div id="noResults"
+            class="hidden text-center py-16 px-4 bg-white rounded-xl border border-slate-200 shadow-sm mt-6">
+            <div
+                class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
                 <i class="fa-solid fa-magnifying-glass text-2xl text-slate-300"></i>
             </div>
             <h3 class="text-lg font-semibold text-slate-700">ไม่พบรถส่วนกลางที่ตรงกับการค้นหา</h3>
@@ -143,37 +203,80 @@
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('vehicleSearch');
-    const vehicleCount = document.getElementById('vehicleCount');
-    const noResults = document.getElementById('noResults');
-    const cards = document.querySelectorAll('.vehicle-card');
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('vehicleSearch');
+            const filterType = document.getElementById('filterType');
+            const filterFuel = document.getElementById('filterFuel');
+            const filterSeat = document.getElementById('filterSeat');
+            const filterUsage = document.getElementById('filterUsage');
+            const resetBtn = document.getElementById('resetFilters');
+            
+            const vehicleCount = document.getElementById('vehicleCount');
+            const noResults = document.getElementById('noResults');
+            const cards = document.querySelectorAll('.vehicle-card');
 
-    searchInput.addEventListener('input', function(e) {
-        const term = e.target.value.toLowerCase().trim();
-        let visibleCount = 0;
+            function applyFilters() {
+                const term = searchInput.value.toLowerCase().trim();
+                const type = filterType.value;
+                const fuel = filterFuel.value;
+                const seat = filterSeat.value;
+                const usage = filterUsage.value;
 
-        cards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            const matches = text.includes(term);
+                let visibleCount = 0;
 
-            if (matches) {
-                card.style.display = '';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
+                cards.forEach(card => {
+                    const cName = card.dataset.name || "";
+                    const cModel = card.dataset.model || "";
+                    const cBrand = card.dataset.brand || "";
+                    const cType = card.dataset.type || "";
+                    const cFuel = card.dataset.fuel || "";
+                    const cSeat = card.dataset.seat || "";
+                    const cUsage = card.dataset.usage || "";
+
+                    // Multi-field text match
+                    const textMatch = !term || 
+                                    cName.includes(term) || 
+                                    cModel.includes(term) || 
+                                    cBrand.includes(term);
+                    
+                    // Category matches
+                    const typeMatch = !type || cType === type;
+                    const fuelMatch = !fuel || cFuel === fuel;
+                    const seatMatch = !seat || cSeat === seat;
+                    const usageMatch = !usage || cUsage === usage;
+
+                    if (textMatch && typeMatch && fuelMatch && seatMatch && usageMatch) {
+                        card.style.display = '';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                vehicleCount.textContent = visibleCount;
+                if (visibleCount === 0 && cards.length > 0) {
+                    noResults.classList.remove('hidden');
+                } else {
+                    noResults.classList.add('hidden');
+                }
             }
+
+            // Listeners
+            searchInput.addEventListener('input', applyFilters);
+            filterType.addEventListener('change', applyFilters);
+            filterFuel.addEventListener('change', applyFilters);
+            filterSeat.addEventListener('change', applyFilters);
+            filterUsage.addEventListener('change', applyFilters);
+
+            resetBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                filterType.value = '';
+                filterFuel.value = '';
+                filterSeat.value = '';
+                filterUsage.value = '';
+                applyFilters();
+            });
         });
-
-        vehicleCount.textContent = visibleCount;
-
-        if (visibleCount === 0 && cards.length > 0) {
-            noResults.classList.remove('hidden');
-        } else {
-            noResults.classList.add('hidden');
-        }
-    });
-});
-</script>
+    </script>
 @endpush

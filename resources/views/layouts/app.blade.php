@@ -16,6 +16,10 @@
         href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;400;600&family=Prompt:wght@200;400;600&display=swap"
         rel="stylesheet">
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Prompt', 'Kanit', sans-serif;
         }

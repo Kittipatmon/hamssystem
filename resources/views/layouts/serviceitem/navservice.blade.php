@@ -32,13 +32,13 @@
                     <span>หน้าหลัก</span>
                 </a>
 
-                @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))
-                <a href="{{ route('serviceshams.welcomeservice') }}"
-                    class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-red-600' : 'text-slate-600' }}">
-                    <i
-                        class="fa-solid fa-square-poll-vertical {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-red-500' : 'text-slate-400 group-hover:text-red-500' }}"></i>
-                    <span>ตรวจสอบ/เตรียมการ</span>
-                </a>
+                @if(Auth::check() && (Auth::user()->department->department_name === 'HAMS' || Auth::user()->employee_code == '11648'))
+                    <a href="{{ route('serviceshams.welcomeservice') }}"
+                        class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-red-600' : 'text-slate-600' }}">
+                        <i
+                            class="fa-solid fa-square-poll-vertical {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-red-500' : 'text-slate-400 group-hover:text-red-500' }}"></i>
+                        <span>ตรวจสอบ/เตรียมการ</span>
+                    </a>
                 @endif
 
                 <a href="{{ route('items.itemsalllist') }}"
@@ -47,17 +47,45 @@
                     <span>รายการอุปกรณ์</span>
                 </a>
 
-                @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))
+                @if(Auth::check() && (Auth::user()->department->department_name === 'HAMS' || Auth::user()->employee_code == '11648'))
+                    {{-- Calculations for Checklist --}}
+                    @php
+                        $requisitions = \App\Models\serviceshams\Requisitions::where(
+                            'packing_staff_status',
+                            \App\Models\serviceshams\Requisitions::PACKING_STATUS_PENDING
+                        )
+                            ->where('status', \App\Models\serviceshams\Requisitions::STATUS_PENDING)
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+                        $checklistCount = $requisitions->count();
+                    @endphp
+
                     <!-- ข้อมูลทั่วไป (dropdown) -->
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
                             class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer">
                             <i class="fa-solid fa-server text-slate-400"></i>
                             <span>ข้อมูลทั่วไป</span>
+                            @if($checklistCount > 0)
+                                <span
+                                    class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1">{{ $checklistCount }}</span>
+                            @endif
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
                         </label>
                         <ul tabindex="0"
-                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-2 w-56 shadow-xl border border-red-50 gap-1 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-56 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                            <li>
+                                <a href="{{ route('requisitions.reqchecklist') }}"
+                                    class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-solid fa-clipboard-check text-red-400 w-4 text-center"></i> Checklist
+                                    </div>
+                                    @if($checklistCount > 0)
+                                        <span
+                                            class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $checklistCount }}</span>
+                                    @endif
+                                </a>
+                            </li>
                             <li>
                                 <a href="{{ route('items.index') }}"
                                     class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
@@ -74,27 +102,8 @@
                     </div>
                 @endif
 
-                @if(Auth::check())
-                    @php
-                        $requisitions = \App\Models\serviceshams\Requisitions::where(
-                            'packing_staff_status',
-                            \App\Models\serviceshams\Requisitions::PACKING_STATUS_PENDING
-                        )
-                            ->where('status', \App\Models\serviceshams\Requisitions::STATUS_PENDING)
-                            ->orderBy('created_at', 'desc')
-                            ->get();
-                        $checklistCount = $requisitions->count();
-                    @endphp
-                    <a href="{{ route('requisitions.reqchecklist') }}"
-                        class="relative flex items-center gap-2 px-3 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600">
-                        <i class="fa-solid fa-clipboard-check text-slate-400"></i>
-                        <span>Checklist</span>
-                        @if($checklistCount > 0)
-                            <span
-                                class="absolute top-0 right-0 inline-flex items-center justify-center min-w-[20px] h-[20px] text-[10px] font-bold text-white bg-red-600 rounded-full px-1 border-2 border-white shadow-sm leading-none">{{ $checklistCount }}</span>
-                        @endif
-                    </a>
 
+                @if(Auth::check() && Auth::user()->hr_status == \App\Models\User::HAMS_STATUS_ACTIVE)
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
                             class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer">
@@ -103,11 +112,17 @@
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
                         </label>
                         <ul tabindex="0"
-                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-2 w-56 shadow-xl border border-red-50 gap-1 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
+                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-56 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                             <li>
                                 <a href="{{ route('requisitions.dashboard') }}"
                                     class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
                                     <i class="fa-solid fa-chart-line text-red-400 w-4 text-center"></i> Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('requisitions.reqlistall') }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                                    <i class="fa-solid fa-history text-red-400 w-4 text-center"></i> ประวัติการเบิกอุปกรณ์
                                 </a>
                             </li>
                             <li>
@@ -118,19 +133,20 @@
                             </li>
                         </ul>
                     </div>
-
-                    @php
-                        $cartCount = \App\Models\serviceshams\Cart_items::where('user_id', Auth::id())->count();
-                    @endphp
-                    <a href="{{ route('cartitem.index') }}"
-                        class="relative flex items-center justify-center w-10 h-10 text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        @if($cartCount > 0)
-                            <span
-                                class="absolute top-0 right-0 inline-flex items-center justify-center min-w-[20px] h-[20px] text-[10px] font-bold text-white bg-red-600 rounded-full px-1 border-2 border-white shadow-sm leading-none">{{ $cartCount }}</span>
-                        @endif
-                    </a>
                 @endif
+
+                @php
+                    $cartCount = \App\Models\serviceshams\Cart_items::where('user_id', Auth::id())->count();
+                @endphp
+                <a href="{{ route('cartitem.index') }}"
+                    class="relative flex items-center justify-center w-10 h-10 text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    @if($cartCount > 0)
+                        <span
+                            class="absolute top-0 right-0 inline-flex items-center justify-center min-w-[20px] h-[20px] text-[10px] font-bold text-white bg-red-600 rounded-full px-1 border-2 border-white shadow-sm leading-none">{{ $cartCount }}</span>
+                    @endif
+                </a>
+
 
                 <!-- Login / Profile Divider -->
                 <div class="h-6 w-px bg-slate-200 mx-1"></div>
@@ -163,8 +179,8 @@
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                         </label>
                         <ul tabindex="0"
-                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-2 w-[280px] shadow-xl border border-red-50 gap-1 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] z-50">
-                            <li class="px-3 py-3 border-b border-slate-100 mb-2">
+                            class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-[280px] shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] z-50">
+                            <li class="px-3 py-3 border-b border-slate-100 mb-0 bg-slate-50/50 rounded-t-2xl">
                                 <div
                                     class="flex items-center gap-3 cursor-default hover:bg-transparent px-1 p-0 focus:!bg-transparent active:!bg-transparent focus:!text-current active:!text-current">
                                     @if(Auth::user()->photo_user)
@@ -196,12 +212,14 @@
                                     รายการรอดำเนินการ
                                 </a>
                             </li>
-                            <li>
-                                <a href="{{ route('requisitions.reqlistall') }}"
-                                    class="flex items-center gap-3 px-3 py-2 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                    <i class="fa-solid fa-list-check text-red-400 w-4 text-center"></i> รายงานทั้งหมด
-                                </a>
-                            </li>
+                            @if(Auth::user()->hr_status == \App\Models\User::HAMS_STATUS_ACTIVE)
+                                <li>
+                                    <a href="{{ route('requisitions.reqlistall') }}"
+                                        class="flex items-center gap-3 px-3 py-2 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                                        <i class="fa-solid fa-list-check text-red-400 w-4 text-center"></i> รายงานทั้งหมด
+                                    </a>
+                                </li>
+                            @endif
                             <li>
                                 <a href="#"
                                     class="flex items-center gap-3 px-3 py-2 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
@@ -225,12 +243,12 @@
                                 </a>
                             </li>
                             <li class="mt-2 border-t border-slate-100"></li>
-                            <li>
-                                <form method="POST" action="{{ route('logout') }}" class="p-0 m-0">
+                            <li class="p-0">
+                                <form method="POST" action="{{ route('logout') }}" class="p-0 m-0 w-full">
                                     @csrf
                                     <button type="submit"
-                                        class="flex items-center w-full gap-3 px-3 py-2.5 text-[14px] font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors text-left mt-1">
-                                        <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> ออกจากระบบ
+                                        class="flex items-center w-full gap-6 px-19 py-2.5 text-[14px] font-semibold text-red-600 hover:bg-red-50 rounded-b-2xl transition-colors">
+                                        <i class="fa-solid fa-right-from-bracket w-5 text-center"></i> ออกจากระบบ
                                     </button>
                                 </form>
                             </li>
@@ -262,31 +280,45 @@
                     หน้าหลัก
                 </a>
 
-                @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))
-                <a href="{{ route('serviceshams.welcomeservice') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('serviceshams.welcomeservice') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
-                    <i
-                        class="fa-solid fa-square-poll-vertical w-5 text-center {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-red-500' : 'text-slate-400' }}"></i>
-                    ตรวจสอบ/เตรียมการ
-                </a>
+                @if(Auth::check() && ((Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code == '11648'))
+                    <a href="{{ route('serviceshams.welcomeservice') }}"
+                        class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('serviceshams.welcomeservice') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <i
+                            class="fa-solid fa-square-poll-vertical w-5 text-center {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                        ตรวจสอบ/เตรียมการ
+                    </a>
                 @endif
 
                 <a href="{{ route('items.itemsalllist') }}"
                     class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-colors">
                     <i class="fa-solid fa-boxes-stacked w-5 text-center text-slate-400"></i> รายการอุปกรณ์
                 </a>
-
-                @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))
+                @if(Auth::check() && ((Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code == '11648'))
                     <details class="group [&_summary::-webkit-details-marker]:hidden">
                         <summary
                             class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
                             <div class="flex items-center gap-3">
                                 <i class="fa-solid fa-server w-5 text-center text-slate-400"></i> ข้อมูลทั่วไป
                             </div>
+                            @if(isset($checklistCount) && $checklistCount > 0)
+                                <span
+                                    class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full mr-8">{{ $checklistCount }}</span>
+                            @endif
                             <i
                                 class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180"></i>
                         </summary>
                         <div class="mt-1 mb-2 ml-4 pl-4 border-l-2 border-red-100 flex flex-col gap-1">
+                            <a href="{{ route('requisitions.reqchecklist') }}"
+                                class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-clipboard-check text-red-400 w-4 text-center"></i> Checklist
+                                </div>
+                                @if(isset($checklistCount) && $checklistCount > 0)
+                                    <span
+                                        class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $checklistCount }}</span>
+                                @endif
+                            </a>
+                            <div class="h-px bg-slate-50 my-1"></div>
                             <a href="{{ route('items.index') }}"
                                 class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <i class="fa-solid fa-box text-red-400 w-4 text-center"></i> ข้อมูลอุปกรณ์
@@ -299,18 +331,8 @@
                     </details>
                 @endif
 
-                @if(Auth::check())
-                    <a href="{{ route('requisitions.reqchecklist') }}"
-                        class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-clipboard-check w-5 text-center text-slate-400"></i> Checklist
-                        </div>
-                        @if(isset($checklistCount) && $checklistCount > 0)
-                            <span
-                                class="inline-flex items-center justify-center min-w-[20px] h-[20px] text-[11px] font-bold text-white bg-red-600 rounded-full px-1.5">{{ $checklistCount }}</span>
-                        @endif
-                    </a>
 
+                @if(Auth::check() && Auth::user()->hr_status == \App\Models\User::HAMS_STATUS_ACTIVE)
                     <details class="group [&_summary::-webkit-details-marker]:hidden">
                         <summary
                             class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
@@ -325,24 +347,28 @@
                                 class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <i class="fa-solid fa-chart-line text-red-400 w-4 text-center"></i> Dashboard
                             </a>
+                            <a href="{{ route('requisitions.reqlistall') }}"
+                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
+                                <i class="fa-solid fa-history text-red-400 w-4 text-center"></i> ประวัติการเบิกอุปกรณ์
+                            </a>
                             <a href="{{ route('requisitions.reportslistall') }}"
                                 class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <i class="fa-solid fa-list-check text-red-400 w-4 text-center"></i> รายงานอุปกรณ์ทั้งหมด
                             </a>
                         </div>
                     </details>
-
-                    <a href="{{ route('cartitem.index') }}"
-                        class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-cart-shopping w-5 text-center text-slate-400"></i> Cart
-                        </div>
-                        @if(isset($cartCount) && $cartCount > 0)
-                            <span
-                                class="inline-flex items-center justify-center min-w-[20px] h-[20px] text-[11px] font-bold text-white bg-red-600 rounded-full px-1.5">{{ $cartCount }}</span>
-                        @endif
-                    </a>
                 @endif
+
+                <a href="{{ route('cartitem.index') }}"
+                    class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-cart-shopping w-5 text-center text-slate-400"></i> Cart
+                    </div>
+                    @if(isset($cartCount) && $cartCount > 0)
+                        <span
+                            class="inline-flex items-center justify-center min-w-[20px] h-[20px] text-[11px] font-bold text-white bg-red-600 rounded-full px-1.5">{{ $cartCount }}</span>
+                    @endif
+                </a>
 
                 <div class="h-px bg-slate-100 my-2 mx-2"></div>
 
@@ -387,10 +413,12 @@
                                 class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <i class="fa-solid fa-rotate fa-spin text-orange-400 w-4 text-center"></i> รายการรอดำเนินการ
                             </a>
-                            <a href="{{ route('requisitions.reqlistall') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
-                                <i class="fa-solid fa-list-check text-red-400 w-4 text-center"></i> รายงานทั้งหมด
-                            </a>
+                            @if(Auth::user()->hr_status == \App\Models\User::HAMS_STATUS_ACTIVE)
+                                <a href="{{ route('requisitions.reqlistall') }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
+                                    <i class="fa-solid fa-list-check text-red-400 w-4 text-center"></i> รายงานทั้งหมด
+                                </a>
+                            @endif
                             <a href="#"
                                 class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <i class="fa-solid fa-bookmark text-red-400 w-4 text-center"></i> คู่มือการใช้
@@ -411,7 +439,7 @@
                             <form method="POST" action="{{ route('logout') }}" class="p-0 m-0 mt-2">
                                 @csrf
                                 <button type="submit"
-                                    class="flex items-center w-full gap-3 px-4 py-2.5 text-[14px] font-bold text-red-600 rounded-lg hover:bg-red-50 transition-colors text-left border border-red-100 bg-white shadow-sm mt-1">
+                                    class="flex items-center w-full gap-3 px-4 py-2.5 text-[14px] font-bold text-red-600 rounded-lg hover:bg-red-50 transition-colors text-center bg-white mt-1">
                                     <i class="fa-solid fa-right-from-bracket text-red-500 w-4 text-center"></i> ออกจากระบบ
                                 </button>
                             </form>
