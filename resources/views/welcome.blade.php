@@ -697,7 +697,7 @@
         };
     @endphp
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12 reveal">
         {{-- FEATURED MAIN NEWS --}}
         @if($mainNews)
             @php
@@ -769,13 +769,14 @@
     {{-- BOTTOM ROW --}}
     @if($bottomNews->count())
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($bottomNews as $item)
+            @foreach($bottomNews as $index => $item)
                 @php
                     $imgs = $processImages($item);
                     $fUrl = $imgs[0] ?? asset('images/welcome/news1.jpg');
                     $imgId = 'bottom-news-img-' . $item->id;
+                    $delayClass = 'reveal-delay-' . ($index + 1);
                 @endphp
-                <a href="{{ route('datamanage.news.detail', $item) }}" class="group bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500">
+                <a href="{{ route('datamanage.news.detail', $item) }}" class="group bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 reveal {{ $delayClass }}">
                     <div class="h-48 overflow-hidden relative">
                         <img id="{{ $imgId }}" src="{{ $fUrl }}" data-images='@json($imgs)' alt="News" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         <div class="absolute bottom-4 left-4">
@@ -830,8 +831,8 @@
         </div>
 
         @if(isset($announcements) && $announcements->count())
-            <div id="announcementScrollContainer" class="flex space-x-6 overflow-x-auto pb-4 scroll-hide snap-x snap-mandatory scroll-smooth">
-                @foreach($announcements as $ann)
+            <div id="announcementScrollContainer" class="flex space-x-6 overflow-x-auto pb-4 scroll-hide snap-x snap-mandatory scroll-smooth reveal reveal-delay-1">
+                @foreach($announcements as $index => $ann)
                     @php
                         $annData = [
                             "title" => $ann->title,
@@ -840,8 +841,9 @@
                             "image" => $ann->image_path,
                             "is_urgent" => $ann->is_urgent
                         ];
+                        $annDelay = 'reveal-delay-' . min(($index + 1), 4);
                     @endphp
-                    <button onclick='openAnnouncementModal(@json($annData))' class="text-left bg-white rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-red-500/10 hover:-translate-y-2 transition-all duration-500 group flex flex-col h-full active:scale-[0.98] min-w-[320px] w-[320px] snap-center flex-shrink-0 overflow-hidden">
+                    <button onclick='openAnnouncementModal(@json($annData))' class="text-left bg-white rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-red-500/10 hover:-translate-y-2 transition-all duration-500 group flex flex-col h-full active:scale-[0.98] min-w-[320px] w-[320px] snap-center flex-shrink-0 overflow-hidden reveal {{ $annDelay }}">
                         {{-- Top: Image --}}
                         <div class="h-44 w-full overflow-hidden bg-slate-50 relative">
                             @if($ann->image_path)
