@@ -41,7 +41,7 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="p-6 ">
+        <main class="p-6 pt-[88px]">
             @yield('content')
         </main>
 

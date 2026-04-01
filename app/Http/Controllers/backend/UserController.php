@@ -20,12 +20,14 @@ class UserController extends Controller
 
         // Filtering Logic
         if ($request->filled('employee_code')) {
-            $query->where('employee_code', 'like', '%' . $request->employee_code . '%');
+            $query->where('employee_code', 'like', '%' . trim($request->employee_code) . '%');
         }
         if ($request->filled('fullname')) {
-            $query->where(function($q) use ($request) {
-                $q->where('first_name', 'like', '%' . $request->fullname . '%')
-                  ->orWhere('last_name', 'like', '%' . $request->fullname . '%');
+            $search = trim($request->fullname);
+            $query->where(function($q) use ($search) {
+                $q->where('first_name', 'like', '%' . $search . '%')
+                  ->orWhere('last_name', 'like', '%' . $search . '%')
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
             });
         }
         if ($request->filled('position')) {
@@ -133,5 +135,38 @@ class UserController extends Controller
         }
 
         return redirect()->route('users.index')->with('success', 'ลบพนักงานเรียบร้อยแล้ว');
+    }
+
+    public function profileUser()
+    {
+        $user = Auth::user();
+        $user->load(['department', 'division', 'section', 'usertype']);
+        return view('backend.users.profile', compact('user'));
+    }
+
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'photo_user' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $user = Auth::user();
+
+        if ($request->hasFile('photo_user')) {
+            // Delete old photo if exists
+            if ($user->photo_user && file_exists(public_path($user->photo_user))) {
+                unlink(public_path($user->photo_user));
+            }
+
+            $imageName = time() . '_' . $user->employee_code . '.' . $request->photo_user->extension();
+            $request->photo_user->move(public_path('images/users'), $imageName);
+            
+            $user->photo_user = 'images/users/' . $imageName;
+            $user->save();
+
+            return back()->with('success', 'อัปเดตรูปประจำตัวสำเร็จแล้ว');
+        }
+
+        return back()->with('error', 'ถิดพลาดในการอัปเดตรูปประจำตัว');
     }
 }

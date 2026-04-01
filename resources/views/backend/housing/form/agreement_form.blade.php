@@ -90,7 +90,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-600 mb-1">จำนวนผู้อาศัย</label>
-                    <input type="number" name="number_of_residents" value="{{ old('number_of_residents', 1) }}" min="1"
+                    <input type="number" name="number_of_residents" 
+                        value="{{ old('number_of_residents', $userRequest->number_of_residents ?? 1) }}" min="1"
                         class="w-full rounded-lg border-gray-200 text-sm h-10 focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
@@ -110,7 +111,7 @@
                 </div>
                 <div class="p-4 bg-red-50 rounded-xl border border-red-100">
                     <label class="flex items-start gap-3 cursor-pointer">
-                        <input type="checkbox" required class="checkbox checkbox-error checkbox-sm mt-0.5">
+                        <input type="checkbox" id="accept_terms" required class="checkbox checkbox-error checkbox-sm mt-0.5" onchange="toggleSubmit(this.checked)">
                         <span class="text-sm text-red-800 font-medium">ข้าพเจ้ายอมรับข้อตกลงทั้งหมดข้างต้น <span class="text-red-500">*</span></span>
                     </label>
                 </div>
@@ -121,11 +122,26 @@
                 <a href="{{ route('housing.welcome') }}" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-500 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-xmark"></i> ยกเลิก
                 </a>
-                <button type="submit" class="px-8 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-bold hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
+                <button type="submit" id="submit_btn" disabled class="px-8 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-bold opacity-50 cursor-not-allowed shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
                     <i class="fa-solid fa-paper-plane"></i> ส่งข้อตกลง
                 </button>
             </div>
         </div>
     </form>
 </div>
+
+<script>
+    function toggleSubmit(checked) {
+        const btn = document.getElementById('submit_btn');
+        if (checked) {
+            btn.removeAttribute('disabled');
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.classList.add('hover:from-blue-600', 'hover:to-blue-700');
+        } else {
+            btn.setAttribute('disabled', 'disabled');
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.classList.remove('hover:from-blue-600', 'hover:to-blue-700');
+        }
+    }
+</script>
 @endsection

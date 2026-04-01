@@ -223,12 +223,17 @@
             </div>
         </div>
         <div class="mt-6 text-center">
-            <div class="modal-action mt-8 pt-4 border-t border-gray-100 dark:border-gray-700">
-                <a href="{{ route('users.index') }}" class="btn">ยกเลิก</a>
-                <button type="submit" id="confirm-add-user" class="btn btn-success text-white px-8">
-                    <i class="fa-solid fa-save mr-2"></i> บันทึกข้อมูล
-                </button>
-            </div>
+        <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="{{ route('users.index') }}" 
+                class="btn btn-ghost h-11 px-8 rounded-xl text-base-content/60 hover:bg-base-200 dark:hover:bg-white/5 transition-all duration-300 font-medium">
+                ยกเลิก
+            </a>
+            <button type="submit" id="confirm-add-user" 
+                class="btn bg-green-600 hover:bg-green-700 text-white border-none h-11 px-10 rounded-xl shadow-lg shadow-green-600/20 flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 group">
+                <i class="fa-solid fa-floppy-disk text-lg group-hover:rotate-12 transition-transform duration-300"></i>
+                <span class="font-bold">บันทึกข้อมูลพนักงาน</span>
+            </button>
+        </div>
         </div>
     </form>
 </div>

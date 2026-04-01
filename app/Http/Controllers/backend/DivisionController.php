@@ -9,9 +9,20 @@ use App\Models\Section;
 
 class DivisionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $divisions = Division::with('section')->get();
+        $query = Division::with('section');
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('division_name', 'like', "%{$search}%")
+                  ->orWhere('division_fullname', 'like', "%{$search}%");
+        }
+        $divisions = $query->get();
+
+        if ($request->ajax()) {
+            return response()->json($divisions);
+        }
+
         $sections = Section::all();
         return view('backend.division.index', compact('divisions', 'sections'));
     }

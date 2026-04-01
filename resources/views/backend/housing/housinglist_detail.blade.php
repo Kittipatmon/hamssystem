@@ -138,7 +138,9 @@
                                 <select id="requestSelect" class="select2 w-full px-4 py-3 rounded-xl border-gray-200 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:ring-red-500 transition-all">
                                     <option value="">-- กรุณาเลือกรายชื่อ --</option>
                                     @foreach($eligibleRequesters as $req)
-                                        <option value="{{ $req->id }}">{{ $req->requests_code }} - {{ $req->first_name }} {{ $req->last_name }}</option>
+                                        @if($req->site && $room->residence->name && (str_contains($req->site, $room->residence->name) || str_contains($room->residence->name, $req->site)))
+                                            <option value="{{ $req->id }}">{{ $req->requests_code }} - {{ $req->first_name }} {{ $req->last_name }} (พื้นที่ที่ขอ: {{ $req->site }})</option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>

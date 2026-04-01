@@ -37,8 +37,8 @@ class Requisitions extends Model
     ];
 
     protected $casts = [
-        'request_date' => 'date',
-        'approve_date' => 'date',
+        'request_date' => 'datetime',
+        'approve_date' => 'datetime',
         'packing_staff_date' => 'datetime',
         'total_price' => 'decimal:2',
         'approve_status' => 'integer',
@@ -190,14 +190,23 @@ class Requisitions extends Model
     ];
     public function getPackingStatusLabelAttribute()
     {
+        if ($this->status === self::STATUS_CANCELLED) {
+            return 'ถูกยกเลิกแล้ว';
+        }
         return self::packingStatusOptions[$this->packing_staff_status]['label'] ?? 'Unknown';
     }
     public function getPackingStatusClassAttribute()
     {
+        if ($this->status === self::STATUS_CANCELLED) {
+            return 'bg-red-100 text-red-600 border-red-200';
+        }
         return self::packingStatusOptions[$this->packing_staff_status]['class'] ?? 'badge bg-secondary';
     }
     public function getPackingStatusIconAttribute()
     {
+        if ($this->status === self::STATUS_CANCELLED) {
+            return 'fa-solid fa-ban';
+        }
         return self::packingStatusOptions[$this->packing_staff_status]['icon'] ?? 'fa fa-question';
     }
 

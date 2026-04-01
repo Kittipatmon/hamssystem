@@ -26,9 +26,9 @@ class ReservationsController extends Controller
 
         $events = $reservations->map(function ($res) {
             // Mapping times to ISO 8601 for FullCalendar
-            $start = $res->reservation_date . 'T' . $res->start_time;
+            $start = $res->reservation_date . ' ' . $res->start_time;
             $endDate = $res->reservation_dateend ?? $res->reservation_date;
-            $end = $endDate . 'T' . $res->end_time;
+            $end = $endDate . ' ' . $res->end_time;
 
             return [
                 'id' => $res->reservation_id,
@@ -37,14 +37,29 @@ class ReservationsController extends Controller
                 'end' => $end,
                 'extendedProps' => [
                     'topic' => $res->topic,
+                    'objective' => $res->objective,
+                    'details' => $res->details,
                     'first_name' => $res->user ? $res->user->first_name : '',
                     'last_name' => $res->user ? $res->user->last_name : '',
                     'room_id' => $res->room_id,
                     'user_id' => $res->user_id,
+                    'reservation_date' => $res->reservation_date,
+                    'reservation_dateend' => $res->reservation_dateend,
                     'start_time' => $res->start_time,
                     'end_time' => $res->end_time,
                     'participant_count' => $res->participant_count,
-                    'requester_name' => $res->requester_name
+                    'requester_name' => $res->requester_name,
+                    'break_morning' => $res->break_morning,
+                    'break_morning_detail' => $res->break_morning_detail,
+                    'lunch' => $res->lunch,
+                    'lunch_detail' => $res->lunch_detail,
+                    'break_afternoon' => $res->break_afternoon,
+                    'break_afternoon_detail' => $res->break_afternoon_detail,
+                    'dinner' => $res->dinner,
+                    'dinner_detail' => $res->dinner_detail,
+                    'start_time_formatted' => \Carbon\Carbon::parse($res->reservation_date . ' ' . $res->start_time)->format('d/m/Y H:i'),
+                    'end_time_formatted' => \Carbon\Carbon::parse(($res->reservation_dateend ?? $res->reservation_date) . ' ' . $res->end_time)->format('d/m/Y H:i'),
+                    'status' => $res->status
                 ],
                 'backgroundColor' => $res->color ?? '#dc2626',
                 'borderColor' => $res->color ?? '#dc2626'
@@ -63,9 +78,9 @@ class ReservationsController extends Controller
         }
 
         $now = now();
-        $startDateTime = \Carbon\Carbon::parse($reservation->reservation_date . ' ' . $reservation->start_time);
-        if ($now->greaterThan($startDateTime)) {
-            return response()->json(['success' => false, 'message' => 'ไม่สามารถยกเลิกการจองที่เริ่มไปแล้วได้'], 403);
+        $endDateTime = \Carbon\Carbon::parse(($reservation->reservation_dateend ?? $reservation->reservation_date) . ' ' . $reservation->end_time);
+        if ($now->greaterThan($endDateTime)) {
+            return response()->json(['success' => false, 'message' => 'ไม่สามารถยกเลิกการจองที่สิ้นสุดการใช้งานไปแล้วได้'], 403);
         }
 
         // ลบไฟล์ที่เกี่ยวข้องถ้ามี

@@ -1,7 +1,16 @@
 @extends('layouts.serviceitem.appservice')
 @section('content')
 
-<div class="max-w-5xl mx-auto px-4 py-8 space-y-8 uppercase tracking-tight">
+@php
+    $isOwner = Auth::check() && $requisition->requester_id === Auth::id();
+    $isHamsOrAdmin = Auth::check() && (
+        (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || 
+        Auth::user()->employee_code === '11648'
+    );
+@endphp
+
+@if($isOwner || $isHamsOrAdmin)
+<div class="max-w-5xl mx-auto px-4 py-8 space-y-8">
 
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-orange-50 animate-zoom-in">
@@ -10,17 +19,25 @@
                 <i class="fa-solid fa-clock-rotate-left text-white text-2xl animate-spin-pulse"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tighter  leading-none">ใบเบิกพัสดุ (รอดำเนินการ)</h1>
-                <p class="text-[13px] text-slate-400 font-bold mt-1.5 flex items-center gap-2">
-                    <span class="px-2 py-0.5 bg-orange-50 text-orange-600 rounded font-mono border border-orange-100">{{ $requisition->requisitions_code }}</span>
+                <h1 class="text-2xl font-bold text-slate-800 leading-none">ใบเบิกพัสดุ ({{ $requisition->status_label }})</h1>
+                <p class="text-sm text-slate-400 font-semibold mt-1.5 flex items-center gap-2">
+                    <span class="px-2 py-0.5 bg-{{ $requisition->status_color }}-50 text-{{ $requisition->status_color }}-600 rounded border border-{{ $requisition->status_color }}-100">{{ $requisition->requisitions_code }}</span>
                     <span>•</span>
-                    <span class="">กำลังรอฝ่ายพัสดุตรวจสอบ</span>
+                    <span>
+                        @if($requisition->status == \App\Models\serviceshams\Requisitions::STATUS_PENDING)
+                            กำลังรอฝ่ายพัสดุตรวจสอบ
+                        @elseif($requisition->status == \App\Models\serviceshams\Requisitions::STATUS_APPROVED)
+                            เจ้าหน้าที่ได้รับการพิจารณาและกำลังเตรียมพัสดุ
+                        @else
+                            ดำเนินการเสร็จสิ้นเรียบร้อยแล้ว
+                        @endif
+                    </span>
                 </p>
             </div>
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('requisitions.reqlistpending') }}" 
-               class="px-6 py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-black rounded-2xl border border-slate-100 transition-all active:scale-95 text-sm">
+               class="px-6 py-3 bg-white hover:bg-slate-50 text-slate-500 font-bold rounded-2xl border border-slate-100 transition-all active:scale-95 text-sm shadow-sm">
                 <i class="fa-solid fa-arrow-left mr-2"></i> กลับหน้ารอเบิก
             </a>
         </div>
@@ -29,25 +46,44 @@
     <!-- Status Timeline & Info -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="md:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-            <h3 class="text-xs font-black text-slate-300 uppercase tracking-[0.2em] mb-6">ความคืบหน้าปัจจุบัน</h3>
+            <h3 class="text-xs font-bold text-slate-300 uppercase mb-6">ความคืบหน้าปัจจุบัน</h3>
             <div class="flex items-center gap-4">
                 <div class="flex flex-col items-center">
                     <div class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-100">
                         <i class="fa-solid fa-check text-xs"></i>
                     </div>
-                    <div class="w-0.5 h-8 bg-slate-100"></div>
-                    <div class="w-10 h-10 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center animate-pulse">
-                        <i class="fa-solid fa-hourglass-half text-xs"></i>
-                    </div>
+                    <div class="w-0.5 h-8 {{ $requisition->status != \App\Models\serviceshams\Requisitions::STATUS_PENDING ? 'bg-emerald-500' : 'bg-slate-100' }}"></div>
+                    @if($requisition->status == \App\Models\serviceshams\Requisitions::STATUS_PENDING)
+                        <div class="w-10 h-10 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center animate-pulse">
+                            <i class="fa-solid fa-hourglass-half text-xs"></i>
+                        </div>
+                    @else
+                        <div class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-100">
+                            <i class="fa-solid fa-check text-xs"></i>
+                        </div>
+                    @endif
                 </div>
                 <div class="flex flex-col gap-9 pb-2">
                     <div>
-                        <p class="text-[14px] font-black text-slate-700 leading-none">ส่งคำขอเบิกแล้ว</p>
-                        <p class="text-[11px] text-slate-400 font-bold mt-1 uppercase ">{{ optional($requisition->request_date)->format('d M Y | H:i') }}</p>
+                        <p class="text-sm font-bold text-slate-700 leading-none">ส่งคำขอเบิกแล้ว</p>
+                        <p class="text-[11px] text-slate-400 font-semibold mt-1 uppercase">
+                            {{ optional($requisition->created_at)->locale('th')->isoFormat('D MMM YYYY | HH:mm') }} น.
+                        </p>
                     </div>
                     <div>
-                        <p class="text-[14px] font-black text-slate-400 leading-none">รอพิจารณา / ตรวจสอบพัสดุ</p>
-                        <p class="text-[11px] text-orange-400 font-bold mt-1 uppercase ">In Queue for Approval</p>
+                        <p class="text-sm font-bold {{ $requisition->status != \App\Models\serviceshams\Requisitions::STATUS_PENDING ? 'text-slate-700' : 'text-slate-400' }} leading-none">
+                            @if($requisition->status == \App\Models\serviceshams\Requisitions::STATUS_PENDING)
+                                รอพิจารณา / ตรวจสอบพัสดุ
+                            @else
+                                พิจารณาอนุมัติและจัดเตรียมพัสดุแล้ว
+                            @endif
+                        </p>
+                        <p class="text-[11px] {{ $requisition->status == \App\Models\serviceshams\Requisitions::STATUS_PENDING ? 'text-orange-400' : 'text-emerald-500' }} font-semibold mt-1 uppercase">
+                            {{ $requisition->status == \App\Models\serviceshams\Requisitions::STATUS_PENDING ? 'In Queue for Approval' : 'Approved & In Preparation' }}
+                        </p>
+                        @if($requisition->approve_user)
+                             <p class="text-[9px] font-bold text-emerald-600 mt-1 uppercase tracking-tighter">อนุมัติโดย: คุณ{{ $requisition->approve_user->fullname }}</p>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -59,8 +95,8 @@
                 <p class="text-[13px] font-bold text-slate-300  leading-relaxed">"ใบเบิกของคุณได้รับการจัดลำดับแล้ว กรุณารอการติดต่อกลับ หรือสถานะการอัปเดตจากเจ้าหน้าที่ HAMS"</p>
             </div>
             <div class="pt-6 border-t border-slate-700 mt-6">
-                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">ยอดรวมประเมิน</p>
-                <p class="text-3xl font-black  font-mono text-orange-400">฿{{ number_format($requisition->total_price, 2) }}</p>
+                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">ยอดรวมประเมิน</p>
+                <p class="text-3xl font-bold text-orange-400">฿{{ number_format($requisition->total_price, 2) }}</p>
             </div>
         </div>
     </div>
@@ -70,31 +106,31 @@
         <div class="p-8 border-b border-slate-50 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-1.5 h-6 bg-orange-500 rounded-full"></div>
-                <h2 class="text-lg font-black text-slate-800 tracking-tight  uppercase">รายการพัสดุที่รอเบิก</h2>
+                <h2 class="text-lg font-bold text-slate-800 uppercase">รายการพัสดุที่รอเบิก</h2>
             </div>
-            <span class="px-4 py-1.5 bg-slate-50 rounded-full text-[11px] font-black text-slate-400 uppercase border border-slate-100">{{ $requisition->requisition_items->count() }} Items</span>
+            <span class="px-4 py-1.5 bg-slate-50 rounded-full text-xs font-bold text-slate-400 uppercase border border-slate-100">{{ $requisition->requisition_items->count() }} Items</span>
         </div>
         <div class="p-6">
             <div class="grid grid-cols-1 gap-4">
                 @foreach ($requisition->requisition_items as $index => $item)
                 <div class="flex items-center justify-between p-5 bg-slate-50/50 rounded-3xl border border-slate-100 hover:border-orange-200 transition-colors group">
                     <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-300 font-black  border border-slate-100 shadow-sm group-hover:text-orange-400 transition-colors">
+                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 font-bold border border-slate-100 shadow-sm group-hover:text-orange-400 transition-colors">
                             {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                         </div>
                         <div>
-                            <p class="text-[15px] font-black text-slate-700">{{ $item->item->name ?? '-' }}</p>
-                            <p class="text-[11px] font-bold text-slate-400 uppercase ">Unit Price: ฿{{ number_format($item->item->per_unit ?? 0, 2) }}</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->item->name ?? '-' }}</p>
+                            <p class="text-xs font-semibold text-slate-400 uppercase">Unit Price: ฿{{ number_format($item->item->per_unit ?? 0, 2) }}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-8 text-right">
                         <div class="flex flex-col">
-                            <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Qty</span>
-                            <span class="text-[16px] font-black text-slate-700 ">{{ $item->quantity }} <span class="text-[10px] text-slate-400 font-normal">ชิ้น</span></span>
+                            <span class="text-xs font-bold text-slate-300 uppercase">Qty</span>
+                            <span class="text-base font-bold text-slate-700">{{ $item->quantity }} <span class="text-[10px] text-slate-400 font-normal">ชิ้น</span></span>
                         </div>
                         <div class="flex flex-col w-24">
-                            <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Total</span>
-                            <span class="text-[16px] font-black text-orange-600 font-mono ">฿{{ number_format(($item->item->per_unit ?? 0) * $item->quantity, 2) }}</span>
+                            <span class="text-xs font-bold text-slate-300 uppercase">Total</span>
+                            <span class="text-base font-bold text-orange-600">฿{{ number_format(($item->item->per_unit ?? 0) * $item->quantity, 2) }}</span>
                         </div>
                     </div>
                 </div>
@@ -104,15 +140,22 @@
         
         <!-- Footer Action -->
         <div class="p-8 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-4 text-slate-400">
-                <i class="fa-solid fa-circle-info text-xl opacity-30"></i>
-                <p class="text-[12px] font-medium leading-relaxed ">คุณยังสามารถยกเลิกใบเบิกนี้ได้ก่อนที่เจ้าหน้าที่จะทำการเริ่มขั้นตอน <span class="text-orange-500 font-black ">"กำลังดำเนินการ"</span></p>
-            </div>
-            <button class="w-full md:w-auto px-10 py-4 bg-white border-2 border-red-50 text-red-500 hover:bg-red-600 hover:text-white font-black rounded-2xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-3 btn-cancel-req"
-                    data-href="{{ route('requisitions.cancel', $requisition->requisitions_id) }}">
-                <i class="fa-solid fa-xmark"></i>
-                ยกเลิกใบเบิกฉบับนี้
-            </button>
+            @if($requisition->status == \App\Models\serviceshams\Requisitions::STATUS_PENDING)
+                <div class="flex items-center gap-4 text-slate-400">
+                    <i class="fa-solid fa-circle-info text-xl opacity-30"></i>
+                    <p class="text-xs font-medium leading-relaxed">คุณยังสามารถยกเลิกใบเบิกนี้ได้ก่อนที่เจ้าหน้าที่จะทำการเริ่มขั้นตอน <span class="text-orange-500 font-bold">"กำลังดำเนินการ"</span></p>
+                </div>
+                <button class="w-full md:w-auto px-10 py-4 bg-white border-2 border-red-50 text-red-500 hover:bg-red-600 hover:text-white font-bold rounded-2xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-3 btn-cancel-req"
+                        data-href="{{ route('requisitions.cancel', $requisition->requisitions_id) }}">
+                    <i class="fa-solid fa-xmark"></i>
+                    ยกเลิกใบเบิกฉบับนี้
+                </button>
+            @else
+                <div class="flex items-center gap-4 text-emerald-600 bg-emerald-50 px-6 py-4 rounded-2xl border border-emerald-100 w-full">
+                    <i class="fa-solid fa-circle-check text-xl"></i>
+                    <p class="text-xs font-bold leading-relaxed uppercase tracking-wider">ใบเบิกนี้ได้รับการยืนยันแล้ว และไม่สามารถยกเลิกรายการได้ในขณะนี้</p>
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -123,8 +166,8 @@
             e.preventDefault();
             const url = this.dataset.href;
             Swal.fire({
-                title: '<span class="text-slate-800 font-black tracking-tight">ยืนยันการยกเลิก?</span>',
-                html: '<p class="text-sm text-slate-500 font-medium leading-relaxed ">"ใบเบิกของคุณจะถูกระงับทันที และไม่สามารถเรียกกลับมาได้"</p>',
+                title: '<span class="text-slate-800 font-bold">ยืนยันการยกเลิก?</span>',
+                html: '<p class="text-sm text-slate-500 font-medium leading-relaxed">ใบเบิกของคุณจะถูกระงับทันที และไม่สามารถเรียกกลับมาได้</p>',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'ยืนยัน ยกเลิกใบเบิก',
@@ -133,9 +176,9 @@
                 cancelButtonColor: '#1e293b',
                 reverseButtons: true,
                 customClass: {
-                    popup: 'rounded-[2.5rem]',
-                    confirmButton: 'rounded-xl px-8 py-3.5 font-black',
-                    cancelButton: 'rounded-xl px-8 py-3.5 font-black'
+                    popup: 'rounded-[2.5rem] p-8',
+                    confirmButton: 'rounded-xl px-8 py-3 font-bold text-sm',
+                    cancelButton: 'rounded-xl px-8 py-3 font-bold text-sm'
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -156,5 +199,18 @@
         100% { transform: rotate(360deg) scale(1); }
     }
 </style>
+</div>
+@else
+<div class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+    <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6">
+        <i class="fa-solid fa-lock text-3xl"></i>
+    </div>
+    <h1 class="text-2xl font-bold text-slate-800 mb-2">เข้าถึงไม่ได้ / ACCESS DENIED</h1>
+    <p class="text-slate-400 mb-8 max-w-md">คุณไม่มีสิทธิ์ในการเข้าชมใบเบิกพัสดุฉบับนี้ หรือใบเบิกนี้ไม่ได้เป็นของคุณ</p>
+    <a href="{{ route('welcome') }}" class="px-8 py-3 bg-slate-900 text-white font-bold rounded-2xl shadow-lg transition-all active:scale-95">
+        กลับหน้าหลัก
+    </a>
+</div>
+@endif
 
 @endsection

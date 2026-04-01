@@ -42,14 +42,121 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="p-6 min-h-[70vh]">
+        <main class="p-6 pt-[88px] min-h-[70vh]">
             @yield('content')
         </main>
 
         @include('layouts.footer')
     </div>
-    @stack('scripts')
-    @yield('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function handleApproval(type, id, action, btn) {
+            Swal.fire({
+                title: action === 'approve' ? 'ยืนยันการอนุมัติ?' : 'ยืนยันไม่อนุมัติ?',
+                text: "คุณต้องการดำเนินการนี้ใช่หรือไม่?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: action === 'approve' ? '#059669' : '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'ใช่, ดำเนินการเลย',
+                cancelButtonText: 'ยกเลิก',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return fetch(`{{ url('housing/approve') }}/${type}/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ action: action })
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error(response.statusText);
+                        return response.json();
+                    })
+                    .catch(error => {
+                        Swal.showValidationMessage(`Request failed: ${error}`);
+                    });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed && result.value.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'ดำเนินการแล้ว!',
+                        text: result.value.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload(); // Still reloads to update all counts and labels across the UI faithfully
+                    });
+                }
+            });
+        }
+
+        function finishRepairTask(repairId) {
+            Swal.fire({
+                title: 'ยืนยันการซ่อมเสร็จสิ้น?',
+                html: `
+                    <div class="text-left space-y-4 px-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1.5">รายละเอียดสิ่งที่ซ่อม (Repair Note)</label>
+                            <textarea id="technician_note" rows="3" class="w-full rounded-xl border-gray-200 text-sm focus:ring-emerald-500 transition-shadow" placeholder="อธิบายการแก้ไข เช่น เปลี่ยนหลอดไฟ, อุดรอยรั่ว..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1.5">แนบรูปภาพผลงาน (After Repair)</label>
+                            <input type="file" id="finish_images" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-[11px] file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-all">
+                            <p class="text-[9px] text-gray-400 mt-1">* สามารถเลือกได้หลายรูป</p>
+                        </div>
+                    </div>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                confirmButtonText: 'ยืนยันปิดงานซ่อม',
+                cancelButtonText: 'ยกเลิก',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    const formData = new FormData();
+                    formData.append('repair_id', repairId);
+                    formData.append('technician_note', document.getElementById('technician_note').value);
+                    
+                    const fileInput = document.getElementById('finish_images');
+                    if (fileInput.files.length > 0) {
+                        Array.from(fileInput.files).forEach(file => {
+                            formData.append('finish_images[]', file);
+                        });
+                    }
+
+                    return fetch('{{ route("housing.repair.finish") }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: formData
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error(res.statusText)
+                        return res.json()
+                    })
+                    .catch(error => {
+                        Swal.showValidationMessage(`เกิดข้อผิดพลาด: ${error}`)
+                    })
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed && result.value.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'ปิดงานสำเร็จ!',
+                        text: 'บันทึกรายละเอียดและรูปภาพเรียบร้อยแล้ว',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                }
+            });
+        }
+    </script>
     @if (session('success'))
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -63,6 +170,7 @@
             });
         </script>
     @endif
+    @stack('scripts')
 </body>
 
 </html>

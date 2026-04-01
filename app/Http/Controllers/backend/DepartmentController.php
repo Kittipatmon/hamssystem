@@ -9,9 +9,20 @@ use App\Models\Division;
 
 class DepartmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $departments = Department::with('division')->get();
+        $query = Department::with('division');
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('department_name', 'like', "%{$search}%")
+                  ->orWhere('department_fullname', 'like', "%{$search}%");
+        }
+        $departments = $query->get();
+
+        if ($request->ajax()) {
+            return response()->json($departments);
+        }
+
         $divisions = Division::all();
         return view('backend.department.index', compact('departments', 'divisions'));
     }

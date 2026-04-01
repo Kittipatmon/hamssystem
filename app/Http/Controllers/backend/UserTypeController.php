@@ -8,9 +8,20 @@ use App\Models\UserType;
 
 class UserTypeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $userTypes = UserType::all();
+        $query = UserType::query();
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('type_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+        }
+        $userTypes = $query->get();
+
+        if ($request->ajax()) {
+            return response()->json($userTypes);
+        }
+
         return view('backend.usertypes.index', compact('userTypes'));
     }
 

@@ -8,9 +8,20 @@ use App\Models\Section;
 
 class SectionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sections = Section::all();
+        $query = Section::query();
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('section_code', 'like', "%{$search}%")
+                  ->orWhere('section_name', 'like', "%{$search}%");
+        }
+        $sections = $query->get();
+
+        if ($request->ajax()) {
+            return response()->json($sections);
+        }
+
         return view('backend.section.index', compact('sections'));
     }
 

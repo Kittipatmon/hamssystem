@@ -203,7 +203,7 @@
                         </td>
                         <td>
                             <div class="font-bold text-gray-900 dark:text-white">{{ $user->fullname }}</div>
-                            <div class="text-xs text-gray-400 mt-0.5 italic">{{ $user->prefix }}</div>
+                            <div class="text-xs text-gray-400 mt-0.5">{{ $user->prefix }}</div>
                         </td>
                         <td>
                             <div class="flex flex-col gap-1">
@@ -221,7 +221,6 @@
                         </td>
                         <td class="text-center">
                             <div class="kumwell-badge bg-{{ $user->level_user_color }}/10 text-{{ $user->level_user_color }} border border-{{ $user->level_user_color }}/20">
-                                <i class="fa-solid fa-award text-[10px]"></i>
                                 {{ $user->level_user_label }}
                             </div>
                         </td>
@@ -542,25 +541,62 @@ document.addEventListener('DOMContentLoaded', () => {
             const hasStatus = u.status !== null && u.status !== undefined && u.status !== '';
             // ... (Logic การสร้าง HTML Row เหมือนเดิม แต่ปรับ class เล็กน้อยให้เข้ากับ Tailwind) ...
             return `
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                <td class="font-medium">${safe(u.employee_code)}</td>
-                <td><div class="font-bold">${safe(u.fullname)}</div></td>
-                <td>${safe(u.department?.department_name ?? u.department?.name)}</td>
-                <td>${safe(u.division?.division_name ?? u.division?.name)}</td>
-                <td>${safe(u.section?.section_code ?? u.section?.code)}</td>
-                <td>${safe(u.position)}</td>
-                <td class="whitespace-nowrap">${safe(u.employee_type)}</td>
-                <td>${levelBadge(u)}</td>
-                <td>${hasHrStatus ? `<span class="badge badge-${safe(u.hams_status_color ?? 'neutral')} badge-sm text-xs">${safe(u.hams_status_label ?? u.hr_status)}</span>` : '-'}</td>
-                <td>${hasStatus ? `<span class="badge badge-${safe(u.status_color ?? 'neutral')} badge-sm text-xs text-white">${safe(u.status_label ?? u.status)}</span>` : '-'}</td>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-100 dark:border-white/5">
+                <td class="pl-6">
+                    <span class="font-mono text-sm bg-gray-100 dark:bg-white/10 px-2 py-1 rounded text-kumwell-red font-bold">
+                        ${safe(u.employee_code)}
+                    </span>
+                </td>
                 <td>
-                    <div class="flex justify-center gap-1">
-                        <a href="${showUrl}" class="btn btn-square btn-xs btn-info text-white"><i class="fa-solid fa-eye"></i></a>
-                        <a href="${editUrl}" class="btn btn-square btn-xs btn-warning text-white"><i class="fa-solid fa-pen-to-square"></i></a>
+                    <div class="font-bold text-gray-900 dark:text-white">${safe(u.fullname)}</div>
+                    <div class="text-xs text-gray-400 mt-0.5">${safe(u.prefix)}</div>
+                </td>
+                <td>
+                    <div class="flex flex-col gap-1">
+                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                            <i class="fa-solid fa-building-user mr-1 opacity-50"></i> ${safe(u.department?.department_name ?? u.department?.name)}
+                        </span>
+                        <span class="text-xs text-gray-500">
+                            <i class="fa-solid fa-layer-group mr-1 opacity-50"></i> ${safe(u.division?.division_name ?? u.division?.name)} / ${safe(u.section?.section_code ?? u.section?.code)}
+                        </span>
+                    </div>
+                </td>
+                <td>
+                    <div class="text-sm font-medium text-gray-800 dark:text-gray-200">${safe(u.position)}</div>
+                    <div class="badge badge-ghost badge-xs opacity-70 mt-1 uppercase tracking-wider text-[10px]">${safe(u.employee_type)}</div>
+                </td>
+                <td class="text-center">
+                    <div class="kumwell-badge bg-${safe(u.level_user_color)}/10 text-${safe(u.level_user_color)} border border-${safe(u.level_user_color)}/20">
+                        <i class="fa-solid fa-award text-[10px]"></i>
+                        ${safe(u.level_user_label)}
+                    </div>
+                </td>
+                <td class="text-center">
+                    <div class="kumwell-badge bg-${safe(u.hams_status_color)}/10 text-${safe(u.hams_status_color)} border border-${safe(u.hams_status_color)}/20">
+                        ${u.hams_status_icon}
+                        ${safe(u.hams_status_label)}
+                    </div>
+                </td>
+                <td class="text-center">
+                    <div class="kumwell-badge bg-${safe(u.status_color)}/10 text-${safe(u.status_color)} border border-${safe(u.status_color)}/20">
+                        ${u.status_icon}
+                        ${safe(u.status_label)}
+                    </div>
+                </td>
+                <td class="pr-6">
+                    <div class="flex justify-center gap-2">
+                        <a href="${showUrl}" class="btn btn-circle btn-ghost btn-xs hover:bg-info/20 hover:text-info transition-all" title="ดูข้อมูล">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <a href="${editUrl}" class="btn btn-circle btn-ghost btn-xs hover:bg-warning/20 hover:text-warning transition-all" title="แก้ไข">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
                         <form action="${destroyUrl}" method="POST" class="inline form-delete">
                             <input type="hidden" name="_token" value="${csrf}">
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="btn btn-square btn-xs btn-error text-white" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                            <button type="submit" class="btn btn-circle btn-ghost btn-xs hover:bg-error/20 hover:text-error transition-all" title="ลบ">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </form>
                     </div>
                 </td>

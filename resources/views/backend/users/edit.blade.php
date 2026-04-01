@@ -298,13 +298,15 @@
                     </div>
                 </div>
 
-                {{-- Action Buttons --}}
-                <div class="flex items-center justify-end gap-3 pt-6 mt-6 border-t border-base-200 dark:border-base-700">
-                    <a href="{{ route('users.index') }}" class="btn btn-ghost text-base-content/70 hover:bg-base-200 dark:hover:bg-base-700">
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 mt-6 border-t border-base-200 dark:border-base-700">
+                    <a href="{{ route('users.index') }}" 
+                        class="btn btn-ghost h-11 px-6 rounded-xl text-base-content/60 hover:bg-base-200 dark:hover:bg-white/5 transition-all duration-300 font-medium">
                         ยกเลิก
                     </a>
-                    <button type="submit" id="confirm-add-user" class="btn btn-success text-white px-8 shadow-lg shadow-success/20 hover:shadow-success/30">
-                        <i class="fa-solid fa-save mr-2"></i> บันทึกการเปลี่ยนแปลง
+                    <button type="submit" id="confirm-add-user" 
+                        class="btn bg-green-600 hover:bg-green-700 text-white border-none h-11 px-8 rounded-xl shadow-lg shadow-green-600/20 flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 group">
+                        <i class="fa-solid fa-floppy-disk text-lg group-hover:rotate-12 transition-transform duration-300"></i>
+                        <span class="font-bold">บันทึกการเปลี่ยนแปลง</span>
                     </button>
                 </div>
             </form>

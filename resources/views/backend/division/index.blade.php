@@ -3,18 +3,39 @@
 @section('content')
 <div class="space-y-6">
     {{-- Header Section --}}
-    <div class="flex flex-col md:flex-row justify-between items-center gap-6 pb-6 border-b border-gray-200 dark:border-white/10">
-        <div>
-            <h1 class="text-3xl font-bold text-kumwell-red flex items-center gap-3">
-                <i class="fa-solid fa-layer-group text-2xl opacity-80"></i>
-                จัดการฝ่าย (Division)
-            </h1>
-            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">จัดการข้อมูลฝ่ายและเชื่อมโยงกับสายงาน (Section)</p>
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pb-6 border-b border-gray-200 dark:border-white/10">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-kumwell-red/10 flex items-center justify-center text-kumwell-red shadow-inner">
+                <i class="fa-solid fa-layer-group text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    ฝ่าย <span class="text-kumwell-red">(Division)</span>
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm font-medium flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                    จัดการข้อมูลฝ่ายและเชื่อมโยงกับสายงานองค์กร
+                </p>
+            </div>
         </div>
-        <button type="button" class="btn btn-kumwell-red shadow-lg" onclick="openCreateModal()">
-            <i class="fa-solid fa-plus-circle mr-2 text-lg"></i>
-            สร้างฝ่ายใหม่
-        </button>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+            <div class="relative flex-grow sm:w-80 group">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none transition-colors group-focus-within:text-kumwell-red">
+                    <i class="fa-solid fa-magnifying-glass text-gray-400 text-sm"></i>
+                </div>
+                <input type="text" id="searchInput" value="{{ request('search') }}" 
+                    class="input input-bordered w-full pl-10 h-11 bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 focus:ring-4 focus:ring-kumwell-red/10 focus:border-kumwell-red transition-all duration-300 rounded-xl text-sm"
+                    placeholder="ค้นหาชื่อฝ่าย หรือชื่อเต็ม...">
+                <div id="searchLoader" class="absolute inset-y-0 right-0 pr-3.5 flex items-center hidden">
+                    <span class="loading loading-spinner loading-xs text-kumwell-red"></span>
+                </div>
+            </div>
+            <button type="button" onclick="openCreateModal()" 
+                class="btn bg-kumwell-red hover:bg-red-700 text-white border-none shadow-lg shadow-red-500/20 h-11 px-6 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 group">
+                <i class="fa-solid fa-plus-circle text-lg group-hover:rotate-90 transition-transform duration-500"></i>
+                <span class="font-bold">สร้างฝ่ายใหม่</span>
+            </button>
+        </div>
     </div>
 
     {{-- Main Content Card --}}
@@ -31,7 +52,7 @@
                         <th class="w-28 text-center pr-6">จัดการ</th>
                     </tr>
                 </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody id="divisionsBody" class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach ($divisions as $division)
                         <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200 border-b border-gray-100 dark:border-white/5">
                             <td class="pl-6 font-medium text-gray-400">{{ $loop->iteration }}</td>
@@ -341,5 +362,112 @@
                 closeDeleteModal();
             }
         });
+
+        // --- AJAX Search Logic ---
+        const searchInput = document.getElementById('searchInput');
+        const searchLoader = document.getElementById('searchLoader');
+        const divisionsBody = document.getElementById('divisionsBody');
+
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value;
+            
+            searchLoader.classList.remove('hidden');
+            
+            searchTimeout = setTimeout(() => {
+                fetchResults(query);
+            }, 500);
+        });
+
+        function fetchResults(query) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('search', query);
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                renderTable(data);
+                searchLoader.classList.add('hidden');
+            })
+            .catch(error => {
+                console.error('Error fetching results:', error);
+                searchLoader.classList.add('hidden');
+            });
+        }
+
+        function renderTable(data) {
+            divisionsBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                divisionsBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-16">
+                            <div class="flex flex-col items-center gap-3 text-gray-400">
+                                <i class="fa-solid fa-folder-open text-4xl opacity-20"></i>
+                                <p class="text-sm">ไม่พบข้อมูลฝ่าย</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            data.forEach((d, index) => {
+                const statusBadge = d.division_status === 0 
+                    ? `<div class="kumwell-badge bg-success/10 text-success border border-success/20">
+                            <i class="fa-solid fa-check-circle text-[10px]"></i> ใช้งาน
+                       </div>`
+                    : `<div class="kumwell-badge bg-error/10 text-error border border-error/20">
+                            <i class="fa-solid fa-times-circle text-[10px]"></i> ไม่ใช้งาน
+                       </div>`;
+
+                const sectionCode = d.section ? d.section.section_code : '-';
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200 border-b border-gray-100 dark:border-white/5';
+                row.innerHTML = `
+                    <td class="pl-6 font-medium text-gray-400">${index + 1}</td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-sitemap text-xs opacity-40"></i>
+                            <span class="font-medium text-gray-700 dark:text-gray-300">${sectionCode}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="bg-kumwell-red/10 text-kumwell-red px-2 py-0.5 rounded font-bold text-xs uppercase tracking-wider">
+                            ${d.division_name}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="font-medium text-gray-900 dark:text-white">${d.division_fullname}</div>
+                    </td>
+                    <td class="text-center">${statusBadge}</td>
+                    <td class="pr-6">
+                        <div class="flex justify-center gap-2">
+                            <button type="button" class="btn btn-circle btn-ghost btn-xs hover:bg-warning/20 hover:text-warning transition-all"
+                                onclick='openEditModalFromJS(${JSON.stringify(d)})' title="แก้ไข">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button type="button" class="btn btn-circle btn-ghost btn-xs hover:bg-error/20 hover:text-error transition-all"
+                                onclick="deleteDivision(${d.division_id})" title="ลบ">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                divisionsBody.appendChild(row);
+            });
+        }
+
+        // Helper for dynamic edit buttons
+        window.openEditModalFromJS = function(division) {
+            openEditModal(division);
+        };
     </script>
 @endpush

@@ -1,6 +1,9 @@
 <!-- Navbar (Tailwind + DaisyUI + Font Awesome) -->
 <nav
-    class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
+    class="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
+    @php
+        $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
+    @endphp
     <div class="max-w-7xl mx-auto px-4 md:px-6">
         <div class="h-16 flex items-center justify-between">
 
@@ -36,13 +39,86 @@
                         class="fa-solid fa-house-chimney {{ request()->routeIs('housing.welcome') ? '' : 'text-slate-400 group-hover:text-red-500' }}"></i>
                     <span>บ้านพัก</span>
                 </a>
+                <a href="{{ route('housing.committee_chart') }}"
+                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('housing.committee_chart') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                    <i
+                        class="fa-solid fa-sitemap {{ request()->routeIs('housing.committee_chart') ? '' : 'text-slate-400 group-hover:text-red-500' }}"></i>
+                    <span>ผังกรรมการ</span>
+                </a>
 
                 <!-- ติดตามสถานะ -->
+                @php
+                    $userId = Auth::id();
+                    $userActionCount = 0;
+                    if (Auth::check()) {
+                        // 1. My own requests needing action (e.g. status 3 = wait for agreement)
+                        $myActionCount = \App\Models\housing\ResidenceRequest::where('user_id', $userId)->where('send_status', 3)->count();
+
+                        // 2. Others' requests waiting for my approval
+                        $pendingForMeCount = 0;
+                        // Requests
+                        $pendingForMeCount += \App\Models\housing\ResidenceRequest::where(function ($q) use ($userId) {
+                            $q->where(function ($sq) use ($userId) {
+                                $sq->where('send_status', 0)->where('commander_id', $userId);
+                            })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 1)->where('managerhams_id', $userId);
+                                })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 2)->where('Committee_id', $userId);
+                                });
+                        })->count();
+                        // Agreements
+                        $pendingForMeCount += \App\Models\housing\ResidenceAgreement::where(function ($q) use ($userId) {
+                            $q->where(function ($sq) use ($userId) {
+                                $sq->where('send_status', 0)->where('commander_id', $userId);
+                            })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 1)->where('managerhams_id', $userId);
+                                })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 2)->where('Committee_id', $userId);
+                                });
+                        })->count();
+                        // Guests
+                        $pendingForMeCount += \App\Models\housing\ResidentGuestRequest::where(function ($q) use ($userId) {
+                            $q->where(function ($sq) use ($userId) {
+                                $sq->where('send_status', 0)->where('commander_id', $userId);
+                            })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 1)->where('managerhams_id', $userId);
+                                })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 2)->where('Committee_id', $userId);
+                                });
+                        })->count();
+                        // Leaves
+                        $pendingForMeCount += \App\Models\housing\ResidenceLeave::where(function ($q) use ($userId) {
+                            $q->where(function ($sq) use ($userId) {
+                                $sq->where('send_status', 0)->where('managerhams_id', $userId);
+                            })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 2)->where('Committee_id', $userId);
+                                });
+                        })->count();
+
+                        // 3. Repairs assigned to me (status 1)
+                        $myRepairTasks = \App\Models\housing\ResidenceRepair::where('technician_id', $userId)->where('status', 1)->count();
+
+                        $userActionCount = $myActionCount + $pendingForMeCount + $myRepairTasks;
+                    }
+                @endphp
                 <a href="{{ route('housing.my_requests') }}"
-                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('housing.my_requests') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                    class="relative flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('housing.my_requests') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
                     <i
-                        class="fa-solid fa-clock-rotate-left {{ request()->routeIs('housing.my_requests') ? '' : 'text-slate-400 group-hover:text-red-500' }}"></i>
+                        class="fa-solid fa-clock-rotate-left {{ request()->routeIs('housing.my_requests') ? '' : 'text-slate-400' }}"></i>
                     <span>ติดตามสถานะ</span>
+                    @if($userActionCount > 0)
+                        <span
+                            class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white ring-2 ring-white shadow-md animate-pulse">
+                            {{ $userActionCount }}
+                        </span>
+                    @endif
                 </a>
 
                 <!-- แบบฟอร์ม (dropdown) -->
@@ -85,23 +161,82 @@
                                 class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('housing.leave.*') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
                                 <i
                                     class="fa-solid fa-right-from-bracket w-4 text-center {{ request()->routeIs('housing.leave.*') ? 'text-red-600' : 'text-red-400' }}"></i>
-                                คำร้องย้ายออก
+                                คำร้องย้ายออก (QF-HAMS-04)
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('housing.repair.create') }}"
+                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('housing.repair.create') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                <i
+                                    class="fa-solid fa-screwdriver-wrench w-4 text-center {{ request()->routeIs('housing.repair.create') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                แจ้งซ่อมบ้านพัก
+                            </a>
                     </ul>
                 </div>
 
-                @php
-                    $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
-                @endphp
+
 
                 @if($isHamsOrAdmin)
+                    @php
+                        $userId = Auth::id();
+                        $pRequests = \App\Models\housing\ResidenceRequest::where(function ($q) use ($userId) {
+                            $q->where(function ($sq) use ($userId) {
+                                $sq->where('send_status', 0)->where('commander_id', $userId);
+                            })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 1)->where('managerhams_id', $userId);
+                                })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 2)->where('Committee_id', $userId);
+                                });
+                        })->count();
+                        $pAgreements = \App\Models\housing\ResidenceAgreement::where(function ($q) use ($userId) {
+                            $q->where(function ($sq) use ($userId) {
+                                $sq->where('send_status', 0)->where('commander_id', $userId);
+                            })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 1)->where('managerhams_id', $userId);
+                                })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 2)->where('Committee_id', $userId);
+                                });
+                        })->count();
+                        $pGuests = \App\Models\housing\ResidentGuestRequest::where(function ($q) use ($userId) {
+                            $q->where(function ($sq) use ($userId) {
+                                $sq->where('send_status', 0)->where('commander_id', $userId);
+                            })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 1)->where('managerhams_id', $userId);
+                                })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 2)->where('Committee_id', $userId);
+                                });
+                        })->count();
+                        $pLeaves = \App\Models\housing\ResidenceLeave::where(function ($q) use ($userId) {
+                            $q->where(function ($sq) use ($userId) {
+                                $sq->where('send_status', 0)->where('managerhams_id', $userId);
+                            })
+                                ->orWhere(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 2)->where('Committee_id', $userId);
+                                });
+                        })->count();
+                        $totalPendingApprovals = $pRequests + $pAgreements + $pGuests + $pLeaves;
+                    @endphp
+
                     <!-- จัดการข้อมูล (dropdown) -->
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
                             class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer {{ request()->routeIs('housing.management') ? 'bg-red-600 text-white shadow-md shadow-red-200' : '' }}">
-                            <i
-                                class="fa-solid fa-server {{ request()->routeIs('housing.management') ? '' : 'text-slate-400' }}"></i>
+                            <div class="relative">
+                                <i
+                                    class="fa-solid fa-server {{ request()->routeIs('housing.management') ? '' : 'text-slate-400' }}"></i>
+                                @if($totalPendingApprovals > 0)
+                                    <span
+                                        class="absolute -top-1.5 -right-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] text-white ring-2 ring-white">
+                                        {{ $totalPendingApprovals }}
+                                    </span>
+                                @endif
+                            </div>
                             <span>จัดการ</span>
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
                         </label>
@@ -109,9 +244,9 @@
                             class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-64 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] right-0 origin-top-right">
                             <li>
                                 <a href="{{ route('housing.management') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('housing.management') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('housing.management') && (!request()->filled('tab') || request()->get('tab') == 'requests') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
                                     <i
-                                        class="fa-solid fa-table-list w-4 text-center {{ request()->routeIs('housing.management') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                        class="fa-solid fa-table-list w-4 text-center {{ request()->routeIs('housing.management') && (!request()->filled('tab') || request()->get('tab') == 'requests') ? 'text-red-600' : 'text-red-400' }}"></i>
                                     จัดการข้อมูลทั้งหมด
                                 </a>
                             </li>
@@ -121,6 +256,30 @@
                                     <i
                                         class="fa-solid fa-building w-4 text-center {{ request()->routeIs('housing.houselist') ? 'text-red-600' : 'text-red-400' }}"></i>
                                     รายการบ้านพัก
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('housing.committee_chart') }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('housing.committee_chart') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i
+                                        class="fa-solid fa-sitemap w-4 text-center {{ request()->routeIs('housing.committee_chart') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                    ผังกรรมการบ้านพัก
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('housing.management', ['tab' => 'repairs']) }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->get('tab') == 'repairs' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i
+                                        class="fa-solid fa-screwdriver-wrench w-4 text-center {{ request()->get('tab') == 'repairs' ? 'text-red-600' : 'text-red-400' }}"></i>
+                                    จัดการงานซ่อม
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('housing.report') }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('housing.report') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i
+                                        class="fa-solid fa-chart-pie w-4 text-center {{ request()->routeIs('housing.report') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                    สรุปรายงาน
                                 </a>
                             </li>
                         </ul>
@@ -285,8 +444,14 @@
                     <a href="{{ route('housing.management') }}"
                         class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('housing.management') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
                         <i
-                            class="fa-solid fa-table-list w-5 text-center {{ request()->routeIs('housing.management') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                            class="fa-solid fa-server w-5 text-center {{ request()->routeIs('housing.management') ? 'text-red-500' : 'text-slate-400' }}"></i>
                         จัดการข้อมูล
+                    </a>
+                    <a href="{{ route('housing.committee_chart') }}"
+                        class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('housing.committee_chart') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <i
+                            class="fa-solid fa-sitemap w-5 text-center {{ request()->routeIs('housing.committee_chart') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                        ผังกรรมการบ้านพัก
                     </a>
                 @endif
 

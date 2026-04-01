@@ -111,8 +111,9 @@
                                 $statusIcon = 'fa-solid fa-wrench';
                             }
                         @endphp
-                        <div class="room-card {{ $bgColor }} rounded-xl p-3 text-white shadow-md hover:shadow-lg transition-shadow cursor-pointer relative overflow-hidden group"
-                             data-status="{{ $status }}">
+                        <div class="room-card {{ $bgColor }} rounded-xl p-3 text-white shadow-md hover:shadow-lg transition-all hover:scale-[1.02] active:scale-95 cursor-pointer relative overflow-hidden group"
+                             data-status="{{ $status }}"
+                             onclick="window.location='{{ route('housing.room_detail', $room->residence_room_id) }}'">
                             {{-- Status indicator dot --}}
                             <div class="absolute top-2 right-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-white/40 block"></span>

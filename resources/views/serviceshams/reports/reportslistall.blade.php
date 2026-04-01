@@ -1,7 +1,13 @@
 @extends('layouts.serviceitem.appservice')
 
 @section('content')
-    <div class="max-w-[1600px] mx-auto px-4 py-8 space-y-8 uppercase tracking-tight">
+    <div class="max-w-[1600px] mx-auto px-4 py-8 space-y-8">
+        @php
+            $statsRequisitions = $requisitions->whereNotIn('status', [
+                \App\Models\serviceshams\Requisitions::STATUS_PENDING,
+                \App\Models\serviceshams\Requisitions::STATUS_CANCELLED
+            ]);
+        @endphp
 
         <!-- Header Section -->
         <div
@@ -11,9 +17,9 @@
                     <i class="fa-solid fa-chart-line text-white text-2xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tighter leading-none">รายงานการเบิกพัสดุ</h1>
-                    <p class="text-[13px] text-slate-400 font-bold mt-1.5 flex items-center gap-2">
-                        <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 font-mono">REPORTS CENTRE</span>
+                    <h1 class="text-2xl font-bold text-slate-800 leading-none">รายงานการเบิกพัสดุ</h1>
+                    <p class="text-sm text-slate-400 font-semibold mt-1.5 flex items-center gap-2">
+                        <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600">REPORTS CENTRE</span>
                         <span>•</span>
                         <span>สรุปข้อมูลการเบิกพัสดุและไฟล์นำออก</span>
                     </p>
@@ -21,7 +27,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <button id="filter-button"
-                    class="px-6 py-3 bg-white border-2 border-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-95 text-sm flex items-center gap-2">
+                    class="px-6 py-3 bg-white border-2 border-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-95 text-sm flex items-center gap-2">
                     <i class="fa-solid fa-filter"></i> ตัวกรอง (Filter)
                 </button>
                 <div class="h-10 w-px bg-slate-100 mx-2"></div>
@@ -42,22 +48,20 @@
             <form method="GET" action="{{ route('requisitions.reportslistall') }}"
                 class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">วันที่เริ่มต้น
-                        (Start Date)</label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase pl-2">วันที่เริ่มต้น (Start Date)</label>
                     <input type="date" name="start_date"
-                        class="w-full h-14 bg-slate-900 border-none rounded-2xl px-6 text-white font-black text-sm focus:ring-2 focus:ring-red-500 transition-all"
+                        class="w-full h-14 bg-slate-900 border-none rounded-2xl px-6 text-white font-bold text-sm focus:ring-2 focus:ring-red-500 transition-all"
                         value="{{ request('start_date') }}">
                 </div>
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">วันที่สิ้นสุด (End
-                        Date)</label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase pl-2">วันที่สิ้นสุด (End Date)</label>
                     <input type="date" name="end_date"
-                        class="w-full h-14 bg-slate-900 border-none rounded-2xl px-6 text-white font-black text-sm focus:ring-2 focus:ring-red-500 transition-all"
+                        class="w-full h-14 bg-slate-900 border-none rounded-2xl px-6 text-white font-bold text-sm focus:ring-2 focus:ring-red-500 transition-all"
                         value="{{ request('end_date') }}">
                 </div>
                 <div class="flex items-end">
                     <button type="submit"
-                        class="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl shadow-lg shadow-red-900/40 transition-all active:scale-95 flex items-center justify-center gap-3">
+                        class="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-lg shadow-red-900/40 transition-all active:scale-95 flex items-center justify-center gap-3">
                         <i class="fa-solid fa-magnifying-glass"></i> APPLY FILTERS
                     </button>
                 </div>
@@ -71,9 +75,8 @@
                     <i class="fa-solid fa-file-invoice text-lg"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">จำนวนรายการ
-                    </p>
-                    <p class="text-[20px] font-black text-slate-700 leading-tight font-mono">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">จำนวนรายการทั้งหมด</p>
+                    <p class="text-xl font-bold text-slate-700 leading-tight">
                         {{ $requisitions->count() }} <span class="text-[10px] text-slate-300">REQ</span></p>
                 </div>
             </div>
@@ -82,10 +85,9 @@
                     <i class="fa-solid fa-baht-sign text-lg"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">มูลค่ารวม
-                        (Total)</p>
-                    <p class="text-[20px] font-black text-slate-700 leading-tight font-mono">
-                        ฿{{ number_format($requisitions->sum('total_price'), 2) }}</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">มูลค่ารวม (Total)</p>
+                    <p class="text-xl font-bold text-slate-700 leading-tight">
+                        ฿{{ number_format($statsRequisitions->sum('total_price'), 2) }}</p>
                 </div>
             </div>
             <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
@@ -93,23 +95,21 @@
                     <i class="fa-solid fa-box-open text-lg"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">
-                        เฉลี่ยต่อรายการ</p>
-                    <p class="text-[20px] font-black text-slate-700 leading-tight font-mono">
-                        ฿{{ number_format($requisitions->count() > 0 ? $requisitions->sum('total_price') / $requisitions->count() : 0, 2) }}
+                    <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">เฉลี่ยต่อรายการ</p>
+                    <p class="text-xl font-bold text-slate-700 leading-tight">
+                        ฿{{ number_format($statsRequisitions->count() > 0 ? $statsRequisitions->sum('total_price') / $statsRequisitions->count() : 0, 2) }}
                     </p>
                 </div>
             </div>
             <div class="bg-slate-800 p-6 rounded-[2rem] shadow-lg shadow-slate-100 flex items-center gap-4 text-white">
-                <div class="w-12 h-12 bg-slate-700 text-slate-300 rounded-full flex items-center justify-center">
-                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-check text-lg"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">
-                        ช่วงเวลาที่แสดง</p>
-                    <p class="text-[14px] font-black">
-                        {{ request('start_date') ? date('d M', strtotime(request('start_date'))) : 'Earliest' }} -
-                        {{ request('end_date') ? date('d M Y', strtotime(request('end_date'))) : 'Today' }}</p>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase leading-none mb-1">จัดอุปกรณ์เรียบร้อย</p>
+                    <p class="text-xl font-bold text-emerald-400 leading-tight">
+                        {{ $requisitions->where('packing_staff_status', \App\Models\serviceshams\Requisitions::PACKING_STATUS_APPROVED)->count() }}
+                        <span class="text-[10px] text-slate-500">REQ</span></p>
                 </div>
             </div>
         </div>
@@ -119,13 +119,11 @@
             <div class="p-8 border-b border-slate-50 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-1.5 h-6 bg-red-600 rounded-full"></div>
-                    <h2 class="text-lg font-black text-slate-800 tracking-tight uppercase">รายการเบิกทั้งหมดในระบบ
-                    </h2>
+                    <h2 class="text-lg font-bold text-slate-800 uppercase">รายการเบิกทั้งหมดในระบบ</h2>
                 </div>
                 <div class="flex items-center gap-3">
                     <span
-                        class="hidden md:inline-block text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mr-4">Interactive
-                        Reporting</span>
+                        class="hidden md:inline-block text-[10px] font-bold text-slate-300 uppercase mr-4">Interactive Reporting</span>
                     <div class="flex bg-slate-100 p-1 rounded-xl">
                         <button id="view-table-btn"
                             class="p-2 px-4 rounded-lg bg-white shadow-sm text-slate-800 transition-all">
@@ -145,63 +143,46 @@
                     <table id="reqlist-table" class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50/50">
-                                <th
-                                    class="px-5 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-l-2xl">
-                                    เลขที่คำขอ</th>
-                                <th class="px-5 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                    ข้อมูลผู้เบิก</th>
-                                <th class="px-5 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">สังกัด
-                                    (สายงาน/ฝ่าย/แผนก)</th>
-                                <th
-                                    class="px-5 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
-                                    วันที่ขอ</th>
-                                <th
-                                    class="px-5 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
-                                    ยอดรวม</th>
-                                <th
-                                    class="px-5 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
-                                    สถานะจัดส่ง</th>
-                                <th
-                                    class="px-5 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center rounded-r-2xl">
-                                    ACTIONS</th>
+                                <th class="px-5 py-4 text-[11px] font-bold text-slate-400 uppercase rounded-l-2xl">เลขที่คำขอ</th>
+                                <th class="px-5 py-4 text-[11px] font-bold text-slate-400 uppercase">ข้อมูลผู้เบิก</th>
+                                <th class="px-5 py-4 text-[11px] font-bold text-slate-400 uppercase">สังกัด (สายงาน/ฝ่าย/แผนก)</th>
+                                <th class="px-5 py-4 text-[11px] font-bold text-slate-400 uppercase text-center">วันที่ขอ</th>
+                                <th class="px-5 py-4 text-[11px] font-bold text-slate-400 uppercase text-right">ยอดรวม</th>
+                                <th class="px-5 py-4 text-[11px] font-bold text-slate-400 uppercase text-center">สถานะจัดส่ง</th>
+                                <th class="px-5 py-4 text-[11px] font-bold text-slate-400 uppercase text-center rounded-r-2xl">ACTIONS</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50">
                             @foreach ($requisitions as $req)
                                 <tr class="hover:bg-slate-50/50 transition-colors group">
                                     <td class="px-5 py-5">
-                                        <span
-                                            class="font-black text-slate-800 font-mono decoration-slate-100 decoration-4 underline-offset-4 underline">{{ $req->requisitions_code ?? '-' }}</span>
+                                        <span class="font-bold text-slate-800">{{ $req->requisitions_code ?? '-' }}</span>
                                     </td>
                                     <td class="px-5 py-5">
                                         <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
+                                            <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
                                                 <i class="fa-solid fa-user text-[10px]"></i>
                                             </div>
-                                            <span class="font-black text-slate-600">คุณ{{ $req->user->fullname }}</span>
+                                            <span class="font-bold text-slate-700">คุณ{{ $req->user->fullname }}</span>
                                         </div>
                                     </td>
                                     <td class="px-5 py-5">
                                         <div class="flex flex-col gap-0.5">
-                                            <span
-                                                class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{{ $req->user->section->section_code ?? '-' }}</span>
-                                            <span
-                                                class="text-[11px] font-bold text-slate-500">{{ $req->user->division->division_name ?? '-' }}</span>
-                                            <span
-                                                class="text-[10px] font-medium text-slate-300">{{ $req->user->department->department_name ?? '-' }}</span>
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ $req->user->section->section_code ?? '-' }}</span>
+                                            <span class="text-[11px] font-bold text-slate-500">{{ $req->user->division->division_name ?? '-' }}</span>
+                                            <span class="text-[10px] font-medium text-slate-400">{{ $req->user->department->department_name ?? '-' }}</span>
                                         </div>
                                     </td>
-                                    <td class="px-5 py-5 text-center font-bold text-slate-400 font-mono uppercase">
+                                    <td class="px-5 py-5 text-center font-bold text-slate-500 uppercase">
                                         {{ optional($req->request_date)->format('d/m/Y') ?? '-' }}
                                     </td>
-                                    <td class="px-5 py-5 text-right font-black text-slate-700 font-mono">
+                                    <td class="px-5 py-5 text-right font-bold text-slate-700">
                                         ฿{{ number_format((float) ($req->total_price ?? 0), 2) }}
                                     </td>
                                     <td class="px-5 py-5 text-center">
                                         <span
-                                            class="{{ $req->packing_status_class }} text-[9px] font-black uppercase px-3 py-1 rounded-full flex items-center justify-center gap-1.5 w-fit mx-auto border border-white/20 shadow-sm">
-                                            <i class="{{ $req->packing_status_icon }} text-[8px]"></i>
+                                            class="{{ $req->packing_status_class }} text-[10px] font-bold uppercase px-3 py-1 rounded-full flex items-center justify-center gap-1.5 w-fit mx-auto border border-white/20 shadow-sm">
+                                            <i class="{{ $req->packing_status_icon }} text-[9px]"></i>
                                             {{ $req->packing_status_label ?? '—' }}
                                         </span>
                                     </td>
@@ -282,9 +263,8 @@
         .dataTables_wrapper .dataTables_paginate {
             color: #94a3b8 !important;
             font-size: 11px !important;
-            font-weight: 800 !important;
+            font-weight: 700 !important;
             text-transform: uppercase !important;
-            letter-spacing: 0.1em !important;
             padding: 20px 0 !important;
         }
 
@@ -293,7 +273,7 @@
             color: white !important;
             border: none !important;
             border-radius: 12px !important;
-            font-weight: 800 !important;
+            font-weight: 700 !important;
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover {

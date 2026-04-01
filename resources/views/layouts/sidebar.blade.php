@@ -176,14 +176,13 @@
                 <div class="sidebar-text px-2 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main
                     Menu</div>
 
-                <!-- <a href="#" class="group relative flex items-center px-3 py-1 rounded-xl text-gray-400 hover:bg-gradient-to-r hover:from-kumwell-red hover:to-red-700 hover:text-white hover:shadow-lg hover:shadow-red-900/30 transition-all duration-200">
-                    <i id="dashboard-icon" class="fa-solid fa-chart-pie text-sm w-6 text-center group-hover:text-white transition-colors mr-3"></i>
-                    <span class="sidebar-text">Dashboard</span>
-                    
-                    <div class="tooltip absolute left-14 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
-                        Dashboard
-                    </div>
-                </a> -->
+                @php
+                    $inventoryActive = request()->routeIs('items.*') || request()->routeIs('datamanage.news.*');
+                    $policyActive = request()->routeIs('backend.policy.*') || request()->routeIs('backend.announcement.*');
+                    $hamsActive = request()->routeIs('users.*') || request()->routeIs('usertypes.*') || request()->routeIs('sections.*') || request()->routeIs('divisions.*') || request()->routeIs('departments.*');
+                    $meetingActive = request()->routeIs('backend.bookingmeeting.rooms.*') || request()->routeIs('backend.bookingmeeting.reservations.*') || request()->routeIs('backend.bookingmeeting.report.*');
+                    $housingActive = request()->routeIs('housing.*');
+                @endphp
 
                 <a href="{{ route('backend.welcomedatamanage') }}"
                     class="group relative flex items-center px-3 py-2 rounded-xl text-gray-400 hover:bg-gradient-to-r hover:from-kumwell-red hover:to-red-700 hover:text-white hover:shadow-lg hover:shadow-red-900/30 transition-all duration-200 {{ request()->routeIs('backend.welcomedatamanage') ? 'bg-gradient-to-r from-kumwell-red to-red-700 text-white shadow-lg' : '' }}">
@@ -199,17 +198,18 @@
 
                 <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-datapublic')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
+                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $inventoryActive ? 'bg-white/5 text-white' : '' }}"
                         id="btn-datapublic">
                         <div class="flex items-center">
                             <i id="icon-datapublic" class="fa-solid fa-database text-sm w-6 text-center mr-3"></i>
                             <span class="sidebar-text text-left">รายงานเบิกอุปกรณ์สำนักงาน</span>
                         </div>
                         <i id="arrow-datapublic"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $inventoryActive ? 'rotate-180' : '' }}"></i>
                     </button>
 
-                    <div id="dropdown-datapublic" class="hidden pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
+                    <div id="dropdown-datapublic"
+                        class="{{ $inventoryActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
                         <a href="{{ route('items.index') }}"
                             class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">
                             - รายการเบิกอุปกรณ์
@@ -229,23 +229,27 @@
 
                 <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-policy')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
+                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $policyActive ? 'bg-white/5 text-white' : '' }}"
                         id="btn-policy">
                         <div class="flex items-center">
                             <i id="icon-policy" class="fa-solid fa-users-gear text-sm w-6 text-center mr-3"></i>
                             <span class="sidebar-text">จัดการนโยบาย/ขั้นตอน</span>
                         </div>
                         <i id="arrow-policy"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $policyActive ? 'rotate-180' : '' }}"></i>
                     </button>
 
-                    <div id="dropdown-policy" class="hidden pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
+                    <div id="dropdown-policy"
+                        class="{{ $policyActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
                         <a href="{{ route('backend.policy.index', ['type' => 'policy']) }}"
                             class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->get('type') === 'policy' ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
                             นโยบาย</a>
                         <a href="{{ route('backend.policy.index', ['type' => 'operation']) }}"
                             class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->get('type') === 'operation' ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
                             หมวดหมู่การดำเนินงาน</a>
+                        <a href="{{ route('backend.announcement.index') }}"
+                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('backend.announcement.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
+                            จัดการประกาศ / แจ้งให้ทราบ</a>
 
                     </div>
 
@@ -258,17 +262,18 @@
 
                 <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-hr')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
+                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $hamsActive ? 'bg-white/5 text-white' : '' }}"
                         id="btn-hr">
                         <div class="flex items-center">
                             <i id="icon-hr" class="fa-solid fa-users-gear text-sm w-6 text-center mr-3"></i>
-                            <span class="sidebar-text">HAMS Settings</span>
+                            <span class="sidebar-text">HAMS User</span>
                         </div>
                         <i id="arrow-hr"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $hamsActive ? 'rotate-180' : '' }}"></i>
                     </button>
 
-                    <div id="dropdown-hr" class="hidden pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
+                    <div id="dropdown-hr"
+                        class="{{ $hamsActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
                         <a href="{{ route('users.index') }}"
                             class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('users.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
                             ข้อมูลพนักงาน</a>
@@ -322,9 +327,9 @@
                     </div>
                 </div>
 
-                <div class="relative group">
+                <!-- <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-bookingmeeting')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
+                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $meetingActive ? 'bg-white/5 text-white' : '' }}"
                         id="btn-bookingmeeting">
                         <div class="flex items-center">
                             <i id="icon-bookingmeeting" class="fa-solid fa-door-open text-sm w-6 text-center mr-3"></i>
@@ -332,11 +337,11 @@
                                 class="sidebar-text text-left break-words whitespace-normal leading-tight">ระบบจัดการห้องประชุม</span>
                         </div>
                         <i id="arrow-bookingmeeting"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $meetingActive ? 'rotate-180' : '' }}"></i>
                     </button>
 
                     <div id="dropdown-bookingmeeting"
-                        class="hidden pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
+                        class="{{ $meetingActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
                         <a href="{{ route('backend.bookingmeeting.rooms.index') }}"
                             class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('backend.bookingmeeting.rooms.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
                             - จัดการข้อมูลห้องประชุม
@@ -355,11 +360,11 @@
                         class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
                         ระบบจัดการห้องประชุม
                     </div>
-                </div>
+                </div> -->
 
-                <div class="relative group">
+                <!-- <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-housing')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
+                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $housingActive ? 'bg-white/5 text-white' : '' }}"
                         id="btn-housing">
                         <div class="flex items-center">
                             <i id="icon-housing" class="fa-solid fa-house-chimney text-sm w-6 text-center mr-3"></i>
@@ -367,10 +372,11 @@
                                 class="sidebar-text text-left break-words whitespace-normal leading-tight">ระบบจัดการบ้านพัก</span>
                         </div>
                         <i id="arrow-housing"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
+                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $housingActive ? 'rotate-180' : '' }}"></i>
                     </button>
 
-                    <div id="dropdown-housing" class="hidden pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
+                    <div id="dropdown-housing"
+                        class="{{ $housingActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
                         <a href="{{ route('housing.welcome') }}"
                             class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.welcome') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
                             - Dashboard บ้านพัก
@@ -401,7 +407,7 @@
                         class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
                         ระบบจัดการบ้านพัก
                     </div>
-                </div>
+                </div> -->
 
             </nav>
 

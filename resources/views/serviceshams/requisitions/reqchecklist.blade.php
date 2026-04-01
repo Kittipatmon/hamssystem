@@ -1,7 +1,7 @@
 @extends('layouts.serviceitem.appservice')
 @section('content')
 
-<div class="max-w-[1400px] mx-auto px-4 py-8 space-y-8 uppercase tracking-tight">
+<div class="max-w-[1400px] mx-auto px-4 py-8 space-y-8">
 
     <!-- Header Section with Stats -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 animate-zoom-in">
@@ -12,8 +12,8 @@
                     <i class="fa-solid fa-box-open text-white text-2xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tighter leading-none">รายการรอดำเนินการจัดเตรียม</h1>
-                    <p class="text-[13px] text-slate-400 font-bold mt-1.5 uppercase">จัดการและตรวจสอบพัสดุตามใบเบิกที่ได้รับอนุมัติแล้ว</p>
+                    <h1 class="text-2xl font-black text-slate-800 leading-none">รายการรอดำเนินการจัดเตรียม</h1>
+                    <p class="text-sm text-slate-400 font-semibold mt-1.5">จัดการและตรวจสอบพัสดุตามใบเบิกที่ได้รับอนุมัติแล้ว</p>
                 </div>
             </div>
         </div>
@@ -24,10 +24,10 @@
                 <i class="fa-solid fa-boxes-packing text-xl"></i>
             </div>
             <div>
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">รอแพ็กของ (Pending)</p>
+                <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1">รอจัดของ (Pending)</p>
                 <div class="flex items-baseline gap-1">
                     <span class="text-3xl font-black text-slate-800">{{ number_format($requisitions->count()) }}</span>
-                    <span class="text-[10px] font-black text-slate-300 uppercase">Packs</span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase">ฉบับ</span>
                 </div>
             </div>
         </div>
@@ -38,10 +38,10 @@
                 <i class="fa-solid fa-bolt text-xl"></i>
             </div>
             <div>
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">ลำดับความสำคัญ (Priority)</p>
+                <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1">นโยบายจัดเตรียม (Priority)</p>
                 <div class="flex flex-col">
-                    <span class="text-[14px] font-black text-red-600 uppercase tracking-tight">First-In First-Out</span>
-                    <span class="text-[9px] font-bold text-slate-300 uppercase mt-0.5">Automated sorting applied</span>
+                    <span class="text-[14px] font-black text-red-600 uppercase">First-In First-Out</span>
+                    <span class="text-[10px] font-semibold text-slate-400 mt-0.5 uppercase tracking-tighter">เรียงตามลำดับเวลา</span>
                 </div>
             </div>
         </div>
@@ -51,11 +51,11 @@
     <div class="flex flex-col sm:flex-row items-center justify-between gap-6 animate-zoom-in" style="animation-delay: 0.1s">
         <div class="flex items-center gap-3">
             <div class="w-1.5 h-8 bg-red-600 rounded-full"></div>
-            <h2 class="text-xl font-black text-slate-800 tracking-tight uppercase">Worklist: ใบเบิกที่ต้องจัดเตรียม</h2>
+            <h2 class="text-xl font-black text-slate-800">รายการใบเบิกที่ต้องจัดเตรียม</h2>
         </div>
         <div class="flex items-center gap-4">
              <span class="px-4 py-2 bg-slate-50 border border-slate-100 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <i class="fa-solid fa-shield-halved mr-2 opacity-50"></i> HAMS internal system
+                <i class="fa-solid fa-shield-halved mr-2 opacity-50"></i> HAMS Internal System
              </span>
         </div>
     </div>
@@ -69,11 +69,11 @@
                 <table id="checklistTable" class="w-full text-left border-collapse min-w-[1200px]">
                     <thead>
                         <tr class="bg-slate-50/50">
-                            <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-l-2xl">Requisition / Date</th>
-                            <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Requester / Department</th>
-                            <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Volume / Value</th>
-                            <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Current Status</th>
-                            <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center rounded-r-2xl w-64">Verification</th>
+                            <th class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest rounded-l-2xl">เลขที่ใบเบิก / วันที่เบิก</th>
+                            <th class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest">ผู้ขอเบิก / แผนก</th>
+                            <th class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">จำนวน / มูลค่าประเมิน</th>
+                            <th class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">สถานะ</th>
+                            <th class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center rounded-r-2xl w-64">การตรวจสอบ</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
@@ -81,9 +81,9 @@
                         <tr class="hover:bg-slate-50 transition-colors group">
                             <td class="px-6 py-5">
                                 <div class="flex flex-col gap-1.5">
-                                    <span class="text-[13px] font-mono font-black text-slate-700 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 w-fit group-hover:bg-white transition-colors">{{ $requisition->requisitions_code }}</span>
+                                    <span class="text-sm font-black text-slate-700 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 w-fit group-hover:bg-white transition-colors">{{ $requisition->requisitions_code }}</span>
                                     <span class="text-[11px] text-slate-400 flex items-center gap-1.5 ml-1 font-bold uppercase">
-                                        <i class="fa-regular fa-calendar-check text-[9px]"></i>
+                                        <i class="fa-regular fa-calendar-check text-[10px]"></i>
                                         {{ \Carbon\Carbon::parse($requisition->request_date)->format('d/m/Y') }}
                                     </span>
                                 </div>
@@ -92,15 +92,15 @@
                                 <div class="flex flex-col">
                                     <span class="text-[15px] font-black text-slate-800 leading-tight">คุณ{{ $requisition->user->fullname ?? "-" }}</span>
                                     <div class="flex items-center gap-2 mt-1.5">
-                                        <span class="text-[9px] font-black text-slate-400 px-2 py-0.5 bg-slate-50 rounded-lg border border-slate-100 uppercase tracking-wider group-hover:bg-white transition-colors">{{ $requisition->user->department->department_name ?? "-" }}</span>
-                                        <span class="text-[9px] font-bold text-slate-300 uppercase">{{ $requisition->user->division->division_name ?? "-" }}</span>
+                                        <span class="text-[10px] font-black text-slate-400 px-2 py-0.5 bg-slate-50 rounded-lg border border-slate-100 uppercase group-hover:bg-white transition-colors">{{ $requisition->user->department->department_name ?? "-" }}</span>
+                                        <span class="text-[10px] font-bold text-slate-400 opacity-60">{{ $requisition->user->division->division_name ?? "-" }}</span>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-5 text-center">
                                 <div class="flex flex-col items-center">
-                                    <span class="text-[14px] font-black text-slate-700">{{ $requisition->requisition_items->count() }} <span class="text-[10px] text-slate-400 font-bold uppercase">Units</span></span>
-                                    <span class="text-[12px] font-black text-red-600 font-mono mt-0.5 tracking-tight border-t border-slate-100 pt-0.5 w-full">฿{{ number_format((float)$requisition->total_price, 2) }}</span>
+                                    <span class="text-[15px] font-black text-slate-700">{{ $requisition->requisition_items->count() }} <span class="text-[10px] text-slate-400 font-black uppercase">รายการ</span></span>
+                                    <span class="text-[13px] font-black text-red-600 mt-1 border-t border-slate-100 pt-1 w-full">฿{{ number_format((float)$requisition->total_price, 2) }}</span>
                                 </div>
                             </td>
                             <td class="px-6 py-5 text-center">
@@ -112,19 +112,19 @@
                                     $opt = $status ? ($statusOptions[$status] ?? null) : null;
                                 @endphp
                                 @if($opt)
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full {{ $opt['class'] }} text-[9px] font-black uppercase shadow-sm border border-white/20">
-                                        <i class="{{ $opt['icon'] }} text-[8px]"></i>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full {{ $opt['class'] }} text-[10px] font-black uppercase shadow-sm border border-white/20 whitespace-nowrap">
+                                        <i class="{{ $opt['icon'] }} text-[9px]"></i>
                                         {{ $opt['label'] }}
                                     </span>
                                 @else
-                                    <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 text-[9px] font-black uppercase tracking-widest opacity-50">Untracked</span>
+                                    <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-400 text-[10px] font-black uppercase opacity-50">ไม่ทราบสถานะ</span>
                                 @endif
                             </td>
                             <td class="px-6 py-5">
                                 <a href="{{ route('requisitions.detailchecklist', $requisition->requisitions_id) }}" 
-                                   class="w-full flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 border border-slate-800 text-white text-[11px] font-black rounded-xl shadow-lg shadow-slate-100 transition-all hover:-translate-y-0.5 active:scale-95 uppercase tracking-widest">
-                                    <i class="fa-solid fa-clipboard-check text-[10px] opacity-50"></i>
-                                    <span>verify & start packing</span>
+                                   class="w-full flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 border border-slate-800 text-white text-[12px] font-black rounded-xl shadow-lg shadow-slate-100 transition-all hover:-translate-y-0.5 active:scale-95">
+                                    <i class="fa-solid fa-clipboard-check text-[11px] opacity-50"></i>
+                                    <span>ตรวจสอบและจัดเตรียม</span>
                                 </a>
                             </td>
                         </tr>
@@ -142,29 +142,29 @@
                     <div class="space-y-2">
                         <span class="text-[10px] font-mono font-black text-red-600 bg-red-50 px-2.5 py-1 rounded-lg border border-red-100 w-fit uppercase tracking-widest">{{ $requisition->requisitions_code }}</span>
                         <h3 class="text-xl font-black text-slate-800 tracking-tighter leading-none pt-1">คุณ{{ $requisition->user->fullname ?? "-" }}</h3>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ $requisition->user->department->department_name ?? "-" }} / {{ $requisition->user->division->division_name ?? "-" }}</p>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-wide">{{ $requisition->user->department->department_name ?? "-" }} / {{ $requisition->user->division->division_name ?? "-" }}</p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 bg-slate-50 p-6 rounded-[1.5rem] border border-slate-100">
                     <div class="flex flex-col">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Request Date</span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">วันที่เบิก</span>
                         <span class="text-[15px] font-black text-slate-700">{{ \Carbon\Carbon::parse($requisition->request_date)->format('d/m/Y') }}</span>
                     </div>
                     <div class="flex flex-col border-l border-slate-200 pl-4">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Items Value</span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">รวมมูลค่า</span>
                         <span class="text-[16px] font-black text-red-600 font-mono">฿{{ number_format((float)$requisition->total_price, 0) }}</span>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between gap-4">
                     <div class="flex flex-col">
-                        <span class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-0.5 leading-none">Load Factor</span>
-                        <span class="text-[14px] font-black text-slate-700 leading-none">{{ $requisition->requisition_items->count() }} <span class="text-[9px] font-normal text-slate-400">Items</span></span>
+                        <span class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-0.5 leading-none px-2">จำนวน</span>
+                        <span class="text-[16px] font-black text-slate-700 leading-none px-2">{{ $requisition->requisition_items->count() }} <span class="text-[10px] font-bold text-slate-400">รายการ</span></span>
                     </div>
                     <a href="{{ route('requisitions.detailchecklist', $requisition->requisitions_id) }}" 
-                       class="flex-1 h-14 flex items-center justify-center bg-slate-900 text-white font-black rounded-2xl shadow-xl shadow-slate-100 text-[12px] uppercase tracking-widest">
-                       verify checklist <i class="fa-solid fa-arrow-right ml-2 text-[10px] opacity-30"></i>
+                       class="flex-1 h-14 flex items-center justify-center bg-slate-900 text-white font-black rounded-2xl shadow-xl shadow-slate-100 text-[13px] tracking-wide">
+                       ตรวจสอบรายการ <i class="fa-solid fa-arrow-right ml-2 text-[10px] opacity-30"></i>
                     </a>
                 </div>
             </div>
@@ -173,7 +173,7 @@
                 <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fa-solid fa-box-open text-2xl text-slate-200"></i>
                 </div>
-                <p class="text-slate-400 font-extrabold tracking-widest uppercase text-xs leading-relaxed">"ไม่มีรายการรอจัดเตรียมในขณะนี้"</p>
+                <p class="text-slate-400 font-black tracking-widest uppercase text-xs leading-relaxed">"ไม่มีรายการรอจัดเตรียมในขณะนี้"</p>
             </div>
             @endforelse
         </div>

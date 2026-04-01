@@ -119,7 +119,6 @@ class BackendReservationsController extends Controller
     {
         $reservation = Reservation::findOrFail($id);
 
-        // delete files if any
         if ($reservation->attached_file && file_exists(public_path('documents/reservations/' . $reservation->attached_file))) {
             unlink(public_path('documents/reservations/' . $reservation->attached_file));
         }
@@ -128,7 +127,26 @@ class BackendReservationsController extends Controller
         }
 
         $reservation->delete();
-
         return redirect()->route('backend.bookingmeeting.reservations.index')->with('success', 'ลบข้อมูลการจองห้องประชุมสำเร็จ');
+    }
+
+    public function updateStatus(Request $request, string $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,acknowledge,rejected,cancelled'
+        ]);
+
+        $reservation = Reservation::findOrFail($id);
+        $reservation->update(['status' => $request->status]);
+
+        $msg = '';
+        switch ($request->status) {
+            case 'acknowledge': $msg = 'อนุมัติการจองห้องประชุมเรียบร้อยแล้ว'; break;
+            case 'rejected': $msg = 'ปฏิเสธการจองห้องประชุมเรียบร้อยแล้ว'; break;
+            case 'cancelled': $msg = 'ยกเลิกการจองห้องประชุมเรียบร้อยแล้ว'; break;
+            default: $msg = 'อัปเดตสถานะการจองเรียบร้อยแล้ว';
+        }
+
+        return redirect()->route('backend.bookingmeeting.reservations.index')->with('success', $msg);
     }
 }

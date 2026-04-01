@@ -1427,6 +1427,7 @@
 
                 var calendarEl = document.getElementById('calendar');
                 var calendar = new FullCalendar.Calendar(calendarEl, {
+                    locale: 'th',
                     initialView: 'dayGridMonth',
                     headerToolbar: {
                         left: 'prev,next today',
@@ -1439,9 +1440,14 @@
                     displayEventTime: true,
                     displayEventEnd: true,
                     eventTimeFormat: {
-                        hour: 'numeric',
+                        hour: '2-digit',
                         minute: '2-digit',
-                        meridiem: 'short'
+                        hour12: false
+                    },
+                    slotLabelFormat: {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
                     },
                     height: 'auto',
                     selectable: true,

@@ -1,6 +1,9 @@
 <!-- Navbar (Tailwind + DaisyUI + Font Awesome) -->
 <nav
-    class="sticky top-0 z-[100] w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
+    class="fixed top-0 left-0 right-0 z-[100] w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
+    @php
+        $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
+    @endphp
     <div class="max-w-[90rem] mx-auto px-4 md:px-6">
         <div class="h-16 flex items-center justify-between">
 
@@ -22,32 +25,51 @@
             </a>
 
             <!-- Right: Navigation Links -->
-            <div class="hidden xl:flex items-center gap-1 2xl:gap-2">
+            <div class="hidden lg:flex items-center gap-1 2xl:gap-2">
 
                 <!-- หน้าแรก -->
                 <a href="{{ route('welcome') }}"
-                    class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 {{ request()->routeIs('welcome') ? 'text-red-600' : 'text-slate-600' }}">
+                    class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('welcome') ? 'text-white bg-red-600 shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600 border border-transparent' }}">
                     <i
-                        class="fa-solid fa-house {{ request()->routeIs('welcome') ? 'text-red-500' : 'text-slate-400 group-hover:text-red-500' }}"></i>
+                        class="fa-solid fa-house {{ request()->routeIs('welcome') ? 'text-white' : 'text-slate-400 group-hover:text-red-500' }}"></i>
                     <span>หน้าหลัก</span>
                 </a>
 
-                @if(Auth::check() && (Auth::user()->department->department_name === 'HAMS' || Auth::user()->employee_code == '11648'))
+                @if($isHamsOrAdmin)
                     <a href="{{ route('serviceshams.welcomeservice') }}"
-                        class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-red-600' : 'text-slate-600' }}">
+                        class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-white bg-red-600 shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600 border border-transparent' }}">
                         <i
-                            class="fa-solid fa-square-poll-vertical {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-red-500' : 'text-slate-400 group-hover:text-red-500' }}"></i>
+                            class="fa-solid fa-square-poll-vertical {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-white' : 'text-slate-400 group-hover:text-red-500' }}"></i>
                         <span>ตรวจสอบ/เตรียมการ</span>
                     </a>
                 @endif
 
                 <a href="{{ route('items.itemsalllist') }}"
-                    class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600">
-                    <i class="fa-solid fa-boxes-stacked text-slate-400"></i>
+                    class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('items.itemsalllist') ? 'text-white bg-red-600 shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600 border border-transparent' }}">
+                    <i
+                        class="fa-solid fa-boxes-stacked {{ request()->routeIs('items.itemsalllist') ? 'text-white' : 'text-slate-400' }}"></i>
                     <span>รายการอุปกรณ์</span>
                 </a>
 
-                @if(Auth::check() && (Auth::user()->department->department_name === 'HAMS' || Auth::user()->employee_code == '11648'))
+                @if(Auth::check())
+                    @php
+                        $myPendingCount = \App\Models\serviceshams\Requisitions::where('requester_id', Auth::id())
+                            ->whereIn('status', [\App\Models\serviceshams\Requisitions::STATUS_PENDING, \App\Models\serviceshams\Requisitions::STATUS_APPROVED])
+                            ->count();
+                    @endphp
+                    <a href="{{ route('requisitions.reqlistpending') }}"
+                        class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('requisitions.reqlistpending') ? 'text-white bg-red-600 shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600 border border-transparent' }}">
+                        <i
+                            class="fa-solid fa-rotate {{ request()->routeIs('requisitions.reqlistpending') ? 'text-white fa-spin' : 'text-slate-400' }} text-xs"></i>
+                        <span>รายการรอดำเนินการ</span>
+                        @if($myPendingCount > 0)
+                            <span
+                                class="bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full ml-1 shadow-sm">{{ $myPendingCount }}</span>
+                        @endif
+                    </a>
+                @endif
+
+                @if($isHamsOrAdmin)
                     {{-- Calculations for Checklist --}}
                     @php
                         $requisitions = \App\Models\serviceshams\Requisitions::where(
@@ -259,7 +281,7 @@
 
             <!-- Mobile menu button -->
             <button
-                class="xl:hidden relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors border border-slate-200"
+                class="lg:hidden relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors border border-slate-200"
                 onclick="document.getElementById('mnav').classList.toggle('hidden')">
                 <i class="fa-solid fa-bars text-lg"></i>
                 @if(Auth::check() && ((isset($cartCount) && $cartCount > 0) || (isset($checklistCount) && $checklistCount > 0)))
@@ -271,29 +293,46 @@
 
         <!-- Mobile nav -->
         <div id="mnav"
-            class="xl:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[80vh] overflow-y-auto">
+            class="lg:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[80vh] overflow-y-auto">
             <div class="flex flex-col gap-1.5 px-2">
                 <a href="{{ route('welcome') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('welcome') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('welcome') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                     <i
-                        class="fa-solid fa-house w-5 text-center {{ request()->routeIs('welcome') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                        class="fa-solid fa-house w-5 text-center {{ request()->routeIs('welcome') ? 'text-white' : 'text-slate-400' }}"></i>
                     หน้าหลัก
                 </a>
 
-                @if(Auth::check() && ((Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code == '11648'))
+                @if($isHamsOrAdmin)
                     <a href="{{ route('serviceshams.welcomeservice') }}"
-                        class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('serviceshams.welcomeservice') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
+                        class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('serviceshams.welcomeservice') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                         <i
-                            class="fa-solid fa-square-poll-vertical w-5 text-center {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                            class="fa-solid fa-square-poll-vertical w-5 text-center {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-white' : 'text-slate-400' }}"></i>
                         ตรวจสอบ/เตรียมการ
                     </a>
                 @endif
 
                 <a href="{{ route('items.itemsalllist') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 transition-colors">
-                    <i class="fa-solid fa-boxes-stacked w-5 text-center text-slate-400"></i> รายการอุปกรณ์
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('items.itemsalllist') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <i
+                        class="fa-solid fa-boxes-stacked w-5 text-center {{ request()->routeIs('items.itemsalllist') ? 'text-white' : 'text-slate-400' }}"></i>
+                    รายการอุปกรณ์
                 </a>
-                @if(Auth::check() && ((Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code == '11648'))
+
+                @if(Auth::check())
+                    <a href="{{ route('requisitions.reqlistpending') }}"
+                        class="flex items-center justify-between px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('requisitions.reqlistpending') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <div class="flex items-center gap-3">
+                            <i
+                                class="fa-solid fa-rotate w-5 text-center {{ request()->routeIs('requisitions.reqlistpending') ? 'text-white fa-spin' : 'text-slate-300' }}"></i>
+                            รายการรอดำเนินการ
+                        </div>
+                        @if(isset($myPendingCount) && $myPendingCount > 0)
+                            <span
+                                class="bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">{{ $myPendingCount }}</span>
+                        @endif
+                    </a>
+                @endif
+                @if($isHamsOrAdmin)
                     <details class="group [&_summary::-webkit-details-marker]:hidden">
                         <summary
                             class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">

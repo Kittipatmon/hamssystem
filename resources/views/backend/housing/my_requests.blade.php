@@ -18,12 +18,52 @@
         <div
             class="bg-white dark:bg-gray-400 rounded-2xl border border-slate-100 dark:border-slate-700 p-2 mb-8 shadow-sm flex flex-wrap gap-1">
             @php
-                $tabItems = [
-                    ['id' => 'tab-requests', 'label' => 'คำขอเข้าพัก', 'icon' => 'fa-file-circle-plus', 'color' => 'text-red-500'],
-                    ['id' => 'tab-agreements', 'label' => 'ข้อตกลงเข้าพัก', 'icon' => 'fa-file-signature', 'color' => 'text-blue-500'],
-                    ['id' => 'tab-guests', 'label' => 'นำญาติเข้าพัก', 'icon' => 'fa-people-arrows', 'color' => 'text-purple-500'],
-                    ['id' => 'tab-leaves', 'label' => 'คำร้องย้ายออก', 'icon' => 'fa-right-from-bracket', 'color' => 'text-orange-500'],
-                ];
+                $userId = Auth::id();
+                $myRepairTasksCount = \App\Models\housing\ResidenceRepair::where('technician_id', $userId)->where('status', 1)->count();
+                $totalPending = collect($pendingApprovals)->sum(function($items){ return count($items); }) + $myRepairTasksCount;
+                
+                $tabItems = [];
+                if($totalPending > 0) {
+                    $tabItems[] = [
+                        'id' => 'tab-pending', 
+                        'label' => 'งานรอดำเนินการ', 
+                        'icon' => 'fa-bell-exclamation', 
+                        'color' => 'text-red-500',
+                        'count' => $totalPending,
+                        'is_pending_tab' => true
+                    ];
+                }
+                
+                $tabItems = array_merge($tabItems, [
+                    [
+                        'id' => 'tab-requests', 
+                        'label' => 'คำขอเข้าพัก', 
+                        'icon' => 'fa-file-circle-plus', 
+                        'color' => 'text-red-500',
+                        'count' => \App\Models\housing\ResidenceRequest::where('user_id', $userId)->where('send_status', '<', 6)->count()
+                    ],
+                    [
+                        'id' => 'tab-agreements', 
+                        'label' => 'ข้อตกลงเข้าพัก', 
+                        'icon' => 'fa-file-signature', 
+                        'color' => 'text-blue-500',
+                        'count' => \App\Models\housing\ResidenceAgreement::where('user_id', $userId)->where('send_status', '<', 6)->count()
+                    ],
+                    [
+                        'id' => 'tab-guests', 
+                        'label' => 'นำญาติเข้าพัก', 
+                        'icon' => 'fa-people-arrows', 
+                        'color' => 'text-purple-500',
+                        'count' => \App\Models\housing\ResidentGuestRequest::where('user_id', $userId)->where('send_status', '<', 3)->count()
+                    ],
+                    [
+                        'id' => 'tab-leaves', 
+                        'label' => 'คำร้องย้ายออก', 
+                        'icon' => 'fa-right-from-bracket', 
+                        'color' => 'text-orange-500',
+                        'count' => \App\Models\housing\ResidenceLeave::where('user_id', $userId)->where('send_status', '<', 3)->count()
+                    ],
+                ]);
             @endphp
 
             @foreach($tabItems as $index => $tab)
@@ -31,14 +71,69 @@
                     class="tab-btn flex-1 min-w-[150px] flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 {{ $index === 0 ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-200' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
                     <i class="fa-solid {{ $tab['icon'] }} {{ $index === 0 ? 'text-white' : ($tab['color'] ?? '') }}"></i>
                     {{ $tab['label'] }}
+                    @if($tab['count'] > 0)
+                        <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-100 text-[10px] {{ $index === 0 ? 'text-red-600' : 'text-slate-500' }}">{{ $tab['count'] }}</span>
+                    @endif
                 </button>
             @endforeach
         </div>
 
         {{-- Tab Contents --}}
         <div class="tab-panels">
+            @if($totalPending > 0)
+                <div id="content-tab-pending" 
+                    class="tab-panel bg-white dark:bg-gray-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm overflow-x-auto">
+                    <div class="space-y-10">
+                        @if(count($pendingApprovals['requests']))
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> คำขอเข้าพักที่รอคุณอนุมัติ
+                                </h3>
+                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['requests'], 'type' => 'request'])
+                            </div>
+                        @endif
+                        @if(count($pendingApprovals['agreements']))
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> ข้อตกลงที่รอคุณอนุมัติ
+                                </h3>
+                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['agreements'], 'type' => 'agreement'])
+                            </div>
+                        @endif
+                        @if(count($pendingApprovals['guests']))
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> คำขอนำญาติเข้าพักที่รอคุณอนุมัติ
+                                </h3>
+                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['guests'], 'type' => 'guest'])
+                            </div>
+                        @endif
+                        @if(count($pendingApprovals['leaves']))
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span> คำร้องขอย้ายออกที่รอคุณอนุมัติ
+                                </h3>
+                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['leaves'], 'type' => 'leave'])
+                            </div>
+                        @endif
+
+                        @php
+                            $myRepairTasks = \App\Models\housing\ResidenceRepair::where('technician_id', Auth::id())->where('status', 1)->get();
+                        @endphp
+                        @if($myRepairTasks->count())
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> งานแจ้งซ่อมที่มอบหมายให้คุณ
+                                </h3>
+                                @include('backend.housing.partials.repair_list_technician', ['items' => $myRepairTasks])
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <div id="content-tab-requests"
-                class="tab-panel bg-white dark:bg-gray-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm overflow-x-auto">
+                class="tab-panel {{ $totalPending > 0 ? 'hidden' : '' }} bg-white dark:bg-gray-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm overflow-x-auto">
                 @include('backend.housing.partials.request_list', ['items' => $requests, 'type' => 'request'])
             </div>
 
@@ -60,31 +155,39 @@
 
         <script>
             function switchTab(tabId) {
+                localStorage.setItem('housing_active_tab', tabId);
                 // Hide all panels
                 document.querySelectorAll('.tab-panel').forEach(panel => {
                     panel.classList.add('hidden');
                 });
                 // Show selected panel
-                document.getElementById('content-' + tabId).classList.remove('hidden');
+                const contentPanel = document.getElementById('content-' + tabId);
+                if(contentPanel) contentPanel.classList.remove('hidden');
 
                 // Reset all buttons
                 document.querySelectorAll('.tab-btn').forEach(btn => {
                     btn.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-red-700', 'text-white', 'shadow-lg', 'shadow-red-200');
                     btn.classList.add('text-slate-500', 'hover:bg-slate-50', 'dark:hover:bg-slate-700');
-
-                    // Reset icon color (finding the original color class from the Blade data would be complex, 
-                    // so we'll just remove text-white and the color classes will take over if they were there)
                     const icon = btn.querySelector('i');
                     if (icon) icon.classList.remove('text-white');
                 });
 
                 // Active button state
                 const activeBtn = document.getElementById('btn-' + tabId);
-                activeBtn.classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-700', 'text-white', 'shadow-lg', 'shadow-red-200');
-                activeBtn.classList.remove('text-slate-500', 'hover:bg-slate-50', 'dark:hover:bg-slate-700');
-                const activeIcon = activeBtn.querySelector('i');
-                if (activeIcon) activeIcon.classList.add('text-white');
+                if(activeBtn) {
+                    activeBtn.classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-700', 'text-white', 'shadow-lg', 'shadow-red-200');
+                    activeBtn.classList.remove('text-slate-500', 'hover:bg-slate-50', 'dark:hover:bg-slate-700');
+                    const activeIcon = activeBtn.querySelector('i');
+                    if (activeIcon) activeIcon.classList.add('text-white');
+                }
             }
+
+            window.onload = function() {
+                const activeTab = localStorage.getItem('housing_active_tab');
+                if (activeTab && document.getElementById('btn-' + activeTab)) {
+                    switchTab(activeTab);
+                }
+            };
         </script>
     </div>
 @endsection

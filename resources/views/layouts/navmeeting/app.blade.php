@@ -36,7 +36,7 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="p-6 min-h-[70vh]">
+        <main class="p-6 pt-[88px] min-h-[70vh]">
             @yield('content')
         </main>
 
@@ -48,14 +48,42 @@
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Success',
-                    text: "{{ session('success') }}",
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'OK'
+                    title: '<span class="text-emerald-600 font-black">สำเร็จ!</span>',
+                    html: '<p class="text-slate-600 font-medium">{{ session('success') }}</p>',
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#10b981',
+                    padding: '2rem',
+                    borderRadius: '2rem',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-3xl border-0 shadow-2xl',
+                        title: 'font-prompt'
+                    }
                 });
             });
         </script>
-        @endif
+    @endif
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: '<span class="text-rose-600 font-black">เกิดข้อผิดพลาด</span>',
+                    html: '<p class="text-slate-600 font-medium">{{ session('error') }}</p>',
+                    confirmButtonText: 'ลองอีกครั้ง',
+                    confirmButtonColor: '#f43f5e',
+                    padding: '2rem',
+                    borderRadius: '2rem',
+                    customClass: {
+                        popup: 'rounded-3xl border-0 shadow-2xl',
+                        title: 'font-prompt'
+                    }
+                });
+            });
+        </script>
+    @endif
 </body>
 
 </html>

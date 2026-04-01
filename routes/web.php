@@ -31,8 +31,9 @@ Route::get('/', function () {
 
     $policies = \App\Models\Policy::where('type', 'policy')->orderBy('order')->get();
     $operations = \App\Models\Policy::where('type', 'operation')->orderBy('order')->get();
+    $announcements = \App\Models\Announcement::orderByDesc('published_date')->get();
 
-    return view('welcome', compact('news', 'policies', 'operations'));
+    return view('welcome', compact('news', 'policies', 'operations', 'announcements'));
 })->name('welcome');
 
 
@@ -55,6 +56,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/backend/welcome', [DataManagementController::class, 'welcomeDataManagement'])->name('backend.welcomedatamanage');
     Route::resource('backend/policy', \App\Http\Controllers\Backend\PolicyController::class, ['as' => 'backend']);
+    Route::resource('backend/announcement', \App\Http\Controllers\Backend\AnnouncementController::class, ['as' => 'backend']);
 
 
     Route::prefix('datamanage')->name('datamanage.')->group(function () {
@@ -108,6 +110,7 @@ Route::middleware('auth')->group(function () {
     Route::get('requisitions/reqlistall', [RequisitionsController::class, 'ReqlistAll'])->name('requisitions.reqlistall');
     Route::get('requisitions/detailreqpedding/{id}', [RequisitionsController::class, 'DetailReqPending'])->name('requisitions.detailreqpedding');
     Route::get('requisitions/detailreqlistall/{id}', [RequisitionsController::class, 'DetailReqAlllist'])->name('requisitions.detailreqlistall');
+    Route::get('requisitions/detail/pdf/{id}', [RequisitionsController::class, 'DetailExportPdf'])->name('requisitions.detail.pdf');
     Route::get('requisitions/cancel/{id}', [RequisitionsController::class, 'cancel'])->name('requisitions.cancel');
     //dashboard route
     Route::get('requisitions/dashboard', [RequisitionsController::class, 'dashboardRequisition'])->name('requisitions.dashboard');
@@ -143,6 +146,7 @@ Route::middleware('auth')->group(function () {
     // Backend Booking Meeting
     Route::prefix('backend/bookingmeeting')->name('backend.bookingmeeting.')->group(function () {
         Route::resource('rooms', \App\Http\Controllers\bookingmeeting\BackendRoomsController::class);
+        Route::put('reservations/{id}/update-status', [\App\Http\Controllers\bookingmeeting\BackendReservationsController::class, 'updateStatus'])->name('reservations.update_status');
         Route::resource('reservations', \App\Http\Controllers\bookingmeeting\BackendReservationsController::class);
         Route::get('report', [\App\Http\Controllers\bookingmeeting\BackendReportController::class, 'index'])->name('report.index');
     });
@@ -196,6 +200,10 @@ Route::middleware('auth')->group(function () {
         Route::get('houselist', [EmployeeHousingController::class, 'houselist'])->name('houselist');
         Route::get('request/create', [EmployeeHousingController::class, 'requestForm'])->name('request.create');
         Route::post('request/store', [EmployeeHousingController::class, 'storeRequest'])->name('request.store');
+        Route::get('request/{id}/pdf', [EmployeeHousingController::class, 'exportRequestPdf'])->name('request.pdf');
+        Route::get('agreement/{id}/pdf', [EmployeeHousingController::class, 'exportAgreementPdf'])->name('agreement.pdf');
+        Route::get('guest/{id}/pdf', [EmployeeHousingController::class, 'exportGuestPdf'])->name('guest.pdf');
+        Route::get('leave/{id}/pdf', [EmployeeHousingController::class, 'exportLeavePdf'])->name('leave.pdf');
         Route::get('agreement/create', [EmployeeHousingController::class, 'agreementForm'])->name('agreement.create');
         Route::post('agreement/store', [EmployeeHousingController::class, 'storeAgreement'])->name('agreement.store');
         Route::get('guest/create', [EmployeeHousingController::class, 'guestForm'])->name('guest.create');
@@ -209,6 +217,19 @@ Route::middleware('auth')->group(function () {
         Route::post('assign-room', [EmployeeHousingController::class, 'assignRoom'])->name('assign_room');
         Route::get('room-detail/{id}', [EmployeeHousingController::class, 'roomDetail'])->name('room_detail');
         Route::get('my-requests', [EmployeeHousingController::class, 'myRequests'])->name('my_requests');
+        Route::get('request-detail/{type}/{id}', [EmployeeHousingController::class, 'requestDetail'])->name('request_detail');
+        Route::get('committee/chart', [EmployeeHousingController::class, 'committeeChart'])->name('committee_chart');
+        Route::post('committee/store', [EmployeeHousingController::class, 'storeCommittee'])->name('committee.store');
+        Route::put('committee/{id}', [EmployeeHousingController::class, 'updateCommittee'])->name('committee.update');
+        Route::delete('committee/{id}', [EmployeeHousingController::class, 'destroyCommittee'])->name('committee.destroy');
+
+        Route::get('report', [EmployeeHousingController::class, 'reportDashboard'])->name('report');
+
+        // Repairs
+        Route::get('repair/create', [EmployeeHousingController::class, 'repairForm'])->name('repair.create');
+        Route::post('repair/store', [EmployeeHousingController::class, 'storeRepair'])->name('repair.store');
+        Route::post('repair/assign', [EmployeeHousingController::class, 'assignRepair'])->name('repair.assign');
+        Route::post('repair/finish', [EmployeeHousingController::class, 'finishRepair'])->name('repair.finish');
     });
 
 

@@ -108,34 +108,68 @@
                                     <div class="text-slate-700 font-medium">{{ $res->requester_name }}</div>
                                     <div class="text-[11px] text-slate-400">{{ $res->user->employee_code ?? '' }}</div>
                                 </td>
-                                <td class="text-center">
-                                    @if($res->status == 'pending')
-                                        <span
-                                            class="bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1 rounded-full text-xs flex items-center w-fit mx-auto gap-1">
-                                            <i class="fa-regular fa-clock"></i> รออนุมัติ
-                                        </span>
-                                    @elseif($res->status == 'acknowledge')
-                                        <span
-                                            class="bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full text-xs flex items-center w-fit mx-auto gap-1">
-                                            <i class="fa-solid fa-check"></i> อนุมัติแล้ว
-                                        </span>
-                                    @elseif($res->status == 'rejected')
-                                        <span
-                                            class="bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full text-xs flex items-center w-fit mx-auto gap-1">
-                                            <i class="fa-solid fa-xmark"></i> ไม่อนุมัติ
-                                        </span>
-                                    @elseif($res->status == 'cancelled')
-                                        <span
-                                            class="bg-orange-100 text-orange-700 border border-orange-200 px-3 py-1 rounded-full text-xs flex items-center w-fit mx-auto gap-1">
-                                            <i class="fa-solid fa-ban"></i> ยกเลิก
-                                        </span>
-                                    @else
-                                        <span
-                                            class="bg-slate-100 text-slate-600 border border-slate-200 px-3 py-1 rounded-full text-xs inline-block">{{ $res->status }}</span>
-                                    @endif
+                                <td class="text-right">
+                                    <div class="flex flex-col items-end gap-2 pr-2">
+                                        @if($res->status == 'pending')
+                                            <div class="flex items-center gap-1.5">
+                                                <span
+                                                    class="bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
+                                                    <i class="fa-regular fa-clock"></i> รออนุมัติ
+                                                </span>
+                                                <div class="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
+                                                    <form
+                                                        action="{{ route('backend.bookingmeeting.reservations.update_status', $res->reservation_id) }}"
+                                                        method="POST" class="m-0 p-0 confirm-submit"
+                                                        data-msg="อนุมัติการจองห้องประชุมรายการนี้?">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="status" value="acknowledge">
+                                                        <button type="submit"
+                                                            class="w-7 h-7 rounded-md text-emerald-600 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-all duration-300"
+                                                            title="อนุมัติการจอง">
+                                                            <i class="fa-solid fa-check text-xs"></i>
+                                                        </button>
+                                                    </form>
+                                                    <div class="w-px h-3 bg-slate-200 mx-0.5"></div>
+                                                    <form
+                                                        action="{{ route('backend.bookingmeeting.reservations.update_status', $res->reservation_id) }}"
+                                                        method="POST" class="m-0 p-0 confirm-submit"
+                                                        data-msg="ไม่อนุมัติการจองห้องประชุมรายการนี้?"
+                                                        data-type="warning">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="status" value="rejected">
+                                                        <button type="submit"
+                                                            class="w-7 h-7 rounded-md text-orange-600 hover:bg-orange-600 hover:text-white flex items-center justify-center transition-all duration-300"
+                                                            title="ไม่อนุมัติ">
+                                                            <i class="fa-solid fa-xmark text-xs"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        @elseif($res->status == 'acknowledge')
+                                            <span
+                                                class="bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
+                                                <i class="fa-solid fa-check"></i> อนุมัติแล้ว
+                                            </span>
+                                        @elseif($res->status == 'rejected')
+                                            <span
+                                                class="bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
+                                                <i class="fa-solid fa-xmark"></i> ไม่อนุมัติ
+                                            </span>
+                                        @elseif($res->status == 'cancelled')
+                                            <span
+                                                class="bg-orange-100 text-orange-700 border border-orange-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
+                                                <i class="fa-solid fa-ban"></i> ยกเลิก
+                                            </span>
+                                        @else
+                                            <span
+                                                class="bg-slate-100 text-slate-600 border border-slate-200 px-3 py-1 rounded-full text-xs shadow-sm">{{ $res->status }}</span>
+                                        @endif
+                                    </div>
                                 </td>
-                                <td>
-                                    <div class="flex items-center justify-center gap-1.5">
+                                <td class="text-right">
+                                    <div class="flex items-center justify-end gap-1.5 pr-2">
                                         <a href="{{ route('backend.bookingmeeting.reservations.show', $res->reservation_id) }}"
                                             class="w-8 h-8 rounded border border-slate-200 bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 flex items-center justify-center transition-colors"
                                             title="ดูรายละเอียด">
@@ -148,8 +182,9 @@
                                         </a>
                                         <form
                                             action="{{ route('backend.bookingmeeting.reservations.destroy', $res->reservation_id) }}"
-                                            method="POST" class="m-0 p-0"
-                                            onsubmit="return confirm('ยืนยันลบรายการจองหมายเลข {{ $res->reservation_id }} นี้ทิ้งอย่างถาวร?');">
+                                            method="POST" class="m-0 p-0 confirm-submit"
+                                            data-msg="ยืนยันลบรายการจองหมายเลข {{ $res->reservation_id }} นี้ทิ้งอย่างถาวร?"
+                                            data-type="danger">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -184,3 +219,49 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmForms = document.querySelectorAll('.confirm-submit');
+        confirmForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const msg = this.getAttribute('data-msg') || 'ยืนยันการทำรายการ?';
+                const type = this.getAttribute('data-type') || 'question';
+                let icon = 'question';
+                let confirmBtnColor = '#3b82f6';
+                if (type === 'warning') {
+                    icon = 'warning';
+                    confirmBtnColor = '#f59e0b';
+                } else if (type === 'danger') {
+                    icon = 'error';
+                    confirmBtnColor = '#ef4444';
+                } else if (msg.includes('อนุมัติ')) {
+                    icon = 'success';
+                    confirmBtnColor = '#10b981';
+                }
+                Swal.fire({
+                    title: '<span class="font-prompt text-xl font-bold">ยืนยันการทำรายการ</span>',
+                    html: `<p class="text-slate-600 font-medium">${msg}</p>`,
+                    icon: icon,
+                    showCancelButton: true,
+                    confirmButtonColor: confirmBtnColor,
+                    cancelButtonColor: '#94a3b8',
+                    confirmButtonText: 'ยืนยันตกลง',
+                    cancelButtonText: 'ยกเลิก',
+                    padding: '2rem',
+                    customClass: {
+                        popup: 'rounded-3xl border-0 shadow-2xl',
+                        title: 'font-prompt'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+@endpush

@@ -1,6 +1,18 @@
 @extends('layouts.housing.apphousing')
 @section('title', 'จัดการข้อมูลบ้านพัก')
 @section('content')
+<style>
+    @keyframes glow-attention {
+        0% { box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.05); }
+        50% { box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.2); }
+        100% { box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.05); }
+    }
+    .row-attention { 
+        animation: glow-attention 2.5s infinite; 
+        background-color: rgba(254, 242, 242, 0.7) !important;
+        border-left: 4px solid #ef4444 !important;
+    }
+</style>
 <div class="space-y-6">
     @if(session('success'))
     <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl flex items-center gap-2 text-sm shadow-sm">
@@ -48,12 +60,46 @@
     </form>
 
     {{-- Tab Navigation --}}
+    @php
+        $userId = Auth::id();
+        $pRequestsTotal = \App\Models\housing\ResidenceRequest::where(function($q) use ($userId) {
+            $q->where(function($sq) use ($userId) { $sq->where('send_status', 0)->where('commander_id', $userId); })
+              ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 1)->where('managerhams_id', $userId); })
+              ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 2)->where('Committee_id', $userId); });
+        })->count();
+        $pAgreementsTotal = \App\Models\housing\ResidenceAgreement::where(function($q) use ($userId) {
+            $q->where(function($sq) use ($userId) { $sq->where('send_status', 0)->where('commander_id', $userId); })
+              ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 1)->where('managerhams_id', $userId); })
+              ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 2)->where('Committee_id', $userId); });
+        })->count();
+        $pGuestsTotal = \App\Models\housing\ResidentGuestRequest::where(function($q) use ($userId) {
+            $q->where(function($sq) use ($userId) { $sq->where('send_status', 0)->where('commander_id', $userId); })
+              ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 1)->where('managerhams_id', $userId); })
+              ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 2)->where('Committee_id', $userId); });
+        })->count();
+        $pLeavesTotal = \App\Models\housing\ResidenceLeave::where(function($q) use ($userId) {
+            $q->where(function($sq) use ($userId) { $sq->where('send_status', 0)->where('managerhams_id', $userId); })
+              ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 2)->where('Committee_id', $userId); });
+        })->count();
+
+        $tabs = [
+            'requests' => ['ชื่อ' => 'คำขอเข้าพัก', 'ไอคอน' => 'fa-file-circle-plus', 'สี' => 'red', 'นับ' => $pRequestsTotal],
+            'agreements' => ['ชื่อ' => 'ข้อตกลง', 'ไอคอน' => 'fa-file-signature', 'สี' => 'blue', 'นับ' => $pAgreementsTotal],
+            'guests' => ['ชื่อ' => 'นำญาติเข้าพัก', 'ไอคอน' => 'fa-people-arrows', 'สี' => 'purple', 'นับ' => $pGuestsTotal],
+            'leaves' => ['ชื่อ' => 'ขอย้ายออก', 'ไอคอน' => 'fa-right-from-bracket', 'สี' => 'orange', 'นับ' => $pLeavesTotal],
+            'repairs' => ['ชื่อ' => 'แจ้งซ่อม', 'ไอคอน' => 'fa-screwdriver-wrench', 'สี' => 'emerald', 'นับ' => 0]
+        ];
+    @endphp
     <div class="flex flex-wrap gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
-        @php $tabs = ['requests' => ['คำขอเข้าพัก','fa-file-circle-plus','red'], 'agreements' => ['ข้อตกลง','fa-file-signature','blue'], 'guests' => ['นำญาติเข้าพัก','fa-people-arrows','purple'], 'leaves' => ['ขอย้ายออก','fa-right-from-bracket','orange']]; @endphp
         @foreach($tabs as $key => $info)
         <a href="{{ route('housing.management', array_merge(request()->query(), ['tab' => $key])) }}"
             class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all {{ $tab == $key ? 'bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700' }}">
-            <i class="fa-solid {{ $info[1] }} text-{{ $info[2] }}-500"></i> {{ $info[0] }}
+            <i class="fa-solid {{ $info['ไอคอน'] }} text-{{ $info['สี'] }}-500"></i> {{ $info['ชื่อ'] }}
+            @if($info['นับ'] > 0)
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                    {{ $info['นับ'] }}
+                </span>
+            @endif
         </a>
         @endforeach
     </div>
@@ -68,12 +114,23 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse($requests as $r)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                        <td class="px-4 py-3 font-mono text-xs font-medium">{{ $r->requests_code }}</td>
-                        <td class="px-4 py-3">{{ $r->first_name }} {{ $r->last_name }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $r->department }}</td>
-                        <td class="px-4 py-3 text-gray-500 text-xs">{{ $r->created_at ? \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') : '-' }}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($r->send_status) }}">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($r->send_status) }}</span></td>
+                        @php
+                            $currentVal = null;
+                            if ($r->send_status == 0) $currentVal = $r->commander_id;
+                            elseif ($r->send_status == 1) $currentVal = $r->managerhams_id;
+                            elseif ($r->send_status == 2) $currentVal = $r->Committee_id;
+                            $isMyTurn =  ($currentVal && Auth::id() == $currentVal);
+                        @endphp
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 {{ $isMyTurn ? 'row-attention' : '' }}">
+                            <td class="px-4 py-3 font-mono text-xs font-medium">{{ $r->requests_code }}</td>
+                            <td class="px-4 py-3">{{ $r->first_name }} {{ $r->last_name }}</td>
+                            <td class="px-4 py-3 text-gray-500">{{ $r->department }}</td>
+                            <td class="px-4 py-3 text-gray-500 text-xs">{{ $r->created_at ? \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') : '-' }}</td>
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($r->send_status) }}">
+                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($r->send_status) }}
+                                </span>
+                            </td>
                         <td class="px-4 py-3 text-gray-500 text-xs font-semibold">
                             @if($r->send_status < 3)
                                 @php
@@ -100,21 +157,47 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <div class="flex justify-center gap-1">
+                            <div class="flex justify-center gap-1 flex-col items-center">
                                 @if($r->send_status < 3)
-                                <form method="POST" action="{{ route('housing.approve', ['type' => 'request', 'id' => $r->id]) }}" class="inline">
-                                    @csrf <input type="hidden" name="action" value="approve">
-                                    <button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center" title="อนุมัติ"><i class="fa-solid fa-check text-xs"></i></button>
-                                </form>
-                                <form method="POST" action="{{ route('housing.approve', ['type' => 'request', 'id' => $r->id]) }}" class="inline">
-                                    @csrf <input type="hidden" name="action" value="reject">
-                                    <button type="submit" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center" title="ไม่อนุมัติ"><i class="fa-solid fa-xmark text-xs"></i></button>
-                                </form>
+                                    @php
+                                        $currentVal = null;
+                                        if ($r->send_status == 0) $currentVal = $r->commander_id;
+                                        elseif ($r->send_status == 1) $currentVal = $r->managerhams_id;
+                                        elseif ($r->send_status == 2) $currentVal = $r->Committee_id;
+                                    @endphp
+                                    
+                                    @if(Auth::id() == $currentVal)
+                                        <span class="block text-[9px] text-red-500 font-bold mb-1 animate-bounce"><i class="fa-solid fa-circle-exclamation"></i> ให้คุณพิจารณา</span>
+                                    @endif
+
+                                    <div class="flex gap-1">
+                                        <form method="POST" action="{{ route('housing.approve', ['type' => 'request', 'id' => $r->id]) }}" class="inline">
+                                            @csrf <input type="hidden" name="action" value="approve">
+                                            <button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center border border-emerald-200" title="อนุมัติ"><i class="fa-solid fa-check text-xs"></i></button>
+                                        </form>
+                                        <form method="POST" action="{{ route('housing.approve', ['type' => 'request', 'id' => $r->id]) }}" class="inline">
+                                            @csrf <input type="hidden" name="action" value="reject">
+                                            <button type="submit" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center border border-red-200" title="ไม่อนุมัติ"><i class="fa-solid fa-xmark text-xs"></i></button>
+                                        </form>
+                                    </div>
                                 @endif
-                                <form method="POST" action="{{ route('housing.destroy', ['type' => 'request', 'id' => $r->id]) }}" onsubmit="return confirm('ยืนยันลบรายการนี้?')" class="inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                                </form>
+                                <div class="flex gap-1 mt-1">
+                                    <a href="{{ route('housing.request_detail', ['type' => 'request', 'id' => $r->id]) }}" 
+                                    class="w-7 h-7 rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center" title="รายละเอียด">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    </a>
+                                    <a href="{{ route('housing.request.pdf', $r->id) }}" target="_blank" 
+                                    class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center" title="PDF">
+                                    <i class="fa-solid fa-file-pdf text-xs"></i>
+                                    </a>
+                                    <form id="delete-form-request-{{ $r->id }}" method="POST" action="{{ route('housing.destroy', ['type' => 'request', 'id' => $r->id]) }}" class="hidden">
+                                        @csrf @method('DELETE')
+                                    </form>
+                                    <button type="button" onclick="confirmDelete('request', {{ $r->id }})" 
+                                        class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -138,12 +221,23 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse($agreements as $a)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                        <td class="px-4 py-3 font-mono text-xs font-medium">{{ $a->agreement_code }}</td>
-                        <td class="px-4 py-3">{{ $a->full_name }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $a->department }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $a->residence_address }}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($a->send_status) }}">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($a->send_status) }}</span></td>
+                        @php
+                            $currentVal = null;
+                            if ($a->send_status == 0) $currentVal = $a->commander_id;
+                            elseif ($a->send_status == 1) $currentVal = $a->managerhams_id;
+                            elseif ($a->send_status == 2) $currentVal = $a->Committee_id;
+                            $isMyTurn =  ($currentVal && Auth::id() == $currentVal);
+                        @endphp
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 {{ $isMyTurn ? 'row-attention' : '' }}">
+                            <td class="px-4 py-3 font-mono text-xs font-medium">{{ $a->agreement_code }}</td>
+                            <td class="px-4 py-3">{{ $a->full_name }}</td>
+                            <td class="px-4 py-3 text-gray-500">{{ $a->department }}</td>
+                            <td class="px-4 py-3 text-gray-500">{{ $a->residence_address }}</td>
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($a->send_status) }}">
+                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($a->send_status) }}
+                                </span>
+                            </td>
                         <td class="px-4 py-3 text-gray-500 text-xs font-semibold">
                             @if($a->send_status < 3)
                                 @php
@@ -168,12 +262,27 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <div class="flex justify-center gap-1">
+                            <div class="flex justify-center gap-1 flex-col items-center">
                                 @if($a->send_status < 3)
-                                <form method="POST" action="{{ route('housing.approve', ['type' => 'agreement', 'id' => $a->agreement_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="approve"><button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center" title="อนุมัติ"><i class="fa-solid fa-check text-xs"></i></button></form>
-                                <form method="POST" action="{{ route('housing.approve', ['type' => 'agreement', 'id' => $a->agreement_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="reject"><button type="submit" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center" title="ไม่อนุมัติ"><i class="fa-solid fa-xmark text-xs"></i></button></form>
+                                    @if(Auth::id() == $currentVal)
+                                        <span class="block text-[9px] text-red-500 font-bold mb-1 animate-bounce"><i class="fa-solid fa-circle-exclamation"></i> ให้คุณพิจารณา</span>
+                                    @endif
+                                    <div class="flex gap-1">
+                                        <form method="POST" action="{{ route('housing.approve', ['type' => 'agreement', 'id' => $a->agreement_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="approve"><button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center border border-emerald-200" title="อนุมัติ"><i class="fa-solid fa-check text-xs"></i></button></form>
+                                        <form method="POST" action="{{ route('housing.approve', ['type' => 'agreement', 'id' => $a->agreement_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="reject"><button type="submit" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center border border-red-200" title="ไม่อนุมัติ"><i class="fa-solid fa-xmark text-xs"></i></button></form>
+                                    </div>
                                 @endif
-                                <form method="POST" action="{{ route('housing.destroy', ['type' => 'agreement', 'id' => $a->agreement_id]) }}" onsubmit="return confirm('ยืนยันลบ?')" class="inline">@csrf @method('DELETE')<button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ"><i class="fa-solid fa-trash-can text-xs"></i></button></form>
+                                <div class="flex gap-1 mt-1">
+                                    <a href="{{ route('housing.request_detail', ['type' => 'agreement', 'id' => $a->agreement_id]) }}" 
+                                    class="w-7 h-7 rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center" title="รายละเอียด">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    </a>
+                                    <a href="{{ route('housing.agreement.pdf', $a->agreement_id) }}" target="_blank" 
+                                    class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center" title="PDF">
+                                    <i class="fa-solid fa-file-pdf text-xs"></i>
+                                    </a>
+                                    <form method="POST" action="{{ route('housing.destroy', ['type' => 'agreement', 'id' => $a->agreement_id]) }}" onsubmit="return confirm('ยืนยันลบ?')" class="inline">@csrf @method('DELETE')<button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ"><i class="fa-solid fa-trash-can text-xs"></i></button></form>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -197,12 +306,23 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse($guests as $g)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                        <td class="px-4 py-3 font-mono text-xs font-medium">{{ $g->resident_guest_code }}</td>
-                        <td class="px-4 py-3">{{ $g->first_name }} {{ $g->last_name }}</td>
-                        <td class="px-4 py-3 text-gray-500 text-xs">{{ $g->start_date ? \Carbon\Carbon::parse($g->start_date)->format('d/m/Y') : '' }} - {{ $g->end_date ? \Carbon\Carbon::parse($g->end_date)->format('d/m/Y') : '' }}</td>
-                        <td class="px-4 py-3 text-center">{{ $g->members->count() }} คน</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($g->send_status) }}">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($g->send_status) }}</span></td>
+                        @php
+                            $currentVal = null;
+                            if ($g->send_status == 0) $currentVal = $g->commander_id;
+                            elseif ($g->send_status == 1) $currentVal = $g->managerhams_id;
+                            elseif ($g->send_status == 2) $currentVal = $g->Committee_id;
+                            $isMyTurn =  ($currentVal && Auth::id() == $currentVal);
+                        @endphp
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 {{ $isMyTurn ? 'row-attention' : '' }}">
+                            <td class="px-4 py-3 font-mono text-xs font-medium">{{ $g->resident_guest_code }}</td>
+                            <td class="px-4 py-3">{{ $g->first_name }} {{ $g->last_name }}</td>
+                            <td class="px-4 py-3 text-gray-500 text-xs">{{ $g->start_date ? \Carbon\Carbon::parse($g->start_date)->format('d/m/Y') : '' }} - {{ $g->end_date ? \Carbon\Carbon::parse($g->end_date)->format('d/m/Y') : '' }}</td>
+                            <td class="px-4 py-3 text-center">{{ $g->members->count() }} คน</td>
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($g->send_status) }}">
+                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($g->send_status) }}
+                                </span>
+                            </td>
                         <td class="px-4 py-3 text-gray-500 text-xs font-semibold">
                             @if($g->send_status < 3)
                                 @php
@@ -227,12 +347,27 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <div class="flex justify-center gap-1">
+                            <div class="flex justify-center gap-1 flex-col items-center">
                                 @if($g->send_status < 3)
-                                <form method="POST" action="{{ route('housing.approve', ['type' => 'guest', 'id' => $g->resident_guest_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="approve"><button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center"><i class="fa-solid fa-check text-xs"></i></button></form>
-                                <form method="POST" action="{{ route('housing.approve', ['type' => 'guest', 'id' => $g->resident_guest_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="reject"><button type="submit" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button></form>
+                                    @if(Auth::id() == $currentVal)
+                                        <span class="block text-[9px] text-red-500 font-bold mb-1 animate-bounce"><i class="fa-solid fa-circle-exclamation"></i> ให้คุณพิจารณา</span>
+                                    @endif
+                                    <div class="flex gap-1">
+                                        <form method="POST" action="{{ route('housing.approve', ['type' => 'guest', 'id' => $g->resident_guest_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="approve"><button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center border border-emerald-200"><i class="fa-solid fa-check text-xs"></i></button></form>
+                                        <form method="POST" action="{{ route('housing.approve', ['type' => 'guest', 'id' => $g->resident_guest_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="reject"><button type="submit" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center border border-red-200"><i class="fa-solid fa-xmark text-xs"></i></button></form>
+                                    </div>
                                 @endif
-                                <form method="POST" action="{{ route('housing.destroy', ['type' => 'guest', 'id' => $g->resident_guest_id]) }}" onsubmit="return confirm('ยืนยันลบ?')" class="inline">@csrf @method('DELETE')<button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center"><i class="fa-solid fa-trash-can text-xs"></i></button></form>
+                                <div class="flex gap-1 mt-1">
+                                    <a href="{{ route('housing.request_detail', ['type' => 'guest', 'id' => $g->resident_guest_id]) }}" 
+                                    class="w-7 h-7 rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center" title="รายละเอียด">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    </a>
+                                    <a href="{{ route('housing.guest.pdf', $g->resident_guest_id) }}" target="_blank" 
+                                    class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center" title="PDF">
+                                    <i class="fa-solid fa-file-pdf text-xs"></i>
+                                    </a>
+                                    <form method="POST" action="{{ route('housing.destroy', ['type' => 'guest', 'id' => $g->resident_guest_id]) }}" onsubmit="return confirm('ยืนยันลบ?')" class="inline">@csrf @method('DELETE')<button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center"><i class="fa-solid fa-trash-can text-xs"></i></button></form>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -256,12 +391,22 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse($leaves as $l)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                        <td class="px-4 py-3 font-mono text-xs font-medium">{{ $l->residence_leaves_code }}</td>
-                        <td class="px-4 py-3">{{ $l->first_name }} {{ $l->last_name }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $l->room_number }}</td>
-                        <td class="px-4 py-3 text-gray-500 text-xs">{{ $l->move_out_date ? \Carbon\Carbon::parse($l->move_out_date)->format('d/m/Y') : '-' }}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($l->send_status) }}">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($l->send_status) }}</span></td>
+                        @php
+                            $currentVal = null;
+                            if ($l->send_status == 0) $currentVal = $l->managerhams_id;
+                            elseif ($l->send_status == 2) $currentVal = $l->Committee_id;
+                            $isMyTurn =  ($currentVal && Auth::id() == $currentVal);
+                        @endphp
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 {{ $isMyTurn ? 'row-attention' : '' }}">
+                            <td class="px-4 py-3 font-mono text-xs font-medium">{{ $l->residence_leaves_code }}</td>
+                            <td class="px-4 py-3">{{ $l->first_name }} {{ $l->last_name }}</td>
+                            <td class="px-4 py-3 text-gray-500">{{ $l->room_number }}</td>
+                            <td class="px-4 py-3 text-gray-500 text-xs">{{ $l->move_out_date ? \Carbon\Carbon::parse($l->move_out_date)->format('d/m/Y') : '-' }}</td>
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($l->send_status) }}">
+                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($l->send_status) }}
+                                </span>
+                            </td>
                         <td class="px-4 py-3 text-gray-500 text-xs font-semibold">
                             @if($l->send_status < 3)
                                 @php
@@ -286,12 +431,27 @@
                         </td>
 
                         <td class="px-4 py-3 text-center">
-                            <div class="flex justify-center gap-1">
+                            <div class="flex justify-center gap-1 flex-col items-center">
                                 @if($l->send_status < 3)
-                                <form method="POST" action="{{ route('housing.approve', ['type' => 'leave', 'id' => $l->residence_leaves_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="approve"><button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center"><i class="fa-solid fa-check text-xs"></i></button></form>
-                                <form method="POST" action="{{ route('housing.approve', ['type' => 'leave', 'id' => $l->residence_leaves_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="reject"><button type="submit" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button></form>
+                                    @if(Auth::id() == $currentVal)
+                                        <span class="block text-[9px] text-red-500 font-bold mb-1 animate-bounce"><i class="fa-solid fa-circle-exclamation"></i> ให้คุณพิจารณา</span>
+                                    @endif
+                                    <div class="flex gap-1">
+                                        <form method="POST" action="{{ route('housing.approve', ['type' => 'leave', 'id' => $l->residence_leaves_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="approve"><button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center border border-emerald-200" title="อนุมัติ"><i class="fa-solid fa-check text-xs"></i></button></form>
+                                        <form method="POST" action="{{ route('housing.approve', ['type' => 'leave', 'id' => $l->residence_leaves_id]) }}" class="inline">@csrf <input type="hidden" name="action" value="reject"><button type="submit" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center border border-red-200" title="ไม่อนุมัติ"><i class="fa-solid fa-xmark text-xs"></i></button></form>
+                                    </div>
                                 @endif
-                                <form method="POST" action="{{ route('housing.destroy', ['type' => 'leave', 'id' => $l->residence_leaves_id]) }}" onsubmit="return confirm('ยืนยันลบ?')" class="inline">@csrf @method('DELETE')<button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center"><i class="fa-solid fa-trash-can text-xs"></i></button></form>
+                                <div class="flex gap-1 mt-1">
+                                    <a href="{{ route('housing.request_detail', ['type' => 'leave', 'id' => $l->residence_leaves_id]) }}" 
+                                    class="w-7 h-7 rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center" title="รายละเอียด">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    </a>
+                                    <a href="{{ route('housing.leave.pdf', $l->residence_leaves_id) }}" target="_blank" 
+                                    class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center" title="PDF">
+                                    <i class="fa-solid fa-file-pdf text-xs"></i>
+                                    </a>
+                                    <form method="POST" action="{{ route('housing.destroy', ['type' => 'leave', 'id' => $l->residence_leaves_id]) }}" onsubmit="return confirm('ยืนยันลบ?')" class="inline">@csrf @method('DELETE')<button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ"><i class="fa-solid fa-trash-can text-xs"></i></button></form>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -302,6 +462,101 @@
             </table>
         </div>
         <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700">{{ $leaves->links() }}</div>
+    </div>
+    @endif
+
+    {{-- TAB: Repairs --}}
+    @if($tab == 'repairs')
+    <div class="kumwell-card bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+        <div class="px-4 py-3 bg-emerald-50 dark:bg-emerald-900/10 border-b border-emerald-100 dark:border-emerald-800/50 flex justify-between items-center">
+            <h3 class="font-bold text-emerald-800 dark:text-emerald-400 text-sm flex items-center gap-2"><i class="fa-solid fa-list-check"></i> รายการแจ้งซ่อม</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 dark:bg-gray-700/50 text-gray-400 dark:text-gray-400 text-[10px] uppercase font-bold tracking-widest">
+                    <tr>
+                        <th class="px-4 py-4 text-left">Code</th>
+                        <th class="px-4 py-4 text-left">ผู้แจ้ง-ห้องพัก</th>
+                        <th class="px-4 py-4 text-left">รายละเอียด</th>
+                        <th class="px-4 py-4 text-left">ผู้ดำเนินการ</th>
+                        <th class="px-4 py-4 text-left">สถานะ</th>
+                        <th class="px-4 py-4 text-center">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @forelse($repairs as $r)
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
+                        <td class="px-4 py-4 align-top font-mono text-xs font-bold text-gray-700 dark:text-gray-300">#{{ $r->repair_code }}</td>
+                        <td class="px-4 py-4 align-top">
+                            <p class="font-bold text-gray-800 dark:text-white">{{ $r->user->fullname ?? '-' }}</p>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-gray-700 rounded-md text-[10px] font-bold text-slate-500">ห้อง {{ $r->room->room_number ?? '-' }}</span>
+                        </td>
+                        <td class="px-4 py-4 align-top">
+                            <p class="font-bold text-gray-700 dark:text-gray-200 mb-1">{{ $r->title }}</p>
+                            <p class="text-xs text-gray-500 line-clamp-2 max-w-xs">{{ $r->description }}</p>
+                            @if($r->images)
+                                <div class="flex gap-1 mt-2">
+                                    @foreach($r->images as $img)
+                                        <a href="{{ asset($img) }}" target="_blank" class="w-8 h-8 rounded border border-gray-200 overflow-hidden group">
+                                            <img src="{{ asset($img) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </td>
+                        <td class="px-4 py-4 align-top">
+                            @if($r->status == 0)
+                                <select onchange="assignTechnician({{ $r->id }}, this.value)" 
+                                    class="select2 text-[10px] h-8 border-gray-200 rounded-lg dark:bg-gray-700 w-full min-w-[140px] focus:ring-emerald-500">
+                                    <option value="">เลือกช่างผู้ดูแล</option>
+                                    @foreach($approvers as $ap)
+                                        <option value="{{ $ap->id }}">{{ $ap->fullname }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-[10px]"><i class="fa-solid fa-user-gear"></i></div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-gray-700 dark:text-gray-200 leading-tight">{{ $r->technician->fullname ?? '-' }}</p>
+                                        <p class="text-[9px] text-gray-400">มอบหมายแล้ว</p>
+                                    </div>
+                                </div>
+                            @endif
+                        </td>
+                        <td class="px-4 py-4 align-top">
+                            @php
+                                $statusConf = [
+                                    0 => ['รอแอดมิน','bg-amber-50 text-amber-600 border-amber-200','fa-regular fa-clock'],
+                                    1 => ['กำลังดำเนินการ','bg-blue-50 text-blue-600 border-blue-200','fa-solid fa-gear fa-spin'],
+                                    2 => ['ซ่อมเสร็จสิ้น','bg-emerald-50 text-emerald-600 border-emerald-200','fa-solid fa-check-double'],
+                                    3 => ['ยกเลิก','bg-red-50 text-red-600 border-red-200','fa-solid fa-ban']
+                                ];
+                                $sc = $statusConf[$r->status];
+                            @endphp
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $sc[1] }}">
+                                <i class="{{ $sc[2] }}"></i> {{ $sc[0] }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 text-center align-top">
+                            <div class="flex justify-center gap-1">
+                                @if($r->status == 1)
+                                    <button onclick="finishRepairTask({{ $r->id }})" class="w-8 h-8 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-md flex items-center justify-center transition-all" title="ปิดงานซ่อม">
+                                        <i class="fa-solid fa-check-to-slot text-xs"></i>
+                                    </button>
+                                @endif
+                                <button type="button" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center" title="รายละเอียดเพิ่มเติม">
+                                    <i class="fa-solid fa-ellipsis-v text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="6" class="px-4 py-12 text-center text-gray-400 italic font-medium"><i class="fa-solid fa-box-open text-3xl mb-3 block opacity-20"></i> ไม่มีข้อมูลการแจ้งซ่อมยื่นเข้ามา</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="px-4 py-4 border-t border-gray-100 dark:border-gray-700">{{ $repairs->links() }}</div>
     </div>
     @endif
 </div>
@@ -347,6 +602,43 @@ function updateApprover(type, id, level, approverId) {
         alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
     });
 }
+
+function assignTechnician(repairId, technicianId) {
+    if (!technicianId) return;
+    
+    Swal.fire({
+        title: 'มอบหมายช่าง?',
+        text: 'ต้องการมอบหมายงานซ่อมนี้และเปลี่ยนสถานะห้องเป็น "ซ่อม/ปรับปรุง" ใช่หรือไม่?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#059669',
+        confirmButtonText: 'ยืนยันมอบหมาย'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('{{ route("housing.repair.assign") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ repair_id: repairId, technician_id: technicianId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('สำเร็จ!', 'มอบหมายงานและปรับสถานะห้องแล้ว', 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('ผิดพลาด', 'ไม่สามารถมอบหมายงานได้', 'error');
+                }
+            });
+        }
+    });
+}
+
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: 'ค้นหารายชื่อ...',
+            allowClear: true,
+            width: '100%'
+        });
+    });
 </script>
 @endsection
 

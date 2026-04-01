@@ -12,8 +12,8 @@
                     <i class="fa-solid fa-boxes-stacked text-white text-2xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">คลังอุปกรณ์</h1>
-                    <p class="text-sm text-slate-500 font-medium">จัดการและตรวจสอบพัสดุอุปกรณ์คงคลังในระบบทั้งหมด</p>
+                    <h1 class="text-2xl font-bold text-slate-800 leading-none">คลังอุปกรณ์</h1>
+                    <p class="text-sm text-slate-500 font-medium mt-1">จัดการและตรวจสอบพัสดุอุปกรณ์คงคลังในระบบทั้งหมด</p>
                 </div>
             </div>
         </div>
@@ -24,8 +24,8 @@
                 <i class="fa-solid fa-layer-group text-lg"></i>
             </div>
             <div>
-                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">อุปกรณ์ทั้งหมด</div>
-                <div class="text-2xl font-black text-slate-800">{{ number_format($items->count()) }} <span class="text-xs font-normal text-slate-400 ml-1">รายการ</span></div>
+                <div class="text-[11px] font-bold text-slate-400 uppercase">อุปกรณ์ทั้งหมด</div>
+                <div class="text-2xl font-bold text-slate-800">{{ number_format($items->count()) }} <span class="text-xs font-normal text-slate-400 ml-1">รายการ</span></div>
             </div>
         </div>
 
@@ -36,8 +36,8 @@
                 <i class="fa-solid fa-triangle-exclamation text-lg"></i>
             </div>
             <div>
-                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">ของใกล้หมด</div>
-                <div class="text-2xl font-black {{ $lowStockCount > 0 ? 'text-red-600' : 'text-slate-800' }}">
+                <div class="text-[11px] font-bold text-slate-400 uppercase">ของใกล้หมด</div>
+                <div class="text-2xl font-bold {{ $lowStockCount > 0 ? 'text-red-600' : 'text-slate-800' }}">
                     {{ number_format($lowStockCount) }} <span class="text-xs font-normal text-slate-400 ml-1">รายการ</span>
                 </div>
             </div>
@@ -45,11 +45,31 @@
     </div>
 
     <!-- Toolbar: Adding and Sorting Info -->
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-2">
-            <span class="w-2 h-8 bg-red-600 rounded-full"></span>
-            <h2 class="text-lg font-extrabold text-slate-700">รายชื่อพัสดุอุปกรณ์</h2>
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-8 bg-red-600 rounded-full"></span>
+                <h2 class="text-lg font-bold text-slate-700">รายชื่อพัสดุอุปกรณ์</h2>
+            </div>
+            
+            <!-- Custom Filters -->
+            <div class="flex items-center gap-4 w-full sm:w-auto">
+                <div class="relative group w-full sm:w-64">
+                    <i class="fa-solid fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <select id="stockFilter" class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all appearance-none cursor-pointer">
+                        <option value="all">ทั้งหมด (ALL ITEMS)</option>
+                        <option value="low">ใกล้หมด (LOW STOCK ≤ 5)</option>
+                        <option value="out">ของหมด (OUT OF STOCK)</option>
+                    </select>
+                </div>
+                
+                <div class="relative group w-full sm:w-72">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs group-focus-within:text-red-500"></i>
+                    <input type="text" id="customSearch" placeholder="ระบุชื่อพัสดุ หรือรหัส..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all shadow-sm">
+                </div>
+            </div>
         </div>
+
         <a href="{{ route('items.create') }}"
            class="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-lg shadow-red-100 transition-all active:scale-95 group">
             <i class="fa-solid fa-plus group-hover:rotate-90 transition-transform duration-300"></i>
@@ -66,12 +86,12 @@
                 <table id="itemsTable" class="w-full text-left border-collapse min-w-[1000px]">
                     <thead>
                         <tr class="bg-slate-50/50">
-                            <th class="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest rounded-l-2xl">รูปภาพ</th>
-                            <th class="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest text-center">รหัสพัสดุ</th>
-                            <th class="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest">ข้อมูลอุปกรณ์</th>
-                            <th class="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest text-center">คลังคงเหลือ</th>
-                            <th class="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest text-center">ราคาหน่วย</th>
-                            <th class="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest text-center rounded-r-2xl">การจัดการ</th>
+                            <th class="px-6 py-4 text-[12px] font-bold text-slate-400 uppercase rounded-l-2xl">รูปภาพ</th>
+                            <th class="px-6 py-4 text-[12px] font-bold text-slate-400 uppercase text-center">รหัสพัสดุ</th>
+                            <th class="px-6 py-4 text-[12px] font-bold text-slate-400 uppercase">ข้อมูลอุปกรณ์</th>
+                            <th class="px-6 py-4 text-[12px] font-bold text-slate-400 uppercase text-center">คลังคงเหลือ</th>
+                            <th class="px-6 py-4 text-[12px] font-bold text-slate-400 uppercase text-center">ราคาหน่วย</th>
+                            <th class="px-6 py-4 text-[12px] font-bold text-slate-400 uppercase text-center rounded-r-2xl">การจัดการ</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
@@ -106,20 +126,20 @@
                             <td class="px-6 py-4 text-center">
                                 <div class="flex flex-col gap-1 items-center">
                                     <span class="text-[12px] font-mono font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">{{ $item->item_code }}</span>
-                                    <span class="text-[10px] uppercase font-black text-red-500 tracking-wider">{{ $item->items_type ? $item->items_type->name : 'General' }}</span>
+                                    <span class="text-[10px] uppercase font-bold text-red-500">{{ $item->items_type ? $item->items_type->name : 'General' }}</span>
                                 </div>
                             </td>
 
                             <!-- Name Column -->
                             <td class="px-6 py-4">
                                 <div class="flex flex-col max-w-[300px]">
-                                    <span class="text-[15px] font-black text-slate-800">{{ $item->name }}</span>
+                                    <span class="text-[15px] font-bold text-slate-800">{{ $item->name }}</span>
                                     <p class="text-[12px] text-slate-400 line-clamp-1 mt-0.5 leading-relaxed">{{ $item->description ?: '-' }}</p>
-                                    @if(Str::length($item->description) > 50)
+                                    @if(mb_strlen($item->description) > 50)
                                         <button onclick="document.getElementById('desc-{{ $item->item_id }}').showModal()" class="text-[10px] font-bold text-red-500 hover:underline text-left w-fit mt-1 uppercase tracking-tighter">Read More</button>
                                         <dialog id="desc-{{ $item->item_id }}" class="modal">
                                             <div class="modal-box rounded-3xl p-8">
-                                                <h3 class="font-black text-xl text-slate-800 mb-4 border-b pb-4">{{ $item->name }}</h3>
+                                                <h3 class="font-bold text-xl text-slate-800 mb-4 border-b pb-4">{{ $item->name }}</h3>
                                                 <p class="text-slate-600 leading-relaxed">{{ $item->description }}</p>
                                                 <div class="modal-action"><form method="dialog"><button class="btn btn-ghost rounded-xl">Close</button></form></div>
                                             </div>
@@ -133,8 +153,8 @@
                             <td class="px-6 py-4 text-center">
                                 <div class="flex flex-col items-center">
                                     <div class="flex items-baseline gap-1">
-                                        <span class="text-2xl font-black {{ $item->quantity <= 5 ? 'text-red-500' : 'text-slate-800' }}">{{ number_format($item->quantity) }}</span>
-                                        <span class="text-[11px] font-black text-slate-300 uppercase">Qty</span>
+                                        <span class="text-2xl font-bold {{ $item->quantity <= 5 ? 'text-red-500' : 'text-slate-800' }}">{{ number_format($item->quantity) }}</span>
+                                        <span class="text-[11px] font-bold text-slate-300 uppercase">Qty</span>
                                     </div>
                                     <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full {{ $item->quantity > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600' }} text-[10px] font-bold uppercase mt-1">
                                         <span class="w-1 h-1 rounded-full {{ $item->quantity > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-red-500' }}"></span>
@@ -169,11 +189,11 @@
 
                                 <!-- Desktop Modals -->
                                 <dialog id="add-{{ $item->item_id }}" class="modal text-left">
-                                    <div class="modal-box rounded-[2rem] p-0 overflow-hidden"><div class="bg-emerald-600 p-6 text-white font-black text-xl flex items-center gap-3"><i class="fa-solid fa-circle-plus"></i> เพิ่มสต็อก: {{ $item->name }}</div><div class="p-8">@include('serviceshams.items.addstock', ['item' => $item])</div></div>
+                                    <div class="modal-box rounded-[2rem] p-0 overflow-hidden"><div class="bg-emerald-600 p-6 text-white font-bold text-xl flex items-center gap-3"><i class="fa-solid fa-circle-plus"></i> เพิ่มสต็อก: {{ $item->name }}</div><div class="p-8">@include('serviceshams.items.addstock', ['item' => $item])</div></div>
                                     <form method="dialog" class="modal-backdrop bg-slate-900/60"><button>close</button></form>
                                 </dialog>
                                 <dialog id="down-{{ $item->item_id }}" class="modal text-left">
-                                    <div class="modal-box rounded-[2rem] p-0 overflow-hidden"><div class="bg-orange-600 p-6 text-white font-black text-xl flex items-center gap-3"><i class="fa-solid fa-circle-minus"></i> ลดสต็อก: {{ $item->name }}</div><div class="p-8">@include('serviceshams.items.downstock', ['item' => $item])</div></div>
+                                    <div class="modal-box rounded-[2rem] p-0 overflow-hidden"><div class="bg-orange-600 p-6 text-white font-bold text-xl flex items-center gap-3"><i class="fa-solid fa-circle-minus"></i> ลดสต็อก: {{ $item->name }}</div><div class="p-8">@include('serviceshams.items.downstock', ['item' => $item])</div></div>
                                     <form method="dialog" class="modal-backdrop bg-slate-900/60"><button>close</button></form>
                                 </dialog>
                             </td>
@@ -185,9 +205,11 @@
         </div>
 
         <!-- 2. Mobile View: Card List (Hidden on desktop) -->
-        <div class="lg:hidden grid grid-cols-1 gap-4">
+        <div class="lg:hidden grid grid-cols-1 gap-4" id="mobileList">
             @foreach($items as $item)
-            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 space-y-6 group active:bg-slate-50 transition-colors">
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 space-y-6 group item-card animate-fade-in" 
+                 data-quantity="{{ $item->quantity }}" 
+                 data-search="{{ strtolower($item->name . ' ' . $item->item_code) }}">
                 <!-- Mobile Header -->
                 <div class="flex items-start gap-4">
                     @if($item->item_pic)
@@ -198,9 +220,9 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100">{{ $item->item_code }}</span>
-                            <span class="text-[10px] font-black text-red-500 uppercase">{{ $item->items_type ? $item->items_type->name : 'General' }}</span>
+                            <span class="text-[10px] font-bold text-red-500 uppercase">{{ $item->items_type ? $item->items_type->name : 'General' }}</span>
                         </div>
-                        <h3 class="text-lg font-black text-slate-800 leading-tight mb-1">{{ $item->name }}</h3>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">{{ $item->name }}</h3>
                         <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed italic">{{ $item->description ?: 'ไม่มีคำอธิบาย' }}</p>
                     </div>
                 </div>
@@ -208,12 +230,12 @@
                 <!-- Stats Grid -->
                 <div class="grid grid-cols-2 gap-3 bg-red-50/20 p-4 rounded-2xl">
                     <div class="flex flex-col">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">สถานะสต็อก</span>
-                        <span class="text-xl font-black {{ $item->quantity <= 5 ? 'text-red-600' : 'text-emerald-600' }}">{{ number_format($item->quantity) }} <span class="text-[10px] font-normal text-slate-400">ชิ้น</span></span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">สถานะสต็อก</span>
+                        <span class="text-xl font-bold {{ $item->quantity <= 5 ? 'text-red-600' : 'text-emerald-600' }}">{{ number_format($item->quantity) }} <span class="text-[10px] font-normal text-slate-400">ชิ้น</span></span>
                     </div>
                     <div class="flex flex-col border-l border-red-100 pl-4">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ราคา/หน่วย</span>
-                        <span class="text-lg font-black text-slate-700 font-mono">฿{{ number_format($item->per_unit, 0) }}</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">ราคา/หน่วย</span>
+                        <span class="text-lg font-bold text-slate-700 font-mono">฿{{ number_format($item->per_unit, 0) }}</span>
                     </div>
                 </div>
 
@@ -256,7 +278,7 @@
         timer: 2500,
         showConfirmButton: false,
         background: '#fff',
-        customClass: { popup: 'rounded-3xl shadow-2xl border border-red-50', title: 'text-2xl font-black text-slate-800' }
+        customClass: { popup: 'rounded-3xl shadow-2xl border border-red-50', title: 'text-2xl font-bold text-slate-800' }
     });
 @endif
 </script>
@@ -266,8 +288,9 @@
 @push('styles')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <style>
+        .dataTables_wrapper .dataTables_length { margin-bottom: 2rem !important; }
         .dataTables_wrapper .dataTables_length select { border-radius: 12px; padding: 4px 12px; border: 1px solid #f1f5f9; background-color: #f8fafc; font-weight: 600; }
-        .dataTables_wrapper .dataTables_filter input { border-radius: 16px; padding: 10px 20px; border: 1px solid #f1f5f9; background-color: #f8fafc; font-weight: 500; font-size: 14px; min-width: 250px; }
+        .dataTables_wrapper .dataTables_filter { display: none; }
         .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #dc2626 !important; border-color: #dc2626 !important; color: white !important; border-radius: 12px; font-weight: bold; }
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: #fee2e2 !important; border-color: transparent !important; color: #dc2626 !important; border-radius: 12px; }
         table.dataTable thead th { border-bottom: none !important; }
@@ -280,13 +303,51 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            $('#itemsTable').DataTable({
+            const itemsTable = $('#itemsTable').DataTable({
                 pageLength: 25,
                 lengthMenu: [10, 25, 50, 100],
                 order: [[1, 'asc']],
                 columnDefs: [ { orderable: false, targets: [0, 5] } ],
                 language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/th.json' }
             });
+
+            // Custom Filter Logic
+            function applyFilters() {
+                const stockVal = $('#stockFilter').val();
+                const searchVal = $('#customSearch').val().toLowerCase();
+
+                // 1. Desktop Filtering
+                // Custom Stock Filter for DataTables
+                $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                    const quantity = parseInt(data[3].replace(/,/g, '')) || 0; // Column 3 is Qty
+                    
+                    if (stockVal === 'low' && quantity > 5) return false;
+                    if (stockVal === 'low' && quantity === 0) return false; // Usually Low Stock means > 0 but <= 5
+                    if (stockVal === 'out' && quantity > 0) return false;
+                    
+                    return true;
+                });
+                
+                itemsTable.search(searchVal).draw();
+                $.fn.dataTable.ext.search.pop(); // Clear for next run
+
+                // 2. Mobile Filtering
+                $('.item-card').each(function() {
+                    const qty = parseInt($(this).data('quantity')) || 0;
+                    const searchData = $(this).data('search');
+                    
+                    let showByStock = true;
+                    if (stockVal === 'low') showByStock = (qty > 0 && qty <= 5);
+                    else if (stockVal === 'out') showByStock = (qty === 0);
+                    
+                    let showBySearch = searchData.includes(searchVal);
+                    
+                    if (showByStock && showBySearch) $(this).show();
+                    else $(this).hide();
+                });
+            }
+
+            $('#stockFilter, #customSearch').on('change keyup input', applyFilters);
         });
     </script>
 @endpush

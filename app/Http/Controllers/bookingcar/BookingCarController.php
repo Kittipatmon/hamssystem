@@ -63,8 +63,8 @@ class BookingCarController extends Controller
                 return [
                     'id' => $booking->booking_id,
                     'title' => ($booking->vehicle->name ?? 'รถส่วนกลาง') . ' - ' . ($booking->user->first_name ?? 'N/A'),
-                    'start' => \Carbon\Carbon::parse($booking->start_time)->toIso8601String(),
-                    'end' => \Carbon\Carbon::parse($booking->end_time)->toIso8601String(),
+                    'start' => \Carbon\Carbon::parse($booking->start_time)->toDateTimeString(),
+                    'end' => \Carbon\Carbon::parse($booking->end_time)->toDateTimeString(),
                     'color' => $isPending ? '#f59e0b' : '#ef4444',
                     'textColor' => '#ffffff',
                     'extendedProps' => [

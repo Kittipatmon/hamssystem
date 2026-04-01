@@ -41,16 +41,25 @@ class RequisitionsController extends Controller
         $reportsAllCount = Requisitions::count();
 
         return view('serviceshams.welcomeservice', compact(
-            'pendingApproveCount', 'updatedCount', 'allReqCount',
-            'checklistPendingCount', 'packingDoneCount',
-            'statsCount', 'reportsAllCount'
+            'pendingApproveCount',
+            'updatedCount',
+            'allReqCount',
+            'checklistPendingCount',
+            'packingDoneCount',
+            'statsCount',
+            'reportsAllCount'
         ));
     }
 
     public function ReqlistPending()
     {
-        $requisitions = Requisitions::where('approve_status', Requisitions::APPROVE_STATUS_PENDING)
-            ->where('status', Requisitions::STATUS_PENDING)
+        $requisitions = Requisitions::where(function ($query) {
+            $query->whereIn('status', [Requisitions::STATUS_PENDING, Requisitions::STATUS_APPROVED])
+                ->orWhere(function ($q) {
+                    $q->where('status', Requisitions::STATUS_END_PROGRESS)
+                        ->where('updated_at', '>=', now()->subHours(24));
+                });
+        })
             ->where('requester_id', Auth::user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -60,9 +69,15 @@ class RequisitionsController extends Controller
 
     public function ReqlistAll()
     {
-        $requisitions = Requisitions::where('requester_id', Auth::user()->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Requisitions::orderBy('created_at', 'desc');
+
+        // Access Control: Non-HAMS/Admin only see their own
+        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        if (!$isHamsOrAdmin) {
+            $query->where('requester_id', Auth::user()->id);
+        }
+
+        $requisitions = $query->get();
         $requisition_items = Requisition_items::with('item')->get();
         return view('serviceshams.requisitions.reqlistall', compact('requisitions', 'requisition_items'));
     }
@@ -72,6 +87,14 @@ class RequisitionsController extends Controller
     public function DetailReqPending($id)
     {
         $requisition = Requisitions::findOrFail($id);
+
+        // Access Control
+        $isOwner = $requisition->requester_id === Auth::id();
+        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        if (!$isOwner && !$isHamsOrAdmin) {
+            return redirect()->route('requisitions.reqlistpending')->with('error', 'Unauthorized access.');
+        }
+
         $requisition_items = Requisition_items::where('requisition_id', $id)->get();
         return view('serviceshams.requisitions.detailreqpedding', compact('requisition', 'requisition_items'));
     }
@@ -79,8 +102,35 @@ class RequisitionsController extends Controller
     public function DetailReqAlllist($id)
     {
         $requisition = Requisitions::findOrFail($id);
+
+        // Access Control
+        $isOwner = $requisition->requester_id === Auth::id();
+        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        if (!$isOwner && !$isHamsOrAdmin) {
+            return redirect()->route('requisitions.reqlistall')->with('error', 'Unauthorized access.');
+        }
+
         $requisition_items = Requisition_items::where('requisition_id', $id)->get();
         return view('serviceshams.requisitions.detailreqlistall', compact('requisition', 'requisition_items'));
+    }
+
+    public function DetailExportPdf($id)
+    {
+        $requisition = Requisitions::with(['user', 'requisition_items.item'])->findOrFail($id);
+
+        // Access Control
+        $isOwner = $requisition->requester_id === Auth::id();
+        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        if (!$isOwner && !$isHamsOrAdmin) {
+            return redirect()->route('requisitions.reqlistall')->with('error', 'Unauthorized access.');
+        }
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->loadView('serviceshams.requisitions.requisition_detail_pdf', compact('requisition'));
+        $pdf->setPaper('A4', 'portrait');
+
+        $filename = 'requisition_' . ($requisition->requisitions_code ?? $id) . '.pdf';
+        return $pdf->download($filename);
     }
 
 
@@ -312,6 +362,12 @@ class RequisitionsController extends Controller
             ->with(['user.section', 'user.division', 'user.department', 'requisition_items'])
             ->orderBy('created_at', 'desc');
 
+        // Access Control: Non-HAMS/Admin only see their own
+        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        if (!$isHamsOrAdmin) {
+            $query->where('requester_id', Auth::user()->id);
+        }
+
         if ($request->filled('start_date')) {
             $query->where('created_at', '>=', Carbon::parse($request->input('start_date'))->startOfDay());
         }
@@ -330,6 +386,12 @@ class RequisitionsController extends Controller
         $query = Requisitions::query()
             ->with(['user.section', 'user.division', 'user.department', 'requisition_items'])
             ->orderBy('created_at', 'desc');
+
+        // Access Control: Non-HAMS/Admin only see their own
+        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        if (!$isHamsOrAdmin) {
+            $query->where('requester_id', Auth::user()->id);
+        }
 
         if ($request->filled('start_date')) {
             $query->where('created_at', '>=', Carbon::parse($request->input('start_date'))->startOfDay());
@@ -361,6 +423,12 @@ class RequisitionsController extends Controller
         $query = Requisitions::query()
             ->with(['user.section', 'user.division', 'user.department', 'requisition_items'])
             ->orderBy('created_at', 'desc');
+
+        // Access Control: Non-HAMS/Admin only see their own
+        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        if (!$isHamsOrAdmin) {
+            $query->where('requester_id', Auth::user()->id);
+        }
 
         if ($request->filled('start_date')) {
             $query->where('created_at', '>=', Carbon::parse($request->input('start_date'))->startOfDay());

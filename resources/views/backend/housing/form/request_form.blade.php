@@ -33,6 +33,7 @@
         @endif
 
         <form action="{{ route('housing.request.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
             <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
 
                 {{-- ข้อมูลส่วนตัว --}}
@@ -261,53 +262,34 @@
                     </div>
                 </div>
 
-                {{-- ผู้เข้าพักอาศัย --}}
-                <div class="px-5 py-3 bg-gray-50 border-t border-b border-gray-100 flex items-center justify-between">
-                    <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2"><i
-                            class="fa-solid fa-users text-teal-400"></i> ผู้เข้าพักอาศัย</h3>
-                    <button type="button" onclick="addDependent()"
-                        class="text-xs font-semibold text-teal-600 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors">
-                        <i class="fa-solid fa-plus mr-1"></i> เพิ่มรายชื่อ
-                    </button>
+                {{-- ข้อมูลผู้พักอาศัยร่วม --}}
+                <div class="px-5 py-3 bg-gray-50 border-t border-b border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-people-group text-emerald-400"></i> ข้อมูลผู้พักอาศัยร่วม
+                        </h3>
+                        <button type="button" onclick="addDependent()" 
+                            class="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors">
+                            <i class="fa-solid fa-plus-circle"></i> เพิ่มรายชื่อ
+                        </button>
+                    </div>
                 </div>
                 <div class="p-5 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-600 mb-1">จำนวนผู้เข้าพักทั้งหมด</label>
-                            <input type="number" name="number_of_residents" value="{{ old('number_of_residents', 1) }}"
-                                min="1"
-                                class="w-full rounded-lg border-gray-200 text-sm h-10 focus:ring-red-500 focus:border-red-500">
-                        </div>
-                    </div>
-                    <div id="dependents-container" class="space-y-3">
-                        <div class="dep-row bg-gray-50 rounded-xl p-4">
-                            <div class="grid grid-cols-12 gap-3 items-end">
-                                <div class="col-span-5">
-                                    <label class="block text-xs font-semibold text-gray-500 mb-1">ชื่อ-นามสกุล</label>
-                                    <input type="text" name="dep_name[]"
-                                        class="w-full rounded-lg border-gray-200 text-sm h-9 focus:ring-red-500 focus:border-red-500">
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="block text-xs font-semibold text-gray-500 mb-1">อายุ</label>
-                                    <input type="number" name="dep_age[]"
-                                        class="w-full rounded-lg border-gray-200 text-sm h-9 focus:ring-red-500 focus:border-red-500">
-                                </div>
-                                <div class="col-span-4">
-                                    <label class="block text-xs font-semibold text-gray-500 mb-1">ความสัมพันธ์</label>
-                                    <input type="text" name="dep_relation[]" placeholder="เช่น บุตร, ภรรยา"
-                                        class="w-full rounded-lg border-gray-200 text-sm h-9 focus:ring-red-500 focus:border-red-500">
-                                </div>
-                                <div class="col-span-1 flex justify-center">
-                                    <button type="button" onclick="this.closest('.dep-row').remove()"
-                                        class="w-8 h-8 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 transition-colors flex items-center justify-center">
-                                        <i class="fa-solid fa-trash-can text-xs"></i>
-                                    </button>
-                                </div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">จำนวนคนที่จะเข้าพักอาศัย <span class="text-red-500">*</span></label>
+                            <div class="flex items-center gap-3">
+                                <input type="number" name="number_of_residents" value="{{ old('number_of_residents', 1) }}" min="1"
+                                    class="w-24 rounded-lg border-gray-200 text-sm h-10 focus:ring-red-500 focus:border-red-500 text-center" required>
+                                <span class="text-sm text-gray-500 font-medium">คน</span>
                             </div>
                         </div>
                     </div>
-                </div>
 
+                    <div id="dependents-container" class="space-y-3">
+                        {{-- Dynamic rows will be added here --}}
+                    </div>
+                </div>
                 {{-- เหตุผลและเอกสารแนบ --}}
                 <div class="px-5 py-3 bg-gray-50 border-t border-b border-gray-100">
                     <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2"><i
@@ -360,7 +342,10 @@
                 el.style.opacity = '0';
             }
         }
-        document.addEventListener('DOMContentLoaded', toggleSpouse);
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleSpouse();
+            // Add one row by default if needed or just leave empty
+        });
 
         function addDependent() {
             const container = document.getElementById('dependents-container');
