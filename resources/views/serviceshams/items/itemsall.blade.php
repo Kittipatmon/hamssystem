@@ -7,7 +7,7 @@
         <div class="relative z-[50] bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 animate-zoom-in">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                 <div class="flex items-center gap-5">
-                    <div class="w-16 h-16 bg-red-600 rounded-3xl flex items-center justify-center shadow-lg shadow-red-100">
+                    <div class="w-16 h-16 bg-red-500 rounded-3xl flex items-center justify-center shadow-lg shadow-sky-100">
                         <i class="fa-solid fa-cart-shopping text-white text-2xl"></i>
                     </div>
                     <div>
@@ -39,7 +39,7 @@
                             $categories = \App\Models\serviceshams\Items_type::where('status', '1')->get();
                         @endphp
                         <label tabindex="0"
-                            class="w-full h-14 bg-red-600 text-white rounded-2xl flex items-center justify-between px-6 cursor-pointer hover:bg-red-700 transition-all shadow-xl shadow-red-100 active:scale-95 border-b-4 border-red-800">
+                            class="w-full h-14 bg-red-500 text-white rounded-2xl flex items-center justify-between px-6 cursor-pointer hover:bg-red-600 transition-all shadow-xl shadow-red-100 active:scale-95 border-b-4 border-red-700">
                             <div class="flex items-center gap-3 font-black text-sm uppercase">
                                 <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                                     <i class="fa-solid fa-layer-group text-white"></i>
@@ -60,9 +60,9 @@
                             </div>
                             <li>
                                 <a href="{{ route('items.itemsalllist') }}"
-                                    class="flex items-center gap-4 py-4 px-6 {{ !request('category') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50' }} rounded-2xl font-black transition-all mb-1 border-b border-slate-50">
+                                    class="flex items-center gap-4 py-4 px-6 {{ !request('category') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} rounded-2xl font-black transition-all mb-1 border-b border-slate-50">
                                     <div
-                                        class="w-10 h-10 rounded-xl flex items-center justify-center {{ !request('category') ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-400' }}">
+                                        class="w-10 h-10 rounded-xl flex items-center justify-center {{ !request('category') ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-400' }}">
                                         <i class="fa-solid fa-border-all text-sm"></i>
                                     </div>
                                     <div class="flex flex-col text-left">
@@ -75,9 +75,9 @@
                                 @foreach($categories as $category)
                                     <li>
                                         <a href="{{ route('items.itemsalllist') . '?category=' . $category->item_type_id }}"
-                                            class="flex items-center gap-4 py-3.5 px-6 {{ request('category') == $category->item_type_id ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:bg-slate-50' }} rounded-2xl font-black transition-all">
+                                            class="flex items-center gap-4 py-3.5 px-6 {{ request('category') == $category->item_type_id ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} rounded-2xl font-black transition-all">
                                             <div
-                                                class="w-2 h-2 rounded-full {{ request('category') == $category->item_type_id ? 'bg-red-600' : 'bg-slate-200 opacity-50' }}">
+                                                class="w-2 h-2 rounded-full {{ request('category') == $category->item_type_id ? 'bg-sky-500' : 'bg-slate-200 opacity-50' }}">
                                             </div>
                                             <span class="text-[13px]">{{ $category->name }}</span>
                                         </a>
@@ -128,7 +128,7 @@
                         <span
                             class="text-[8px] sm:text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 leading-none">{{ $item->item_code ?? 'CODE-NULL' }}</span>
                         <h2
-                            class="text-[12px] sm:text-[14px] font-black text-slate-800 line-clamp-2 leading-tight h-8 sm:h-10 group-hover:text-red-600 transition-colors uppercase">
+                            class="text-[12px] sm:text-[14px] font-black text-slate-800 line-clamp-2 leading-tight h-8 sm:h-10 group-hover:text-sky-600 transition-colors uppercase">
                             {{ $item->name }}
                         </h2>
 
@@ -147,7 +147,7 @@
                                 <span
                                     class="text-[7.5px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Price/Unit</span>
                                 <span
-                                    class="text-[14px] sm:text-[16px] font-black text-red-600 font-mono leading-none">฿{{ number_format($item->per_unit ?? 0, 2) }}</span>
+                                    class="text-[14px] sm:text-[16px] font-black text-black-600 font-mono leading-none">฿{{ number_format($item->per_unit ?? 0, 2) }}</span>
                             </div>
                         </div>
 
@@ -157,10 +157,10 @@
                             <input type="hidden" name="item_id" value="{{ $item->item_id }}">
                             <div class="flex items-stretch gap-2">
                                 <input name="quantity" type="number" min="1" max="{{ $item->quantity }}" value="1"
-                                    class="w-10 sm:w-16 h-10 sm:h-12 text-center text-[12px] sm:text-[14px] font-black bg-slate-50 border-2 border-slate-50 rounded-xl sm:rounded-2xl focus:bg-white focus:border-red-200 focus:outline-none transition-all"
+                                    class="w-10 sm:w-16 h-10 sm:h-12 text-center text-[12px] sm:text-[14px] font-black bg-slate-50 border-2 border-slate-50 rounded-xl sm:rounded-2xl focus:bg-white focus:border-sky-200 focus:outline-none transition-all"
                                     @if($item->quantity == 0) disabled @endif>
                                 <button type="submit"
-                                    class="flex-1 h-10 sm:h-12 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[12px] uppercase transition-all shadow-lg shadow-red-100 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none active:scale-95 flex items-center justify-center gap-1.5"
+                                    class="flex-1 h-10 sm:h-12 bg-sky-500 hover:bg-sky-600 text-white rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[12px] uppercase transition-all shadow-lg shadow-sky-100 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none active:scale-95 flex items-center justify-center gap-1.5"
                                     @if($item->quantity == 0) disabled @endif>
                                     <i class="fa-solid fa-plus text-[9px] sm:text-[10px]"></i>
                                     ADD CART
@@ -199,56 +199,56 @@
                 const img = item.item_pic
                     ? `<img src="${window.location.origin}/images/items/${item.item_pic}" alt="${item.name}" class="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-500">`
                     : `<div class="flex flex-col items-center gap-3 text-slate-300">
-                            <i class="fa-solid fa-image text-3xl sm:text-4xl opacity-20"></i>
-                            <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">No Preview</span>
-                          </div>`;
+                                                <i class="fa-solid fa-image text-3xl sm:text-4xl opacity-20"></i>
+                                                <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">No Preview</span>
+                                              </div>`;
 
                 return `
-                    <div class="bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-100 sm:hover:-translate-y-2 transition-all duration-300 flex flex-col group overflow-hidden animate-zoom-in">
-                        <div class="aspect-square bg-slate-50/50 flex items-center justify-center p-4 sm:p-8 relative overflow-hidden">
-                            <div class="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            ${img}
-                            ${isLowStock ? '<div class="absolute top-3 sm:top-4 left-3 sm:left-4"><span class="px-2 sm:px-3 py-0.5 sm:py-1 bg-red-100 text-red-600 rounded-full text-[8px] sm:text-[9px] font-black uppercase shadow-sm border border-red-200">Low Stock</span></div>' : ''}
-                        </div>
-                        <div class="p-3 sm:p-6 flex flex-col items-center text-center flex-1">
-                            <span class="text-[8px] sm:text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 leading-none">${item.item_code ?? 'CODE-NULL'}</span>
-                            <h2 class="text-[12px] sm:text-[14px] font-black text-slate-800 line-clamp-2 leading-tight h-8 sm:h-10 group-hover:text-red-600 transition-colors uppercase">${item.name}</h2>
-                            <div class="w-full h-px bg-slate-50 my-3 sm:my-4"></div>
-                            <div class="flex items-center justify-center gap-3 sm:gap-6 mb-4 sm:mb-6">
-                                <div class="flex flex-col">
-                                    <span class="text-[7.5px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">In Stock</span>
-                                    <span class="text-[14px] sm:text-[16px] font-black text-emerald-600 font-mono leading-none">${item.quantity ?? 0}</span>
-                                </div>
-                                <div class="w-px h-6 bg-slate-100"></div>
-                                <div class="flex flex-col">
-                                    <span class="text-[7.5px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Price/Unit</span>
-                                    <span class="text-[14px] sm:text-[16px] font-black text-red-600 font-mono leading-none">฿${priceFmt.format(Number(item.per_unit ?? 0))}</span>
-                                </div>
-                            </div>
-                            <form method="POST" action="${window.location.origin}/cartitem/add" class="w-full mt-auto">
-                                <input type="hidden" name="_token" value="${csrf}">
-                                <input type="hidden" name="item_id" value="${item.item_id}">
-                                <div class="flex items-stretch gap-2">
-                                    <input name="quantity" type="number" min="1" max="${item.quantity ?? 0}" value="1" class="w-10 sm:w-16 h-10 sm:h-12 text-center text-[12px] sm:text-[14px] font-black bg-slate-50 border-2 border-slate-50 rounded-xl sm:rounded-2xl focus:bg-white focus:border-red-200 focus:outline-none transition-all" ${disabled ? 'disabled' : ''}>
-                                    <button type="submit" class="flex-1 h-10 sm:h-12 bg-red-600 hover:bg-red-700 text-white rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[12px] uppercase transition-all shadow-lg shadow-red-100 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none active:scale-95 flex items-center justify-center gap-1.5" ${disabled ? 'disabled' : ''}>
-                                        <i class="fa-solid fa-plus text-[9px] sm:text-[10px]"></i> ADD CART
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>`;
+                                        <div class="bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-100 sm:hover:-translate-y-2 transition-all duration-300 flex flex-col group overflow-hidden animate-zoom-in">
+                                            <div class="aspect-square bg-slate-50/50 flex items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+                                                <div class="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                ${img}
+                                                ${isLowStock ? '<div class="absolute top-3 sm:top-4 left-3 sm:left-4"><span class="px-2 sm:px-3 py-0.5 sm:py-1 bg-red-100 text-red-600 rounded-full text-[8px] sm:text-[9px] font-black uppercase shadow-sm border border-red-200">Low Stock</span></div>' : ''}
+                                            </div>
+                                            <div class="p-3 sm:p-6 flex flex-col items-center text-center flex-1">
+                                                <span class="text-[8px] sm:text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 leading-none">${item.item_code ?? 'CODE-NULL'}</span>
+                                                <h2 class="text-[12px] sm:text-[14px] font-black text-slate-800 line-clamp-2 leading-tight h-8 sm:h-10 group-hover:text-sky-600 transition-colors uppercase">${item.name}</h2>
+                                                <div class="w-full h-px bg-slate-50 my-3 sm:my-4"></div>
+                                                <div class="flex items-center justify-center gap-3 sm:gap-6 mb-4 sm:mb-6">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-[7.5px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">In Stock</span>
+                                                        <span class="text-[14px] sm:text-[16px] font-black text-emerald-600 font-mono leading-none">${item.quantity ?? 0}</span>
+                                                    </div>
+                                                    <div class="w-px h-6 bg-slate-100"></div>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-[7.5px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Price/Unit</span>
+                                                        <span class="text-[14px] sm:text-[16px] font-black text-sky-600 font-mono leading-none">฿${priceFmt.format(Number(item.per_unit ?? 0))}</span>
+                                                    </div>
+                                                </div>
+                                                <form method="POST" action="${window.location.origin}/cartitem/add" class="w-full mt-auto">
+                                                    <input type="hidden" name="_token" value="${csrf}">
+                                                    <input type="hidden" name="item_id" value="${item.item_id}">
+                                                    <div class="flex items-stretch gap-2">
+                                                        <input name="quantity" type="number" min="1" max="${item.quantity ?? 0}" value="1" class="w-10 sm:w-16 h-10 sm:h-12 text-center text-[12px] sm:text-[14px] font-black bg-slate-50 border-2 border-slate-50 rounded-xl sm:rounded-2xl focus:bg-white focus:border-sky-200 focus:outline-none transition-all" ${disabled ? 'disabled' : ''}>
+                                                        <button type="submit" class="flex-1 h-10 sm:h-12 bg-sky-500 hover:bg-sky-600 text-white rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[12px] uppercase transition-all shadow-lg shadow-sky-100 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none active:scale-95 flex items-center justify-center gap-1.5" ${disabled ? 'disabled' : ''}>
+                                                            <i class="fa-solid fa-plus text-[9px] sm:text-[10px]"></i> ADD CART
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>`;
             }
 
             function render(items) {
                 if (!Array.isArray(items) || items.length === 0) {
                     grid.innerHTML = `
-                            <div class="col-span-full py-20 text-center">
-                                <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <i class="fa-solid fa-magnifying-glass text-slate-200 text-3xl"></i>
-                                </div>
-                                <h3 class="text-xl font-black text-slate-800 uppercase">ไม่พบพัสดุที่ต้องการ</h3>
-                                <p class="text-slate-400 font-bold mt-2 uppercase text-xs">Try searching for something else</p>
-                            </div>`;
+                                                <div class="col-span-full py-20 text-center">
+                                                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                        <i class="fa-solid fa-magnifying-glass text-slate-200 text-3xl"></i>
+                                                    </div>
+                                                    <h3 class="text-xl font-black text-slate-800 uppercase">ไม่พบพัสดุที่ต้องการ</h3>
+                                                    <p class="text-slate-400 font-bold mt-2 uppercase text-xs">Try searching for something else</p>
+                                                </div>`;
                     return;
                 }
                 grid.innerHTML = items.map(buildItemCard).join('');
