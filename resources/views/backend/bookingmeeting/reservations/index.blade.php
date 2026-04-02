@@ -147,24 +147,24 @@
                                                     </form>
                                                 </div>
                                             </div>
-                                        @elseif($res->status == 'acknowledge')
+                                        @elseif($res->status == 'acknowledge' || $res->status == 'approved' || $res->status == 'อนุมัติ' || $res->status == 'เสร็จสิ้น')
                                             <span
                                                 class="bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
                                                 <i class="fa-solid fa-check"></i> อนุมัติแล้ว
                                             </span>
-                                        @elseif($res->status == 'rejected')
+                                        @elseif($res->status == 'rejected' || $res->status == 'ไม่อนุมัติ')
                                             <span
                                                 class="bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
                                                 <i class="fa-solid fa-xmark"></i> ไม่อนุมัติ
                                             </span>
-                                        @elseif($res->status == 'cancelled')
+                                        @elseif($res->status == 'cancelled' || $res->status == 'ยกเลิก')
                                             <span
-                                                class="bg-orange-100 text-orange-700 border border-orange-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
+                                                class="bg-orange-100 text-orange-700 border border-orange-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm transition-all duration-300">
                                                 <i class="fa-solid fa-ban"></i> ยกเลิก
                                             </span>
                                         @else
                                             <span
-                                                class="bg-slate-100 text-slate-600 border border-slate-200 px-3 py-1 rounded-full text-xs shadow-sm">{{ $res->status }}</span>
+                                                class="bg-slate-100 text-slate-600 border border-slate-200 px-3 py-1 rounded-full text-xs shadow-sm capitalize">{{ $res->status }}</span>
                                         @endif
                                     </div>
                                 </td>

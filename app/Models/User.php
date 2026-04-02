@@ -66,13 +66,13 @@ class User extends Authenticatable
     {
         return $this->belongsTo(UserType::class, 'level_user', 'id');
     }
-    
+
 
     // Accessor for `$user->fullname`
     public function getFullnameAttribute(): string
     {
         $prefix = $this->prefix ? ($this->prefix . ' ') : '';
-        return trim("{$this->first_name} {$this->last_name}");
+        return trim("{$prefix}{$this->first_name} {$this->last_name}");
     }
 
     public function department()

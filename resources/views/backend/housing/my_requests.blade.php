@@ -183,9 +183,16 @@
             }
 
             window.onload = function() {
-                const activeTab = localStorage.getItem('housing_active_tab');
-                if (activeTab && document.getElementById('btn-' + activeTab)) {
-                    switchTab(activeTab);
+                const urlParams = new URLSearchParams(window.location.search);
+                const tabParam = urlParams.get('tab');
+                
+                if (tabParam && document.getElementById('btn-tab-' + tabParam)) {
+                    switchTab('tab-' + tabParam);
+                } else {
+                    const activeTab = localStorage.getItem('housing_active_tab');
+                    if (activeTab && document.getElementById('btn-' + activeTab)) {
+                        switchTab(activeTab);
+                    }
                 }
             };
         </script>

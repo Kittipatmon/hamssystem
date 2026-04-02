@@ -91,8 +91,17 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         @foreach($rooms as $room)
                         @php
-                            $status = $room->residence_room_status;
                             $currentStay = $room->stays->where('is_current', 1)->first();
+                            $status = $room->residence_room_status;
+
+                            // Fallback logic: If no current occupant, treat status as 0 (unless in maintenance)
+                            if ($status == 1 && !$currentStay) {
+                                $status = 0;
+                            }
+                            // If has occupant but status is 0, treat as 1
+                            if ($status == 0 && $currentStay) {
+                                $status = 1;
+                            }
 
                             if ($status == 0) {
                                 $bgColor = 'bg-emerald-500';
@@ -137,6 +146,9 @@
                             {{-- Occupant info --}}
                             @if($status == 1 && $currentStay)
                             <div class="mt-2 pt-2 border-t border-white/20 text-[10px] space-y-0.5">
+                                <p class="font-bold"><i class="fa-solid fa-user-check mr-1"></i>
+                                    {{ $currentStay->resident->full_name ?? ($currentStay->latestRequest ? $currentStay->latestRequest->first_name . ' ' . $currentStay->latestRequest->last_name : 'กำลังดำเนินการ') }}
+                                </p>
                                 <p><i class="fa-solid fa-calendar-check mr-1"></i>เข้าพักเมื่อ {{ $currentStay->check_in ? \Carbon\Carbon::parse($currentStay->check_in)->format('d/m/Y') : '-' }}</p>
                             </div>
                             @endif

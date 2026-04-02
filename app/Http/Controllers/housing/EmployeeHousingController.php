@@ -44,7 +44,7 @@ class EmployeeHousingController extends Controller
             ->get()
             ->pluck('count', 'month')
             ->toArray();
-        
+
         $monthlyLabels = [];
         $monthlyValues = [];
         for ($m = 1; $m <= 12; $m++) {
@@ -61,14 +61,17 @@ class EmployeeHousingController extends Controller
             ->pluck('count', 'send_status');
 
         // 4. Occupancy Summary
-        $residences = Residence::withCount(['rooms', 'rooms as occupied' => function($q) {
-            $q->where('residence_room_status', 1); // 1 = Occupied
-        }])->get();
+        $residences = Residence::withCount([
+            'rooms',
+            'rooms as occupied' => function ($q) {
+                $q->where('residence_room_status', 1); // 1 = Occupied
+            }
+        ])->get();
 
         $totalRooms = ResidenceRoom::count();
         $occupiedRooms = ResidenceRoom::where('residence_room_status', 1)->count();
         $underRepair = ResidenceRoom::where('residence_room_status', 2)->count();
-        
+
         // 4.1 Most common repair issues (Top 5)
         $topRepairs = ResidenceRepair::whereYear('repair_date', $year)
             ->select('title', DB::raw('count(*) as count'))
@@ -76,25 +79,33 @@ class EmployeeHousingController extends Controller
             ->orderByDesc('count')
             ->take(5)
             ->get();
-        
+
         // 5. Available Years for Filtering
         $dbYears = ResidenceRepair::select(DB::raw('YEAR(repair_date) as year'))
             ->distinct()
             ->orderBy('year', 'desc')
             ->pluck('year')
             ->toArray();
-        
-        $currentYear = (int)date('Y');
+
+        $currentYear = (int) date('Y');
         $defaultYears = [$currentYear, $currentYear - 1, $currentYear - 2, $currentYear - 3];
-        
+
         $years = collect(array_merge($dbYears, $defaultYears))
             ->unique()
             ->sortDesc()
             ->values();
 
         return view('backend.housing.report.index', compact(
-            'year', 'years', 'repairStats', 'monthlyLabels', 'monthlyValues',
-            'requestStats', 'residences', 'totalRooms', 'occupiedRooms', 'underRepair',
+            'year',
+            'years',
+            'repairStats',
+            'monthlyLabels',
+            'monthlyValues',
+            'requestStats',
+            'residences',
+            'totalRooms',
+            'occupiedRooms',
+            'underRepair',
             'topRepairs'
         ));
     }
@@ -112,27 +123,48 @@ class EmployeeHousingController extends Controller
         $recentLeaves = ResidenceLeave::with('user')
             ->orderBy('created_at', 'desc')->take(5)->get();
 
-        $totalRooms = ResidenceRoom::count();
-        $availableRooms = ResidenceRoom::where('residence_room_status', 0)->count();
-        $occupiedRooms = ResidenceRoom::where('residence_room_status', 1)->count();
+        $residenceRooms = ResidenceRoom::with(['stays' => function ($q) {
+            $q->where('is_current', 1); }])->get();
+        $totalRooms = $residenceRooms->count();
+        $availableRooms = 0;
+        $occupiedRooms = 0;
+        foreach ($residenceRooms as $room) {
+            $hasOccupant = $room->stays->isNotEmpty();
+            $status = $room->residence_room_status;
+            if ($status != 2 && !$hasOccupant) {
+                $availableRooms++;
+            } elseif ($hasOccupant) {
+                $occupiedRooms++;
+            }
+        }
+
         $pendingRequests = ResidenceRequest::where('send_status', 0)->count()
             + ResidenceAgreement::where('send_status', 0)->count()
             + ResidentGuestRequest::where('send_status', 0)->count()
             + ResidenceLeave::where('send_status', 0)->count();
-        $activeResidents = ResidenceStay::where('is_current', 1)->count();
+        $activeResidents = $occupiedRooms;
 
-        $activeResidents = ResidenceStay::where('is_current', 1)->count();
-
-        // Check for missing agreement notification
+        // Check for active request and next step
+        $userActiveRequest = null;
         $needsAgreement = false;
+        $pendingAgreement = false;
         if (Auth::check()) {
-            $userRequest = ResidenceRequest::where('user_id', Auth::id())
-                ->where('send_status', 3)
+            $userActiveRequest = ResidenceRequest::where('user_id', Auth::id())
+                ->whereIn('send_status', [0, 1, 2, 3, 4, 7])
+                ->orderBy('updated_at', 'desc')
                 ->first();
-            if ($userRequest) {
-                $hasAgreement = ResidenceAgreement::where('user_id', Auth::id())->exists();
-                if (!$hasAgreement) {
+
+            if ($userActiveRequest && $userActiveRequest->send_status == 7) {
+                // Find agreement created AFTER or ON the same date as the request
+                $agreement = ResidenceAgreement::where('user_id', Auth::id())
+                    ->where('created_at', '>=', $userActiveRequest->created_at)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                
+                if (!$agreement) {
                     $needsAgreement = true;
+                } elseif ($agreement->send_status < 3) {
+                    $pendingAgreement = true;
                 }
             }
         }
@@ -148,29 +180,45 @@ class EmployeeHousingController extends Controller
             'occupiedRooms',
             'pendingRequests',
             'activeResidents',
-            'needsAgreement'
+            'needsAgreement',
+            'pendingAgreement',
+            'userActiveRequest'
         ));
     }
 
     // ==================== HOUSE LIST (ROOM GRID) ====================
     public function houselist()
     {
-        $totalRooms = ResidenceRoom::count();
-        $availableRooms = ResidenceRoom::where('residence_room_status', 0)->count();
-        $occupiedRooms = ResidenceRoom::where('residence_room_status', 1)->count();
-        $maintenanceRooms = ResidenceRoom::where('residence_room_status', 2)->count();
-
         $residences = Residence::with([
             'rooms' => function ($q) {
                 $q->orderBy('floor')->orderBy('room_number');
             },
             'rooms.stays' => function ($q) {
-                $q->where('is_current', 1);
+                $q->where('is_current', 1)->with(['resident', 'latestRequest']);
             }
         ])->get();
 
+        $allRooms = $residences->flatMap->rooms;
+        $totalRooms = $allRooms->count();
+        $availableRooms = 0;
+        $occupiedRooms = 0;
+        $maintenanceRooms = 0;
+
+        foreach ($allRooms as $room) {
+            $status = $room->residence_room_status;
+            $hasOccupant = $room->stays->where('is_current', 1)->isNotEmpty();
+
+            if ($status == 2) {
+                $maintenanceRooms++;
+            } elseif ($hasOccupant) {
+                $occupiedRooms++;
+            } else {
+                $availableRooms++;
+            }
+        }
+
         // Fetch eligible requesters (Approved by Committee but no room assigned)
-        $eligibleRequesters = ResidenceRequest::where('send_status', 2)->get();
+        $eligibleRequesters = ResidenceRequest::where('send_status', 3)->get();
 
         return view('backend.housing.houselist', compact(
             'totalRooms',
@@ -186,7 +234,7 @@ class EmployeeHousingController extends Controller
     public function requestForm()
     {
         $residences = Residence::all();
-        $user = \Illuminate\Support\Facades\Auth::user();
+        $user = Auth::user();
         if ($user) {
             $user->load(['department', 'division', 'section']);
         }
@@ -281,7 +329,9 @@ class EmployeeHousingController extends Controller
 
         $filename = 'housing_request_' . ($requestData->requests_code ?? $id) . '.pdf';
         return $pdf->stream($filename);
-    }    public function exportAgreementPdf($id)
+    }
+
+    public function exportAgreementPdf($id)
     {
         $agreement = ResidenceAgreement::with(['user'])->findOrFail($id);
         $pdf = app('dompdf.wrapper');
@@ -313,24 +363,25 @@ class EmployeeHousingController extends Controller
         $filename = 'housing_leave_' . ($leave->residence_leaves_code ?? $id) . '.pdf';
         return $pdf->stream($filename);
     }
+
     // ==================== AGREEMENT (QF-HAMS-03) ====================
     public function agreementForm()
     {
         $residences = Residence::all();
-        $user = \Illuminate\Support\Facades\Auth::user();
+        $user = Auth::user();
         $userStay = null;
 
         if ($user) {
             $user->load(['department', 'division', 'section']);
 
             // Check for current stay to auto-fill
-            $userStay = \App\Models\housing\ResidenceStay::with(['room.residence'])
+            $userStay = ResidenceStay::with(['room.residence'])
                 ->where('residence_resident_id', $user->id)
                 ->where('is_current', 1)
                 ->first();
 
             // Check for latest request to pull number of residents
-            $userRequest = \App\Models\housing\ResidenceRequest::where('user_id', $user->id)
+            $userRequest = ResidenceRequest::where('user_id', $user->id)
                 ->orderBy('created_at', 'desc')
                 ->first();
         }
@@ -371,7 +422,7 @@ class EmployeeHousingController extends Controller
     public function guestForm()
     {
         $residences = Residence::all();
-        $user = \Illuminate\Support\Facades\Auth::user();
+        $user = Auth::user();
         if ($user) {
             $user->load(['department', 'division', 'section']);
         }
@@ -393,8 +444,8 @@ class EmployeeHousingController extends Controller
         $lastId = ResidentGuestRequest::max('resident_guest_id') ?? 0;
         $code = 'RQ-' . date('ym') . sprintf('%02d', ($lastId % 100) + 1);
 
-        $startDate = \Carbon\Carbon::parse($request->start_date);
-        $endDate = \Carbon\Carbon::parse($request->end_date);
+        $startDate = Carbon::parse($request->start_date);
+        $endDate = Carbon::parse($request->end_date);
         $totalDays = $startDate->diffInDays($endDate) + 1;
 
         $guestRequest = ResidentGuestRequest::create([
@@ -439,11 +490,17 @@ class EmployeeHousingController extends Controller
     public function leaveForm()
     {
         $residences = Residence::all();
-        $user = \Illuminate\Support\Facades\Auth::user();
+        $user = Auth::user();
+        $currentStay = null;
+
         if ($user) {
             $user->load(['department', 'division', 'section']);
+            $currentStay = ResidenceStay::with('room.residence')
+                ->where('residence_resident_id', $user->id)
+                ->where('is_current', 1)
+                ->first();
         }
-        return view('backend.housing.form.leave_form', compact('residences', 'user'));
+        return view('backend.housing.form.leave_form', compact('residences', 'user', 'currentStay'));
     }
 
     public function storeLeave(Request $request)
@@ -463,6 +520,7 @@ class EmployeeHousingController extends Controller
         ResidenceLeave::create([
             'residence_leaves_code' => $code,
             'user_id' => Auth::id(),
+            'residence_room_id' => $request->residence_room_id,
             'request_date' => now()->toDateString(),
             'prefix' => $request->prefix,
             'first_name' => $request->first_name,
@@ -570,12 +628,13 @@ class EmployeeHousingController extends Controller
         }
 
         $column = '';
-        if ($request->approver_level === 'commander')
+        if ($request->approver_level === 'commander') {
             $column = 'commander_id';
-        elseif ($request->approver_level === 'manager')
+        } elseif ($request->approver_level === 'manager') {
             $column = 'managerhams_id';
-        elseif ($request->approver_level === 'committee')
+        } elseif ($request->approver_level === 'committee') {
             $column = 'Committee_id';
+        }
 
         if ($column) {
             $item->update([$column => $request->approver_id]);
@@ -600,14 +659,14 @@ class EmployeeHousingController extends Controller
             ->exists();
 
         if ($room->residence_room_status == 2 || $hasOccupant) {
-            return response()->json(['success' => false, 'message' => 'Room is not available']);
+            return response()->json(['success' => false, 'message' => 'ห้องไม่ว่างหรือไม่สามารถมอบหมายได้ในขณะนี้']);
         }
 
         // Update Room
         $room->update(['residence_room_status' => 1]);
 
         // Update Request
-        $resReq->update(['send_status' => 3]);
+        $resReq->update(['send_status' => 7]);
 
         // Create Stay
         ResidenceStay::create([
@@ -627,16 +686,38 @@ class EmployeeHousingController extends Controller
         $room = ResidenceRoom::with([
             'residence',
             'stays' => function ($q) {
-                $q->where('is_current', 1);
+                $q->where('is_current', 1)->with('resident');
             }
         ])->findOrFail($id);
 
         $currentStay = $room->stays->first();
+        $agreement = null;
+        $latestReq = null;
+
+        if ($currentStay) {
+            // Priority: Find an agreement for this user.
+            $agreement = ResidenceAgreement::where('user_id', $currentStay->residence_resident_id)
+                ->where('send_status', 3) // Success
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            // Fallback: Get the latest request to ensure we have a name even if they haven't signed the agreement yet
+            $latestReq = ResidenceRequest::with(['commander', 'managerHams', 'committee', 'dependents'])
+                ->where('user_id', $currentStay->residence_resident_id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
 
         // Fetch eligible requesters (Approved by Committee but no room assigned)
-        $eligibleRequesters = ResidenceRequest::where('send_status', 2)->get();
+        // Filter by site matching the room's residence name
+        $siteName = $room->residence->name; // e.g. "บางใหญ่"
+        $eligibleRequesters = ResidenceRequest::where('send_status', 3)
+            ->where(function ($q) use ($siteName) {
+                $q->where('site', 'like', '%' . $siteName . '%');
+            })
+            ->get();
 
-        return view('backend.housing.housinglist_detail', compact('room', 'currentStay', 'eligibleRequesters'));
+        return view('backend.housing.housinglist_detail', compact('room', 'currentStay', 'eligibleRequesters', 'agreement', 'latestReq'));
     }
 
     public function myRequests()
@@ -649,24 +730,46 @@ class EmployeeHousingController extends Controller
 
         // Tasks pending for this user to approve
         $pendingApprovals = [
-            'requests' => ResidenceRequest::where(function($q) use ($userId) {
-                $q->where(function($sq) use ($userId) { $sq->where('send_status', 0)->where('commander_id', $userId); })
-                  ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 1)->where('managerhams_id', $userId); })
-                  ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 2)->where('Committee_id', $userId); });
+            'requests' => ResidenceRequest::where(function ($q) use ($userId) {
+                $q->where(function ($sq) use ($userId) {
+                    $sq->where('send_status', 0)->where('commander_id', $userId);
+                })
+                    ->orWhere(function ($sq) use ($userId) {
+                        $sq->where('send_status', 1)->where('managerhams_id', $userId);
+                    })
+                    ->orWhere(function ($sq) use ($userId) {
+                        $sq->where('send_status', 2)->where('Committee_id', $userId);
+                    });
             })->get(),
-            'agreements' => ResidenceAgreement::where(function($q) use ($userId) {
-                $q->where(function($sq) use ($userId) { $sq->where('send_status', 0)->where('commander_id', $userId); })
-                  ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 1)->where('managerhams_id', $userId); })
-                  ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 2)->where('Committee_id', $userId); });
+            'agreements' => ResidenceAgreement::where(function ($q) use ($userId) {
+                $q->where(function ($sq) use ($userId) {
+                    $sq->where('send_status', 0)->where('commander_id', $userId);
+                })
+                    ->orWhere(function ($sq) use ($userId) {
+                        $sq->where('send_status', 1)->where('managerhams_id', $userId);
+                    })
+                    ->orWhere(function ($sq) use ($userId) {
+                        $sq->where('send_status', 2)->where('Committee_id', $userId);
+                    });
             })->get(),
-            'guests' => ResidentGuestRequest::where(function($q) use ($userId) {
-                $q->where(function($sq) use ($userId) { $sq->where('send_status', 0)->where('commander_id', $userId); })
-                  ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 1)->where('managerhams_id', $userId); })
-                  ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 2)->where('Committee_id', $userId); });
+            'guests' => ResidentGuestRequest::where(function ($q) use ($userId) {
+                $q->where(function ($sq) use ($userId) {
+                    $sq->where('send_status', 0)->where('commander_id', $userId);
+                })
+                    ->orWhere(function ($sq) use ($userId) {
+                        $sq->where('send_status', 1)->where('managerhams_id', $userId);
+                    })
+                    ->orWhere(function ($sq) use ($userId) {
+                        $sq->where('send_status', 2)->where('Committee_id', $userId);
+                    });
             })->get(),
-            'leaves' => ResidenceLeave::where(function($q) use ($userId) {
-                $q->where(function($sq) use ($userId) { $sq->where('send_status', 0)->where('managerhams_id', $userId); })
-                  ->orWhere(function($sq) use ($userId) { $sq->where('send_status', 2)->where('Committee_id', $userId); });
+            'leaves' => ResidenceLeave::where(function ($q) use ($userId) {
+                $q->where(function ($sq) use ($userId) {
+                    $sq->where('send_status', 0)->where('managerhams_id', $userId);
+                })
+                    ->orWhere(function ($sq) use ($userId) {
+                        $sq->where('send_status', 2)->where('Committee_id', $userId);
+                    });
             })->get(),
         ];
 
@@ -696,19 +799,25 @@ class EmployeeHousingController extends Controller
         return view('backend.housing.request_detail', compact('item', 'type'));
     }
 
-
-
-
     // ==================== DESTROY ====================
     public function destroy($type, $id)
     {
         $item = null;
         switch ($type) {
-            case 'request': $item = ResidenceRequest::findOrFail($id); break;
-            case 'agreement': $item = ResidenceAgreement::findOrFail($id); break;
-            case 'guest': $item = ResidentGuestRequest::findOrFail($id); break;
-            case 'leave': $item = ResidenceLeave::findOrFail($id); break;
-            default: abort(404);
+            case 'request':
+                $item = ResidenceRequest::findOrFail($id);
+                break;
+            case 'agreement':
+                $item = ResidenceAgreement::findOrFail($id);
+                break;
+            case 'guest':
+                $item = ResidentGuestRequest::findOrFail($id);
+                break;
+            case 'leave':
+                $item = ResidenceLeave::findOrFail($id);
+                break;
+            default:
+                abort(404);
         }
 
         // Security Check: Only owner or official can delete
@@ -723,8 +832,12 @@ class EmployeeHousingController extends Controller
 
         // Perform deletion
         switch ($type) {
-            case 'request': $item->dependents()->delete(); break;
-            case 'guest': $item->members()->delete(); break;
+            case 'request':
+                $item->dependents()->delete();
+                break;
+            case 'guest':
+                $item->members()->delete();
+                break;
         }
         $item->delete();
 
@@ -793,10 +906,42 @@ class EmployeeHousingController extends Controller
             // SPECIAL LOGIC: If Agreement is fully approved, mark the related Housing Request as Completed (6)
             if ($type === 'agreement' && $action === 'approve') {
                 $housingRequest = ResidenceRequest::where('user_id', $item->user_id)
-                    ->where('send_status', 3) // มอบหมายห้องแล้ว
+                    ->where('send_status', 7) // มอบหมายห้องแล้ว
                     ->first();
                 if ($housingRequest) {
                     $housingRequest->update(['send_status' => 6]);
+                }
+            }
+
+            // SPECIAL LOGIC: If Leave Request is fully approved, update ResidenceRoom and ResidenceStay
+            if ($type === 'leave' && $action === 'approve') {
+                // Try to find room by ID first (preferred)
+                $room = null;
+                if ($item->residence_room_id) {
+                    $room = ResidenceRoom::find($item->residence_room_id);
+                }
+
+                // Fallback to string search if ID not found
+                if (!$room) {
+                    $room = ResidenceRoom::where('room_number', $item->room_number)
+                        ->whereHas('residence', function ($q) use ($item) {
+                            $q->where('name', $item->residence_type);
+                        })->first();
+                }
+
+                if ($room) {
+                    // Update Room Status to Vacant (0)
+                    $room->update(['residence_room_status' => 0]);
+
+                    // Update ResidenceStay for this user and room
+                    ResidenceStay::where('residence_room_id', $room->residence_room_id)
+                        ->where('residence_resident_id', $item->user_id)
+                        ->where('is_current', 1)
+                        ->update([
+                            'is_current' => 0,
+                            'check_out' => $item->move_out_date,
+                            'reason_leave' => $item->reason
+                        ]);
                 }
             }
         }
@@ -804,15 +949,13 @@ class EmployeeHousingController extends Controller
         $item->save();
 
         $msg = ($action === 'approve') ? 'อนุมัติเรียบร้อยแล้ว' : 'ไม่อนุมัติเรียบร้อยแล้ว';
-        
+
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => $msg]);
         }
 
         return back()->with('success', $msg);
     }
-
-
 
     // ==================== REPAIR REQUEST (QF-HAMS-REPAIR) ====================
     public function repairForm()
@@ -880,42 +1023,55 @@ class EmployeeHousingController extends Controller
 
         return response()->json(['success' => true]);
     }
-    
+
     public function finishRepair(Request $request)
     {
-        $request->validate([
-            'repair_id' => 'required|integer',
-            'technician_note' => 'nullable|string',
-            'finish_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-        ]);
+        try {
+            $request->validate([
+                'repair_id' => 'required|integer',
+                'technician_note' => 'nullable|string',
+                'finish_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            ]);
 
-        $repair = ResidenceRepair::findOrFail($request->repair_id);
-        
-        $filePaths = [];
-        if ($request->hasFile('finish_images')) {
-            foreach ($request->file('finish_images') as $file) {
-                $filename = time() . '_fin_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('uploads/housing_repairs'), $filename);
-                $filePaths[] = 'uploads/housing_repairs/' . $filename;
+            $repair = ResidenceRepair::findOrFail($request->repair_id);
+
+            $filePaths = [];
+            if ($request->hasFile('finish_images')) {
+                // Ensure directory exists
+                $uploadPath = public_path('uploads/housing_repairs');
+                if (!file_exists($uploadPath)) {
+                    mkdir($uploadPath, 0777, true);
+                }
+
+                foreach ($request->file('finish_images') as $file) {
+                    $filename = time() . '_fin_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move($uploadPath, $filename);
+                    $filePaths[] = 'uploads/housing_repairs/' . $filename;
+                }
             }
+
+            $repair->update([
+                'status' => 2, // Completed
+                'technician_note' => $request->technician_note,
+                'technician_images' => !empty($filePaths) ? $filePaths : null,
+                'completion_date' => now(),
+            ]);
+
+            // Check if room is still occupied by someone
+            $hasOccupant = ResidenceStay::where('residence_room_id', $repair->residence_room_id)
+                ->where('is_current', 1)
+                ->exists();
+
+            $room = ResidenceRoom::findOrFail($repair->residence_room_id);
+            $room->update(['residence_room_status' => $hasOccupant ? 1 : 0]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $repair->update([
-            'status' => 2, // Completed
-            'technician_note' => $request->technician_note,
-            'technician_images' => !empty($filePaths) ? $filePaths : null,
-            'completion_date' => now(),
-        ]);
-
-        // Check if room is still occupied by someone
-        $hasOccupant = ResidenceStay::where('residence_room_id', $repair->residence_room_id)
-            ->where('is_current', 1)
-            ->exists();
-
-        $room = ResidenceRoom::findOrFail($repair->residence_room_id);
-        $room->update(['residence_room_status' => $hasOccupant ? 1 : 0]);
-
-        return response()->json(['success' => true]);
     }
 
     // ==================== COMMITTEE ORGANIZATION CHART ====================
@@ -994,18 +1150,39 @@ class EmployeeHousingController extends Controller
     }
 
     // ==================== HELPER: Status Label ====================
-    public static function getStatusLabel($status)
+    public static function getStatusLabel($status, $type = 'request')
     {
-        return match (intval($status)) {
-            0 => 'รอพิจารณา (ส่วนงานต้นสังกัด)',
-            1 => 'รอพิจารณา (ผจก.แผนกฯ)',
-            2 => 'อนุมัติแล้ว (รอดำเนินการ)',
-            3 => 'มอบหมายห้องแล้ว',
-            4 => 'รอกรรมการบ้านพักตรวจสอบ',
-            5 => 'ยกเลิก',
-            6 => 'ดำเนินการเสร็จสิ้น (เข้าพักแล้ว)',
-            default => 'ไม่ทราบสถานะ',
-        };
+        $status = intval($status);
+        switch ($status) {
+            case 0:
+                if ($type == 'leave')
+                    return 'รอผู้จัดการแผนกจัดการฯ ตรวจสอบ (ถัดไป: รอกรรมการบ้านพัก)';
+                return 'รอผู้บังคับบัญชาอนุมัติ (ถัดไป: รอผู้จัดการแผนกจัดการฯ)';
+            case 1:
+                return 'รอผู้จัดการแผนกจัดการฯ อนุมัติ (ถัดไป: รอกรรมการบ้านพัก)';
+            case 2:
+                if ($type == 'request')
+                    return 'รอกรรมการบ้านพักตรวจสอบ (ถัดไป: รอมอบหมายห้อง)';
+                return 'รอกรรมการบ้านพักตรวจสอบ (ถัดไป: อนุมัติขั้นสุดท้าย)';
+            case 3:
+                if ($type == 'request')
+                    return 'ผ่านการอนุมัติ (ถัดไป: รอเจ้าหน้าที่มอบหมายห้อง)';
+                if ($type == 'leave')
+                    return 'อนุมัติการย้ายออกแล้ว (ดำเนินการเสร็จสิ้น)';
+                return 'ดำเนินการเสร็จสิ้น';
+            case 7:
+                if ($type == 'request')
+                    return 'มอบหมายห้องแล้ว (ถัดไป: รอลงนามข้อตกลงเข้าพัก)';
+                return 'มอบหมายห้องแล้ว';
+            case 4:
+                return 'ส่งกลับแก้ไข (ถัดไป: รอคุณแก้ไขข้อมูล)';
+            case 5:
+                return 'ยกเลิก';
+            case 6:
+                return 'ดำเนินการเสร็จสิ้น (เข้าพักแล้ว)';
+            default:
+                return 'ไม่ทราบสถานะ';
+        }
     }
 
     public static function getStatusColor($status)
@@ -1018,6 +1195,7 @@ class EmployeeHousingController extends Controller
             4 => 'bg-purple-50 text-purple-600 border-purple-200',
             5 => 'bg-red-50 text-red-600 border-red-200',
             6 => 'bg-slate-50 text-slate-600 border-slate-200',
+            7 => 'bg-cyan-50 text-cyan-600 border-cyan-200',
             default => 'bg-slate-50 text-slate-400 border-slate-200',
         };
     }

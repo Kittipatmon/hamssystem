@@ -77,6 +77,11 @@ class ReservationsController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
+        $isPending = in_array($reservation->status, ['pending', 'รออนุมัติ', 'รอดำเนินการ']);
+        if (!$isPending) {
+            return response()->json(['success' => false, 'message' => 'ไม่สามารถยกเลิกรายการที่ผ่านการตรวจสอบหรืออนุมัติแล้วได้'], 403);
+        }
+
         $now = now();
         $endDateTime = \Carbon\Carbon::parse(($reservation->reservation_dateend ?? $reservation->reservation_date) . ' ' . $reservation->end_time);
         if ($now->greaterThan($endDateTime)) {

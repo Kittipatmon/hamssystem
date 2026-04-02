@@ -88,12 +88,12 @@
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <div class="pt-6">
+            <!-- Styled Form Footer -->
+            <div class="mt-12 -mx-8 sm:-mx-12 px-8 sm:px-12 py-10 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800">
                 <button type="submit" 
-                    class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-black py-5 rounded-2xl shadow-xl shadow-red-500/30 hover:shadow-red-600/50 transform hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 text-lg group">
-                    <i class="fa-solid fa-save transition-transform group-hover:scale-125"></i>
-                    บันทึกข้อมูลประกาศ
+                    class="w-full h-16 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl shadow-lg shadow-red-900/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-lg uppercase tracking-wide">
+                    <i class="fa-solid fa-save text-xl"></i>
+                    <span>บันทึกข้อมูลประกาศ</span>
                 </button>
             </div>
         </form>

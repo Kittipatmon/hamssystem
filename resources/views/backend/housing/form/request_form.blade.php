@@ -43,7 +43,7 @@
                 </div>
                 <div class="p-5 space-y-4 ">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 mb-2">สถานที่ปฏิบัติงาน <span
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">ด้วยข้าพเจ้ามีความต้องการเข้าพักอาศัยในบ้านพักของพนักงาน ที่ <span
                                 class="text-red-500">*</span></label>
                         <div class="flex gap-6">
                             @foreach(['โรงงานบางใหญ่', 'โรงงานไทรใหญ่'] as $site)

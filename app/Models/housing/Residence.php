@@ -10,8 +10,12 @@ class Residence extends Model
     protected $primaryKey = 'residence_id';
 
     protected $fillable = [
-        'name', 'address', 'total_floors', 'total_rooms',
-        'user_createdid', 'user_updateid'
+        'name',
+        'address',
+        'total_floors',
+        'total_rooms',
+        'user_createdid',
+        'user_updateid'
     ];
 
     public function rooms()

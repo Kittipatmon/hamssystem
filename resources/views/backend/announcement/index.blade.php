@@ -56,7 +56,6 @@
                                 <td class="px-6 py-4 text-center">
                                     @if($item->is_urgent)
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold border bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800 uppercase tracking-tighter">
-                                            <i class="fa-solid fa-triangle-exclamation mr-1.5 text-[8px]"></i>
                                             เร่งด่วน
                                         </span>
                                     @else
@@ -74,14 +73,14 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-center gap-3">
                                         <a href="{{ route('backend.announcement.edit', $item) }}"
-                                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm font-bold">
+                                            class="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-amber-100 dark:border-amber-900/40 font-bold">
                                             <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         </a>
                                         <form action="{{ route('backend.announcement.destroy', $item) }}" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบประกาศนี้?');" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm font-bold">
+                                                class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-red-100 dark:border-red-900/40 font-bold">
                                                 <i class="fa-solid fa-trash-can text-xs"></i>
                                             </button>
                                         </form>

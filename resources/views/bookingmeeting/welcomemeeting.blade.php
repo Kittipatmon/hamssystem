@@ -68,10 +68,10 @@
 
               <div class="space-y-1 mb-3 text-xs text-slate-700">
                 <p class="flex items-center"><i class="fa-solid fa-users w-5 text-center text-slate-400"></i>
-                  <span>ความจุ: <span class="font-medium">{{ $room->capacity }}</span> ท่าน</span>
+                  &nbsp;<span>ความจุ: <span class="font-medium">{{ $room->capacity }}</span> ท่าน</span>
                 </p>
                 <p class="flex items-start"><i class="fa-solid fa-map-location-dot w-5 text-center text-slate-400 mt-1"></i>
-                  <span class="break-words whitespace-normal flex-1">สิ่งอำนวยความสะดวก: {{ $room->location ?? '-' }}
+                  &nbsp;<span class="break-words whitespace-normal flex-1">สิ่งอำนวยความสะดวก: {{ $room->location ?? '-' }}
                     @if($room->floor) (ชั้น {{ $room->floor }}) @endif</span>
                 </p>
                 @if($room->has_projector)
@@ -803,7 +803,7 @@
         document.getElementById('booking_modal').showModal();
       @endif
 
-              var calendarEl = document.getElementById('calendar');
+                    var calendarEl = document.getElementById('calendar');
       var calendar = new FullCalendar.Calendar(calendarEl, {
         locale: 'th',
         initialView: 'dayGridMonth',
@@ -863,11 +863,11 @@
           let cateringHtml = '';
           if (props.break_morning || props.lunch || props.break_afternoon || props.dinner) {
             cateringHtml = `
-                      <div class="mt-3 p-3 bg-white rounded-lg border border-slate-100 text-left">
-                        <p class="font-bold text-slate-800 border-b border-slate-50 mb-2 pb-1 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                          <i class="fa-solid fa-utensils text-slate-400"></i> การบริการอาหารและเครื่องดื่ม
-                        </p>
-                    `;
+                            <div class="mt-3 p-3 bg-white rounded-lg border border-slate-100 text-left">
+                              <p class="font-bold text-slate-800 border-b border-slate-50 mb-2 pb-1 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-utensils text-slate-400"></i> การบริการอาหารและเครื่องดื่ม
+                              </p>
+                          `;
             if (props.break_morning) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• เบรคเช้า:</span> <span class="text-slate-600">${props.break_morning_detail || 'ตามความเหมาะสม'}</span></p>`;
             if (props.lunch) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• อาหารกลางวัน:</span> <span class="text-slate-600">${props.lunch_detail || 'ตามความเหมาะสม'}</span></p>`;
             if (props.break_afternoon) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• เบรคบ่าย:</span> <span class="text-slate-600">${props.break_afternoon_detail || 'ตามความเหมาะสม'}</span></p>`;
@@ -877,40 +877,43 @@
 
           const currentUserId = {{ Auth::id() ?? 'null' }};
           const isOwner = currentUserId === props.user_id;
-          const eventEnd = info.event.end || info.event.start; // Fallback to start if end is not set (e.g. all-day event)
+          const isPending = props.status === 'pending' || props.status === 'รออนุมัติ' || props.status === 'รอดำเนินการ';
+          const eventEnd = info.event.end || info.event.start;
           const isEnded = new Date(eventEnd) < new Date();
-          const canCancel = isOwner && !isEnded;
+          const canCancel = isOwner && !isEnded && isPending;
 
           Swal.fire({
             title: '<h2 class="text-3xl font-black text-slate-800 text-center mb-0">รายละเอียดการจองห้องประชุม</h2>',
             html: `
-                <div class="mt-8 text-center space-y-2.5 text-slate-700">
-                    <p class="text-xl font-medium"><span class="font-bold text-slate-900">ชื่อผู้จอง:</span> ${bookerName}</p>
-                    <p class="text-xl font-medium"><span class="font-bold text-slate-900">เจ้าของงาน:</span> ${requesterName}</p>
-                    <p class="text-xl font-medium"><span class="font-bold text-slate-900">วันที่เริ่ม:</span> ${startTimeFormatted} น.</p>
-                    <p class="text-xl font-medium"><span class="font-bold text-slate-900">วันที่สิ้นสุด:</span> ${endTimeFormatted} น.</p>
-                    
-                    <p class="text-[22px] font-bold text-red-600 mt-4">
-                        ห้องประชุม: ${info.event.title}
-                    </p>
-                    
-                    <p class="text-xl font-medium"><span class="font-bold text-slate-900">หัวข้อ:</span> ${topic}</p>
-                    <p class="text-lg text-slate-500 font-medium">${objective}</p>
-                    
-                    <p class="text-xl font-medium"><span class="font-bold text-slate-900">จำนวนผู้เข้าประชุม:</span> ${participantCount} ท่าน</p>
-                    
-                    <p class="text-xl font-bold text-emerald-600 mt-4 leading-none">
-                        สถานะ: อนุมัติแล้ว
-                    </p>
-                    
-                    <div class="mt-8 mb-6">
-                        <div class="w-full bg-emerald-50 border border-emerald-100 py-3 rounded-xl flex items-center justify-center gap-2">
-                             <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
-                             <span class="text-xl font-bold text-emerald-600">ปกติ / ยืนยันแล้ว</span>
-                        </div>
-                    </div>
-                </div>
-            `,
+                      <div class="mt-8 text-center space-y-2.5 text-slate-700">
+                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">ชื่อผู้จอง:</span> ${bookerName}</p>
+                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">เจ้าของงาน:</span> ${requesterName}</p>
+                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">วันที่เริ่ม:</span> ${startTimeFormatted} น.</p>
+                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">วันที่สิ้นสุด:</span> ${endTimeFormatted} น.</p>
+
+                          <p class="text-[22px] font-bold text-red-600 mt-4">
+                              ห้องประชุม: ${info.event.title}
+                          </p>
+
+                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">หัวข้อ:</span> ${topic}</p>
+                          <p class="text-lg text-slate-500 font-medium">${objective}</p>
+
+                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">จำนวนผู้เข้าประชุม:</span> ${participantCount} ท่าน</p>
+
+                          <p class="text-xl font-bold mt-4 leading-none ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'text-emerald-600' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'text-amber-500' : 'text-red-500')}">
+                              สถานะ: ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'อนุมัติแล้ว' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'รออนุมัติ' : 'ยกเลิก / ไม่อนุมัติ')}
+                          </p>
+
+                          <div class="mt-8 mb-6">
+                              <div class="w-full ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'bg-emerald-50 border-emerald-100' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100')} py-3 rounded-xl flex items-center justify-center gap-2 border">
+                                   <i class="fa-solid ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'fa-circle-check text-emerald-500' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'fa-clock text-amber-500' : 'fa-circle-xmark text-red-500')} text-xl"></i>
+                                   <span class="text-xl font-bold ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'text-emerald-600' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'text-amber-600' : 'text-red-600')}">
+                                      ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'ปกติ / ยืนยันแล้ว' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'รอดำเนินการอนุมัติ' : (props.status === 'rejected' || props.status === 'ไม่อนุมัติ' ? 'รายการนี้ไม่ได้รับการอนุมัติ' : 'รายการนี้ถูกยกเลิก'))}
+                                   </span>
+                              </div>
+                          </div>
+                      </div>
+                  `,
             showConfirmButton: true,
             confirmButtonText: 'ปิด',
             confirmButtonColor: '#94a3b8',

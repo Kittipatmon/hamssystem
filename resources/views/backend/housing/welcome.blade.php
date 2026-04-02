@@ -25,29 +25,76 @@
             </div>
         </div>
 
-        {{-- Notification Alert --}}
-        @if($needsAgreement)
-            <div class="max-w-5xl mx-auto mb-8">
-                <div
-                    class="relative overflow-hidden bg-gradient-to-r from-white to-red-50 rounded-2xl border-l-4 border-red-500 shadow-lg p-6 group animate-pulse">
-                    <div class="flex items-center gap-5">
-                        <div
-                            class="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center text-red-600 shadow-inner group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-file-signature text-2xl"></i>
+        {{-- Next Step Notification Alert --}}
+        @if($userActiveRequest)
+            @php
+                $status = $userActiveRequest->send_status;
+                $config = match($status) {
+                    0, 1, 2 => [
+                        'icon' => 'fa-hourglass-half',
+                        'color' => 'amber',
+                        'title' => 'กำลังอยู่ระหว่างการพิจารณา',
+                        'desc' => 'คำขอหมายเลข ' . $userActiveRequest->requests_code . ' กำลังถูกตรวจสอบตามขั้นตอน ขั้นตอนถัดไป: รอการอนุมัติจากผู้เกี่ยวข้อง',
+                        'btn' => 'ติดตามสถานะ',
+                        'route' => route('housing.my_requests')
+                    ],
+                    3 => [
+                        'icon' => 'fa-circle-check',
+                        'color' => 'blue',
+                        'title' => 'ผ่านการอนุมัติแล้ว!',
+                        'desc' => 'คำขอของคุณได้รับการอนุมัติขั้นสุดท้ายแล้ว ขั้นตอนถัดไป: รอเจ้าหน้าที่ดำเนินการมอบหมายห้องพักให้คุณ',
+                        'btn' => 'ดูรายละเอียด',
+                        'route' => route('housing.my_requests')
+                    ],
+                    4 => [
+                        'icon' => 'fa-circle-exclamation',
+                        'color' => 'orange',
+                        'title' => 'คำขอถูกส่งกลับแก้ไข',
+                        'desc' => 'กรุณาตรวจสอบและแก้ไขข้อมูลในคำขอหมายเลข ' . $userActiveRequest->requests_code . ' ของคุณเพื่อให้การพิจารณาดำเนินการต่อได้',
+                        'btn' => 'ไปแก้ไขข้อมูล',
+                        'route' => route('housing.my_requests')
+                    ],
+                    7 => ($pendingAgreement) ? [
+                        'icon' => 'fa-hourglass-half',
+                        'color' => 'blue',
+                        'title' => 'รอกรรมการตรวจสอบสัญญา',
+                        'desc' => 'คุณส่งแบบฟอร์มข้อตกลงฯ เรียบร้อยแล้ว ขั้นตอนถัดไป: รอเจ้าหน้าที่ตรวจสอบและอนุมัติสัญญาเข้าพักของคุณ',
+                        'btn' => 'ติดตามผล',
+                        'route' => route('housing.my_requests') . '?tab=agreements'
+                    ] : [
+                        'icon' => 'fa-file-signature',
+                        'color' => 'red',
+                        'title' => 'ขั้นตอนสุดท้าย: ลงนามข้อตกลง',
+                        'desc' => 'คุณได้รับมอบหมายห้องพักแล้ว! กรุณากรอกแบบฟอร์มข้อตกลงการเข้าพักอาศัย (QF-HAMS-03) เพื่อยืนยันการเข้าพัก',
+                        'btn' => 'กรอกแบบฟอร์ม',
+                        'route' => route('housing.agreement.create')
+                    ],
+                    default => null
+                };
+            @endphp
+
+            @if($config)
+            <div class="max-w-5xl mx-auto mb-8 px-4 sm:px-0">
+                <div class="relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border-l-4 border-{{ $config['color'] }}-500 shadow-md p-5 group transition-all hover:shadow-lg">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-{{ $config['color'] }}-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                    <div class="flex flex-col sm:flex-row items-center gap-5 relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-{{ $config['color'] }}-100 dark:bg-{{ $config['color'] }}-900/30 flex items-center justify-center text-{{ $config['color'] }}-600 dark:text-{{ $config['color'] }}-400 shadow-inner">
+                            <i class="fa-solid {{ $config['icon'] }} text-xl"></i>
                         </div>
-                        <div class="flex-1">
-                            <h3 class="text-base font-bold text-gray-800">ดำเนินการคำขอเข้าพักเสร็จสิ้น!</h3>
-                            <p class="text-sm text-gray-500">คุณได้รับการมอบหมายห้องพักแล้ว กรุณากรอก <span
-                                    class="font-bold text-red-600">แบบฟอร์มข้อตกลงการเข้าพักอาศัย</span> เพื่อยืนยันการเข้าพัก
+                        <div class="flex-1 text-center sm:text-left">
+                            <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 tracking-tight">{{ $config['title'] }}</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                {!! $config['desc'] !!}
                             </p>
                         </div>
-                        <a href="{{ route('housing.agreement.create') }}"
-                            class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-red-200 transition-all flex items-center gap-2">
-                            กรอกแบบฟอร์ม <i class="fa-solid fa-chevron-right text-xs"></i>
+                        <a href="{{ $config['route'] }}"
+                            class="bg-{{ $config['color'] }}-600 hover:bg-{{ $config['color'] }}-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-2 whitespace-nowrap">
+                            {{ $config['btn'] }} <i class="fa-solid fa-chevron-right text-[10px]"></i>
                         </a>
                     </div>
                 </div>
             </div>
+            @endif
         @endif
 
         {{-- Residence Cards --}}
@@ -231,6 +278,7 @@
                                     $allRecent->push((object) [
                                         'code' => $r->requests_code,
                                         'type' => 'คำขอเข้าพัก',
+                                        'type_slug' => 'request',
                                         'type_color' => 'bg-red-50 text-red-600',
                                         'name' => ($r->first_name ?? '') . ' ' . ($r->last_name ?? ''),
                                         'date' => $r->created_at,
@@ -241,6 +289,7 @@
                                     $allRecent->push((object) [
                                         'code' => $r->agreement_code,
                                         'type' => 'ข้อตกลง',
+                                        'type_slug' => 'agreement',
                                         'type_color' => 'bg-blue-50 text-blue-600',
                                         'name' => $r->full_name ?? '',
                                         'date' => $r->created_at,
@@ -251,6 +300,7 @@
                                     $allRecent->push((object) [
                                         'code' => $r->resident_guest_code,
                                         'type' => 'นำญาติเข้าพัก',
+                                        'type_slug' => 'guest',
                                         'type_color' => 'bg-purple-50 text-purple-600',
                                         'name' => ($r->first_name ?? '') . ' ' . ($r->last_name ?? ''),
                                         'date' => $r->created_at,
@@ -261,6 +311,7 @@
                                     $allRecent->push((object) [
                                         'code' => $r->residence_leaves_code,
                                         'type' => 'ขอย้ายออก',
+                                        'type_slug' => 'leave',
                                         'type_color' => 'bg-orange-50 text-orange-600',
                                         'name' => ($r->first_name ?? '') . ' ' . ($r->last_name ?? ''),
                                         'date' => $r->created_at,
@@ -284,7 +335,7 @@
                                     <td class="px-5 py-3.5">
                                         <span
                                             class="px-2.5 py-1 rounded-lg text-[10px] font-bold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($item->status) }}">
-                                            {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($item->status) }}
+                                            {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($item->status, $item->type_slug) }}
                                         </span>
                                     </td>
                                 </tr>

@@ -135,12 +135,16 @@
                         headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                         body: formData
                     })
-                    .then(res => {
-                        if (!res.ok) throw new Error(res.statusText)
-                        return res.json()
+                    .then(async res => {
+                        const data = await res.json().catch(() => null);
+                        if (!res.ok) {
+                            const errorMsg = data && data.message ? data.message : (res.statusText || 'Unknown Error');
+                            throw new Error(errorMsg);
+                        }
+                        return data;
                     })
                     .catch(error => {
-                        Swal.showValidationMessage(`เกิดข้อผิดพลาด: ${error}`)
+                        Swal.showValidationMessage(`เกิดข้อผิดพลาด: ${error.message || error}`)
                     })
                 },
                 allowOutsideClick: () => !Swal.isLoading()

@@ -45,11 +45,22 @@
                 <label class="block text-xs font-semibold text-gray-500 mb-1">สถานะ</label>
                 <select name="status" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm h-10">
                     <option value="all" {{ request('status')=='all'?'selected':'' }}>ทุกสถานะ</option>
-                    <option value="0" {{ request('status')==='0'?'selected':'' }}>รอผู้บังคับบัญชา</option>
+                    @if($tab == 'leaves')
+                        <option value="0" {{ request('status')==='0'?'selected':'' }}>รอผู้จัดการแผนกจัดการฯ</option>
+                    @else
+                        <option value="0" {{ request('status')==='0'?'selected':'' }}>รอผู้บังคับบัญชา</option>
+                    @endif
                     <option value="1" {{ request('status')==='1'?'selected':'' }}>รอผจก.แผนกจัดการฯ</option>
                     <option value="2" {{ request('status')==='2'?'selected':'' }}>รอกรรมการ</option>
-                    <option value="3" {{ request('status')==='3'?'selected':'' }}>มอบหมายห้องแล้ว</option>
-                    <option value="6" {{ request('status')==='6'?'selected':'' }}>ดำเนินการเสร็จสิ้น</option>
+                    @if($tab == 'requests')
+                        <option value="3" {{ request('status')==='3'?'selected':'' }}>ผ่านการอนุมัติ (รอนายจ้างมอบหมายห้อง)</option>
+                        <option value="7" {{ request('status')==='7'?'selected':'' }}>มอบหมายห้องแล้ว (รอข้อตกลงฯ)</option>
+                    @elseif($tab == 'leaves')
+                        <option value="3" {{ request('status')==='3'?'selected':'' }}>อนุมัติการย้ายออกแล้ว</option>
+                    @else
+                        <option value="3" {{ request('status')==='3'?'selected':'' }}>ดำเนินการเสร็จสิ้น</option>
+                    @endif
+                    <option value="6" {{ request('status')==='6'?'selected':'' }}>ดำเนินการเสร็จสิ้น (เข้าพักแล้ว)</option>
                     <option value="4" {{ request('status')==='4'?'selected':'' }}>ส่งกลับแก้ไข</option>
                     <option value="5" {{ request('status')==='5'?'selected':'' }}>ยกเลิก</option>
                 </select>
@@ -128,7 +139,7 @@
                             <td class="px-4 py-3 text-gray-500 text-xs">{{ $r->created_at ? \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') : '-' }}</td>
                             <td class="px-4 py-3">
                                 <span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($r->send_status) }}">
-                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($r->send_status) }}
+                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($r->send_status, 'request') }}
                                 </span>
                             </td>
                         <td class="px-4 py-3 text-gray-500 text-xs font-semibold">
@@ -235,7 +246,7 @@
                             <td class="px-4 py-3 text-gray-500">{{ $a->residence_address }}</td>
                             <td class="px-4 py-3">
                                 <span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($a->send_status) }}">
-                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($a->send_status) }}
+                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($a->send_status, 'agreement') }}
                                 </span>
                             </td>
                         <td class="px-4 py-3 text-gray-500 text-xs font-semibold">
@@ -281,7 +292,13 @@
                                     class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center" title="PDF">
                                     <i class="fa-solid fa-file-pdf text-xs"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('housing.destroy', ['type' => 'agreement', 'id' => $a->agreement_id]) }}" onsubmit="return confirm('ยืนยันลบ?')" class="inline">@csrf @method('DELETE')<button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ"><i class="fa-solid fa-trash-can text-xs"></i></button></form>
+                                    <form id="delete-form-agreement-{{ $a->agreement_id }}" method="POST" action="{{ route('housing.destroy', ['type' => 'agreement', 'id' => $a->agreement_id]) }}" class="hidden">
+                                        @csrf @method('DELETE')
+                                    </form>
+                                    <button type="button" onclick="confirmDelete('agreement', {{ $a->agreement_id }})" 
+                                        class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
                                 </div>
                             </div>
                         </td>
@@ -320,7 +337,7 @@
                             <td class="px-4 py-3 text-center">{{ $g->members->count() }} คน</td>
                             <td class="px-4 py-3">
                                 <span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($g->send_status) }}">
-                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($g->send_status) }}
+                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($g->send_status, 'guest') }}
                                 </span>
                             </td>
                         <td class="px-4 py-3 text-gray-500 text-xs font-semibold">
@@ -366,7 +383,13 @@
                                     class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center" title="PDF">
                                     <i class="fa-solid fa-file-pdf text-xs"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('housing.destroy', ['type' => 'guest', 'id' => $g->resident_guest_id]) }}" onsubmit="return confirm('ยืนยันลบ?')" class="inline">@csrf @method('DELETE')<button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center"><i class="fa-solid fa-trash-can text-xs"></i></button></form>
+                                    <form id="delete-form-guest-{{ $g->resident_guest_id }}" method="POST" action="{{ route('housing.destroy', ['type' => 'guest', 'id' => $g->resident_guest_id]) }}" class="hidden">
+                                        @csrf @method('DELETE')
+                                    </form>
+                                    <button type="button" onclick="confirmDelete('guest', {{ $g->resident_guest_id }})" 
+                                        class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
                                 </div>
                             </div>
                         </td>
@@ -404,7 +427,7 @@
                             <td class="px-4 py-3 text-gray-500 text-xs">{{ $l->move_out_date ? \Carbon\Carbon::parse($l->move_out_date)->format('d/m/Y') : '-' }}</td>
                             <td class="px-4 py-3">
                                 <span class="px-2 py-1 rounded-full text-[10px] font-semibold border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($l->send_status) }}">
-                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($l->send_status) }}
+                                    {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($l->send_status, 'leave') }}
                                 </span>
                             </td>
                         <td class="px-4 py-3 text-gray-500 text-xs font-semibold">
@@ -450,7 +473,13 @@
                                     class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center" title="PDF">
                                     <i class="fa-solid fa-file-pdf text-xs"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('housing.destroy', ['type' => 'leave', 'id' => $l->residence_leaves_id]) }}" onsubmit="return confirm('ยืนยันลบ?')" class="inline">@csrf @method('DELETE')<button type="submit" class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ"><i class="fa-solid fa-trash-can text-xs"></i></button></form>
+                                    <form id="delete-form-leave-{{ $l->residence_leaves_id }}" method="POST" action="{{ route('housing.destroy', ['type' => 'leave', 'id' => $l->residence_leaves_id]) }}" class="hidden">
+                                        @csrf @method('DELETE')
+                                    </form>
+                                    <button type="button" onclick="confirmDelete('leave', {{ $l->residence_leaves_id }})" 
+                                        class="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-red-500 flex items-center justify-center" title="ลบ">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
                                 </div>
                             </div>
                         </td>
@@ -628,6 +657,23 @@ function assignTechnician(repairId, technicianId) {
                     Swal.fire('ผิดพลาด', 'ไม่สามารถมอบหมายงานได้', 'error');
                 }
             });
+        }
+    });
+}
+
+function confirmDelete(type, id) {
+    Swal.fire({
+        title: 'ยืนยันการลบ?',
+        text: 'ข้อมูลนี้จะถูกลบออกจากระบบและไม่สามารถกู้คืนได้',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'ยืนยันลบ',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + type + '-' + id).submit();
         }
     });
 }

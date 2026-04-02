@@ -10,8 +10,16 @@ class ResidenceRoom extends Model
     protected $primaryKey = 'residence_room_id';
 
     protected $fillable = [
-        'residence_id', 'room_number', 'floor', 'residence_room_status',
-        'note', 'user_createdid', 'user_updateid', 'image', 'price', 'capacity'
+        'residence_id',
+        'room_number',
+        'floor',
+        'residence_room_status',
+        'note',
+        'user_createdid',
+        'user_updateid',
+        'image',
+        'price',
+        'capacity'
     ];
 
     public function residence()

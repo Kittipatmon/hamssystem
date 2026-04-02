@@ -35,7 +35,7 @@
                     <span
                         class="px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($item->send_status) }} shadow-sm">
                         <i class="fa-solid fa-circle-dot mr-1 animate-pulse"></i>
-                        {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($item->send_status) }}
+                        {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($item->send_status, $type) }}
                     </span>
                 </td>
                 <td class="px-4 py-5 text-center">

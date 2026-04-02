@@ -19,4 +19,25 @@ class ResidenceStay extends Model
     {
         return $this->belongsTo(ResidenceRoom::class, 'residence_room_id', 'residence_room_id');
     }
+
+    public function resident()
+    {
+        // This is specifically for the Agreement (QF-HAMS-03)
+        return $this->belongsTo(ResidenceAgreement::class, 'residence_resident_id', 'user_id')
+            ->where('send_status', 3) // Success
+            ->with('user')
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function latestRequest()
+    {
+        // Fallback for names if agreement is not yet finished
+        return $this->belongsTo(ResidenceRequest::class, 'residence_resident_id', 'user_id')
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'residence_resident_id', 'id');
+    }
 }

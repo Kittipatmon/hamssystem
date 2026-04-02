@@ -196,7 +196,7 @@
                     </div>
                 </a>
 
-                <div class="relative group">
+                <!-- <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-datapublic')"
                         class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $inventoryActive ? 'bg-white/5 text-white' : '' }}"
                         id="btn-datapublic">
@@ -225,7 +225,7 @@
                         class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
                         ข้อมูลทั่วไป
                     </div>
-                </div>
+                </div> -->
 
                 <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-policy')"
@@ -296,7 +296,7 @@
                     </div>
                 </div>
 
-                <div class="relative group">
+                <!-- <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-suggestion')"
                         class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
                         id="btn-suggestion">
@@ -325,7 +325,7 @@
                         class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
                         ข้อมูลทั่วไป
                     </div>
-                </div>
+                </div> -->
 
                 <!-- <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-bookingmeeting')"

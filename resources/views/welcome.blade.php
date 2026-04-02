@@ -842,12 +842,7 @@
                                         <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                                     @else
                                         <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-                                            <i class="fa-solid fa-bullhorn text-5xl text-slate-200"></i>
-                                        </div>
-                                    @endif
-                                    @if($ann->is_urgent)
-                                        <div class="absolute top-6 right-6 w-12 h-12 rounded-full bg-red-600 flex items-center justify-center shadow-lg animate-pulse z-10">
-                                            <i class="fa-solid fa-triangle-exclamation text-white text-sm"></i>
+                                            <i class="fa-solid fa-info-circle text-5xl text-slate-200"></i>
                                         </div>
                                     @endif
                                 </div>
@@ -855,14 +850,21 @@
                                 {{-- Body: Text Content --}}
                                 <div class="p-10 flex flex-col flex-grow">
                                     <div class="flex flex-col mb-5">
-                                        <span class="text-red-500 font-black text-[11px] tracking-widest uppercase mb-1">OFFICIAL NOTICE</span>
-                                        <time class="text-slate-400 text-[11px] font-bold">{{ $ann->published_date ? $ann->published_date->format('d M Y') : '' }}</time>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-red-500 font-black text-[11px] tracking-widest uppercase">OFFICIAL NOTICE</span>
+                                            @if($ann->is_urgent)
+                                                <span class="px-2 py-0.5 bg-red-600 text-white text-[9px] font-black rounded-lg shadow-sm animate-pulse">เร่งด่วน</span>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center justify-end">
+                                            <time class="text-slate-400 text-[11px] font-bold ml-auto">{{ $ann->published_date ? $ann->published_date->format('d M Y') : '' }}</time>
+                                        </div>
                                     </div>
                                     
                                     <h3 class="text-[1.25rem] font-extrabold text-slate-900 mb-4 line-clamp-2 leading-[1.3] group-hover/item:text-red-600 transition-colors tracking-tight">{{ $ann->title }}</h3>
                                     <p class="text-slate-500 text-sm line-clamp-3 mb-8 flex-grow leading-[1.6]">{{ strip_tags($ann->content) }}</p>
                                     
-                                    <div class="flex items-center justify-between pt-6 border-t border-slate-50">
+                                    <div class="flex items-center justify-end pt-6 border-t border-slate-50">
                                         <span class="text-red-600 text-[11px] font-black uppercase tracking-widest flex items-center gap-2 group-hover/item:gap-3 transition-all">
                                             READ MORE <i class="fa-solid fa-chevron-right text-[10px]"></i>
                                         </span>

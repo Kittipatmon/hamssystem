@@ -77,35 +77,53 @@
                             <i class="fa-solid fa-user-circle text-red-500"></i> ข้อมูลผู้ยื่นคำขอ
                         </h2>
                     </div>
-                    <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+                    <div class="p-8 grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-8">
+                        @if($type == 'request')
+                        <div class="col-span-2 md:col-span-4">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 text-red-500">สถานที่ปฏิบัติงาน</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->site }}</p>
+                        </div>
+                        @endif
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ชื่อ-นามสกุล</p>
-                            <p class="text-base font-bold text-slate-700">
-                                {{ $item->title ?? '' }}{{ $item->first_name }} {{ $item->last_name }}
-                                @if($type == 'agreement') {{ $item->full_name }} @endif
-                            </p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">คำนำหน้า</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->title }}</p>
                         </div>
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ตำแหน่ง / สังกัด</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ชื่อ</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->first_name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">นามสกุล</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->last_name }}</p>
+                        </div>
+                        @if($type == 'request')
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">อายุงาน (ปี)</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->age_work }}</p>
+                        </div>
+                        @endif
+                        
+                        <div class="col-span-2 md:col-span-2">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ตำแหน่ง</p>
                             <p class="text-base font-bold text-slate-700">{{ $item->position }}</p>
-                            <p class="text-xs font-semibold text-slate-400 mt-0.5">
-                                {{ $item->department }} / {{ $item->section }}
-                            </p>
                         </div>
-                        @if(isset($item->phone))
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">เบอร์โทรศัพท์</p>
-                            <p class="text-base font-bold text-slate-700">{{ $item->phone }}</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">แผนก</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->department }}</p>
                         </div>
-                        @endif
-                        @if(isset($item->marital_status))
                         <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">สถานภาพสมรส</p>
-                            <p class="text-base font-bold text-slate-700">
-                                {{ match($item->marital_status) { 'โสด' => 'โสด', 'สมรส' => 'สมรส', 'หย่าร้าง' => 'หย่าร้าง', 'หม้าย' => 'หม้าย', default => $item->marital_status } }}
-                            </p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ฝ่าย (สังกัด)</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->section }}</p>
                         </div>
-                        @endif
+
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">หมายเลขโทรศัพท์</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->phone ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">สถานภาพ</p>
+                            <p class="text-base font-bold text-slate-700">{{ $item->marital_status }}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -118,25 +136,55 @@
                                 <i class="fa-solid fa-map-location-dot text-blue-500"></i> ข้อมูลที่อยู่
                             </h2>
                         </div>
-                        <div class="p-8 space-y-6">
-                            <div class="bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">ที่อยู่ตามภูมิลำเนา</p>
-                                <p class="text-sm font-semibold text-slate-700 leading-relaxed">
-                                    {{ $item->address_original }}
-                                    ต.{{ $item->address_original_subdistrict }} 
-                                    อ.{{ $item->address_original_district }} 
-                                    จ.{{ $item->address_original_province }}
-                                </p>
+                        <div class="p-8 space-y-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+                                <div class="col-span-1 md:col-span-2">
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">ที่อยู่ตามทะเบียนบ้าน</p>
+                                </div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">บ้านเลขที่ / ที่อยู่</p>
+                                    <p class="text-sm font-semibold text-slate-700">{{ $item->address_original }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">แขวง/ตำบล</p>
+                                    <p class="text-sm font-semibold text-slate-700">{{ $item->address_original_subdistrict ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">เขต/อำเภอ</p>
+                                    <p class="text-sm font-semibold text-slate-700">{{ $item->address_original_district ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">จังหวัด</p>
+                                    <p class="text-sm font-semibold text-slate-700">{{ $item->address_original_province ?? '-' }}</p>
+                                </div>
                             </div>
-                            <div class="bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">ที่อยู่ปัจจุบัน</p>
-                                <p class="text-sm font-semibold text-slate-700 leading-relaxed">
-                                    {{ $item->address_current }}
-                                    ต.{{ $item->address_current_subdistrict }} 
-                                    อ.{{ $item->address_current_district }} 
-                                    จ.{{ $item->address_current_province }}
-                                </p>
-                                <p class="text-[10px] font-bold text-slate-500 mt-2">ขั้วคำขอ: {{ $item->current_house_type }}</p>
+
+                            <hr class="border-slate-100 border-dashed">
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+                                <div class="col-span-1 md:col-span-2">
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">ที่อยู่ปัจจุบัน</p>
+                                </div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">บ้านเลขที่ / ที่อยู่</p>
+                                    <p class="text-sm font-semibold text-slate-700">{{ $item->address_current ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">แขวง/ตำบล</p>
+                                    <p class="text-sm font-semibold text-slate-700">{{ $item->address_current_subdistrict ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">เขต/อำเภอ</p>
+                                    <p class="text-sm font-semibold text-slate-700">{{ $item->address_current_district ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">จังหวัด</p>
+                                    <p class="text-sm font-semibold text-slate-700">{{ $item->address_current_province ?? '-' }}</p>
+                                </div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ลักษณะที่พักอาศัยปัจจุบัน</p>
+                                    <p class="text-sm font-semibold text-slate-700">{{ $item->current_house_type ?? '-' }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -277,24 +325,50 @@
                     </div>
                 @endif
                 
-                @if(isset($item->residence_reason) || isset($item->reason))
-                <!-- Reason Card -->
+                @if(isset($item->residence_reason) || isset($item->reason) || ($type == 'request' && $item->requests_file))
+                <!-- Reason and Attachments Section -->
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-8 border-b border-slate-50 bg-slate-50/30">
                         <h2 class="text-lg font-bold text-slate-800 flex items-center gap-3">
-                            <i class="fa-solid fa-comment-dots text-amber-500"></i> เหตุผลความจำเป็น
+                            <i class="fa-solid fa-pen-to-square text-amber-500"></i> เหตุผลและเอกสารแนบ
                         </h2>
                     </div>
-                    <div class="p-8">
-                        <div class="bg-amber-50/50 p-6 rounded-2xl border border-amber-100 italic text-amber-900 font-medium leading-relaxed">
-                            "{{ $item->residence_reason ?? $item->reason }}"
+                    <div class="p-8 space-y-8">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">เหตุผลที่ขอเข้าพัก</p>
+                            <div class="bg-amber-50/50 p-6 rounded-2xl border border-amber-100 italic text-amber-900 font-medium leading-relaxed">
+                                "{{ $item->residence_reason ?? $item->reason }}"
+                            </div>
                         </div>
+
+                        @if($type == 'request' && $item->requests_file)
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">เอกสารแนบ</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @php $files = json_decode($item->requests_file, true) ?? []; @endphp
+                                @forelse($files as $fileName)
+                                <a href="{{ asset('uploads/housing_requests/' . $fileName) }}" target="_blank" 
+                                   class="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 transition-all group">
+                                    <div class="flex items-center gap-3 overflow-hidden">
+                                        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500">
+                                            <i class="fa-solid fa-file-pdf"></i>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-600 truncate">{{ $fileName }}</span>
+                                    </div>
+                                    <i class="fa-solid fa-download text-slate-300 group-hover:text-red-500 transition-colors"></i>
+                                </a>
+                                @empty
+                                <p class="text-xs text-slate-400 font-bold italic">ไม่มีเอกสารแนบ</p>
+                                @endforelse
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
                 @endif
             </div>
 
-            <!-- Right Side: Status and Files -->
+            <!-- Right Side: Status and Quick Actions -->
             <div class="space-y-6">
                 <!-- Status Card -->
                 <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
@@ -302,32 +376,10 @@
                     <div class="flex flex-col items-center text-center space-y-4">
                         <div class="px-5 py-2.5 rounded-2xl text-xs font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($item->send_status) }} shadow-sm inline-flex items-center gap-2">
                             <i class="fa-solid fa-circle-dot animate-pulse"></i>
-                            {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($item->send_status) }}
+                            {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($item->send_status, $type) }}
                         </div>
                     </div>
                 </div>
-
-                @if($type == 'request' && $item->requests_file)
-                <!-- Files Card -->
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">เอกสารแนบ</h3>
-                    <div class="space-y-3">
-                        @php $files = json_decode($item->requests_file, true) ?? []; @endphp
-                        @forelse($files as $fileName)
-                        <a href="{{ asset('uploads/housing_requests/' . $fileName) }}" target="_blank" 
-                           class="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 transition-all group">
-                            <div class="flex items-center gap-3 overflow-hidden">
-                                <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
-                                <span class="text-xs font-bold text-slate-600 truncate max-w-[150px]">{{ $fileName }}</span>
-                            </div>
-                            <i class="fa-solid fa-download text-slate-300 group-hover:text-red-500 transition-colors"></i>
-                        </a>
-                        @empty
-                        <p class="text-xs text-slate-400 font-bold text-center">ไม่มีเอกสารแนบ</p>
-                        @endforelse
-                    </div>
-                </div>
-                @endif
             </div>
         </div>
     </div>

@@ -29,6 +29,7 @@
 
     <form action="{{ route('housing.leave.store') }}" method="POST">
         @csrf
+        <input type="hidden" name="residence_room_id" value="{{ $currentStay->room->residence_room_id ?? '' }}">
         <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             <div class="px-5 py-3 bg-gray-50 border-b border-gray-100">
                 <h3 class="font-bold text-gray-700 text-sm flex items-center gap-2"><i class="fa-solid fa-user text-orange-400"></i> ข้อมูลผู้ขอย้ายออก</h3>
@@ -79,17 +80,17 @@
                         <select name="residence_type" class="w-full rounded-lg border-gray-200 text-sm h-10 focus:ring-orange-500 focus:border-orange-500" required>
                             <option value="">-- เลือกบ้านพัก --</option>
                             @foreach($residences as $r)
-                                <option value="{{ $r->name }}" {{ old('residence_type') == $r->name ? 'selected' : '' }}>{{ $r->name }}</option>
+                                <option value="{{ $r->name }}" {{ old('residence_type', $currentStay->room->residence->name ?? '') == $r->name ? 'selected' : '' }}>{{ $r->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-600 mb-1">เลขที่ห้อง <span class="text-red-500">*</span></label>
-                        <input type="text" name="room_number" value="{{ old('room_number') }}" class="w-full rounded-lg border-gray-200 text-sm h-10 focus:ring-orange-500 focus:border-orange-500" required>
+                        <input type="text" name="room_number" value="{{ old('room_number', $currentStay->room->room_number ?? '') }}" class="w-full rounded-lg border-gray-200 text-sm h-10 focus:ring-orange-500 focus:border-orange-500" required>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-600 mb-1">ชั้น</label>
-                        <input type="text" name="floor" value="{{ old('floor') }}" class="w-full rounded-lg border-gray-200 text-sm h-10 focus:ring-orange-500 focus:border-orange-500">
+                        <input type="text" name="floor" value="{{ old('floor', $currentStay->room->floor ?? '') }}" class="w-full rounded-lg border-gray-200 text-sm h-10 focus:ring-orange-500 focus:border-orange-500">
                     </div>
                 </div>
                 <div>

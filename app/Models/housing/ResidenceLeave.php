@@ -11,7 +11,7 @@ class ResidenceLeave extends Model
     protected $primaryKey = 'residence_leaves_id';
 
     protected $fillable = [
-        'residence_leaves_code', 'user_id', 'request_date', 'prefix',
+        'residence_leaves_code', 'user_id', 'residence_room_id', 'request_date', 'prefix',
         'first_name', 'last_name', 'position', 'department', 'section',
         'residence_type', 'room_number', 'floor', 'move_out_date', 'reason',
         'send_status',
@@ -22,5 +22,10 @@ class ResidenceLeave extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function room()
+    {
+        return $this->belongsTo(ResidenceRoom::class, 'residence_room_id', 'residence_room_id');
     }
 }
