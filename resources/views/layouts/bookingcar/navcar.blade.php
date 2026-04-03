@@ -50,38 +50,40 @@
                     $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
                 @endphp
                 @if($isHamsOrAdmin)
-                    <!-- รายงาน (dropdown) -->
+                    @php
+                        $isReportRoute = request()->routeIs('bookingcar.dashboard') || request()->routeIs('bookingcar.report') || request()->routeIs('backend.bookingcar.table');
+                    @endphp
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
-                            class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer">
-                            <i class="fa-solid fa-server text-slate-400"></i>
+                            class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ $isReportRoute ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                            <i class="fa-solid fa-server {{ $isReportRoute ? 'text-white' : 'text-slate-400' }}"></i>
                             <span>รายงาน</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
+                            <i class="fa-solid fa-chevron-down text-[10px] {{ $isReportRoute ? 'text-white' : 'opacity-70' }} ml-1"></i>
                         </label>
                         <ul tabindex="0"
                             class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-64 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] right-0 origin-top-right">
                             <li>
                                 <a href="{{ route('bookingcar.dashboard') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('bookingcar.dashboard') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('bookingcar.dashboard') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-700 hover:bg-red-50' }}">
                                     <i
-                                        class="fa-solid fa-list-ul w-4 text-center {{ request()->routeIs('bookingcar.dashboard') ? 'text-red-600' : 'text-red-400' }}"></i>
-                                    รายการจอง
+                                        class="fa-solid fa-list-ul w-4 text-center {{ request()->routeIs('bookingcar.dashboard') ? 'text-red-600' : 'text-red-400 font-bold' }}"></i>
+                                    จัดการรายการจอง
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('bookingcar.report') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('bookingcar.report') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('bookingcar.report') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-700 hover:bg-red-50' }}">
                                     <i
-                                        class="fa-solid fa-chart-pie w-4 text-center {{ request()->routeIs('bookingcar.report') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                        class="fa-solid fa-chart-pie w-4 text-center {{ request()->routeIs('bookingcar.report') ? 'text-red-600' : 'text-red-400 font-bold' }}"></i>
                                     รายงาน
                                 </a>
                             </li>
                             <!-- <li class="border-t border-slate-50 my-1"></li> -->
                             <li>
                                 <a href="{{ route('backend.bookingcar.table') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('backend.bookingcar.table') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('backend.bookingcar.table') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-700 hover:bg-red-50' }}">
                                     <i
-                                        class="fa-solid fa-car-side w-4 text-center {{ request()->routeIs('backend.bookingcar.table') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                        class="fa-solid fa-car-side w-4 text-center {{ request()->routeIs('backend.bookingcar.table') ? 'text-red-600' : 'text-red-400 font-bold' }}"></i>
                                     จัดการข้อมูลรถ
                                 </a>
                             </li>

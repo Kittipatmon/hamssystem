@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\bookingcar\Vehicle;
 use App\Models\bookingcar\BookingCar;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 
 class BookingCarController extends Controller
@@ -239,6 +240,7 @@ class BookingCarController extends Controller
             'status' => 'รออนุมัติ',
             'return_status' => 'ยังไม่ส่งคืน',
             'approved_status' => 0,
+            'driver_request' => $request->has('driver_request') ? 1 : 0,
         ]);
 
         return redirect()->route('bookingcar.welcome')->with('success', 'ส่งคำร้องขอจองรถส่วนกลางเรียบร้อยแล้ว');
@@ -509,18 +511,56 @@ class BookingCarController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // Calculate stats (keeping global counts for the header cards)
+        // Calculate global stats for cards
         $totalBookings = BookingCar::count();
         $approvedBookings = BookingCar::where('status', 'อนุมัติแล้ว')->count();
         $pendingBookings = BookingCar::where('status', 'รออนุมัติ')->count();
         $rejectedBookings = BookingCar::where('status', 'ไม่อนุมัติ')->orWhere('status', 'ยกเลิก')->count();
+
+        // 1. Usage Trends (By Month - Current Year)
+        $usageMonthly = BookingCar::select(DB::raw('MONTH(created_at) as month'), DB::raw('count(*) as count'))
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->pluck('count', 'month');
+
+        $usageTrends = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $usageTrends[$m] = $usageMonthly[$m] ?? 0;
+        }
+
+        // 2. Usage by Vehicle (Top 5)
+        $vehicleUsage = BookingCar::select('vehicle_id', DB::raw('count(*) as count'))
+            ->with('vehicle')
+            ->groupBy('vehicle_id')
+            ->orderByDesc('count')
+            ->take(5)
+            ->get();
+
+        // 3. Top Destinations
+        $topDestinations = BookingCar::select('destination', DB::raw('count(*) as count'))
+            ->groupBy('destination')
+            ->orderByDesc('count')
+            ->take(5)
+            ->get();
+
+        // 4. Driver Stats
+        $driverStats = [
+            'requested' => BookingCar::where('driver_request', 1)->count(),
+            'self_drive' => BookingCar::where('driver_request', 0)->count(),
+        ];
 
         return view('bookingcar.report', compact(
             'totalBookings',
             'approvedBookings',
             'pendingBookings',
             'rejectedBookings',
-            'recentBookings'
+            'recentBookings',
+            'usageTrends',
+            'vehicleUsage',
+            'topDestinations',
+            'driverStats'
         ));
     }
 
@@ -536,7 +576,16 @@ class BookingCarController extends Controller
 
         $booking = BookingCar::with(['user', 'vehicle'])->findOrFail($id);
         $vehicles = Vehicle::where('status', 1)->get();
-        return view('bookingcar.edit', compact('booking', 'vehicles'));
+
+        $jsonPath = storage_path('app/thailand_geography.json');
+        $provinces = [];
+        if (file_exists($jsonPath)) {
+            $geoData = json_decode(file_get_contents($jsonPath), true);
+            $provinces = array_keys($geoData);
+            sort($provinces);
+        }
+
+        return view('bookingcar.edit', compact('booking', 'vehicles', 'provinces'));
     }
 
     public function update(Request $request, $id)

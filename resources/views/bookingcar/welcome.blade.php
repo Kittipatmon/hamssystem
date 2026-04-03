@@ -196,10 +196,16 @@
                                         </div>
                                         <!-- Details Block -->
                                         <div class="flex-1 min-w-0 pr-16 md:pr-24">
-                                            <h4
-                                                class="text-sm md:text-md font-bold text-slate-800 mb-2 mt-1 truncate group-hover:text-red-600 transition-colors">
-                                                {{ $booking->vehicle->name ?? 'รถส่วนกลาง' }}
-                                            </h4>
+                                            <div class="flex items-center gap-2 mb-2 mt-1">
+                                                <h4 class="text-sm md:text-md font-black text-slate-800 truncate group-hover:text-red-600 transition-colors">
+                                                    {{ $booking->vehicle->name ?? 'รถส่วนกลาง' }}
+                                                </h4>
+                                                @if($booking->vehicle->model_name)
+                                                    <span class="badge badge-xs bg-slate-100 text-slate-500 border-none px-2 py-2 h-auto rounded font-bold">
+                                                        {{ $booking->vehicle->model_name }}
+                                                    </span>
+                                                @endif
+                                            </div>
 
                                             <div class="grid grid-cols-1 gap-y-1.5 gap-x-3">
                                                 <div class="text-xs md:text-sm flex items-start text-slate-600">
@@ -208,10 +214,25 @@
                                                         {{ ($booking->user->first_name ?? 'N/A') . ' ' . ($booking->user->last_name ?? '') }}</span>
                                                 </div>
                                                 <div class="text-xs md:text-sm flex items-start text-slate-600">
+                                                    <i class="fa-solid fa-briefcase w-4 mt-0.5 text-slate-400"></i>
+                                                    <span class="truncate ml-1"><strong>เจ้าของงาน:</strong> {{ $booking->requester_name ?? '-' }}</span>
+                                                </div>
+
+                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
+                                                    <i class="fa-solid fa-users w-4 mt-0.5 text-slate-400"></i>
+                                                    <span class="truncate ml-1"><strong>จำนวนผู้โดยสาร:</strong> {{ $booking->passenger_count ?? 1 }} คน</span>
+                                                </div>
+
+                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
                                                     <i class="fa-solid fa-location-dot w-4 mt-0.5 text-slate-400"></i>
                                                     <span class="truncate ml-1"
-                                                        title="{{ $booking->destination }}"><strong>ปลายทาง:</strong>
-                                                        {{ $booking->destination }}</span>
+                                                        title="{{ $booking->destination }} (อ.{{ $booking->district }} จ.{{ $booking->province }})">
+                                                        <strong>ปลายทาง:</strong>
+                                                        {{ $booking->destination }} 
+                                                        <span class="text-slate-400 font-medium">
+                                                            (อ.{{ $booking->district }} จ.{{ $booking->province }})
+                                                        </span>
+                                                    </span>
                                                 </div>
 
                                                 <div class="text-xs md:text-sm flex items-start text-slate-600">
@@ -279,16 +300,44 @@
                                     <div class="flex flex-col xl:flex-row gap-3 md:gap-4 xl:gap-5">
                                         <!-- Details Block -->
                                         <div class="flex-1 min-w-0 pr-16 md:pr-24">
-                                            <h4
-                                                class="text-sm md:text-md font-bold text-slate-800 mb-2 mt-1 truncate group-hover:text-emerald-600 transition-colors">
-                                                {{ $booking->vehicle->name ?? 'รถส่วนกลาง' }}
-                                            </h4>
+                                            <div class="flex items-center gap-2 mb-2 mt-1">
+                                                <h4 class="text-sm md:text-md font-black text-slate-800 truncate group-hover:text-emerald-600 transition-colors">
+                                                    {{ $booking->vehicle->name ?? 'รถส่วนกลาง' }}
+                                                </h4>
+                                                @if($booking->vehicle->model_name)
+                                                    <span class="badge badge-xs bg-slate-100 text-slate-500 border-none px-2 py-2 h-auto rounded font-bold">
+                                                        {{ $booking->vehicle->model_name }}
+                                                    </span>
+                                                @endif
+                                            </div>
 
                                             <div class="grid grid-cols-1 gap-y-1.5 gap-x-3">
                                                 <div class="text-xs md:text-sm flex items-start text-slate-600">
                                                     <i class="fa-solid fa-user-tie w-4 mt-0.5 text-slate-400"></i>
                                                     <span class="truncate ml-1"><strong>ผู้จอง:</strong>
                                                         {{ ($booking->user->first_name ?? 'N/A') . ' ' . ($booking->user->last_name ?? '') }}</span>
+                                                </div>
+                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
+                                                    <i class="fa-solid fa-briefcase w-4 mt-0.5 text-slate-400"></i>
+                                                    <span class="truncate ml-1"><strong>เจ้าของงาน:</strong> {{ $booking->requester_name ?? '-' }}</span>
+                                                </div>
+                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
+                                                    <i class="fa-solid fa-users w-4 mt-0.5 text-slate-400"></i>
+                                                    <span class="truncate ml-1 mr-4"><strong>จำนวนผู้โดยสาร:</strong> {{ $booking->passenger_count ?? 1 }} คน</span>
+                                                    <span class="badge badge-xs {{ $booking->driver_request ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-400 border-slate-100' }} rounded-lg font-bold px-2 py-2">
+                                                        <i class="fa-solid fa-steering-wheel mr-1"></i> {{ $booking->driver_request ? 'ขอพนักงานขับรถ' : 'ขับเอง' }}
+                                                    </span>
+                                                </div>
+                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
+                                                    <i class="fa-solid fa-location-dot w-4 mt-0.5 text-slate-400"></i>
+                                                    <span class="truncate ml-1"
+                                                        title="{{ $booking->destination }} (อ.{{ $booking->district }} จ.{{ $booking->province }})">
+                                                        <strong>ปลายทาง:</strong>
+                                                        {{ $booking->destination }} 
+                                                        <span class="text-slate-400 font-medium">
+                                                            (อ.{{ $booking->district }} จ.{{ $booking->province }})
+                                                        </span>
+                                                    </span>
                                                 </div>
                                                 <div class="text-xs md:text-sm flex items-start text-slate-600">
                                                     <i class="fa-solid fa-clock w-4 mt-0.5 text-slate-400"></i>
@@ -332,9 +381,6 @@
 
             <form action="{{ route('bookingcar.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-
-                <form action="{{ route('bookingcar.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
 
                     @if ($errors->any() && !$isReturnError)
                         <div
@@ -568,11 +614,21 @@
                             </div>
 
                             <!-- Participants -->
-                            <div class="form-control mb-1">
-                                <label class="label py-1"><span class="label-text font-semibold text-slate-700">จำนวนผู้โดยสาร (ท่าน)</span></label>
-                                <input type="number" name="passenger_count"
-                                    class="input input-sm input-bordered w-full text-[13px]" placeholder="ระบุจำนวนคน" min="1"
-                                    value="{{ old('passenger_count', 1) }}" />
+                            <div class="grid grid-cols-2 gap-3 mb-1">
+                                <div class="form-control">
+                                    <label class="label py-1"><span class="label-text font-semibold text-slate-700">จำนวนผู้โดยสาร (ท่าน)</span></label>
+                                    <input type="number" name="passenger_count"
+                                        class="input input-sm input-bordered w-full text-[13px]" placeholder="ระบุจำนวนคน" min="1"
+                                        value="{{ old('passenger_count', 1) }}" />
+                                </div>
+                                <div class="form-control">
+                                    <label class="label py-1"><span class="label-text font-semibold text-slate-700">พนักงานขับรถ</span></label>
+                                    <div class="flex items-center h-[36px] px-3 bg-white border border-slate-200 rounded-lg shadow-sm gap-2 mt-0.5">
+                                        <input type="checkbox" name="driver_request" id="driver_request" value="1" 
+                                            class="checkbox checkbox-xs checkbox-error" {{ old('driver_request') ? 'checked' : '' }} />
+                                        <label for="driver_request" class="text-[12px] font-bold text-red-600 cursor-pointer select-none">ต้องการพนักงานขับรถ</label>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
@@ -651,8 +707,9 @@
                     <div class="modal-action mt-6 pt-4 border-t border-slate-100 col-span-full">
                         <button type="button" class="btn btn-sm"
                             onclick="document.getElementById('booking_modal').close()">ยกเลิก</button>
-                        <button type="submit"
-                            class="btn btn-sm bg-gradient-to-r from-[#e53935] to-[#c62828] hover:from-[#d32f2f] hover:to-[#b71c1c] text-white border-0 shadow-[0_4px_10px_rgba(229,57,53,0.3)]">
+                        <button type="submit" id="submit_booking"
+                            class="btn btn-sm bg-gradient-to-r from-[#e53935] to-[#c62828] hover:from-[#d32f2f] hover:to-[#b71c1c] text-white border-0 shadow-[0_4px_10px_rgba(229,57,53,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>
                             <i class="fa-solid fa-paper-plane mr-1 text-[12px]"></i> เสนอใบคำร้องจองรถ
                         </button>
                     </div>
@@ -1619,7 +1676,18 @@
                     }
                 });
                 calendar.render();
+                
+                const ackCheckbox = document.getElementById('ack_return_info');
+                const submitBtn = document.getElementById('submit_booking');
+                
+                if (ackCheckbox && submitBtn) {
+                    // Initial state
+                    submitBtn.disabled = !ackCheckbox.checked;
 
+                    ackCheckbox.addEventListener('change', function() {
+                        submitBtn.disabled = !this.checked;
+                    });
+                }
             });
         </script>
 @endsection

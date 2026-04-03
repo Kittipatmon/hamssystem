@@ -427,474 +427,508 @@
 
 
     {{-- ============ SERVICES SECTION ============ --}}
-    <div class="bg-slate-50/70 border-y border-slate-100 mt-4">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-            <div id="services" class="scroll-mt-20 flex flex-col items-center mb-12 reveal">
+    <div class="relative py-24 bg-[#FAF7F2] overflow-hidden">
+        {{-- Decorative Glow --}}
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-50/50 rounded-full blur-3xl opacity-50"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+            <div id="services" class="scroll-mt-32 mb-16 reveal">
+                <div class="flex flex-col items-center text-center">
+                    <div class="inline-flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 mb-6 group hover:scale-105 transition-transform duration-500">
+                        <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-200 group-hover:rotate-12 transition-transform">
+                            <i class="fa-solid fa-layer-group text-lg"></i>
+                        </div>
+                        <span class="text-slate-900 font-black text-sm tracking-tight">HAMS Ecosystem</span>
+                    </div>
+                    <h2 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-6">
+                        งานสนับสนุน<span class="text-red-600">และบริการ</span>
+                    </h2>
+                    <p class="text-slate-500 text-lg font-medium max-w-2xl leading-relaxed">
+                        ยกระดับประสิทธิภาพการทำงานด้วยระบบสนับสนุนอัจฉริยะ <br class="hidden sm:block"> ครอบคลุมทุกความต้องการภายในองค์กร
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 reveal">
+                @php
+                    $services = [
+                        [
+                            'route' => route('items.itemsalllist'),
+                            'title' => 'ระบบเบิกอุปกรณ์สำนักงาน',
+                            'subtitle' => 'Asset & Supply Management',
+                            'description' => 'จัดการเบิกอุปกรณ์ ติดตามสถานะ และควบคุมสต็อกอัจฉริยะเพื่อความโปร่งใส',
+                            'image' => asset('images/welcome/servicehams.jpg'),
+                            'status' => 'พร้อมใช้งาน',
+                            'status_color' => 'emerald',
+                            'icon' => 'fa-box-open',
+                            'delay' => 'reveal-delay-1'
+                        ],
+                        [
+                            'route' => route('reservations.welcomemeeting'),
+                            'title' => 'ระบบจองห้องประชุม',
+                            'subtitle' => 'Meeting Room Booking',
+                            'description' => 'จองห้องประชุมออนไลน์ เช็คตารางเวลา และจัดการเครื่องอำนวยความสะดวก',
+                            'image' => asset('images/welcome/bookingmeet.jpg'),
+                            'status' => 'พร้อมใช้งาน',
+                            'status_color' => 'emerald',
+                            'icon' => 'fa-calendar-check',
+                            'delay' => 'reveal-delay-2'
+                        ],
+                        [
+                            'route' => route('bookingcar.welcome'),
+                            'title' => 'ระบบจองรถส่วนกลาง',
+                            'subtitle' => 'Smart Transportation',
+                            'description' => 'บริการจองรถยนต์ส่วนกลางสำหรับการปฏิบัติงาน ติดตามตำแหน่งและสถานะกนรใช้งาน',
+                            'image' => asset('images/welcome/bookingcar.jpg'),
+                            'status' => 'พร้อมใช้งาน',
+                            'status_color' => 'emerald',
+                            'icon' => 'fa-car-side',
+                            'delay' => 'reveal-delay-3'
+                        ],
+                        [
+                            'route' => route('housing.welcome'),
+                            'title' => 'ระบบบ้านพักพนักงาน',
+                            'subtitle' => 'Residence Management',
+                            'description' => 'บริหารจัดการสิทธิที่พักพนักงาน ตรวจสอบห้องว่าง และดำเนินการส่งมอบที่พัก',
+                            'image' => asset('images/welcome/residence.jpg'),
+                            'status' => 'พร้อมใช้งาน',
+                            'status_color' => 'emerald',
+                            'icon' => 'fa-building-user',
+                            'delay' => 'reveal-delay-1'
+                        ],
+                        [
+                            'route' => '#',
+                            'title' => 'ระบบแจ้งซ่อมบำรุง',
+                            'subtitle' => 'Maintenance Request',
+                            'description' => 'แจ้งซ่อมอุปกรณ์และอาคาร ติดตามคิวงาน และสรุปผลการดำเนินการ (เร็วๆ นี้)',
+                            'image' => asset('images/welcome/repairrequest.jpg'),
+                            'status' => 'เร็วๆ นี้',
+                            'status_color' => 'orange',
+                            'icon' => 'fa-tools',
+                            'delay' => 'reveal-delay-2',
+                            'upcoming' => true
+                        ],
+                    ];
+
+                    // Add Admin card if applicable
+                    if (Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648')) {
+                        $services[] = [
+                            'route' => route('backend.welcomedatamanage'),
+                            'title' => 'ระบบจัดการข้อมูลหลังบ้าน',
+                            'subtitle' => 'Central Data Control',
+                            'description' => 'ศูนย์ควบคุมข้อมูล Master Data พนักงาน อาคาร และการตั้งค่าระบบทั้งหมด',
+                            'image' => asset('images/welcome/data.png'),
+                            'status' => 'ผู้ดูแลระบบ',
+                            'status_color' => 'indigo',
+                            'icon' => 'fa-database',
+                            'delay' => 'reveal-delay-3'
+                        ];
+                    }
+                @endphp
+
+                @foreach($services as $svc)
+                    <div class="{{ $svc['delay'] }}">
+                        <a href="{{ $svc['route'] }}" 
+                           @if(isset($svc['upcoming'])) onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'ระบบส่วนนี้จะเปิดให้บริการในอนาคตอันใกล้.', 'warning'); return false;" @endif
+                           class="group relative block bg-white rounded-[2.5rem] p-4 shadow-2xl shadow-slate-200/40 border border-white hover:border-red-100 transition-all duration-500 hover:-translate-y-2 overflow-hidden h-full">
+                            
+                            {{-- Image Container --}}
+                            <div class="relative h-60 w-full overflow-hidden rounded-[2rem] mb-6">
+                                <img src="{{ $svc['image'] }}" alt="{{ $svc['title'] }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
+                                
+                                {{-- Status Pill --}}
+                                <div class="absolute top-6 right-6">
+                                    <span class="px-4 py-2 bg-white/90 backdrop-blur-md rounded-2xl shadow-lg text-[10px] font-black uppercase tracking-widest text-{{ $svc['status_color'] }}-600 border border-white/50">
+                                        {{ $svc['status'] }}
+                                    </span>
+                                </div>
+
+                                {{-- Icon Overlay --}}
+                                <div class="absolute bottom-6 left-6">
+                                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-white shadow-xl">
+                                        <i class="fa-solid {{ $svc['icon'] }} text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="px-3 pb-4">
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] @if($svc['status_color'] == 'indigo') text-indigo-500 @else text-red-600 @endif mb-2">{{ $svc['subtitle'] }}</p>
+                                <h3 class="text-xl font-black text-slate-900 mb-3 group-hover:text-red-600 transition-colors tracking-tight">{{ $svc['title'] }}</h3>
+                                <p class="text-slate-500 text-sm leading-relaxed font-medium line-clamp-2">{{ $svc['description'] }}</p>
+                                
+                                <div class="mt-8 flex items-center justify-end">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-red-50 group-hover:text-red-600 border border-slate-100 transition-all duration-300">
+                                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>    </div>
+
+    {{-- ============ POLICY & OPERATIONS SECTION ============ --}}
+    <div class="relative py-20 overflow-hidden">
+        <div class="absolute inset-0 bg-[#FDFBF7] -z-10"></div>
+        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-50"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex flex-col items-center mb-16 reveal">
                 <div class="flex items-center gap-4 group">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 text-red-600 shadow-sm border border-red-100 group-hover:rotate-12 transition-transform duration-300 shrink-0">
-                        <i class="fa-solid fa-grip-vertical text-xl"></i>
+                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white text-blue-600 shadow-xl shadow-blue-900/5 border border-slate-100 group-hover:rotate-6 transition-all duration-300 shrink-0">
+                        <i class="fa-solid fa-book-open text-2xl"></i>
                     </div>
                     <div class="relative">
                         <h2 class="text-4xl font-black text-slate-900 tracking-tight">
-                            งาน<span class="text-red-600">สนับสนุน</span>
+                            นโยบาย<span class="text-blue-600">และการ</span>ดำเนินงาน
                         </h2>
-                        <div class="absolute -bottom-2 left-0 w-full h-1 bg-red-600/10 rounded-full overflow-hidden">
-                            <div class="w-0 group-hover:w-full h-full bg-red-600 rounded-full wizz-transition"></div>
+                        <div class="absolute -bottom-2 left-0 w-full h-1 bg-blue-600/10 rounded-full overflow-hidden">
+                            <div class="w-0 group-hover:w-full h-full bg-blue-600 rounded-full wizz-transition"></div>
                         </div>
                     </div>
                 </div>
-                <p class="text-slate-500 max-w-2xl mx-auto text-lg font-medium mt-6 text-center">
-                    ระบบบริการสนับสนุนภายในองค์กร จัดการเบิกอุปกรณ์ จองห้องประชุม และบริการงานบ้านพัก
+                <p class="text-slate-500 max-w-2xl mx-auto text-lg font-medium mt-6 text-center leading-relaxed">
+                    ข้อกำหนด แนวทางปฏิบัติ และขั้นตอนการทำงานที่โปร่งใส <br class="hidden sm:block"> เพื่อมาตรฐานการบริการที่ยอดเยี่ยม
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-                {{-- Card 1 --}}
-                <a href="{{ route('items.itemsalllist') }}"
-                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block reveal reveal-delay-1">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ asset('images/welcome/servicehams.jpg') }}" alt="เบิกอุปกรณ์"
-                            class="w-full h-40 object-cover">
-                        <span
-                            class="absolute top-3 right-3 bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
-                            พร้อมใช้งาน
-                        </span>
-                    </div>
-                    <div class="p-4">
-                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบเบิกอุปกรณ์สำนักงาน</h3>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการเบิกอุปกรณ์ ติดตามสถานะและควบคุมสต็อก
-                        </p>
-                    </div>
-                </a>
-
-                {{-- Card 2 --}}
-                <a href="{{ route('reservations.welcomemeeting') }}"
-                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block reveal reveal-delay-2">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ asset('images/welcome/bookingmeet.jpg') }}" alt="จองห้องประชุม"
-                            class="w-full h-40 object-cover">
-                        <span
-                            class="absolute top-3 right-3 bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
-                            พร้อมใช้งาน
-                        </span>
-                    </div>
-                    <div class="p-4">
-                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบจองห้องประชุม</h3>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการจองห้องประชุม
-                            ติดตามสถานะและควบคุมการใช้งาน</p>
-                    </div>
-                </a>
-
-                {{-- Card 3 --}}
-                <a href="{{ route('bookingcar.welcome') }}"
-                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block reveal reveal-delay-3">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ asset('images/welcome/bookingcar.jpg') }}" alt="จองรถส่วนกลาง"
-                            class="w-full h-40 object-cover">
-                        <span
-                            class="absolute top-3 right-3 bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
-                            พร้อมใช้งาน
-                        </span>
-                    </div>
-                    <div class="p-4">
-                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบจองรถส่วนกลาง</h3>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการจองรถส่วนกลาง
-                            ติดตามสถานะและควบคุมการใช้งาน</p>
-                    </div>
-                </a>
-
-                {{-- Card 4 --}}
-                <a href="{{ route('housing.welcome') }}"
-                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block reveal reveal-delay-4">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ asset('images/welcome/residence.jpg') }}" alt="บ้านพัก"
-                            class="w-full h-40 object-cover">
-                        <span
-                            class="absolute top-3 right-3 bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
-                            พร้อมใช้งาน
-                        </span>
-                    </div>
-                    <div class="p-4">
-                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบบ้านพักพนักงาน</h3>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการบ้านพักพนักงาน
-                            ติดตามสถานะและควบคุมการใช้งาน</p>
-                    </div>
-                </a>
-
-                {{-- Card 5 --}}
-                <a onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'จะแจ้งให้ทราบในภายหลัง.', 'warning')"
-                    class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block cursor-pointer">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ asset('images/welcome/repairrequest.jpg') }}" alt="แจ้งซ่อม"
-                            class="w-full h-40 object-cover">
-                        <span
-                            class="absolute top-3 right-3 bg-orange-400 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
-                            เร็วๆ นี้
-                        </span>
-                    </div>
-                    <div class="p-4">
-                        <p class="text-[10px] text-red-400 font-semibold uppercase tracking-widest mb-1">บริการหลัก</p>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบแจ้งซ่อม</h3>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">จัดการแจ้งซ่อม
-                            ติดตามสถานะและควบคุมการดำเนินการ</p>
-                    </div>
-                </a>
-
-                {{-- Card 6: Admin --}}
-                @php
-                    $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
-                @endphp
-
-                @if($isHamsOrAdmin)
-                    <a href="{{ route('backend.welcomedatamanage') }}"
-                        class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block">
-                        <div class="relative overflow-hidden">
-                            <img src="{{ asset('images/welcome/data.png') }}" alt="จัดการข้อมูล"
-                                class="w-full h-40 object-cover">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Policy Section -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/50 border border-white/50 reveal reveal-left">
+                    <div class="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100/80">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-200">
+                            <i class="fa-solid fa-bullhorn text-xl"></i>
                         </div>
-                        <div class="p-4">
-                            <p class="text-[10px] text-indigo-400 font-semibold uppercase tracking-widest mb-1">บริการหลังบ้าน
-                            </p>
-                            <h3 class="text-sm font-bold text-slate-800 mb-1">ระบบจัดการข้อมูลทั่วไป</h3>
-                            <p class="text-[11px] text-slate-400 leading-relaxed">จัดการข้อมูลทั่วไป เช่น ข้อมูลพนักงาน อาคาร
-                                และอุปกรณ์</p>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 leading-tight">หมวดหมู่นโยบาย</h3>
+                            <p class="text-xs text-slate-400 font-medium tracking-wide uppercase mt-1">Corporate Policies & Guidelines</p>
                         </div>
-                    </a>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    {{-- ============ POLICY & OPERATIONS SECTION ============ --}}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <div class="flex flex-col items-center mb-16 reveal">
-            <div class="flex items-center gap-4 group">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 shadow-sm border border-blue-100 group-hover:rotate-12 transition-transform duration-300 shrink-0">
-                    <i class="fa-solid fa-book-open text-xl"></i>
-                </div>
-                <div class="relative">
-                    <h2 class="text-4xl font-black text-slate-900 tracking-tight">
-                        นโยบาย<span class="text-blue-600">และการ</span>ดำเนินงาน
-                    </h2>
-                    <div class="absolute -bottom-2 left-0 w-full h-1 bg-blue-600/10 rounded-full overflow-hidden">
-                        <div class="w-0 group-hover:w-full h-full bg-blue-600 rounded-full wizz-transition"></div>
                     </div>
-                </div>
-            </div>
-            <p class="text-slate-500 max-w-2xl mx-auto text-lg font-medium mt-6 text-center">
-                ข้อกำหนด แนวทางปฏิบัติ และขั้นตอนการทำงานที่โปร่งใสภายในองค์กร
-            </p>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Policy Section -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 reveal reveal-left">
-                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-bullhorn text-blue-600 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-blue-900 leading-tight">หมวดหมู่นโยบาย</h3>
-                        <p class="text-[11px] text-slate-400">ข้อกำหนดและแนวทางปฏิบัติขององค์กร</p>
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    @forelse($policies as $policy)
-                        <div
-                            class="bg-blue-50/50 rounded-xl p-4 border border-blue-100/50 hover:border-blue-200 transition-all">
-                            <div class="flex gap-3">
-                                <div
-                                    class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
-                                    {{ $loop->iteration }}
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="text-sm text-blue-900 font-bold mb-1">{{ $policy->title }}</h4>
-                                    <p class="text-[12px] text-blue-800/60 leading-relaxed">{{ $policy->content }}</p>
+                    <div class="space-y-4">
+                        @forelse($policies as $policy)
+                            <div class="group/card bg-white rounded-2xl p-5 border border-slate-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 relative overflow-hidden">
+                                <div class="absolute left-0 top-0 w-1 h-full bg-blue-600 opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+                                <div class="flex gap-5">
+                                    <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs shrink-0 group-hover/card:bg-blue-600 group-hover/card:text-white transition-colors mt-0.5">
+                                        {{ $loop->iteration }}
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-[15px] text-slate-800 font-bold mb-1.5 group-hover/card:text-blue-700 transition-colors">{{ $policy->title }}</h4>
+                                        <p class="text-[13px] text-slate-500 leading-relaxed font-medium">{{ $policy->content }}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    @empty
-                        <p class="text-center text-slate-400 py-8 italic text-sm">ยังไม่มีข้อมูลนโยบาย</p>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Operations Section -->
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 reveal reveal-right">
-                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-clipboard-list text-emerald-600 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-emerald-900 leading-tight">หมวดหมู่การดำเนินงาน</h3>
-                        <p class="text-[11px] text-slate-400">ขั้นตอนและแนวทางการปฏิบัติงาน</p>
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    @forelse($operations as $op)
-                        <div
-                            class="bg-emerald-50/50 rounded-xl p-4 border border-emerald-100/50 hover:border-emerald-200 transition-all">
-                            <div class="flex gap-3">
-                                <div
-                                    class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
-                                    {{ $loop->iteration }}
+                        @empty
+                            <div class="text-center py-12">
+                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-slate-200">
+                                    <i class="fa-solid fa-folder-open text-slate-300 text-2xl"></i>
                                 </div>
-                                <div class="flex-1">
-                                    <h4 class="text-sm text-emerald-900 font-bold mb-1">{{ $op->title }}</h4>
-                                    <p class="text-[12px] text-emerald-800/60 leading-relaxed">{{ $op->content }}</p>
+                                <p class="text-slate-400 italic text-sm">ยังไม่มีข้อมูลนโยบาย</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Operations Section -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/50 border border-white/50 reveal reveal-right mt-8 lg:mt-0">
+                    <div class="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100/80">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-200">
+                            <i class="fa-solid fa-clipboard-list text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 leading-tight">หมวดหมู่การดำเนินงาน</h3>
+                            <p class="text-xs text-slate-400 font-medium tracking-wide uppercase mt-1">Operational Procedures</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        @forelse($operations as $op)
+                            <div class="group/card bg-white rounded-2xl p-5 border border-slate-100 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-300 relative overflow-hidden">
+                                <div class="absolute left-0 top-0 w-1 h-full bg-emerald-600 opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+                                <div class="flex gap-5">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs shrink-0 group-hover/card:bg-emerald-600 group-hover/card:text-white transition-colors mt-0.5">
+                                        {{ $loop->iteration }}
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-[15px] text-slate-800 font-bold mb-1.5 group-hover/card:text-emerald-700 transition-colors">{{ $op->title }}</h4>
+                                        <p class="text-[13px] text-slate-500 leading-relaxed font-medium">{{ $op->content }}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    @empty
-                        <p class="text-center text-slate-400 py-8 italic text-sm">ยังไม่มีข้อมูลการดำเนินงาน</p>
-                    @endforelse
+                        @empty
+                            <div class="text-center py-12">
+                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-slate-200">
+                                    <i class="fa-solid fa-folder-open text-slate-300 text-2xl"></i>
+                                </div>
+                                <p class="text-slate-400 italic text-sm">ยังไม่มีข้อมูลการดำเนินงาน</p>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     {{-- ============ NEWS SECTION ============ --}}
-    <div class="bg-slate-50/70 border-y border-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-            <div id="news" class="scroll-mt-20 flex flex-col items-center mb-12 reveal">
-                <div class="flex items-center gap-4 group">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 text-red-600 shadow-sm border border-red-100 group-hover:rotate-12 transition-transform duration-300 shrink-0">
-                        <i class="fa-solid fa-newspaper text-xl"></i>
-                    </div>
-                    <div class="relative">
-                        <h2 class="text-4xl font-black text-slate-900 tracking-tight">
+    <div class="relative py-24 bg-[#FAF7F2] overflow-hidden">
+        {{-- Decorative background elements --}}
+        <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[#F3EEE5] to-transparent opacity-60"></div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-red-50 rounded-full blur-3xl opacity-50"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+            <div id="news" class="scroll-mt-32 mb-16 reveal">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div class="max-w-2xl">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="w-10 h-[2px] bg-red-600 rounded-full"></span>
+                            <span class="text-red-600 font-bold text-xs uppercase tracking-[0.2em]">Latest Updates</span>
+                        </div>
+                        <h2 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
                             ข่าวสารและ<span class="text-red-600">กิจกรรม</span>
                         </h2>
-                        <div class="absolute -bottom-2 left-0 w-full h-1 bg-red-600/10 rounded-full overflow-hidden">
-                            <div class="w-0 group-hover:w-full h-full bg-red-600 rounded-full wizz-transition"></div>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-slate-500 max-w-2xl mx-auto text-lg font-medium mt-6 text-center">
-                    ติดตามข้อมูลข่าวสาร ประชาสัมพันธ์ และกิจกรรมล่าสุดของหน่วยงาน HAMS
-                </p>
-                <div class="mt-8">
-                    <a href="{{ route('datamanage.news.newsalllist') }}"
-                        class="inline-flex items-center gap-2 bg-slate-900 hover:bg-red-600 text-white px-8 py-2 rounded-full font-bold shadow-lg shadow-slate-200 transition-all hover:scale-105 active:scale-95 group">
-                        ดูข้อมูลเพิ่มเติม 
-                        <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
-                    </a>
-                </div>
-            </div>
-
-@if(isset($news) && $news->count())
-    @php
-        $mainNews = $news->first();
-        $sideNews = $news->slice(1, 3);
-        
-        $processImages = function($item) {
-            $raw = $item->image_path ?? null;
-            if (is_string($raw)) {
-                $decoded = json_decode($raw, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    $paths = $decoded;
-                } elseif (trim($raw) !== '') {
-                    $paths = [$raw];
-                }
-            } elseif (is_array($raw)) {
-                $paths = $raw;
-            }
-            $p = $paths[0] ?? 'images/welcome/news1.jpg';
-            $p = str_replace('\\', '/', (string) $p);
-            return (preg_match('#^(https?:)?//#', $p) === 1) ? $p : asset(ltrim($p, '/'));
-        };
-    @endphp
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-20 reveal">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            {{-- MAIN FEATURE NEWS (LEFT) --}}
-            <div class="lg:col-span-7 group cursor-pointer" onclick="window.location.href='{{ route('datamanage.news.newsalllist') }}'">
-                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm transition-all duration-300 group-hover:shadow-md">
-                    <div class="relative overflow-hidden rounded-2xl mb-6">
-                        <img src="{{ $processImages($mainNews) }}" 
-                            alt="{{ $mainNews->title }}" 
-                            class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-700">
+                        <p class="text-slate-500 text-lg font-medium mt-4 leading-relaxed">
+                            ติดตามข้อมูลข่าวสาร ประชาสัมพันธ์ และกิจกรรมล่าสุดของหน่วยงาน HAMS <br class="hidden lg:block"> เพื่อไม่ให้พลาดทุกความเคลื่อนไหวสำคัญ
+                        </p>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3 line-clamp-2 leading-tight group-hover:text-red-600 transition-colors">
-                            {{ $mainNews->title }}
-                        </h3>
-                        <p class="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed">
-                            {{ strip_tags($mainNews->content) }}
-                        </p>
-                        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                            <div class="flex items-center gap-2 text-slate-400 text-xs font-medium">
-                                <i class="fa-regular fa-calendar-check"></i>
-                                {{ $mainNews->created_at->translatedFormat('d M Y') }}
-                            </div>
-                            <span class="text-slate-500 hover:text-red-600 font-bold text-sm tracking-tight transition-colors flex items-center gap-1">
-                                อ่านต่อ <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </span>
-                        </div>
+                        <a href="{{ route('datamanage.news.newsalllist') }}"
+                            class="inline-flex items-center gap-3 bg-white hover:bg-red-600 text-red-600 hover:text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-slate-200/50 border border-red-50 hover:border-red-600 transition-all duration-300 group hover:-translate-y-1">
+                            ดูข่าวสารทั้งหมด 
+                            <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            {{-- SIDEBAR NEWS LIST (RIGHT) --}}
-            <div class="lg:col-span-5 flex flex-col gap-6">
-                @foreach($sideNews as $item)
-                    <div class="group cursor-pointer flex gap-5 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:border-red-200" onclick="window.location.href='{{ route('datamanage.news.newsalllist') }}'">
-                        <div class="w-1/3 shrink-0 relative overflow-hidden rounded-xl h-24 sm:h-28">
-                            <img src="{{ $processImages($item) }}" 
-                                alt="{{ $item->title }}" 
-                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        </div>
-                        <div class="w-2/3 flex flex-col justify-between py-1">
-                            <h4 class="text-sm font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors mb-2">
-                                {{ $item->title }}
-                            </h4>
-                            <div class="flex items-center justify-between mt-auto">
-                                <div class="flex items-center gap-1.5 text-slate-400 text-[11px] font-medium">
-                                    <i class="fa-regular fa-calendar text-[10px]"></i>
-                                    {{ $item->created_at->translatedFormat('d M Y') }}
+            @if(isset($news) && $news->count())
+                @php
+                    $mainNews = $news->first();
+                    $sideNews = $news->slice(1, 3);
+                    
+                    $processImages = function($item) {
+                        $raw = $item->image_path ?? null;
+                        if (is_string($raw)) {
+                            $decoded = json_decode($raw, true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                $paths = $decoded;
+                            } elseif (trim($raw) !== '') {
+                                $paths = [$raw];
+                            }
+                        } elseif (is_array($raw)) {
+                            $paths = $raw;
+                        }
+                        $p = $paths[0] ?? 'images/welcome/news1.jpg';
+                        $p = str_replace('\\', '/', (string) $p);
+                        return (preg_match('#^(https?:)?//#', $p) === 1) ? $p : asset(ltrim($p, '/'));
+                    };
+                @endphp
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 reveal">
+                    {{-- MAIN FEATURE NEWS (LEFT) --}}
+                    <div class="lg:col-span-7">
+                        <div class="group cursor-pointer bg-white rounded-[2.5rem] p-4 shadow-2xl shadow-slate-200/40 border border-white transition-all duration-500 hover:-translate-y-2" 
+                             onclick="window.location.href='{{ route('datamanage.news.newsalllist') }}'">
+                            <div class="relative overflow-hidden rounded-[2rem] mb-8">
+                                <img src="{{ $processImages($mainNews) }}" 
+                                    alt="{{ $mainNews->title }}" 
+                                    class="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform duration-1000">
+                                <div class="absolute top-6 left-6">
+                                    <span class="bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full shadow-lg">New Featured</span>
                                 </div>
-                                <span class="text-slate-500 hover:text-red-600 font-bold text-[12px] tracking-tight transition-colors flex items-center gap-1">
-                                    อ่านต่อ <i class="fa-solid fa-chevron-right text-[9px]"></i>
-                                </span>
+                            </div>
+                            <div class="px-4 pb-4">
+                                <div class="flex items-center gap-3 text-slate-400 text-xs font-bold mb-4 uppercase tracking-widest">
+                                    <i class="fa-regular fa-calendar-check text-red-500"></i>
+                                    {{ $mainNews->created_at->translatedFormat('d M Y') }}
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+                                    <span>HAMS Administrator</span>
+                                </div>
+                                <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mb-4 line-clamp-2 leading-tight group-hover:text-red-600 transition-colors">
+                                    {{ $mainNews->title }}
+                                </h3>
+                                <p class="text-slate-500 text-base mb-8 line-clamp-3 leading-relaxed font-medium">
+                                    {{ strip_tags($mainNews->content) }}
+                                </p>
+                                <div class="flex items-center justify-between pt-6 border-t border-slate-50">
+                                    <span class="text-slate-900 group-hover:text-red-600 font-black text-sm tracking-tight transition-all flex items-center gap-2">
+                                        อ่านเนื้อหาฉบับเต็ม <i class="fa-solid fa-arrow-right-long transition-transform group-hover:translate-x-2"></i>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                @endforeach
 
-                {{-- Mobile only "View All" link integrated --}}
-                <div class="lg:hidden mt-4">
-                     <a href="{{ route('datamanage.news.newsalllist') }}"
-                        class="flex items-center justify-center gap-2 bg-slate-50 text-slate-600 py-3 rounded-xl border border-slate-100 font-bold text-sm">
-                        ดูข่าวสารทั้งหมด <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </a>
+                    {{-- SIDEBAR NEWS LIST (RIGHT) --}}
+                    <div class="lg:col-span-5 flex flex-col gap-8">
+                        @foreach($sideNews as $item)
+                            <div class="group cursor-pointer flex gap-6 bg-white/60 hover:bg-white p-4 rounded-3xl border border-transparent hover:border-white hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500" 
+                                 onclick="window.location.href='{{ route('datamanage.news.newsalllist') }}'">
+                                <div class="w-32 sm:w-40 shrink-0 relative overflow-hidden rounded-2xl aspect-square shadow-md">
+                                    <img src="{{ $processImages($item) }}" 
+                                        alt="{{ $item->title }}" 
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                </div>
+                                <div class="flex-1 flex flex-col justify-center py-1">
+                                    <div class="flex items-center gap-2 text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+                                        <i class="fa-regular fa-calendar text-red-500/60"></i>
+                                        {{ $item->created_at->translatedFormat('d M Y') }}
+                                    </div>
+                                    <h4 class="text-lg font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors mb-4">
+                                        {{ $item->title }}
+                                    </h4>
+                                    <span class="text-slate-400 group-hover:text-red-600 font-bold text-xs tracking-tight transition-colors flex items-center gap-2 mt-auto">
+                                        เพิ่มเติม <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        @if($sideNews->isEmpty())
+                            <div class="h-full flex items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] p-10">
+                                <p class="text-slate-400 font-medium italic text-center">คอยติดตามข่าวสารใหม่ๆ ได้ที่นี่เร็วๆ นี้</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-@else
-    <div class="text-center py-20 bg-slate-50/50">
-        <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200/50">
-            <i class="fa-solid fa-newspaper text-slate-300 text-3xl"></i>
-        </div>
-        <p class="text-slate-400 font-medium">ยังไม่มีข้อมูลข่าวสารในขณะนี้</p>
-    </div>
-@endif
+            @else
+                <div class="text-center py-24 reveal">
+                    <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-slate-200 border border-slate-50">
+                        <i class="fa-solid fa-newspaper text-slate-200 text-4xl"></i>
+                    </div>
+                    <p class="text-slate-400 font-bold text-xl">ยังไม่มีข้อมูลข่าวสารในขณะนี้</p>
+                    <p class="text-slate-300 font-medium mt-2">โปรดกลับมาเช็คใหม่อีกครั้งในภายหลัง</p>
+                </div>
+            @endif
         </div>
     </div>
 
     {{-- ============ ANNOUNCEMENT LIST SECTION ============ --}}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16 reveal">
-        <div id="announcements-list" class="scroll-mt-20 flex flex-col items-center mb-12">
-            <div class="flex items-center gap-4 group">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 text-red-600 shadow-sm border border-red-100 group-hover:rotate-12 transition-transform duration-300 shrink-0">
-                    <i class="fa-solid fa-bullhorn text-xl"></i>
-                </div>
-                <div class="relative">
-                    <h2 class="text-4xl font-black text-slate-900 tracking-tight">
-                        ประกาศ<span class="text-red-600">สำคัญ</span>
-                    </h2>
-                    <div class="absolute -bottom-2 left-0 w-full h-1 bg-red-600/10 rounded-full overflow-hidden">
-                        <div class="w-0 group-hover:w-full h-full bg-red-600 rounded-full wizz-transition"></div>
-                    </div>
-                </div>
-            </div>
-            <p class="text-slate-500 max-w-2xl mx-auto text-lg font-medium mt-6 text-center">
-                อัปเดตแจ้งเตือน ข้อมูลด่วน และประกาศสำคัญจากผู้บริหารและแผนก HAMS
-            </p>
-        </div>
+    <div class="relative py-28 bg-[#FAF7F2] overflow-hidden">
+        {{-- Abstract background patterns --}}
+        <div class="absolute inset-0 opacity-[0.015] pointer-events-none" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
 
-        @if(isset($announcements) && $announcements->count())
-            <div class="relative group/slider overflow-hidden px-4 md:px-12">
-                {{-- Navigation Buttons --}}
-                <button id="annPrevBtn" class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/80 backdrop-blur-md border border-slate-200 text-slate-400 hover:text-red-600 shadow-lg flex items-center justify-center transition-all opacity-0 group-hover/slider:opacity-100 lg:flex hidden">
-                    <i class="fa-solid fa-chevron-left text-lg"></i>
-                </button>
-                <button id="annNextBtn" class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/80 backdrop-blur-md border border-slate-200 text-slate-400 hover:text-red-600 shadow-lg flex items-center justify-center transition-all opacity-0 group-hover/slider:opacity-100 lg:flex hidden">
-                    <i class="fa-solid fa-chevron-right text-lg"></i>
-                </button>
-
-                {{-- Carousel Container --}}
-                <div id="announcementSlider" class="flex overflow-x-auto pb-10 scroll-hide snap-x snap-mandatory scroll-smooth gap-8 cursor-grab active:cursor-grabbing items-center min-h-[580px]">
-                    @foreach($announcements as $index => $ann)
-                        @php
-                            $annData = [
-                                "title" => $ann->title,
-                                "content" => $ann->content,
-                                "date" => $ann->published_date ? $ann->published_date->format('d/m/Y') : '-',
-                                "image" => $ann->image_path,
-                                "is_urgent" => $ann->is_urgent
-                            ];
-                        @endphp
-                        <div class="announcement-slide snap-center flex-shrink-0 transition-all duration-500 scale-90 opacity-40" data-original-index="{{ $index }}">
-                            <button onclick='handleCardClick(this, @json($annData))' 
-                                class="text-left bg-white rounded-[2.5rem] shadow-xl border border-slate-100 flex flex-col h-[520px] w-[340px] sm:w-[360px] overflow-hidden group/item cursor-pointer">
-                                
-                                {{-- Top: Image --}}
-                                <div class="h-56 w-full overflow-hidden bg-slate-50 relative pointer-events-none">
-                                    @if($ann->image_path)
-                                        <img src="{{ asset($ann->image_path) }}" class="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-700" alt="Preview">
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                                    @else
-                                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-                                            <i class="fa-solid fa-info-circle text-5xl text-slate-200"></i>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                {{-- Body: Text Content --}}
-                                <div class="p-10 flex flex-col flex-grow">
-                                    <div class="flex flex-col mb-5">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <span class="text-red-500 font-black text-[11px] tracking-widest uppercase">OFFICIAL NOTICE</span>
-                                            @if($ann->is_urgent)
-                                                <span class="px-2 py-0.5 bg-red-600 text-white text-[9px] font-black rounded-lg shadow-sm animate-pulse">เร่งด่วน</span>
-                                            @endif
-                                        </div>
-                                        <div class="flex items-center justify-end">
-                                            <time class="text-slate-400 text-[11px] font-bold ml-auto">{{ $ann->published_date ? $ann->published_date->format('d M Y') : '' }}</time>
-                                        </div>
-                                    </div>
-                                    
-                                    <h3 class="text-[1.25rem] font-extrabold text-slate-900 mb-4 line-clamp-2 leading-[1.3] group-hover/item:text-red-600 transition-colors tracking-tight">{{ $ann->title }}</h3>
-                                    <p class="text-slate-500 text-sm line-clamp-3 mb-8 flex-grow leading-[1.6]">{{ strip_tags($ann->content) }}</p>
-                                    
-                                    <div class="flex items-center justify-end pt-6 border-t border-slate-50">
-                                        <span class="text-red-600 text-[11px] font-black uppercase tracking-widest flex items-center gap-2 group-hover/item:gap-3 transition-all">
-                                            READ MORE <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </button>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+            <div id="announcements-list" class="scroll-mt-32 flex flex-col lg:flex-row lg:items-end justify-between mb-16 reveal gap-8">
+                <div class="max-w-2xl">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-14 h-14 rounded-2xl bg-white shadow-xl shadow-red-900/5 flex items-center justify-center border border-red-50 group-hover:rotate-6 transition-transform">
+                            <i class="fa-solid fa-bullhorn text-2xl text-red-600"></i>
                         </div>
-                    @endforeach
+                        <h2 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                            ประกาศ<span class="text-red-600">สำคัญ</span>
+                        </h2>
+                    </div>
+                    <p class="text-slate-500 text-lg font-medium leading-relaxed">
+                        อัปเดตแจ้งเตือน ข้อมูลด่วน และประกาศล่าสุดจากผู้บริหารและแผนก HAMS <br class="hidden lg:block"> เพื่อการสื่อสารที่รวดเร็วและทั่วถึงภายในองค์กร
+                    </p>
                 </div>
-
-                {{-- Slider Pagination Indicator --}}
-                <div class="flex items-center justify-center mt-4">
-                    <div class="bg-slate-100/50 backdrop-blur-sm px-6 py-2 rounded-full border border-slate-100 shadow-sm transition-all hover:bg-white hover:border-red-100">
-                        <span id="annCounter" class="text-slate-500 font-bold text-xs tracking-widest">
-                            <span class="text-red-600">1</span> / {{ $announcements->count() }}
+                
+                {{-- Custom Navigation Controls --}}
+                <div class="flex items-center gap-4">
+                    <div class="h-10 bg-white px-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                        <span id="annCounter" class="text-[13px] font-black tracking-widest text-slate-400">
+                            <span class="text-red-600">01</span> <span class="mx-1 text-slate-200">/</span> {{ $announcements->count() < 10 ? '0' : '' }}{{ $announcements->count() }}
                         </span>
                     </div>
+                    <div class="flex gap-2">
+                        <button id="annPrevBtn" class="w-12 h-12 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-100 hover:shadow-lg shadow-slate-200/50 flex items-center justify-center transition-all">
+                            <i class="fa-solid fa-arrow-left-long"></i>
+                        </button>
+                        <button id="annNextBtn" class="w-12 h-12 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-100 hover:shadow-lg shadow-slate-200/50 flex items-center justify-center transition-all">
+                            <i class="fa-solid fa-arrow-right-long"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-        @else
-            <div class="bg-slate-50/50 rounded-[3.5rem] border-2 border-dashed border-slate-200 p-24 text-center">
-                <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-sm">
-                    <i class="fa-solid fa-bullhorn text-4xl text-slate-200"></i>
-                </div>
-                <p class="text-slate-400 font-black text-xl uppercase tracking-widest leading-none">ยังไม่มีประกาศใหม่</p>
-                <p class="text-slate-300 text-sm mt-3">ระบบยังไม่มีรายการประกาศที่แสดงให้เห็นในขณะนี้</p>
-            </div>
-        @endif
-    </div>
 
+            @if(isset($announcements) && $announcements->count())
+                <div class="relative group/slider reveal">
+                    {{-- Carousel Container --}}
+                    <div id="announcementSlider" class="flex overflow-x-auto pb-12 scroll-hide snap-x snap-mandatory scroll-smooth gap-10 cursor-grab active:cursor-grabbing items-center min-h-[620px]">
+                        @foreach($announcements as $index => $ann)
+                            @php
+                                $annData = [
+                                    "title" => $ann->title,
+                                    "content" => $ann->content,
+                                    "date" => $ann->published_date ? $ann->published_date->format('d/m/Y') : '-',
+                                    "image" => $ann->image_path,
+                                    "is_urgent" => $ann->is_urgent
+                                ];
+                            @endphp
+                            <div class="announcement-slide snap-center flex-shrink-0 transition-all duration-700 scale-90 opacity-40 py-10" data-original-index="{{ $index }}">
+                                <button onclick='handleCardClick(this, @json($annData))' 
+                                    class="text-left bg-white rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-white flex flex-col h-[540px] w-[360px] sm:w-[400px] overflow-hidden group/item cursor-pointer transition-all duration-500 hover:border-red-100 active:scale-95">
+                                    
+                                    {{-- Top: Image with Overlays --}}
+                                    <div class="h-64 w-full overflow-hidden bg-slate-50 relative pointer-events-none">
+                                        @if($ann->image_path)
+                                            <img src="{{ asset($ann->image_path) }}" class="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-1000" alt="Preview">
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#FDFBF7] to-[#F3EEE5]">
+                                                <i class="fa-solid fa-bullhorn text-6xl text-red-100"></i>
+                                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                                            </div>
+                                        @endif
+
+                                        {{-- Official Badge --}}
+                                        <div class="absolute top-6 left-6">
+                                            <div class="bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-white/50 flex items-center gap-2">
+                                                <div class="w-1.5 h-1.5 rounded-full {{ $ann->is_urgent ? 'bg-red-500 animate-pulse' : 'bg-slate-300' }}"></div>
+                                                <span class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Official Notice</span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Urgent Tag --}}
+                                        @if($ann->is_urgent)
+                                            <div class="absolute top-6 right-6">
+                                                <div class="bg-red-600 text-white px-3 py-1.5 rounded-xl shadow-lg font-black text-[9px] uppercase tracking-tighter">Urgent</div>
+                                            </div>
+                                        @endif
+
+                                        {{-- Date over image --}}
+                                        <div class="absolute bottom-6 left-8">
+                                            <p class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Published On</p>
+                                            <p class="text-white text-sm font-black">{{ $ann->published_date ? $ann->published_date->format('d M Y') : '—' }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- Body: Text Content --}}
+                                    <div class="p-10 flex flex-col flex-grow">
+                                        <h3 class="text-2xl font-black text-slate-900 mb-5 line-clamp-2 leading-[1.25] group-hover/item:text-red-600 transition-colors tracking-tight">{{ $ann->title }}</h3>
+                                        <p class="text-slate-500 text-[15px] line-clamp-3 mb-8 flex-grow leading-[1.6] font-medium">{{ strip_tags($ann->content) }}</p>
+                                        
+                                        <div class="flex items-center justify-between pt-8 border-t border-slate-50 mt-auto">
+                                            <div class="flex -space-x-2">
+                                                <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">H</div>
+                                                <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200"></div>
+                                            </div>
+                                            <span class="text-slate-900 group-hover:text-red-600 font-black text-[13px] transition-all flex items-center gap-3">
+                                                อ่านรายละเอียด <i class="fa-solid fa-arrow-right-long transition-transform group-hover:translate-x-2"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @else
+                <div class="bg-white/50 backdrop-blur-sm rounded-[3.5rem] border-2 border-dashed border-slate-200 p-24 text-center reveal">
+                    <div class="w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-8 transition-transform hover:rotate-12">
+                        <i class="fa-solid fa-bullhorn text-4xl text-slate-200"></i>
+                    </div>
+                    <h3 class="text-slate-900 font-black text-2xl tracking-tight">ยังไม่มีประกาศล่าสุด</h3>
+                    <p class="text-slate-500 text-base mt-3 max-w-md mx-auto leading-relaxed">คอยติดตามการอัปเดตข้อมูลและประกาศสำคัญจากผู้บริหารได้ที่นี่เร็วๆ นี้</p>
+                </div>
+            @endif
+        </div>
+    </div>
     @push('scripts')
         <script>
             /**

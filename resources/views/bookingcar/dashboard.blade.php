@@ -365,36 +365,59 @@
                                         <i class="fa-solid fa-users text-[8px]"></i> {{ $item->passenger_count ?? 1 }} คน
                                     </span>
                                 </td>
-                                <td class="text-center px-1.5">
-                                    @php
-                                        $statusClass = match ($item->status) {
-                                            'อนุมัติแล้ว' => 'bg-emerald-500 text-white',
-                                            'รออนุมัติ' => 'bg-amber-400 text-white',
-                                            'ไม่อนุมัติ', 'ยกเลิก' => 'bg-red-500 text-white',
-                                            default => 'bg-slate-300 text-white'
-                                        };
-                                        $icon = match ($item->status) {
-                                            'อนุมัติแล้ว' => 'fa-circle-check',
-                                            'รออนุมัติ' => 'fa-circle-pause',
-                                            default => 'fa-circle-xmark'
-                                        };
-                                    @endphp
-                                    <span
-                                        class="badge badge-xs border-0 rounded-full px-2 py-1 h-auto font-bold gap-1 text-[9px] whitespace-nowrap {{ $statusClass }}">
-                                        {{ $item->status === 'อนุมัติแล้ว' ? 'รับทราบแล้ว' : ($item->status === 'รออนุมัติ' ? 'รอเนินการ' : $item->status) }}
-                                    </span>
+                                <td class="text-center px-1.5 py-3">
+                                    <div class="flex flex-col items-center gap-2">
+                                        @php
+                                            $statusClass = match ($item->status) {
+                                                'อนุมัติแล้ว' => 'bg-emerald-500 text-white',
+                                                'รออนุมัติ' => 'bg-amber-400 text-white',
+                                                'ไม่อนุมัติ', 'ยกเลิก' => 'bg-red-500 text-white',
+                                                default => 'bg-slate-300 text-white'
+                                            };
+                                        @endphp
+                                        <span
+                                            class="badge badge-xs border-0 rounded-full px-2 py-1 h-auto font-bold gap-1 text-[9px] whitespace-nowrap {{ $statusClass }}">
+                                            {{ $item->status === 'อนุมัติแล้ว' ? 'รับทราบแล้ว' : ($item->status === 'รออนุมัติ' ? 'รอเนินการ' : $item->status) }}
+                                        </span>
+
+                                        @if($item->status === 'รออนุมัติ')
+                                            <div class="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm no-print">
+                                                <form action="{{ route('bookingcar.approve', $item->booking_id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="อนุมัติแล้ว">
+                                                    <button type="submit" class="hover:bg-emerald-50 p-1.5 rounded transition-colors group" title="อนุมัติการจอง">
+                                                        <i class="fa-solid fa-check text-emerald-500 text-[10px]"></i>
+                                                    </button>
+                                                </form>
+                                                <div class="w-[1px] h-3 bg-slate-200 mx-0.5"></div>
+                                                <form action="{{ route('bookingcar.approve', $item->booking_id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="ไม่อนุมัติ">
+                                                    <button type="submit" class="hover:bg-red-50 p-1.5 rounded transition-colors group" title="ปฏิเสธการจอง">
+                                                        <i class="fa-solid fa-xmark text-red-500 text-[10px]"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="text-center px-2">
                                     @php
-                                        $retClass = match ($item->return_status) {
-                                            'ยังไม่ส่งคืน' => 'bg-amber-400 text-white',
-                                            'ส่งคืนแล้ว' => 'bg-green-500 text-white',
-                                            default => 'bg-slate-300 text-white'
-                                        };
+                                        $isInvalidStatus = in_array($item->status, ['ยกเลิก', 'ไม่อนุมัติ']);
+                                        $retClass = $isInvalidStatus 
+                                            ? 'bg-slate-200 text-slate-500' 
+                                            : match ($item->return_status) {
+                                                'ยังไม่ส่งคืน' => 'bg-amber-400 text-white',
+                                                'ส่งคืนแล้ว' => 'bg-green-500 text-white',
+                                                default => 'bg-slate-300 text-white'
+                                            };
+                                        $displayText = $isInvalidStatus ? '-' : $item->return_status;
                                     @endphp
                                     <span
                                         class="badge badge-xs border-0 rounded px-2 py-1.5 h-auto font-bold gap-1 text-[10px] whitespace-nowrap {{ $retClass }}">
-                                        {{ $item->return_status }}
+                                        {{ $displayText }}
                                     </span>
                                 </td>
                                 <td class="text-center px-2">

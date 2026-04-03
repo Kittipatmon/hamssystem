@@ -38,7 +38,8 @@ class BookingCar extends Model
         'status',
         'approved_by',
         'approved_status',
-        'approved_at'
+        'approved_at',
+        'driver_request'
     ];
 
     public function user()
