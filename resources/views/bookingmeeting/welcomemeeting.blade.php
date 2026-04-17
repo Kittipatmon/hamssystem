@@ -176,7 +176,7 @@
             <div class="form-control mb-1">
               <label class="label py-1"><span class="label-text font-semibold text-slate-700">ผู้จอง</span></label>
               <input type="text"
-                value="{{ Auth::user() ? Auth::user()->employee_code . ' - ' . Auth::user()->first_name . ' ' . Auth::user()->last_name : 'Guest' }}"
+                value="{{ Auth::user() ? Auth::user()->emp_code . ' - ' . Auth::user()->first_name . ' ' . Auth::user()->last_name : 'Guest' }}"
                 class="input input-sm input-bordered w-full bg-slate-200 text-slate-500 text-[13px]" readonly />
             </div>
 

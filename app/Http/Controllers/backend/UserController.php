@@ -16,18 +16,19 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with(['department', 'division', 'section', 'usertype']);
+        $query = User::with(['department', 'hamsPermission', 'hamsPermissionLatestLog.grantedBy'])
+            ->where('role', '!=', 'admin');
 
         // Filtering Logic
-        if ($request->filled('employee_code')) {
-            $query->where('employee_code', 'like', '%' . trim($request->employee_code) . '%');
+        if ($request->filled('emp_code')) {
+            $query->where('emp_code', 'like', '%' . trim($request->emp_code) . '%');
         }
         if ($request->filled('fullname')) {
             $search = trim($request->fullname);
             $query->where(function($q) use ($search) {
-                $q->where('first_name', 'like', '%' . $search . '%')
-                  ->orWhere('last_name', 'like', '%' . $search . '%')
-                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"]);
+                $q->where('firstname', 'like', '%' . $search . '%')
+                  ->orWhere('lastname', 'like', '%' . $search . '%')
+                  ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%$search%"]);
             });
         }
         if ($request->filled('position')) {
@@ -40,20 +41,12 @@ class UserController extends Controller
             $query->where('status', $request->status);
         }
         if ($request->filled('department')) {
-            $query->where('department_id', $request->department);
+            $query->where('dept_id', $request->department);
         }
-        if ($request->filled('division')) {
-            $query->where('division_id', $request->division);
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
         }
-        if ($request->filled('section')) {
-            $query->where('section_id', $request->section);
-        }
-        if ($request->filled('level_user')) {
-            $query->where('level_user', $request->level_user);
-        }
-        if ($request->filled('hr_status')) {
-            $query->where('hr_status', $request->hr_status);
-        }
+        // skip division/section filters as they don't exist in new schema
 
         $perPage = $request->get('per_page', 50);
         $users = $query->paginate($perPage);
@@ -63,9 +56,9 @@ class UserController extends Controller
         }
 
         $departments = Department::all();
-        $divisions = Division::all();
-        $sections = Section::all();
-        $userTypes = UserType::all();
+        $divisions = collect([]); // No divisions table in appkum_user
+        $sections = collect([]);  // No sections table in appkum_user
+        $userTypes = collect([]); // No user_types table in appkum_user
 
         return view('backend.users.index', compact('users', 'departments', 'divisions', 'sections', 'userTypes'));
     }
@@ -73,19 +66,20 @@ class UserController extends Controller
     public function create()
     {
         $departments = Department::all();
-        $divisions = Division::all();
-        $sections = Section::all();
-        $userTypes = UserType::all();
+        $divisions = collect([]);
+        $sections = collect([]);
+        $userTypes = collect([]);
         return view('backend.users.create', compact('departments', 'divisions', 'sections', 'userTypes'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'employee_code' => 'required|unique:userskml,employee_code',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            // Add other validations as needed
+            'emp_code' => 'required|unique:userkml2025.employees,emp_code',
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'role' => 'required|in:admin,staff',
+            'status' => 'required|in:active,resign',
         ]);
 
         $user = User::create($request->all());
@@ -99,7 +93,7 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = User::with(['department', 'division', 'section', 'usertype'])->findOrFail($id);
+        $user = User::with(['department'])->findOrFail($id);
         return view('backend.users.detail', compact('user'));
     }
 
@@ -107,15 +101,24 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $departments = Department::all();
-        $divisions = Division::all();
-        $sections = Section::all();
-        $userTypes = UserType::all();
+        $divisions = collect([]);
+        $sections = collect([]);
+        $userTypes = collect([]);
         return view('backend.users.edit', compact('user', 'departments', 'divisions', 'sections', 'userTypes'));
     }
 
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+        
+        $request->validate([
+            'emp_code' => 'required|unique:userkml2025.employees,emp_code,' . $id,
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'role' => 'required|in:admin,staff',
+            'status' => 'required|in:active,resign',
+        ]);
+
         $user->update($request->all());
 
         if ($request->ajax()) {
@@ -140,33 +143,83 @@ class UserController extends Controller
     public function profileUser()
     {
         $user = Auth::user();
-        $user->load(['department', 'division', 'section', 'usertype']);
+        $user->load(['department']);
         return view('backend.users.profile', compact('user'));
     }
 
     public function updateAvatar(Request $request)
     {
-        $request->validate([
-            'photo_user' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+        \Log::info('Update Avatar Started');
+        try {
+            $fileKey = $request->hasFile('avatar') ? 'avatar' : 'photo_user';
+            \Log::info('File Key: ' . $fileKey);
+            
+            $request->validate([
+                $fileKey => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        if ($request->hasFile('photo_user')) {
-            // Delete old photo if exists
-            if ($user->photo_user && file_exists(public_path($user->photo_user))) {
-                unlink(public_path($user->photo_user));
+            if ($request->hasFile($fileKey)) {
+                // Delete old photo if exists
+                if ($user->profile_pic && file_exists(public_path($user->profile_pic))) {
+                    @unlink(public_path($user->profile_pic));
+                }
+
+                $imageName = time() . '_' . $user->emp_code . '.' . $request->file($fileKey)->extension();
+                $request->file($fileKey)->move(public_path('images/users'), $imageName);
+                
+                $user->profile_pic = 'images/users/' . $imageName;
+                $user->save();
+
+                if ($request->ajax() || $request->expectsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'avatar_url' => asset($user->profile_pic),
+                        'message' => 'อัปเดตรูปประจำตัวสำเร็จแล้ว'
+                    ]);
+                }
+
+                return back()->with('success', 'อัปเดตรูปประจำตัวสำเร็จแล้ว');
             }
 
-            $imageName = time() . '_' . $user->employee_code . '.' . $request->photo_user->extension();
-            $request->photo_user->move(public_path('images/users'), $imageName);
-            
-            $user->photo_user = 'images/users/' . $imageName;
-            $user->save();
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'ถิดพลาดในการอัปเดตรูปประจำตัว']);
+            }
 
-            return back()->with('success', 'อัปเดตรูปประจำตัวสำเร็จแล้ว');
+            return back()->with('error', 'ถิดพลาดในการอัปเดตรูปประจำตัว');
+        } catch (\Exception $e) {
+            \Log::error('Avatar Upload Error: ' . $e->getMessage());
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+            }
+            return back()->with('error', 'Error: ' . $e->getMessage());
         }
+    }
 
-        return back()->with('error', 'ถิดพลาดในการอัปเดตรูปประจำตัว');
+    public function toggleHamsEditor(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $currentUser = Auth::user();
+
+        $permission = \App\Models\HamsPermission::firstOrCreate(['user_id' => $user->id]);
+        $oldValue = $permission->is_hams_editor ?? false;
+        $permission->is_hams_editor = !$oldValue;
+        $permission->save();
+
+        // Log the change
+        \App\Models\HamsPermissionLog::create([
+            'target_user_id' => $user->id,
+            'granted_by_user_id' => $currentUser->id,
+            'action' => $permission->is_hams_editor ? 'granted' : 'revoked'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'is_hams_editor' => $permission->is_hams_editor,
+            'grantor_name' => $currentUser->fullname,
+            'message' => 'ปรับปรุงสิทธิ์ HAMS Editor เรียบร้อยแล้ว'
+        ]);
     }
 }
+

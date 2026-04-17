@@ -123,8 +123,11 @@ class EmployeeHousingController extends Controller
         $recentLeaves = ResidenceLeave::with('user')
             ->orderBy('created_at', 'desc')->take(5)->get();
 
-        $residenceRooms = ResidenceRoom::with(['stays' => function ($q) {
-            $q->where('is_current', 1); }])->get();
+        $residenceRooms = ResidenceRoom::with([
+            'stays' => function ($q) {
+                $q->where('is_current', 1);
+            }
+        ])->get();
         $totalRooms = $residenceRooms->count();
         $availableRooms = 0;
         $occupiedRooms = 0;
@@ -160,7 +163,7 @@ class EmployeeHousingController extends Controller
                     ->where('created_at', '>=', $userActiveRequest->created_at)
                     ->orderBy('created_at', 'desc')
                     ->first();
-                
+
                 if (!$agreement) {
                     $needsAgreement = true;
                 } elseif ($agreement->send_status < 3) {
@@ -236,7 +239,7 @@ class EmployeeHousingController extends Controller
         $residences = Residence::all();
         $user = Auth::user();
         if ($user) {
-            $user->load(['department', 'division', 'section']);
+            $user->load(['department']);
         }
         return view('backend.housing.form.request_form', compact('residences', 'user'));
     }
@@ -318,6 +321,157 @@ class EmployeeHousingController extends Controller
 
         return redirect()->route('housing.welcome')->with('success', 'ส่งคำร้องขอเข้าพักบ้านพักเรียบร้อยแล้ว');
     }
+    public function editRequest($id)
+    {
+        $item = ResidenceRequest::with('dependents')->findOrFail($id);
+
+        // Security: only owner can edit if status is 4
+        if ($item->user_id !== Auth::id() || $item->send_status !== 4) {
+            return redirect()->route('housing.my_requests')->with('error', 'คุณไม่ได้รับอนุญาตให้แก้ไขรายการนี้');
+        }
+
+        $residences = Residence::all();
+        $user = Auth::user();
+        if ($user) {
+            $user->load(['department']);
+        }
+        return view('backend.housing.form.request_form', compact('residences', 'user', 'item'));
+    }
+
+    public function updateRequest(Request $request, $id)
+    {
+        $item = ResidenceRequest::findOrFail($id);
+
+        if ($item->user_id !== Auth::id() || $item->send_status !== 4) {
+            return redirect()->route('housing.my_requests')->with('error', 'คุณไม่ได้รับอนุญาตให้แก้ไขรายการนี้');
+        }
+
+        $request->validate([
+            'site' => 'required|string',
+            'title' => 'required|string',
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'position' => 'required|string',
+            'department' => 'required|string',
+            'section' => 'required|string',
+            'phone' => 'required|string',
+            'marital_status' => 'required|string',
+            'address_original' => 'required|string',
+            'residence_reason' => 'required|string',
+        ]);
+
+        $filePaths = json_decode($item->requests_file, true) ?? [];
+        if ($request->hasFile('requests_file')) {
+            // Optional: delete old files if desired, but here we just append or replace
+            // For simplicity, let's replace if new files are uploaded
+            $filePaths = [];
+            foreach ($request->file('requests_file') as $file) {
+                $filename = time() . '_' . uniqid() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+                $file->move(public_path('uploads/housing_requests'), $filename);
+                $filePaths[] = $filename;
+            }
+        }
+
+        $item->update([
+            'site' => $request->site,
+            'title' => $request->title,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'position' => $request->position,
+            'department' => $request->department,
+            'section' => $request->section,
+            'age_work' => $request->age_work,
+            'phone' => $request->phone,
+            'marital_status' => $request->marital_status,
+            'address_original' => $request->address_original,
+            'address_original_subdistrict' => $request->address_original_subdistrict,
+            'address_original_district' => $request->address_original_district,
+            'address_original_province' => $request->address_original_province,
+            'address_current' => $request->address_current,
+            'address_current_subdistrict' => $request->address_current_subdistrict,
+            'address_current_district' => $request->address_current_district,
+            'address_current_province' => $request->address_current_province,
+            'current_house_type' => $request->current_house_type,
+            'spouse_name' => $request->spouse_name,
+            'spouse_occupation' => $request->spouse_occupation,
+            'spouse_phone' => $request->spouse_phone,
+            'workplace_spouse' => $request->workplace_spouse,
+            'number_of_residents' => $request->number_of_residents,
+            'residence_reason' => $request->residence_reason,
+            'requests_file' => !empty($filePaths) ? json_encode($filePaths) : $item->requests_file,
+            'send_status' => 0, // Reset status to pending
+        ]);
+
+        // Sync dependents
+        ResidenceDependent::where('request_id', $item->id)->delete();
+        if ($request->has('dep_name')) {
+            foreach ($request->dep_name as $i => $name) {
+                if (!empty($name)) {
+                    ResidenceDependent::create([
+                        'request_id' => $item->id,
+                        'full_name' => $name,
+                        'age' => $request->dep_age[$i] ?? null,
+                        'relation' => $request->dep_relation[$i] ?? null,
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('housing.my_requests')->with('success', 'แก้ไขคำร้องขอเข้าพักเรียบร้อยแล้ว');
+    }
+    public function editAgreement($id)
+    {
+        $item = ResidenceAgreement::findOrFail($id);
+        if ($item->user_id !== Auth::id() || $item->send_status !== 4) {
+            return redirect()->route('housing.my_requests')->with('error', 'คุณไม่ได้รับอนุญาตให้แก้ไขรายการนี้');
+        }
+
+        $residences = Residence::all();
+        $user = Auth::user();
+        $userStay = null;
+        $userRequest = null;
+
+        if ($user) {
+            $user->load(['department']);
+            $userStay = ResidenceStay::with(['room.residence'])
+                ->where('residence_resident_id', $user->id)
+                ->where('is_current', 1)
+                ->first();
+            $userRequest = ResidenceRequest::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
+        return view('backend.housing.form.agreement_form', compact('residences', 'user', 'userStay', 'userRequest', 'item'));
+    }
+
+    public function updateAgreement(Request $request, $id)
+    {
+        $item = ResidenceAgreement::findOrFail($id);
+        if ($item->user_id !== Auth::id() || $item->send_status !== 4) {
+            return redirect()->route('housing.my_requests')->with('error', 'คุณไม่ได้รับอนุญาตให้แก้ไขรายการนี้');
+        }
+
+        $request->validate([
+            'title' => 'required|string',
+            'full_name' => 'required|string',
+            'position' => 'required|string',
+            'department' => 'required|string',
+        ]);
+
+        $item->update([
+            'title' => $request->title,
+            'full_name' => $request->full_name,
+            'position' => $request->position,
+            'department' => $request->department,
+            'section' => $request->section,
+            'residence_address' => $request->residence_address,
+            'residence_floor' => $request->residence_floor,
+            'number_of_residents' => $request->number_of_residents,
+            'send_status' => 0,
+        ]);
+
+        return redirect()->route('housing.my_requests')->with('success', 'แก้ไขข้อตกลงเข้าพักเรียบร้อยแล้ว');
+    }
 
     public function exportRequestPdf($id)
     {
@@ -372,7 +526,7 @@ class EmployeeHousingController extends Controller
         $userStay = null;
 
         if ($user) {
-            $user->load(['department', 'division', 'section']);
+            $user->load(['department']);
 
             // Check for current stay to auto-fill
             $userStay = ResidenceStay::with(['room.residence'])
@@ -423,10 +577,24 @@ class EmployeeHousingController extends Controller
     {
         $residences = Residence::all();
         $user = Auth::user();
+        $userStay = null;
+        $userRequest = null;
+
         if ($user) {
-            $user->load(['department', 'division', 'section']);
+            $user->load(['department']);
+
+            // Get current stay to pre-fill room number
+            $userStay = ResidenceStay::with(['room.residence'])
+                ->where('residence_resident_id', $user->id)
+                ->where('is_current', 1)
+                ->first();
+
+            // Get latest housing request for personal details (Position, Dept, Section)
+            $userRequest = ResidenceRequest::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
         }
-        return view('backend.housing.form.guest_form', compact('residences', 'user'));
+        return view('backend.housing.form.guest_form', compact('residences', 'user', 'userStay', 'userRequest'));
     }
 
     public function storeGuest(Request $request)
@@ -478,12 +646,95 @@ class EmployeeHousingController extends Controller
                         'full_name' => $name,
                         'age' => $request->guest_age[$i] ?? null,
                         'relation' => $request->guest_relation[$i] ?? null,
+                        'phone' => $request->guest_phone[$i] ?? null,
                     ]);
                 }
             }
         }
 
         return redirect()->route('housing.welcome')->with('success', 'ส่งคำขอนำญาติเข้าพักเรียบร้อยแล้ว');
+    }
+    public function editGuest($id)
+    {
+        $item = ResidentGuestRequest::with('members')->findOrFail($id);
+        if ($item->user_id !== Auth::id() || $item->send_status !== 4) {
+            return redirect()->route('housing.my_requests')->with('error', 'คุณไม่ได้รับอนุญาตให้แก้ไขรายการนี้');
+        }
+
+        $residences = Residence::all();
+        $user = Auth::user();
+        $userStay = null;
+        $userRequest = null;
+
+        if ($user) {
+            $user->load(['department']);
+            $userStay = ResidenceStay::with(['room.residence'])
+                ->where('residence_resident_id', $user->id)
+                ->where('is_current', 1)
+                ->first();
+            $userRequest = ResidenceRequest::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
+        return view('backend.housing.form.guest_form', compact('residences', 'user', 'userStay', 'userRequest', 'item'));
+    }
+
+    public function updateGuest(Request $request, $id)
+    {
+        $item = ResidentGuestRequest::findOrFail($id);
+        if ($item->user_id !== Auth::id() || $item->send_status !== 4) {
+            return redirect()->route('housing.my_requests')->with('error', 'คุณไม่ได้รับอนุญาตให้แก้ไขรายการนี้');
+        }
+
+        $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'residence_type' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required',
+        ]);
+
+        $startDate = Carbon::parse($request->start_date);
+        $endDate = Carbon::parse($request->end_date);
+        $totalDays = $startDate->diffInDays($endDate) + 1;
+
+        $item->update([
+            'prefix' => $request->prefix,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'position' => $request->position,
+            'department' => $request->department,
+            'section' => $request->section,
+            'residence_type' => $request->residence_type,
+            'room_number' => $request->room_number,
+            'relationship' => $request->relationship,
+            'start_date' => $request->start_date,
+            'start_time' => $request->start_time,
+            'end_date' => $request->end_date,
+            'end_time' => $request->end_time,
+            'total_days' => $totalDays,
+            'send_status' => 0,
+        ]);
+
+        // Sync guest members
+        ResidentGuestMember::where('guest_request_id', $item->resident_guest_id)->delete();
+        if ($request->has('guest_name')) {
+            foreach ($request->guest_name as $i => $name) {
+                if (!empty($name)) {
+                    ResidentGuestMember::create([
+                        'guest_request_id' => $item->resident_guest_id,
+                        'full_name' => $name,
+                        'age' => $request->guest_age[$i] ?? null,
+                        'relation' => $request->guest_relation[$i] ?? null,
+                        'phone' => $request->guest_phone[$i] ?? null,
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('housing.my_requests')->with('success', 'แก้ไขคำขอนำญาติเข้าพักเรียบร้อยแล้ว');
     }
 
     // ==================== LEAVE/MOVE-OUT REQUEST ====================
@@ -492,20 +743,38 @@ class EmployeeHousingController extends Controller
         $residences = Residence::all();
         $user = Auth::user();
         $currentStay = null;
+        $snapshot = null;
 
         if ($user) {
-            $user->load(['department', 'division', 'section']);
+            $user->load(['department']);
             $currentStay = ResidenceStay::with('room.residence')
                 ->where('residence_resident_id', $user->id)
                 ->where('is_current', 1)
                 ->first();
+
+            // Try to find the latest snapshot from Agreement or Request
+            $latestAgreement = ResidenceAgreement::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($latestAgreement) {
+                $snapshot = $latestAgreement;
+            } else {
+                $latestRequest = ResidenceRequest::where('user_id', $user->id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                if ($latestRequest) {
+                    $snapshot = $latestRequest;
+                }
+            }
         }
-        return view('backend.housing.form.leave_form', compact('residences', 'user', 'currentStay'));
+        return view('backend.housing.form.leave_form', compact('residences', 'user', 'currentStay', 'snapshot'));
     }
 
     public function storeLeave(Request $request)
     {
         $request->validate([
+            'prefix' => 'nullable|string',
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'residence_type' => 'required|string',
@@ -522,7 +791,7 @@ class EmployeeHousingController extends Controller
             'user_id' => Auth::id(),
             'residence_room_id' => $request->residence_room_id,
             'request_date' => now()->toDateString(),
-            'prefix' => $request->prefix,
+            'prefix' => $request->prefix ?: (Auth::user()->prefix ?? '-'),
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'position' => $request->position,
@@ -537,6 +806,78 @@ class EmployeeHousingController extends Controller
         ]);
 
         return redirect()->route('housing.welcome')->with('success', 'ส่งคำร้องขอย้ายออกเรียบร้อยแล้ว');
+    }
+    public function editLeave($id)
+    {
+        $item = ResidenceLeave::findOrFail($id);
+        if ($item->user_id !== Auth::id() || $item->send_status !== 4) {
+            return redirect()->route('housing.my_requests')->with('error', 'คุณไม่ได้รับอนุญาตให้แก้ไขรายการนี้');
+        }
+
+        $residences = Residence::all();
+        $user = Auth::user();
+        $currentStay = null;
+        $snapshot = null;
+
+        if ($user) {
+            $user->load(['department']);
+            $currentStay = ResidenceStay::with('room.residence')
+                ->where('residence_resident_id', $user->id)
+                ->where('is_current', 1)
+                ->first();
+
+            $latestAgreement = ResidenceAgreement::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($latestAgreement) {
+                $snapshot = $latestAgreement;
+            } else {
+                $latestRequest = ResidenceRequest::where('user_id', $user->id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                if ($latestRequest) {
+                    $snapshot = $latestRequest;
+                }
+            }
+        }
+        return view('backend.housing.form.leave_form', compact('residences', 'user', 'currentStay', 'snapshot', 'item'));
+    }
+
+    public function updateLeave(Request $request, $id)
+    {
+        $item = ResidenceLeave::findOrFail($id);
+        if ($item->user_id !== Auth::id() || $item->send_status !== 4) {
+            return redirect()->route('housing.my_requests')->with('error', 'คุณไม่ได้รับอนุญาตให้แก้ไขรายการนี้');
+        }
+
+        $request->validate([
+            'prefix' => 'nullable|string',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'residence_type' => 'required|string',
+            'room_number' => 'required|string',
+            'move_out_date' => 'required|date',
+            'reason' => 'required|string',
+        ]);
+
+        $item->update([
+            'residence_room_id' => $request->residence_room_id,
+            'prefix' => $request->prefix ?: (Auth::user()->prefix ?? '-'),
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'position' => $request->position,
+            'department' => $request->department,
+            'section' => $request->section,
+            'residence_type' => $request->residence_type,
+            'room_number' => $request->room_number,
+            'floor' => $request->floor,
+            'move_out_date' => $request->move_out_date,
+            'reason' => $request->reason,
+            'send_status' => 0,
+        ]);
+
+        return redirect()->route('housing.my_requests')->with('success', 'แก้ไขคำร้องขอย้ายออกเรียบร้อยแล้ว');
     }
 
     // ==================== MANAGEMENT TABLE ====================
@@ -588,7 +929,11 @@ class EmployeeHousingController extends Controller
             $repairs->where('status', $statusVal);
         }
 
-        $approvers = User::where('status', '0')->where('level_user', '>=', '2')->get();
+        $approvers = User::with(['department'])
+            ->where('firstname', 'not like', '%System%')
+            ->where('firstname', 'not like', '%ICT%')
+            ->orderBy('firstname', 'asc')
+            ->get();
 
         return view('backend.housing.management', [
             'tab' => $tab,
@@ -607,7 +952,7 @@ class EmployeeHousingController extends Controller
             'type' => 'required|string',
             'id' => 'required|integer',
             'approver_level' => 'required|string', // commander, manager, committee
-            'approver_id' => 'required|integer',
+            'approver_id' => 'nullable|integer',
         ]);
 
         switch ($request->type) {
@@ -637,11 +982,51 @@ class EmployeeHousingController extends Controller
         }
 
         if ($column) {
-            $item->update([$column => $request->approver_id]);
+            $item->update([$column => $request->approver_id ?: null]);
             return response()->json(['success' => true]);
         }
 
         return response()->json(['success' => false]);
+    }
+
+    public function updateAllApprovers(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|string',
+            'id' => 'required|integer',
+            'commander_id' => 'nullable|integer',
+            'managerhams_id' => 'nullable|integer',
+            'Committee_id' => 'nullable|integer',
+        ]);
+
+        switch ($request->type) {
+            case 'request':
+                $item = ResidenceRequest::findOrFail($request->id);
+                break;
+            case 'agreement':
+                $item = ResidenceAgreement::findOrFail($request->id);
+                break;
+            case 'guest':
+                $item = ResidentGuestRequest::findOrFail($request->id);
+                break;
+            case 'leave':
+                $item = ResidenceLeave::findOrFail($request->id);
+                break;
+            default:
+                return response()->json(['success' => false, 'message' => 'Invalid type']);
+        }
+
+        $updates = [
+            'managerhams_id' => $request->managerhams_id ?: null,
+            'Committee_id' => $request->Committee_id ?: null,
+        ];
+
+        if ($request->type !== 'leave') {
+            $updates['commander_id'] = $request->commander_id ?: null;
+        }
+
+        $item->update($updates);
+        return response()->json(['success' => true]);
     }
 
     public function assignRoom(Request $request)
@@ -784,13 +1169,16 @@ class EmployeeHousingController extends Controller
                 $item = ResidenceRequest::with(['user', 'dependents'])->findOrFail($id);
                 break;
             case 'agreement':
-                $item = ResidenceAgreement::with('user')->findOrFail($id);
+                $item = ResidenceAgreement::with(['user', 'commander', 'managerHams', 'committee'])->findOrFail($id);
+                $item->latestReq = ResidenceRequest::where('user_id', $item->user_id)->orderBy('created_at', 'desc')->first();
                 break;
             case 'guest':
-                $item = ResidentGuestRequest::with(['user', 'members'])->findOrFail($id);
+                $item = ResidentGuestRequest::with(['user', 'members', 'commander', 'managerHams', 'committee'])->findOrFail($id);
+                $item->latestReq = ResidenceRequest::where('user_id', $item->user_id)->orderBy('created_at', 'desc')->first();
                 break;
             case 'leave':
-                $item = ResidenceLeave::with('user')->findOrFail($id);
+                $item = ResidenceLeave::with(['user', 'managerHams', 'committee'])->findOrFail($id);
+                $item->latestReq = ResidenceRequest::where('user_id', $item->user_id)->orderBy('created_at', 'desc')->first();
                 break;
             default:
                 abort(404);
@@ -848,7 +1236,7 @@ class EmployeeHousingController extends Controller
     public function approve(Request $request, $type, $id)
     {
         $request->validate([
-            'action' => 'required|in:approve,reject',
+            'action' => 'required|in:approve,reject,correct',
             'comment' => 'nullable|string',
         ]);
 
@@ -875,7 +1263,40 @@ class EmployeeHousingController extends Controller
         }
 
         $currentStatus = $item->send_status;
-        $approvalStatus = ($action === 'approve') ? 1 : 2;
+
+        // --- Custom Authorization Check ---
+        // 1. Check if user has HAMS management rights
+        $user = Auth::user();
+        $isHams = ($user->role === 'admin' || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor);
+
+        // 2. Determine who should be the assigned approver for this specific step
+        $assignedApproverId = null;
+        if ($type === 'leave') {
+            if ($currentStatus == 0) $assignedApproverId = $item->managerhams_id;
+            elseif ($currentStatus == 2) $assignedApproverId = $item->Committee_id;
+        } else {
+            if ($currentStatus == 0) $assignedApproverId = $item->commander_id;
+            elseif ($currentStatus == 1) $assignedApproverId = $item->managerhams_id;
+            elseif ($currentStatus == 2) $assignedApproverId = $item->Committee_id;
+        }
+
+        // 3. Block if NOT HAMS and NOT the assigned approver
+        if (!$isHams && $userId != $assignedApproverId) {
+            $msg = 'ขออภัย คุณไม่ได้รับอนุญาตให้ดำเนินการในขั้นตอนนี้ (ต้องเป็นผู้อนุมัติที่ได้รับมอบหมายหรือเจ้าหน้าที่ HAMS)';
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 403);
+            }
+            return back()->with('error', $msg);
+        }
+        // ----------------------------------
+
+        // Map actions to internal status codes for the current approver level
+        // 1 = Approved, 2 = Rejected (Final), 4 = Correction Required
+        $approvalStatus = 1;
+        if ($action === 'reject')
+            $approvalStatus = 2;
+        if ($action === 'correct')
+            $approvalStatus = 4;
 
         // Determine which level to update based on current send_status
         if ($currentStatus == 0 && in_array($type, ['request', 'agreement', 'guest'])) {
@@ -884,7 +1305,7 @@ class EmployeeHousingController extends Controller
             $item->commander_status = $approvalStatus;
             $item->commander_comment = $comment;
             $item->commander_date = $date;
-            $item->send_status = ($action === 'approve') ? 1 : 4;
+            $item->send_status = ($action === 'approve') ? 1 : ($action === 'correct' ? 4 : 8);
         } elseif (
             ($currentStatus == 1 && in_array($type, ['request', 'agreement', 'guest'])) ||
             ($currentStatus == 0 && $type === 'leave')
@@ -894,14 +1315,14 @@ class EmployeeHousingController extends Controller
             $item->managerhams_status = $approvalStatus;
             $item->managerhams_comment = $comment;
             $item->managerhams_date = $date;
-            $item->send_status = ($action === 'approve') ? 2 : 4;
+            $item->send_status = ($action === 'approve') ? 2 : ($action === 'correct' ? 4 : 8);
         } elseif ($currentStatus == 2) {
             // Level 3: Committee
             $item->Committee_id = $userId;
             $item->Committee_status = $approvalStatus;
             $item->Committee_comment = $comment;
             $item->Committee_date = $date;
-            $item->send_status = ($action === 'approve') ? 3 : 4;
+            $item->send_status = ($action === 'approve') ? 3 : ($action === 'correct' ? 4 : 8);
 
             // SPECIAL LOGIC: If Agreement is fully approved, mark the related Housing Request as Completed (6)
             if ($type === 'agreement' && $action === 'approve') {
@@ -948,7 +1369,13 @@ class EmployeeHousingController extends Controller
 
         $item->save();
 
-        $msg = ($action === 'approve') ? 'อนุมัติเรียบร้อยแล้ว' : 'ไม่อนุมัติเรียบร้อยแล้ว';
+        $msg = 'ดำเนินการเรียบร้อยแล้ว';
+        if ($action === 'approve')
+            $msg = 'อนุมัติเรียบร้อยแล้ว';
+        elseif ($action === 'correct')
+            $msg = 'ส่งกลับแก้ไขเรียบร้อยแล้ว';
+        elseif ($action === 'reject')
+            $msg = 'ไม่อนุมัติเรียบร้อยแล้ว';
 
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => $msg]);
@@ -1077,7 +1504,7 @@ class EmployeeHousingController extends Controller
     // ==================== COMMITTEE ORGANIZATION CHART ====================
     public function committeeChart()
     {
-        $committees = HousingCommittee::with('user.department', 'user.division')
+        $committees = HousingCommittee::with('user.department')
             ->orderBy('order', 'asc')
             ->get();
 
@@ -1085,14 +1512,15 @@ class EmployeeHousingController extends Controller
         $isHams = false;
         if (Auth::check()) {
             $user = Auth::user();
-            $deptName = strtoupper($user->department->department_name ?? '');
-            if (in_array($deptName, ['HAMS', 'HAMS_ADMIN']) || $user->hr_status == '0' || $user->level_user == 0) {
+            $dept_id = $user->dept_id;
+            if ($user->role === 'admin' || in_array($dept_id, [14, 16])) {
                 $isHams = true;
             }
         }
 
         // All users to choose from for committee
-        $users = User::where('status', '0')->get();
+        $users = User::where('status', 'active')->get();
+        // Or if '0' is still needed for some reason, but 'active' is the new enum
 
         return view('backend.housing.committee_chart', compact('committees', 'isHams', 'users'));
     }
@@ -1106,7 +1534,7 @@ class EmployeeHousingController extends Controller
         }
 
         $request->validate([
-            'user_id' => 'required|exists:userkml2025.userskml,id',
+            'user_id' => 'required|exists:userkml2025.employees,id',
             'role' => 'required|string',
             'order' => 'required|integer'
         ]);
@@ -1125,7 +1553,7 @@ class EmployeeHousingController extends Controller
         }
 
         $request->validate([
-            'user_id' => 'required|exists:userkml2025.userskml,id',
+            'user_id' => 'required|exists:userkml2025.employees,id',
             'role' => 'required|string',
             'order' => 'required|integer'
         ]);
@@ -1180,6 +1608,8 @@ class EmployeeHousingController extends Controller
                 return 'ยกเลิก';
             case 6:
                 return 'ดำเนินการเสร็จสิ้น (เข้าพักแล้ว)';
+            case 8:
+                return 'ไม่อนุมัติ (ดำเนินการเสร็จสิ้น)';
             default:
                 return 'ไม่ทราบสถานะ';
         }
@@ -1196,6 +1626,7 @@ class EmployeeHousingController extends Controller
             5 => 'bg-red-50 text-red-600 border-red-200',
             6 => 'bg-slate-50 text-slate-600 border-slate-200',
             7 => 'bg-cyan-50 text-cyan-600 border-cyan-200',
+            8 => 'bg-rose-50 text-rose-700 border-rose-200',
             default => 'bg-slate-50 text-slate-400 border-slate-200',
         };
     }

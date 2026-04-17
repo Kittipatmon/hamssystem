@@ -27,8 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // เปลี่ยนจาก email เป็น employee_code สำหรับการเข้าสู่ระบบ
-            'employee_code' => ['required', 'string'],
+            'emp_code' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -42,15 +41,44 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // ใช้ employee_code แทน email
-        if (! Auth::attempt($this->only('employee_code', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $user = \App\Models\User::where('emp_code', $this->emp_code)->first();
 
+        if (!$user) {
+            RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
-                'employee_code' => trans('auth.failed'),
+                'emp_code' => 'รหัสหรือ user กรอกผิดพลาด',
             ]);
         }
 
+        if ($user->status === \App\Models\User::STATUS_RESIGN) {
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'emp_code' => 'รหัสหรือ user กรอกผิดพลาด',
+            ]);
+        }
+
+        $isMatch = false;
+        try {
+            // Try standard Laravel check first
+            $isMatch = \Illuminate\Support\Facades\Hash::check($this->password, $user->password);
+        } catch (\RuntimeException $e) {
+            // If hash check fails because it's not a bcrypt hash, check as plaintext
+            $isMatch = ($this->password === $user->password);
+        }
+
+        // Final fallback if hash check didn't throw but returned false (could still be plaintext)
+        if (!$isMatch) {
+            $isMatch = ($this->password === $user->password);
+        }
+
+        if (!$isMatch) {
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'emp_code' => 'รหัสหรือ user กรอกผิดพลาด',
+            ]);
+        }
+
+        Auth::login($user, $this->boolean('remember'));
         RateLimiter::clear($this->throttleKey());
     }
 
@@ -70,7 +98,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'employee_code' => trans('auth.throttle', [
+            'emp_code' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -82,7 +110,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        // ใช้ employee_code เป็น key สำหรับ rate limiting
-        return Str::transliterate(Str::lower($this->string('employee_code')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('emp_code')).'|'.$this->ip());
     }
 }

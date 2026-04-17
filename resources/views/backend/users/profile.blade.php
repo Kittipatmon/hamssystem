@@ -192,7 +192,7 @@
                     <div class="relative group">
                         <div id="avatar-container"
                             class="w-40 h-40 md:w-48 md:h-48 rounded-[2rem] overflow-hidden ring-8 ring-white dark:ring-slate-800 shadow-2xl transition-transform duration-500 group-hover:scale-105 bg-white dark:bg-slate-700">
-                            @php $avatar = $user->photo_user; @endphp
+                            @php $avatar = optional($user)->photo_user; @endphp
                             @if($avatar)
                                 <img id="profile-image" src="{{ asset($avatar) }}" alt="User Avatar"
                                     class="w-full h-full object-cover">
@@ -227,7 +227,7 @@
                                 {{ $user->usertype->description ?? 'Employee' }}
                             </span>
                             <h1 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight">
-                                {{ $user->first_name }} {{ $user->last_name }}
+                                {{ $user->firstname }} {{ $user->lastname }}
                             </h1>
                         </div>
 
@@ -235,7 +235,7 @@
                             class="flex flex-wrap justify-center md:justify-start gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
                             <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-700/50 rounded-xl">
                                 <i class="fa-solid fa-id-badge text-kumwell-red"></i>
-                                <span>{{ $user->employee_code }}</span>
+                                <span>{{ $user->emp_code }}</span>
                             </div>
                             <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-700/50 rounded-xl">
                                 <i class="fa-solid fa-briefcase text-kumwell-red"></i>
@@ -328,7 +328,7 @@
                         class="bg-gradient-to-br from-red-500 to-[#8B1A1E] rounded-[2rem] p-8 text-white shadow-xl shadow-orange-500/20">
                         <p class="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">Primary Department</p>
                         <h4 class="text-2xl font-black mb-6">
-                            {{ optional($user->department)->department_name ?? 'Kumwell Corp' }}</h4>
+                            {{ optional($user->department)->name ?? 'Kumwell Corp' }}</h4>
                         <div class="flex items-center gap-4 text-sm opacity-90">
                             <i class="fa-solid fa-location-dot"></i>
                             <span>{{ $user->workplace ?: 'Main Office, BKK' }}</span>
@@ -361,7 +361,7 @@
                                     <label
                                         class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Employee
                                         Code</label>
-                                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ $user->employee_code }}
+                                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ $user->emp_code }}
                                     </p>
                                 </div>
                                 <div class="group">
@@ -390,22 +390,9 @@
                             <div class="space-y-6">
                                 <div class="group">
                                     <label
-                                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Section
-                                        Code</label>
-                                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200">
-                                        {{ optional($user->section)->section_code ?? '-' }}</p>
-                                </div>
-                                <div class="group">
-                                    <label
-                                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Division</label>
-                                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200">
-                                        {{ optional($user->division)->division_name ?? '-' }}</p>
-                                </div>
-                                <div class="group">
-                                    <label
                                         class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Department</label>
                                     <p class="text-sm font-bold text-gray-800 dark:text-gray-200">
-                                        {{ optional($user->department)->department_name ?? '-' }}</p>
+                                        {{ optional($user->department)->name ?? '-' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -477,11 +464,24 @@
                     fetch('{{ route("users.update_avatar") }}', {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
                         },
                         body: formData
                     })
-                        .then(response => response.json())
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(text => {
+                                    let errorMsg = 'Server Error (' + response.status + ')';
+                                    try {
+                                        const json = JSON.parse(text);
+                                        errorMsg = json.message || errorMsg;
+                                    } catch(e) {}
+                                    throw new Error(errorMsg);
+                                });
+                            }
+                            return response.json();
+                        })
                         .then(data => {
                             if (data.success) {
                                 // Update image on page
@@ -517,10 +517,11 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
+                            // Try to get response text for better debugging if possible
                             Swal.fire({
                                 icon: 'error',
                                 title: 'ผิดพลาด',
-                                text: 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์'
+                                text: 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: ' + error.message
                             });
                         });
                 }

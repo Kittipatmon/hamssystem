@@ -210,7 +210,7 @@
                                     <img src="{{ $m->user->photo_user ? asset($m->user->photo_user) : 'https://ui-avatars.com/api/?name='.urlencode($m->user->fullname).'&background=' . ($loop->parent->first ? 'dc2626' : 'f59e0b') . '&color=fff' }}" 
                                          class="node-avatar" alt="Avatar">
                                     <h3 class="node-name">{{ $m->user->fullname }}</h3>
-                                    <p class="node-dept">{{ $m->user->department->department_name ?? '-' }} ({{ $m->user->employee_code }})</p>
+                                    <p class="node-dept">{{ $m->user->department->department_name ?? '-' }} ({{ $m->user->emp_code }})</p>
                                     
                                     @if($isHams)
                                         <div class="mt-4 pt-4 border-t border-slate-50 flex justify-center gap-2">
@@ -257,7 +257,7 @@
                     <select name="user_id" class="select select-bordered w-full rounded-2xl select2-user" required>
                         <option value="">-- ค้นหารายชื่อ --</option>
                         @foreach($users as $u)
-                            <option value="{{ $u->id }}">{{ $u->employee_code }} - {{ $u->fullname }}</option>
+                            <option value="{{ $u->id }}">{{ $u->emp_code }} - {{ $u->fullname }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -298,7 +298,7 @@
                     <label class="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">พนักงาน</label>
                     <select name="user_id" id="edit_user_id" class="select select-bordered w-full rounded-2xl" required>
                         @foreach($users as $u)
-                            <option value="{{ $u->id }}">{{ $u->employee_code }} - {{ $u->fullname }}</option>
+                            <option value="{{ $u->id }}">{{ $u->emp_code }} - {{ $u->fullname }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -368,3 +368,4 @@
     }
 </script>
 @endpush
+

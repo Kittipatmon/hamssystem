@@ -1,7 +1,7 @@
 @extends('layouts.serviceitem.appservice')
 
 @section('content')
-    <div class="max-w-[1600px] mx-auto px-4 py-8 space-y-8">
+    <div class="max-w-[1600px] mx-auto px-4 py-8 lg:py-18 space-y-8">
         @php
             $statsRequisitions = $requisitions->whereNotIn('status', [
                 \App\Models\serviceshams\Requisitions::STATUS_PENDING,
@@ -163,14 +163,14 @@
                                             <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
                                                 <i class="fa-solid fa-user text-[10px]"></i>
                                             </div>
-                                            <span class="font-bold text-slate-700">คุณ{{ $req->user->fullname }}</span>
+                                            <span class="font-bold text-slate-700">คุณ{{ optional($req->user)->fullname ?? 'ไม่ระบุตัวตน' }}</span>
                                         </div>
                                     </td>
                                     <td class="px-5 py-5">
                                         <div class="flex flex-col gap-0.5">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ $req->user->section->section_code ?? '-' }}</span>
-                                            <span class="text-[11px] font-bold text-slate-500">{{ $req->user->division->division_name ?? '-' }}</span>
-                                            <span class="text-[10px] font-medium text-slate-400">{{ $req->user->department->department_name ?? '-' }}</span>
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ optional($req->user?->section)->section_code ?? '-' }}</span>
+                                            <span class="text-[11px] font-bold text-slate-500">{{ optional($req->user?->division)->division_name ?? '-' }}</span>
+                                            <span class="text-[10px] font-medium text-slate-400">{{ optional($req->user?->department)->department_name ?? '-' }}</span>
                                         </div>
                                     </td>
                                     <td class="px-5 py-5 text-center font-bold text-slate-500 uppercase">
@@ -187,10 +187,18 @@
                                         </span>
                                     </td>
                                     <td class="px-5 py-5 text-center">
-                                        <a href="{{ route('requisitions.detailreqlistall', $req->requisitions_id) }}"
-                                            class="w-9 h-9 inline-flex items-center justify-center bg-white border border-slate-100 text-slate-400 rounded-xl hover:bg-slate-800 hover:text-white hover:border-slate-800 transition-all active:scale-95 shadow-sm">
-                                            <i class="fa-regular fa-eye"></i>
-                                        </a>
+                                        <div class="flex items-center justify-center gap-2">
+                                            <a href="{{ route('requisitions.detailreqlistall', $req->requisitions_id) }}"
+                                                class="w-9 h-9 inline-flex items-center justify-center bg-white border border-slate-100 text-slate-400 rounded-xl hover:bg-slate-800 hover:text-white hover:border-slate-800 transition-all active:scale-95 shadow-sm"
+                                                title="ดูรายละเอียด">
+                                                <i class="fa-regular fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('requisitions.detail.pdf', $req->requisitions_id) }}"
+                                                class="w-9 h-9 inline-flex items-center justify-center bg-red-50 text-red-600 border border-red-100 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                                                title="ดาวน์โหลด PDF">
+                                                <i class="fa-solid fa-file-pdf"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -218,10 +226,10 @@
                                         ข้อมูลผู้เบิก</p>
                                     <h3
                                         class="text-[16px] font-black text-slate-800 underline decoration-slate-100 decoration-4 underline-offset-4">
-                                        คุณ{{ $req->user->fullname }}</h3>
+                                        คุณ{{ optional($req->user)->fullname ?? 'ไม่ระบุตัวตน' }}</h3>
                                     <p class="text-[11px] font-bold text-slate-400 mt-1">
-                                        {{ $req->user->division->division_name ?? '-' }} /
-                                        {{ $req->user->section->section_code }}</p>
+                                        {{ optional($req->user?->division)->division_name ?? '-' }} /
+                                        {{ optional($req->user?->section)->section_code ?? '-' }}</p>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
@@ -239,10 +247,16 @@
                                     </div>
                                 </div>
 
-                                <a href="{{ route('requisitions.detailreqlistall', $req->requisitions_id) }}"
-                                    class="w-full py-4 bg-slate-50 hover:bg-slate-100 text-slate-500 font-black rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 text-xs uppercase tracking-widest border border-slate-100">
-                                    <i class="fa-regular fa-eye"></i> View Detailed Report
-                                </a>
+                                <div class="flex gap-2">
+                                    <a href="{{ route('requisitions.detailreqlistall', $req->requisitions_id) }}"
+                                        class="flex-1 py-4 bg-slate-50 hover:bg-slate-100 text-slate-500 font-black rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 text-xs uppercase tracking-widest border border-slate-100">
+                                        <i class="fa-regular fa-eye"></i> View Detailed Report
+                                    </a>
+                                    <a href="{{ route('requisitions.detail.pdf', $req->requisitions_id) }}"
+                                        class="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center border border-red-100 shadow-sm transition-all active:scale-95">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </a>
+                                </div>
                             </div>
                         @endforeach
                     </div>

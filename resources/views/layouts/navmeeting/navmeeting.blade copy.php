@@ -73,7 +73,7 @@
                     <div class="dropdown dropdown-end">
                         <label tabindex="0" class="pill cursor-pointer">
                             <i class="fa-solid fa-user"></i>
-                            <span>{{ Auth::user()->employee_code }}</span>
+                            <span>{{ Auth::user()->emp_code }}</span>
                             <i class="fa-solid fa-chevron-down text-[11px]"></i>
                         </label>
                         <ul tabindex="0" class="dropdown-content menu bg-white/95 backdrop-blur-sm rounded-2xl mt-2 p-2 w-52

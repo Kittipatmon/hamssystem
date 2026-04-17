@@ -1,7 +1,7 @@
 @extends('layouts.serviceitem.appservice')
 @section('content')
 
-    <div class="max-w-[1400px] mx-auto px-4 py-8 space-y-8">
+    <div class="max-w-[1400px] mx-auto px-4 py-8 lg:py-18 space-y-8">
 
         <!-- Header Section -->
         <div
@@ -16,7 +16,7 @@
                         <span
                             class="px-2 py-0.5 bg-slate-100 rounded text-slate-500">{{ $requisition->requisitions_code }}</span>
                         <span>•</span>
-                        <span>{{ optional($requisition->request_date)->locale('th')->isoFormat('D MMM YYYY') }}</span>
+                        <span>{{ optional($requisition->request_date)->locale('th')->addYears(543)->isoFormat('D MMM YYYY') }}</span>
                     </p>
                 </div>
             </div>
@@ -47,11 +47,11 @@
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">ผู้ส่งคำขอเบิก
                                 (Requester)</p>
-                            <p class="text-lg font-bold text-slate-700 leading-tight">คุณ{{ $requisition->user->fullname }}
+                            <p class="text-lg font-bold text-slate-700 leading-tight">คุณ{{ optional($requisition->user)->fullname ?? 'ไม่ระบุตัวตน' }}
                             </p>
                             <p class="text-xs font-semibold text-slate-400 mt-1">
-                                {{ $requisition->user->department->department_name ?? '-' }} /
-                                {{ $requisition->user->section->section_code ?? '-' }}</p>
+                                {{ optional($requisition->user?->department)->department_name ?? '-' }} /
+                                {{ optional($requisition->user?->section)->section_code ?? '-' }}</p>
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
@@ -192,6 +192,10 @@
                         class="space-y-8 relative before:absolute before:left-5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-50">
                         <!-- Request Step -->
                         <div class="relative pl-12">
+                            <!-- Connecting Line to Step 2 -->
+                            <div class="absolute left-5 top-10 bottom-[-32px] w-0.5 bg-emerald-500 overflow-hidden z-0">
+                                <div class="w-full h-full animate-flow-line"></div>
+                            </div>
                             <div
                                 class="absolute left-0 w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-50 z-10">
                                 <i class="fa-solid fa-paper-plane text-xs"></i>
@@ -199,8 +203,10 @@
                             <div>
                                 <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">STEP 01</p>
                                 <h4 class="text-sm font-bold text-slate-800 leading-none">ส่งคำขอเบิก</h4>
+                                <p class="text-[10px] font-bold text-red-600 mt-1 uppercase tracking-tighter">
+                                    ผู้ส่งคำขอ: คุณ{{ optional($requisition->user)->fullname ?? 'ไม่ระบุตัวตน' }}</p>
                                 <p class="text-[11px] font-semibold text-slate-400 mt-1 uppercase">
-                                    {{ optional($requisition->created_at)->locale('th')->isoFormat('D MMM YYYY | HH:mm') }} น.</p>
+                                    {{ optional($requisition->created_at)->locale('th')->addYears(543)->isoFormat('D MMM YYYY | HH:mm') }} น.</p>
                             </div>
                         </div>
 
@@ -209,6 +215,12 @@
                             $isApproved = $requisition->approve_id || $requisition->approve_status == \App\Models\serviceshams\Requisitions::APPROVE_STATUS_APPROVED || $requisition->status === \App\Models\serviceshams\Requisitions::STATUS_END_PROGRESS;
                         @endphp
                         <div class="relative pl-12">
+                            <!-- Connecting Line to Step 3 -->
+                            @if ($isApproved)
+                                <div class="absolute left-5 top-10 bottom-[-32px] w-0.5 bg-emerald-500 overflow-hidden z-0">
+                                    <div class="w-full h-full animate-flow-line"></div>
+                                </div>
+                            @endif
                             <div
                                 class="absolute left-0 w-10 h-10 {{ $isApproved ? 'bg-emerald-500' : 'bg-slate-100' }} text-{{ $isApproved ? 'white' : 'slate-300' }} rounded-full flex items-center justify-center shadow-lg z-10">
                                 <i class="fa-solid fa-signature text-xs"></i>
@@ -218,13 +230,13 @@
                                 <h4
                                     class="text-sm font-bold {{ $isApproved ? 'text-slate-800' : 'text-slate-300' }} leading-none">
                                     การพิจารณาอนุมัติ</h4>
-                                <p class="text-[11px] font-semibold text-slate-400 mt-1 uppercase">
-                                    {{ $isApproved ? ($requisition->approve_date ? optional($requisition->approve_date)->locale('th')->isoFormat('D MMM YYYY | HH:mm') . ' น.' : 'APPROVED') : 'WAITING FOR APPROVAL' }}
-                                </p>
                                 @if($requisition->approve_user)
                                     <p class="text-[10px] font-bold text-emerald-600 mt-1 uppercase tracking-tighter">
-                                        อนุมัติโดย: คุณ{{ $requisition->approve_user->fullname }}</p>
+                                        ผู้อนุมัติ: คุณ{{ optional($requisition->approve_user)->fullname ?? 'ไม่ระบุตัวตน' }}</p>
                                 @endif
+                                <p class="text-[11px] font-semibold text-slate-400 mt-1 uppercase">
+                                    {{ $isApproved ? ($requisition->approve_date ? optional($requisition->approve_date)->locale('th')->addYears(543)->isoFormat('D MMM YYYY | HH:mm') . ' น.' : 'APPROVED') : 'WAITING FOR APPROVAL' }}
+                                </p>
                                 @if($requisition->approve_comment)
                                     <div
                                         class="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-100 text-[11px] font-medium text-slate-500 leading-relaxed">
@@ -248,13 +260,13 @@
                                 <h4
                                     class="text-sm font-bold {{ $isPacked ? 'text-slate-800' : 'text-slate-300' }} leading-none">
                                     จัดเตรียมสิ่งของ</h4>
-                                <p class="text-[11px] font-semibold text-slate-400 mt-1 uppercase">
-                                    {{ $isPacked ? ($requisition->packing_staff_date ? optional($requisition->packing_staff_date)->locale('th')->isoFormat('D MMM YYYY | HH:mm') . ' น.' : 'COMPLETED') : 'PENDING PACKING' }}
-                                </p>
                                 @if($requisition->packing_staff)
-                                    <p class="text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-tighter">จัดเตรียมโดย:
-                                        คุณ{{ $requisition->packing_staff->fullname }}</p>
+                                    <p class="text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-tighter">
+                                        ผู้จัดเตรียม: คุณ{{ optional($requisition->packing_staff)->fullname ?? 'ไม่ระบุตัวตน' }}</p>
                                 @endif
+                                <p class="text-[11px] font-semibold text-slate-400 mt-1 uppercase">
+                                    {{ $isPacked ? ($requisition->packing_staff_date ? optional($requisition->packing_staff_date)->locale('th')->addYears(543)->isoFormat('D MMM YYYY | HH:mm') . ' น.' : 'COMPLETED') : 'PENDING PACKING' }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -289,6 +301,25 @@
 
         .animate-zoom-in {
             animation: zoom-in 0.4s ease-out forwards;
+        }
+
+        @keyframes flow-line {
+            0% {
+                background-position: 0 -100px;
+            }
+
+            100% {
+                background-position: 0 100px;
+            }
+        }
+
+        .animate-flow-line {
+            background: linear-gradient(to bottom,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.6) 50%,
+                    transparent 100%);
+            background-size: 100% 100px;
+            animation: flow-line 2s linear infinite;
         }
 
         @media print {

@@ -52,7 +52,7 @@ class BookingCarController extends Controller
 
         // Get current user details for passing to view
         $currentUser = Auth::user();
-        $isHamsOrAdmin = $currentUser && (($currentUser->department && $currentUser->department->department_name === 'HAMS') || $currentUser->employee_code === '11648');
+        $isHamsOrAdmin = $currentUser && (in_array($currentUser->dept_id ?? 0, [14, 16]) || ($currentUser->role ?? '') === 'admin');
         $currentUserId = $currentUser ? $currentUser->id : null;
 
         // Fetch approved and pending bookings for the calendar (All relevant ones)
@@ -249,14 +249,12 @@ class BookingCarController extends Controller
     public function dashboard(Request $request)
     {
         $user = Auth::user();
-        $isHams = $user && $user->department && $user->department->department_name === 'HAMS';
-        $isSpecificUser = $user && $user->employee_code === '11648';
-
-        if (!$isHams && !$isSpecificUser) {
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
+        if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
         }
 
-        $query = BookingCar::with(['user.department', 'vehicle']);
+        $query = BookingCar::with(['user.department', 'vehicle', 'approver']);
 
         // Global Search (Booking Code, Name, Requester, Department, Destination, Province) - Fixed for cross-db
         if ($request->filled('search')) {
@@ -473,10 +471,9 @@ class BookingCarController extends Controller
     public function report(Request $request)
     {
         $user = Auth::user();
-        $isHams = $user && $user->department && $user->department->department_name === 'HAMS';
-        $isSpecificUser = $user && $user->employee_code === '11648';
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
 
-        if (!$isHams && !$isSpecificUser) {
+        if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
         }
 
@@ -567,14 +564,13 @@ class BookingCarController extends Controller
     public function edit($id)
     {
         $user = Auth::user();
-        $isHams = $user && $user->department && $user->department->department_name === 'HAMS';
-        $isSpecificUser = $user && $user->employee_code === '11648';
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
 
-        if (!$isHams && !$isSpecificUser) {
+        if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
         }
 
-        $booking = BookingCar::with(['user', 'vehicle'])->findOrFail($id);
+        $booking = BookingCar::with(['user', 'vehicle', 'approver'])->findOrFail($id);
         $vehicles = Vehicle::where('status', 1)->get();
 
         $jsonPath = storage_path('app/thailand_geography.json');
@@ -591,10 +587,9 @@ class BookingCarController extends Controller
     public function update(Request $request, $id)
     {
         $user = Auth::user();
-        $isHams = $user && $user->department && $user->department->department_name === 'HAMS';
-        $isSpecificUser = $user && $user->employee_code === '11648';
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
 
-        if (!$isHams && !$isSpecificUser) {
+        if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
         }
 
@@ -693,10 +688,9 @@ class BookingCarController extends Controller
     public function approve(Request $request, $id)
     {
         $user = Auth::user();
-        $isHams = $user && $user->department && $user->department->department_name === 'HAMS';
-        $isSpecificUser = $user && $user->employee_code === '11648';
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
 
-        if (!$isHams && !$isSpecificUser) {
+        if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
         }
 
@@ -783,10 +777,10 @@ class BookingCarController extends Controller
         $booking = BookingCar::findOrFail($id);
 
         $isOwner = $user && $user->id === $booking->user_id;
-        $isHams = $user && $user->department && $user->department->department_name === 'HAMS';
-        $isSpecificUser = $user && $user->employee_code === '11648';
+        $isHamsOrIct = $user && in_array($user->dept_id ?? 0, [14, 16]);
+        $isAdmin = $user && ($user->role ?? '') === 'admin';
 
-        if (!$isHams && !$isSpecificUser && !$isOwner) {
+        if (!$isHamsOrIct && !$isOwner && !$isAdmin) {
             return redirect()->back()->with('error', 'คุณไม่มีสิทธิ์ทำรายการนี้');
         }
 
@@ -868,3 +862,4 @@ class BookingCarController extends Controller
         return response()->json($districts);
     }
 }
+

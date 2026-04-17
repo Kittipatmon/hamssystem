@@ -23,7 +23,7 @@ class RequisitionConfirmed extends Notification implements ShouldQueue
 
     public function toTelegram(object $notifiable): TelegramMessage
     {
-        $req = $this->requisition->loadMissing(['user.department', 'user.division', 'user.section']);
+        $req = $this->requisition->loadMissing(['user.department']);
         $user = $req->user;
 
         $fullname = $user?->fullname ?: '-';

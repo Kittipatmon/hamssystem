@@ -2,7 +2,13 @@
 <nav
     class="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
     @php
-        $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isReportActive = request()->routeIs('backend.bookingmeeting.*');
+        
+        $pMeetingReservationsTotal = 0;
+        if ($isHamsOrAdmin) {
+            $pMeetingReservationsTotal = \App\Models\bookingmeeting\Reservation::where('status', 'pending')->count();
+        }
     @endphp
     <div class="max-w-7xl mx-auto px-4 md:px-6">
         <div class="h-16 flex items-center justify-between">
@@ -54,10 +60,16 @@
                     <!-- ข้อมูลทั่วไป (dropdown) -->
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
-                            class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer">
-                            <i class="fa-solid fa-server text-slate-400"></i>
+                            class="relative flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ $isReportActive ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                            <i class="fa-solid fa-server {{ $isReportActive ? 'text-white' : 'text-slate-400' }}"></i>
                             <span>รายงาน</span>
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
+                            
+                            @if($pMeetingReservationsTotal > 0)
+                                <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white ring-2 ring-white shadow-md animate-pulse font-black">
+                                    {{ $pMeetingReservationsTotal }}
+                                </span>
+                            @endif
                         </label>
                         <ul tabindex="0"
                             class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-64 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
@@ -71,10 +83,16 @@
                             </li>
                             <li>
                                 <a href="{{ route('backend.bookingmeeting.reservations.index') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('backend.bookingmeeting.reservations.*') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
-                                    <i
-                                        class="fa-solid fa-list-check w-4 text-center {{ request()->routeIs('backend.bookingmeeting.reservations.*') ? 'text-red-600' : 'text-red-400' }}"></i>
-                                    รายการจองห้องประชุม
+                                    class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('backend.bookingmeeting.reservations.*') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-solid fa-list-check w-4 text-center {{ request()->routeIs('backend.bookingmeeting.reservations.*') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                        รายการจองห้องประชุม
+                                    </div>
+                                    @if($pMeetingReservationsTotal > 0)
+                                        <span class="flex items-center justify-center min-w-[20px] h-5 px-1 bg-red-600 text-[10px] text-white rounded-lg shadow-sm font-black">
+                                            {{ $pMeetingReservationsTotal }}
+                                        </span>
+                                    @endif
                                 </a>
                             </li>
                             <li>
@@ -114,7 +132,7 @@
                                     <i class="fa-solid fa-user"></i>
                                 @endif
                             </div>
-                            <span>{{ Auth::user()->employee_code }}</span>
+                            <span>{{ Auth::user()->emp_code }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                         </label>
                         <ul tabindex="0"
@@ -135,7 +153,7 @@
                                     @endif
                                     <div class="flex flex-col flex-1 truncate">
                                         <span
-                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->employee_code }}</span>
+                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->emp_code }}</span>
                                         <span
                                             class="text-[12px] text-slate-500 truncate">{{ Auth::user()->position ?? 'Employee' }}</span>
                                     </div>
@@ -207,11 +225,16 @@
                 </a>
 
                 @if($isHamsOrAdmin)
-                    <details class="group [&_summary::-webkit-details-marker]:hidden">
+                    <details class="group [&_summary::-webkit-details-marker]:hidden" {{ $isReportActive ? 'open' : '' }}>
                         <summary
-                            class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
+                            class="flex items-center justify-between px-4 py-3 text-[15px] font-medium rounded-xl cursor-pointer transition-colors {{ $isReportActive ? 'bg-red-600 text-white shadow-lg shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                             <div class="flex items-center gap-3">
-                                <i class="fa-solid fa-server w-5 text-center text-slate-400"></i> รายงาน
+                                <i class="fa-solid fa-server w-5 text-center {{ $isReportActive ? 'text-white' : 'text-slate-400' }}"></i> รายงาน
+                                @if($pMeetingReservationsTotal > 0)
+                                    <span class="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-500 text-[10px] text-white rounded-full font-black ml-1 shadow-sm">
+                                        {{ $pMeetingReservationsTotal }}
+                                    </span>
+                                @endif
                             </div>
                             <i
                                 class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180"></i>
@@ -224,10 +247,16 @@
                                 จัดการข้อมูลห้องประชุม
                             </a>
                             <a href="{{ route('backend.bookingmeeting.reservations.index') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-lg transition-colors {{ request()->routeIs('backend.bookingmeeting.reservations.*') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
-                                <i
-                                    class="fa-solid fa-list-check w-4 text-center {{ request()->routeIs('backend.bookingmeeting.reservations.*') ? 'text-red-600' : 'text-red-400' }}"></i>
-                                รายการจองห้องประชุม
+                                class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium rounded-lg transition-colors {{ request()->routeIs('backend.bookingmeeting.reservations.*') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-list-check w-4 text-center {{ request()->routeIs('backend.bookingmeeting.reservations.*') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                    รายการจองห้องประชุม
+                                </div>
+                                @if($pMeetingReservationsTotal > 0)
+                                    <span class="flex items-center justify-center min-w-[20px] h-5 px-1 bg-red-600 text-[10px] text-white rounded-lg shadow-sm font-black">
+                                        {{ $pMeetingReservationsTotal }}
+                                    </span>
+                                @endif
                             </a>
                             <a href="{{ route('backend.bookingmeeting.report.index') }}"
                                 class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-lg transition-colors {{ request()->routeIs('backend.bookingmeeting.report.*') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
@@ -265,7 +294,7 @@
                                     @endif
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="leading-tight">{{ Auth::user()->employee_code }}</span>
+                                    <span class="leading-tight">{{ Auth::user()->emp_code }}</span>
                                     <span
                                         class="text-[11px] text-slate-400 font-medium font-normal leading-tight">{{ Auth::user()->first_name ?? 'ผู้ใช้งานระบบ' }}</span>
                                 </div>

@@ -10,7 +10,7 @@ class ResidentGuestMember extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'guest_request_id', 'full_name', 'age', 'relation'
+        'guest_request_id', 'full_name', 'age', 'relation', 'phone'
     ];
 
     public function guestRequest()

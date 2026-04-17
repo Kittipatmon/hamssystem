@@ -11,7 +11,7 @@ class BackendReservationsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Reservation::with(['user', 'room']);
+        $query = Reservation::with(['user', 'room', 'approvedBy']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -20,7 +20,7 @@ class BackendReservationsController extends Controller
                     ->orWhere('requester_name', 'like', '%' . $search . '%')
                     ->orWhereHas('user', function ($qu) use ($search) {
                         $qu->where('first_name', 'like', '%' . $search . '%')
-                            ->orWhere('employee_code', 'like', '%' . $search . '%');
+                            ->orWhere('emp_code', 'like', '%' . $search . '%');
                     })
                     ->orWhereHas('room', function ($qr) use ($search) {
                         $qr->where('room_name', 'like', '%' . $search . '%');
@@ -54,7 +54,7 @@ class BackendReservationsController extends Controller
 
     public function show(string $id)
     {
-        $reservation = Reservation::with(['user', 'room'])->findOrFail($id);
+        $reservation = Reservation::with(['user', 'room', 'approvedBy'])->findOrFail($id);
         return view('backend.bookingmeeting.reservations.show', compact('reservation'));
     }
 
@@ -109,7 +109,9 @@ class BackendReservationsController extends Controller
             'topic' => $request->topic,
             'status' => $request->status,
             'participant_count' => $request->participant_count,
-            'requester_name' => $request->requester_name
+            'requester_name' => $request->requester_name,
+            'approved_by' => auth()->id(),
+            'approved_at' => now()
         ]);
 
         return redirect()->route('backend.bookingmeeting.reservations.index')->with('success', 'ปรับปรุงข้อมูลการจองสำเร็จ');
@@ -137,7 +139,11 @@ class BackendReservationsController extends Controller
         ]);
 
         $reservation = Reservation::findOrFail($id);
-        $reservation->update(['status' => $request->status]);
+        $reservation->update([
+            'status' => $request->status,
+            'approved_by' => auth()->id(),
+            'approved_at' => now()
+        ]);
 
         $msg = '';
         switch ($request->status) {
@@ -150,3 +156,4 @@ class BackendReservationsController extends Controller
         return redirect()->route('backend.bookingmeeting.reservations.index')->with('success', $msg);
     }
 }
+

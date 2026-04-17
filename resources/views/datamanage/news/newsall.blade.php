@@ -92,11 +92,17 @@
 											<i class="fa-regular fa-calendar-alt mr-1 text-red-500"></i>
 											{{ optional($item->published_date)->format('d/m/Y') }}
 										</time>
-										@if($item->is_active)
-											<span class="px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-medium">เผยแพร่</span>
-										@else
-											<span class="px-2 py-0.5 rounded-full bg-gray-50 text-gray-600 font-medium">ปิด</span>
-										@endif
+										<div class="flex items-center gap-2">
+											<span class="flex items-center" title="ยอดเข้าดู">
+												<i class="fa-regular fa-eye mr-1 text-blue-400"></i>
+												{{ number_format($item->views_count ?? 0) }}
+											</span>
+											@if($item->is_active)
+												<span class="px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-medium">เผยแพร่</span>
+											@else
+												<span class="px-2 py-0.5 rounded-full bg-gray-50 text-gray-600 font-medium">ปิด</span>
+											@endif
+										</div>
 									</div>
 									<h3
 										class="text-sm font-semibold mb-2 line-clamp-2 text-gray-900 group-hover:text-red-600 transition">

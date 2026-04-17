@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@php \Carbon\Carbon::setLocale('th'); @endphp
+
 
 <head>
     <meta charset="utf-8">
@@ -42,7 +44,7 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="p-6 pt-[88px] min-h-[70vh]">
+        <main class="p-6 pt-[100px] min-h-[70vh]">
             @yield('content')
         </main>
 
@@ -51,17 +53,42 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function handleApproval(type, id, action, btn) {
+            let title = 'ยืนยันการอนุมัติ?';
+            let icon = 'question';
+            let confirmButtonColor = '#059669';
+            let input = null;
+
+            if (action === 'reject') {
+                title = 'ยืนยันไม่อนุมัติ?';
+                icon = 'warning';
+                confirmButtonColor = '#dc2626';
+                input = 'textarea';
+            } else if (action === 'correct') {
+                title = 'ส่งกลับแก้ไขข้อมูล?';
+                icon = 'info';
+                confirmButtonColor = '#8b5cf6';
+                input = 'textarea';
+            }
+
             Swal.fire({
-                title: action === 'approve' ? 'ยืนยันการอนุมัติ?' : 'ยืนยันไม่อนุมัติ?',
-                text: "คุณต้องการดำเนินการนี้ใช่หรือไม่?",
-                icon: 'question',
+                title: title,
+                text: input ? "กรุณาระบุเหตุผลหรือสิ่งที่ควรแก้ไข:" : "คุณต้องการดำเนินการนี้ใช่หรือไม่?",
+                icon: icon,
+                input: input,
+                inputPlaceholder: 'ระบุเหตุผลที่นี่...',
                 showCancelButton: true,
-                confirmButtonColor: action === 'approve' ? '#059669' : '#dc2626',
+                confirmButtonColor: confirmButtonColor,
                 cancelButtonColor: '#6b7280',
-                confirmButtonText: 'ใช่, ดำเนินการเลย',
+                confirmButtonText: 'ยืนยันดำเนินการ',
                 cancelButtonText: 'ยกเลิก',
                 showLoaderOnConfirm: true,
-                preConfirm: () => {
+                inputValidator: (value) => {
+                    if (input && !value) {
+                        return 'กรุณาระบุเหตุผล!'
+                    }
+                },
+                preConfirm: (result) => {
+                    const comment = typeof result === 'string' ? result : '';
                     return fetch(`{{ url('housing/approve') }}/${type}/${id}`, {
                         method: 'POST',
                         headers: {
@@ -70,15 +97,21 @@
                             'Accept': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        body: JSON.stringify({ action: action })
+                        body: JSON.stringify({
+                            action: action,
+                            comment: comment
+                        })
                     })
-                    .then(response => {
-                        if (!response.ok) throw new Error(response.statusText);
-                        return response.json();
-                    })
-                    .catch(error => {
-                        Swal.showValidationMessage(`Request failed: ${error}`);
-                    });
+                        .then(response => {
+                            if (response.status === 403) {
+                                throw new Error('คุณไม่ได้รับอนุญาตให้ดำเนินการในขั้นตอนนี้ (ต้องเป็นผู้อนุมัติที่ได้รับมอบหมายหรือเจ้าหน้าที่ HAMS)');
+                            }
+                            if (!response.ok) throw new Error(response.statusText);
+                            return response.json();
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`ไม่สำเร็จ: ${error.message || error}`);
+                        });
                 },
                 allowOutsideClick: () => !Swal.isLoading()
             }).then((result) => {
@@ -90,7 +123,7 @@
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
-                        location.reload(); // Still reloads to update all counts and labels across the UI faithfully
+                        location.reload();
                     });
                 }
             });
@@ -122,7 +155,7 @@
                     const formData = new FormData();
                     formData.append('repair_id', repairId);
                     formData.append('technician_note', document.getElementById('technician_note').value);
-                    
+
                     const fileInput = document.getElementById('finish_images');
                     if (fileInput.files.length > 0) {
                         Array.from(fileInput.files).forEach(file => {
@@ -135,17 +168,17 @@
                         headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                         body: formData
                     })
-                    .then(async res => {
-                        const data = await res.json().catch(() => null);
-                        if (!res.ok) {
-                            const errorMsg = data && data.message ? data.message : (res.statusText || 'Unknown Error');
-                            throw new Error(errorMsg);
-                        }
-                        return data;
-                    })
-                    .catch(error => {
-                        Swal.showValidationMessage(`เกิดข้อผิดพลาด: ${error.message || error}`)
-                    })
+                        .then(async res => {
+                            const data = await res.json().catch(() => null);
+                            if (!res.ok) {
+                                const errorMsg = data && data.message ? data.message : (res.statusText || 'Unknown Error');
+                                throw new Error(errorMsg);
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`เกิดข้อผิดพลาด: ${error.message || error}`)
+                        })
                 },
                 allowOutsideClick: () => !Swal.isLoading()
             }).then((result) => {

@@ -40,8 +40,8 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div class="form-control">
                 <span class="label-text mb-1 text-xs text-gray-500 dark:text-gray-400">รหัสพนักงาน</span>
-                <input type="text" name="employee_code" placeholder="ค้นหารหัส..."
-                    value="{{ request('employee_code') }}"
+                <input type="text" name="emp_code" placeholder="ค้นหารหัส..."
+                    value="{{ request('emp_code') }}"
                     class="input input-bordered input-sm w-full dark:bg-gray-700" />
             </div>
 
@@ -66,8 +66,8 @@
             <select name="department" class="select select-bordered select-sm w-full dark:bg-gray-700">
                 <option value="">แผนก (ทั้งหมด)</option>
                 @foreach($departments as $dept)
-                <option value="{{ $dept->department_id }}" {{ (string)request('department')===(string)$dept->
-                    department_id ? 'selected' : '' }}>
+                <option value="{{ $dept->dept_id }}" {{ (string)request('department')===(string)$dept->
+                    dept_id ? 'selected' : '' }}>
                     {{ $dept->department_name }}
                 </option>
                 @endforeach
@@ -144,7 +144,7 @@
                     class="text-gray-700 dark:text-gray-300 divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse($users as $user)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td class="font-medium">{{ $user->employee_code }}</td>
+                        <td class="font-medium">{{ $user->emp_code }}</td>
                         <td>
                             <div class="font-bold">{{ $user->fullname }}</div>
                         </td>
@@ -231,7 +231,7 @@
                 <div class="form-control w-full">
                     <label class="label"><span class="label-text font-medium">รหัสพนักงาน <span
                                 class="text-red-500">*</span></span></label>
-                    <input type="text" name="employee_code" class="input input-bordered w-full dark:bg-gray-700"
+                    <input type="text" name="emp_code" class="input input-bordered w-full dark:bg-gray-700"
                         required />
                 </div>
 
@@ -280,10 +280,10 @@
                 <div class="form-control w-full">
                     <label class="label"><span class="label-text font-medium">แผนก <span
                                 class="text-red-500">*</span></span></label>
-                    <select name="department_id" class="select select-bordered w-full dark:bg-gray-700">
+                    <select name="dept_id" class="select select-bordered w-full dark:bg-gray-700">
                         <option disabled selected>เลือกแผนก</option>
                         @foreach($departments as $dept)
-                        <option value="{{ $dept->department_id }}">{{ $dept->department_name }}</option>
+                        <option value="{{ $dept->dept_id }}">{{ $dept->department_name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -561,7 +561,7 @@
                 // ... (Logic การสร้าง HTML Row เหมือนเดิม แต่ปรับ class เล็กน้อยให้เข้ากับ Tailwind) ...
                 return `
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                <td class="font-medium">${safe(u.employee_code)}</td>
+                <td class="font-medium">${safe(u.emp_code)}</td>
                 <td><div class="font-bold">${safe(u.fullname)}</div></td>
                 <td>${safe(u.department?.department_name)}</td>
                 <td>${safe(u.division?.division_name)}</td>

@@ -43,7 +43,7 @@
             <select name="department" class="select select-bordered select-sm w-full mt-1" data-cascade="department">
                 <option value="">ทั้งหมด</option>
                 @foreach($departments as $d)
-                    <option value="{{ $d->department_id }}">{{ $d->department_name }} ({{ $d->department_fullname }})</option>
+                    <option value="{{ $d->dept_id }}">{{ $d->department_name }} ({{ $d->department_fullname }})</option>
                 @endforeach
             </select>
         </div>

@@ -127,9 +127,9 @@
                                 </p>
                                 <div class="mt-2 flex flex-wrap gap-2">
                                     @php
-                                        $displayPosition = $displayAgreement->position ?? ($latestReq->position ?? 'พนักงาน');
-                                        $displayDept = $displayAgreement->department ?? ($latestReq->department ?? '-');
-                                        $displaySection = $displayAgreement->section ?? ($latestReq->section ?? '');
+                                        $displayPosition = optional($displayAgreement)->position ?? (optional($latestReq)->position ?? 'พนักงาน');
+                                        $displayDept = optional($displayAgreement)->department ?? (optional($latestReq)->department ?? '-');
+                                        $displaySection = optional($displayAgreement)->section ?? (optional($latestReq)->section ?? '');
                                     @endphp
                                     <span class="px-2 py-0.5 bg-red-50 dark:bg-red-900/20 rounded text-[10px] font-bold text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30">
                                         {{ $displayPosition }}
@@ -153,7 +153,7 @@
                                     <p class="text-slate-400 text-[10px] uppercase font-bold mb-1">เบอร์ติดต่อ</p>
                                     <p class="font-bold text-gray-700 dark:text-gray-200">
                                         <i class="fa-solid fa-phone mr-2 text-red-400"></i>
-                                        {{ $currentStay->tel_phone ?? '-' }}
+                                        {{ $currentStay->tel_phone ?? ($latestReq->phone ?? '-') }}
                                     </p>
                                 </div>
                             </div>
@@ -170,31 +170,37 @@
                             </h3>
                         </div>
                         <div class="p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 text-center">
-                                <div class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8 text-center mt-4">
+                                <div class="space-y-8">
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">สถานที่ปฏิบัติงาน</span>
+                                        <span class="text-sm font-black text-red-600 dark:text-red-400 mt-1">{{ $latestReq->site ?? '-' }}</span>
+                                    </div>
                                     <div class="flex flex-col items-center">
                                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">สถานภาพ</span>
                                         <span class="text-sm font-semibold text-slate-700 dark:text-gray-200 mt-1">{{ $latestReq->marital_status ?? '-' }}</span>
                                     </div>
-                                    <div class="flex flex-col items-center">
-                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ที่อยู่ตามภูมิลำเนาเดิม</span>
-                                        <span class="text-sm font-semibold text-slate-700 dark:text-gray-200 mt-1">
-                                            {{ $latestReq->address_original_province ? ($latestReq->address_original_province . ' / ' . $latestReq->address_original_district) : ($latestReq->address_original ?? '-') }}
-                                        </span>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ที่พักปัจจุบัน</span>
-                                        <span class="text-sm font-semibold text-slate-700 dark:text-gray-200 mt-1">{{ $latestReq->current_house_type ?? '-' }}</span>
-                                    </div>
                                 </div>
-                                <div class="space-y-6">
+                                <div class="space-y-8">
                                     <div class="flex flex-col items-center">
                                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">จำนวนผู้อยู่อาศัยรวม</span>
                                         <span class="text-sm font-semibold text-slate-700 dark:text-gray-200 mt-1">{{ $latestReq->number_of_residents ?? '-' }} คน</span>
                                     </div>
                                     <div class="flex flex-col items-center">
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ที่อยู่ตามภูมิลำเนาเดิม</span>
+                                        <span class="text-sm font-semibold text-slate-700 dark:text-gray-200 mt-1 leading-tight">
+                                            {{ $latestReq->address_original_province ? ($latestReq->address_original_province . ' / ' . $latestReq->address_original_district) : ($latestReq->address_original ?? '-') }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-2 lg:col-span-1 space-y-8">
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ประเภทที่พักปัจจุบัน</span>
+                                        <span class="text-sm font-semibold text-slate-700 dark:text-gray-200 mt-1">{{ $latestReq->current_house_type ?? '-' }}</span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
                                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">เหตุผลความจำเป็น</span>
-                                        <span class="text-sm font-semibold text-slate-700 dark:text-gray-200 mt-1 leading-relaxed">{{ $latestReq->residence_reason ?? '-' }}</span>
+                                        <span class="text-xs font-medium text-slate-600 dark:text-slate-400 mt-2 leading-relaxed max-w-[200px]">"{{ $latestReq->residence_reason ?? '-' }}"</span>
                                     </div>
                                 </div>
                             </div>
@@ -216,70 +222,107 @@
                             </div>
                             @endif
 
-                            {{-- Approval History --}}
-                            <div class="pt-8 mt-8 border-t border-slate-50 dark:border-gray-700 text-center">
-                                <span class="text-[10px] text-slate-400 font-bold uppercase block mb-6 tracking-widest">ผลการพิจารณาคำขอ</span>
-                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                    {{-- Commander --}}
-                                    <div class="bg-white dark:bg-gray-800/50 p-5 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col items-center">
-                                        <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 mb-3">
+                            {{-- Process Status Stepper --}}
+                            <div class="pt-10 mt-10 border-t border-slate-50 dark:border-gray-700">
+                                <h3 class="text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-widest text-center mb-10 flex items-center justify-center gap-3">
+                                    <div class="w-1.5 h-6 bg-red-500 rounded-full"></div>
+                                    สถานะกระบวนการ
+                                </h3>
+
+                                <div class="relative flex flex-col md:flex-row items-start justify-between gap-6 md:gap-4 px-4">
+                                    {{-- Global Progress Line Background --}}
+                                    <div class="absolute left-[35px] top-[70px] bottom-[40px] md:left-[50px] md:right-[50px] md:top-[35px] md:bottom-auto md:h-[2px] bg-slate-100 dark:bg-gray-700 z-0"></div>
+
+                                    @php
+                                        $s = intval($latestReq->send_status);
+                                        // Progress percentage for the line
+                                        $progressWidth = '0%';
+                                        if ($s == 1) $progressWidth = '25%';
+                                        if ($s == 2) $progressWidth = '50%';
+                                        if ($s >= 3) $progressWidth = '100%';
+                                    @endphp
+                                    {{-- Active Progress Line --}}
+                                    <div class="absolute left-[35px] top-[70px] md:left-[50px] md:top-[35px] md:h-[2px] bg-emerald-500 z-0 transition-all duration-1000"
+                                         style="width: {{ $progressWidth }}; max-width: calc(100% - 100px);"></div>
+
+                                    {{-- Step 1: Commander --}}
+                                    <div class="relative z-10 flex flex-row md:flex-col items-center gap-4 md:gap-3 flex-1">
+                                        <div class="w-12 h-12 rounded-2xl {{ $s >= 1 ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-white border-2 border-slate-100 text-slate-300' }} shadow-lg flex items-center justify-center transition-all duration-500 group">
                                             <i class="fa-solid fa-user-tie text-lg"></i>
                                         </div>
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ผู้บังคับบัญชา</p>
-                                        <p class="text-xs font-bold text-slate-700 dark:text-gray-200 mt-1 mb-3">{{ $latestReq->commander->fullname ?? 'รอระบุ' }}</p>
-                                        
-                                        <div class="mt-auto w-full">
-                                            <div class="flex items-center justify-center gap-2 mb-2">
-                                                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider {{ $latestReq->commander_status == 1 ? 'bg-emerald-100 text-emerald-600' : ($latestReq->commander_status == 2 ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500') }}">
-                                                    {{ $latestReq->commander_status == 1 ? 'ผ่านการอนุมัติ' : ($latestReq->commander_status == 2 ? 'ไม่ผ่าน' : 'รอพิจารณา') }}
-                                                </span>
-                                            </div>
-                                            <p class="text-[9px] text-slate-400 font-bold">{{ $latestReq->commander_date ? \Carbon\Carbon::parse($latestReq->commander_date)->format('d/m/Y') : '-' }}</p>
+                                        <div class="flex flex-col md:items-center text-left md:text-center">
+                                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Step 01</span>
+                                            <h4 class="text-[11px] font-bold text-slate-700 dark:text-gray-300">ผู้บังคับบัญชา</h4>
+                                            <p class="text-[10px] font-bold text-slate-400 mt-0.5">{{ $latestReq->commander->fullname ?? 'รอระบุ' }}</p>
+                                            @if($latestReq->commander_status == 1)
+                                                <span class="mt-2 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black">ผ่านการอนุมัติ</span>
+                                            @elseif($latestReq->commander_status == 2)
+                                                <span class="mt-2 px-2 py-0.5 bg-red-50 text-red-600 rounded-md text-[9px] font-black">ไม่ผ่าน</span>
+                                            @endif
+                                            @if($latestReq->commander_date)
+                                                <p class="text-[8px] text-slate-400 font-bold mt-1.5">{{ \Carbon\Carbon::parse($latestReq->commander_date)->format('d/m/Y') }}</p>
+                                            @endif
                                             @if($latestReq->commander_comment)
-                                                <p class="mt-3 text-[10px] text-slate-500 italic px-2 border-l-2 border-red-200">"{{ $latestReq->commander_comment }}"</p>
+                                                <p class="mt-2 text-[9px] text-slate-500 italic max-w-[120px] line-clamp-2">"{{ $latestReq->commander_comment }}"</p>
                                             @endif
                                         </div>
                                     </div>
 
-                                    {{-- HAMS Manager --}}
-                                    <div class="bg-white dark:bg-gray-800/50 p-5 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col items-center">
-                                        <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500 mb-3">
+                                    {{-- Step 2: HAMS Manager --}}
+                                    <div class="relative z-10 flex flex-row md:flex-col items-center gap-4 md:gap-3 flex-1">
+                                        <div class="w-12 h-12 rounded-2xl {{ $s >= 2 ? 'bg-emerald-500 text-white shadow-emerald-200' : ($s == 1 ? 'bg-white border-2 border-blue-400 text-blue-500 shadow-blue-100 animate-pulse' : 'bg-white border-2 border-slate-100 text-slate-300') }} shadow-lg flex items-center justify-center transition-all duration-500">
                                             <i class="fa-solid fa-building-user text-lg"></i>
                                         </div>
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ผจก. แผนกฯ</p>
-                                        <p class="text-xs font-bold text-slate-700 dark:text-gray-200 mt-1 mb-3">{{ $latestReq->managerHams->fullname ?? 'รอระบุ' }}</p>
-                                        
-                                        <div class="mt-auto w-full">
-                                            <div class="flex items-center justify-center gap-2 mb-2">
-                                                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider {{ $latestReq->managerhams_status == 1 ? 'bg-emerald-100 text-emerald-600' : ($latestReq->managerhams_status == 2 ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500') }}">
-                                                    {{ $latestReq->managerhams_status == 1 ? 'เห็นสมควร' : ($latestReq->managerhams_status == 2 ? 'ไม่เห็นสมควร' : 'รอพิจารณา') }}
-                                                </span>
-                                            </div>
-                                            <p class="text-[9px] text-slate-400 font-bold">{{ $latestReq->managerhams_date ? \Carbon\Carbon::parse($latestReq->managerhams_date)->format('d/m/Y') : '-' }}</p>
+                                        <div class="flex flex-col md:items-center text-left md:text-center">
+                                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Step 02</span>
+                                            <h4 class="text-[11px] font-bold text-slate-700 dark:text-gray-300">ผจก. แผนกฯ</h4>
+                                            <p class="text-[10px] font-bold text-slate-400 mt-0.5">{{ $latestReq->managerHams->fullname ?? 'รอระบุ' }}</p>
+                                            @if($latestReq->managerhams_status == 1)
+                                                <span class="mt-2 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black">เห็นสมควร</span>
+                                            @elseif($latestReq->managerhams_status == 2)
+                                                <span class="mt-2 px-2 py-0.5 bg-red-50 text-red-600 rounded-md text-[9px] font-black">ไม่ผ่าน</span>
+                                            @endif
+                                            @if($latestReq->managerhams_date)
+                                                <p class="text-[8px] text-slate-400 font-bold mt-1.5">{{ \Carbon\Carbon::parse($latestReq->managerhams_date)->format('d/m/Y') }}</p>
+                                            @endif
                                             @if($latestReq->managerhams_comment)
-                                                <p class="mt-3 text-[10px] text-slate-500 italic px-2 border-l-2 border-red-200">"{{ $latestReq->managerhams_comment }}"</p>
+                                                <p class="mt-2 text-[9px] text-slate-500 italic max-w-[120px] line-clamp-2">"{{ $latestReq->managerhams_comment }}"</p>
                                             @endif
                                         </div>
                                     </div>
 
-                                    {{-- Committee --}}
-                                    <div class="bg-white dark:bg-gray-800/50 p-5 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col items-center">
-                                        <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 mb-3">
+                                    {{-- Step 3: Committee --}}
+                                    <div class="relative z-10 flex flex-row md:flex-col items-center gap-4 md:gap-3 flex-1">
+                                        <div class="w-12 h-12 rounded-2xl {{ $s >= 3 ? 'bg-emerald-500 text-white shadow-emerald-200' : ($s == 2 ? 'bg-white border-2 border-amber-400 text-amber-500 shadow-amber-100 animate-pulse' : 'bg-white border-2 border-slate-100 text-slate-300') }} shadow-lg flex items-center justify-center transition-all duration-500">
                                             <i class="fa-solid fa-users-gear text-lg"></i>
                                         </div>
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">คณะกรรมการย่อย</p>
-                                        <p class="text-xs font-bold text-slate-700 dark:text-gray-200 mt-1 mb-3">{{ $latestReq->committee->fullname ?? 'รอมติร่วม' }}</p>
-                                        
-                                        <div class="mt-auto w-full">
-                                            <div class="flex items-center justify-center gap-2 mb-2">
-                                                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider {{ $latestReq->Committee_status == 1 ? 'bg-emerald-100 text-emerald-600' : ($latestReq->Committee_status == 2 ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500') }}">
-                                                    {{ $latestReq->Committee_status == 1 ? 'อนุมัติ' : ($latestReq->Committee_status == 2 ? 'ไม่อนุมัติ' : 'รอพิจารณา') }}
-                                                </span>
-                                            </div>
-                                            <p class="text-[9px] text-slate-400 font-bold">{{ $latestReq->Committee_date ? \Carbon\Carbon::parse($latestReq->Committee_date)->format('d/m/Y') : '-' }}</p>
-                                            @if($latestReq->Committee_comment)
-                                                <p class="mt-3 text-[10px] text-slate-500 italic px-2 border-l-2 border-red-200">"{{ $latestReq->Committee_comment }}"</p>
+                                        <div class="flex flex-col md:items-center text-left md:text-center">
+                                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Step 03</span>
+                                            <h4 class="text-[11px] font-bold text-slate-700 dark:text-gray-300">คณะกรรมการย่อย</h4>
+                                            <p class="text-[10px] font-bold text-slate-400 mt-0.5">{{ $latestReq->committee->fullname ?? 'รอมติร่วม' }}</p>
+                                            @if($latestReq->Committee_status == 1)
+                                                <span class="mt-2 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black">อนุมัติ</span>
+                                            @elseif($latestReq->Committee_status == 2)
+                                                <span class="mt-2 px-2 py-0.5 bg-red-50 text-red-600 rounded-md text-[9px] font-black">ไม่อนุมัติ</span>
                                             @endif
+                                            @if($latestReq->Committee_date)
+                                                <p class="text-[8px] text-slate-400 font-bold mt-1.5">{{ \Carbon\Carbon::parse($latestReq->Committee_date)->format('d/m/Y') }}</p>
+                                            @endif
+                                            @if($latestReq->Committee_comment)
+                                                <p class="mt-2 text-[9px] text-slate-500 italic max-w-[120px] line-clamp-2">"{{ $latestReq->Committee_comment }}"</p>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    {{-- Step 4: Ready/Assigned --}}
+                                    <div class="relative z-10 flex flex-row md:flex-col items-center gap-4 md:gap-3 flex-1">
+                                        <div class="w-12 h-12 rounded-2xl {{ $s >= 6 ? 'bg-blue-600 text-white shadow-blue-200' : ($s >= 3 ? 'bg-white border-2 border-blue-400 text-blue-500 shadow-blue-100 animate-pulse' : 'bg-white border-2 border-slate-100 text-slate-300') }} shadow-lg flex items-center justify-center transition-all duration-500">
+                                            <i class="fa-solid fa-house-circle-check text-lg"></i>
+                                        </div>
+                                        <div class="flex flex-col md:items-center text-left md:text-center">
+                                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Step 04</span>
+                                            <h4 class="text-[11px] font-bold text-slate-700 dark:text-gray-300">จัดเตรียมที่พัก</h4>
+                                            <p class="text-[10px] font-bold text-slate-400 mt-0.5">{{ $s >= 7 ? 'ดำเนินการแล้ว' : 'เตรียมความพร้อม' }}</p>
                                         </div>
                                     </div>
                                 </div>

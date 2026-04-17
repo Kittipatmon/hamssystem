@@ -51,4 +51,9 @@ class BookingCar extends Model
     {
         return $this->belongsTo(Vehicle::class, 'vehicle_id', 'vehicle_id');
     }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by', 'id');
+    }
 }

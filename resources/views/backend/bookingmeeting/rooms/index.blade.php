@@ -177,7 +177,15 @@
                         </td>
                         <td>
                             <div class="flex items-center justify-center gap-2">
-                                <a href="#" onclick="alert('Viewing room stats...')" 
+                                <a href="#" onclick="Swal.fire({ 
+                                    title: '<span class=\'font-black\'>กำลังจัดทำ...</span>', 
+                                    html: '<p class=\'text-slate-500\'>ระบบสถิติการใช้ห้องประชุม อยู่ระหว่างการพัฒนาครับ</p>', 
+                                    icon: 'info', 
+                                    confirmButtonColor: '#0891b2', 
+                                    padding: '2rem', 
+                                    borderRadius: '2.5rem',
+                                    customClass: { popup: 'rounded-[2.5rem] border-0 shadow-2xl' }
+                                })" 
                                    class="w-8 h-8 rounded-lg flex items-center justify-center border border-cyan-200 text-cyan-500 hover:bg-cyan-50 transition-colors" title="ดูข้อมูล">
                                     <i class="fa-regular fa-eye text-xs"></i>
                                 </a>
@@ -185,11 +193,13 @@
                                    class="w-8 h-8 rounded-lg flex items-center justify-center border border-amber-200 text-amber-500 hover:bg-amber-50 transition-colors" title="แก้ไข">
                                     <i class="fa-regular fa-pen-to-square text-xs"></i>
                                 </a>
-                                <form action="{{ route('backend.bookingmeeting.rooms.destroy', $room->room_id) }}" method="POST" class="m-0 p-0" onsubmit="return confirm('ยืนยันการลบห้องประชุมรายนี้?');">
+                                <form action="{{ route('backend.bookingmeeting.rooms.destroy', $room->room_id) }}" method="POST" class="m-0 p-0 delete-form">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" 
-                                       class="w-8 h-8 rounded-lg flex items-center justify-center border border-red-200 text-red-500 hover:bg-red-50 transition-colors" title="ลบข้อมูล">
+                                    <button type="button" 
+                                       class="w-8 h-8 rounded-lg flex items-center justify-center border border-red-200 text-red-500 hover:bg-red-50 transition-colors btn-delete" 
+                                       data-name="{{ $room->room_name }}"
+                                       title="ลบข้อมูล">
                                         <i class="fa-regular fa-trash-can text-xs"></i>
                                     </button>
                                 </form>
@@ -345,6 +355,37 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+
+    // === SweetAlert2 Delete Confirmation ===
+    document.querySelectorAll('.btn-delete').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var form = this.closest('.delete-form');
+            var roomName = this.getAttribute('data-name');
+
+            Swal.fire({
+                title: '<span class="text-xl font-black text-slate-800">ยืนยันการลบข้อมูล?</span>',
+                html: '<p class="text-slate-500 font-medium">คุณกำลังจะลบห้องประชุม <span class="text-red-600 font-bold">"' + roomName + '"</span><br>การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#f1f5f9',
+                confirmButtonText: 'ยืนยันการลบ',
+                cancelButtonText: '<span class="text-slate-500">ยกเลิก</span>',
+                padding: '2rem',
+                borderRadius: '2.5rem',
+                customClass: {
+                    popup: 'rounded-[2.5rem] border-0 shadow-2xl',
+                    confirmButton: 'rounded-xl px-10 py-3 font-bold',
+                    cancelButton: 'rounded-xl px-10 py-3 font-bold'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
 });
 </script>
 @endsection

@@ -26,29 +26,21 @@
             class="bg-white dark:bg-kumwell-card border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl shadow-gray-200/50 transition-all hover:shadow-2xl relative z-30 overflow-visible min-h-[450px] mb-20">
             <div class="relative overflow-visible">
                 <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
-                            <th
-                                class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center w-32">
-                                รูปภาพ</th>
-                            <th
-                                class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest whitespace-nowrap">
-                                วันที่เผยแพร่</th>
-                            <th
-                                class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
-                                หัวข้อข่าว</th>
-                            <th
-                                class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">
-                                สถานะ</th>
-                            <th
-                                class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">
-                                จัดการ</th>
+                    <thead class="hidden md:table-header-group">
+                        <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 uppercase tracking-[0.15em] text-[10px] font-black">
+                            <th class="px-6 py-5 text-gray-500 dark:text-gray-400 text-center w-32">รูปภาพ</th>
+                            <th class="px-6 py-5 text-gray-500 dark:text-gray-400 whitespace-nowrap">วันที่เผยแพร่</th>
+                            <th class="px-6 py-5 text-gray-500 dark:text-gray-400">หัวข้อข่าว</th>
+                            <th class="px-6 py-5 text-gray-500 dark:text-gray-400 text-center">ยอดเข้าดู</th>
+                            <th class="px-6 py-5 text-gray-500 dark:text-gray-400 text-center">สถานะ</th>
+                            <th class="px-6 py-5 text-gray-500 dark:text-gray-400 text-center">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
                         @forelse($news as $item)
-                            <tr class="group hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition-colors">
-                                <td class="px-6 py-6 font-medium">
+                            <tr class="group flex flex-col md:table-row hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition-colors border-b md:border-none last:border-0 p-4 md:p-0">
+                                <td class="flex justify-between items-center md:table-cell px-6 py-6 font-medium">
+                                    <span class="md:hidden text-[10px] font-black text-slate-400 uppercase tracking-widest">รูปภาพ</span>
                                     @php
                                         $paths = [];
                                         if (method_exists($item, 'imagePaths')) {
@@ -105,113 +97,130 @@
                                             </div>
                                         @endif
                                     </div>
-                                </td>
-                                <td class="px-6 py-6 whitespace-nowrap">
+                                <td class="hidden md:table-cell px-6 py-6 whitespace-nowrap">
                                     <div class="flex flex-col">
                                         <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
                                             {{ optional($item->published_date)->format('d M Y') }}
                                         </span>
-                                        <span class="text-[10px] text-gray-400 uppercase tracking-tighter">
-                                            {{ optional($item->published_date)->diffForHumans() }}
-                                        </span>
+                                        <div class="flex items-center gap-1.5 mt-0.5">
+                                            <span class="text-[10px] text-slate-400 font-bold tracking-tighter">
+                                                {{ optional($item->published_date)->format('H:i') }}
+                                            </span>
+                                            <span class="text-[9px] text-slate-300 font-medium uppercase">
+                                                · {{ optional($item->published_date)->diffForHumans() }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-6 font-medium">
-                                    <p
-                                        class="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 group-hover:text-kumwell-red transition-colors">
-                                        {{ $item->title }}
-                                    </p>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    @if($item->is_active)
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                            <span class="w-1 h-1 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
-                                            เผยแพร่
-                                        </span>
-                                    @else
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-400">
-                                            <span class="w-1 h-1 rounded-full bg-gray-400 mr-2"></span>
-                                            ปิดใช้งาน
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-6 font-medium">
-                                    <div class="flex items-center justify-center gap-3">
-                                        <!-- Outlook Notification Popover Logic -->
-                                        <div class="relative" x-data="{ open: false }">
-                                            <button onclick="toggleEmailPanel(this)" title="แจ้งเตือนผ่าน Outlook"
-                                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition-all transform hover:-translate-y-0.5 shadow-sm">
-                                                <i class="fa-solid fa-envelope"></i>
-                                            </button>
-
-                                            <!-- Email Panel (Abstracted Styling) -->
-                                            <div
-                                                class="email-panel hidden absolute right-0 mt-4 w-[22rem] bg-white dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-[2rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.35)] p-8 z-[9999] animate-popIn">
-                                                <form action="{{ route('datamanage.news.notifyOutlook', $item) }}" method="POST"
-                                                    onsubmit="return confirm('ส่งอีเมลแจ้งเตือน Outlook สำหรับข่าวนี้?');">
-                                                    @csrf
-                                                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
-                                                        แจ้งเตือน Outlook</h4>
-
-                                                    <div class="space-y-3">
-                                                        <div>
-                                                            <div class="flex justify-between items-center mb-1">
-                                                                <label
-                                                                    class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">เลือกผู้รับเพิ่มเติม</label>
-                                                                <button type="button"
-                                                                    onclick="handleClearAllEmails('{{ $item->news_id }}')"
-                                                                    class="text-[10px] font-black text-red-500 hover:text-red-700 transition-colors uppercase tracking-wider">
-                                                                    <i class="fa-solid fa-trash-can mr-1"></i> ล้างทั้งหมด
-                                                                </button>
-                                                            </div>
-
-                                                            <select id="select-emails-{{ $item->news_id }}"
-                                                                name="extra_emails[]" multiple class="select2-email w-full">
-                                                                @foreach(['Kittiphan.Bu@kumwell.com', 'hr@kumwell.com', 'sale@kumwell.com'] as $em)
-                                                                    <option value="{{ strtolower($em) }}">{{ strtolower($em) }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                            <p class="text-[11px] text-slate-400 mt-1">คลิก x
-                                                                ที่แท็กเพื่อลบอีเมลออก</p>
-                                                        </div>
-
-                                                        <div>
-                                                            <label
-                                                                class="text-[10px] font-semibold text-gray-500 mb-1 block uppercase tracking-wider">พิมพ์อีเมลอื่น</label>
-                                                            <div class="flex gap-2">
-                                                                <input type="email" id="input-custom-{{ $item->news_id }}"
-                                                                    class="flex-1 px-4 py-3 text-sm bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
-                                                                    placeholder="example@domain.com"
-                                                                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleAddCustomEmail('{{ $item->news_id }}'); }">
-                                                                <button type="button"
-                                                                    onclick="handleAddCustomEmail('{{ $item->news_id }}')"
-                                                                    class="w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-md active:scale-95">
-                                                                    <i class="fa-solid fa-plus text-lg font-bold"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="mt-4 flex gap-2">
-                                                        <button type="submit"
-                                                            class="flex-1 bg-blue-600 text-white text-[11px] font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                                            ส่งแจ้งเตือน
-                                                        </button>
-                                                        <button type="button" onclick="closeEmailPanel(this)"
-                                                            class="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[11px] rounded-lg hover:bg-gray-200 transition-colors">
-                                                            ยกเลิก
-                                                        </button>
-                                                    </div>
-                                                </form>
+                                <td class="flex flex-row md:table-cell px-6 py-6 font-medium border-none items-start gap-4">
+                                    <span class="md:hidden text-[10px] font-black text-slate-400 uppercase tracking-widest sr-only">ข้อมูลข่าว</span>
+                                    
+                                    {{-- Image Group on Mobile --}}
+                                    <div class="md:hidden">
+                                        {{-- We will move the image generation logic up if needed, but for now we just reference the existing block --}}
+                                    </div>
+                                    
+                                    {{-- Vertical Data Block for Mobile --}}
+                                    <div class="flex flex-col gap-3 w-full">
+                                        <div class="flex justify-between items-start md:hidden">
+                                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">วันที่เผยแพร่</span>
+                                            <div class="flex flex-col text-right">
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
+                                                    {{ optional($item->published_date)->format('d M Y') }}
+                                                </span>
+                                                <div class="flex items-center justify-end gap-1.5 mt-0.5">
+                                                    <span class="text-[11px] text-slate-400 font-black">
+                                                        {{ optional($item->published_date)->format('H:i') }}
+                                                    </span>
+                                                    <span class="text-[9px] text-slate-400 font-medium uppercase tracking-tighter">
+                                                        ({{ optional($item->published_date)->diffForHumans() }})
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
 
+                                        <div class="flex justify-between items-start md:hidden border-t border-gray-50 dark:border-gray-800/50 pt-3">
+                                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">หัวข้อ</span>
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 text-right">
+                                                {{ $item->title }}
+                                            </p>
+                                        </div>
+
+                                        <div class="flex justify-between items-center md:hidden border-t border-gray-50 dark:border-gray-800/50 pt-3">
+                                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ยอดเข้าดู</span>
+                                            <div class="flex flex-row items-center gap-1.5">
+                                                <span class="text-sm font-bold text-gray-700 dark:text-gray-200">
+                                                    {{ number_format($item->views_count ?? 0) }}
+                                                </span>
+                                                <span class="text-[9px] text-gray-400 uppercase tracking-tighter">ครั้ง</span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Desktop Title Content --}}
+                                        <div class="hidden md:block">
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 group-hover:text-kumwell-red transition-colors">
+                                                {{ $item->title }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+                                {{-- Views column (Desktop Only) --}}
+                                <td class="hidden md:table-cell px-6 py-4 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-sm font-bold text-gray-700 dark:text-gray-200">
+                                            {{ number_format($item->views_count ?? 0) }}
+                                        </span>
+                                        <span class="text-[9px] text-gray-400 uppercase tracking-tighter">ครั้ง</span>
+                                    </div>
+                                </td>
+                                </td>
+                                <td class="flex flex-row justify-center items-center gap-4 md:table-cell px-6 py-4 text-center border-t md:border-none border-gray-50 dark:border-gray-800/50 pt-6">
+                                    {{-- Group Status and Actions in a specific row for mobile --}}
+                                    <div class="md:hidden contents">
+                                        {{-- This will be handled by the next TD for a unified centered row on mobile --}}
+                                    </div>
+
+                                    <div class="hidden md:block">
+                                        @if($item->is_active)
+                                            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50 shadow-sm">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2.5 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                                เผยแพร่
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest bg-slate-50 text-slate-400 border border-slate-100 dark:bg-gray-800/50 dark:text-gray-500 dark:border-gray-700/50">
+                                                <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-gray-600 mr-2.5"></span>
+                                                ปิดใช้งาน
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="flex flex-row justify-center items-center gap-4 md:table-cell px-6 py-6 font-medium whitespace-nowrap text-center md:border-none pt-2 md:pt-6">
+                                    <div class="flex flex-row items-center justify-center gap-3">
+                                        {{-- Show status badge here on mobile as part of the action row --}}
+                                        <div class="md:hidden">
+                                            @if($item->is_active)
+                                                <span class="inline-flex items-center px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 shadow-sm leading-tight text-center">
+                                                    เผยแพร่
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-slate-50 text-slate-400 border border-slate-100 dark:bg-gray-800/50 dark:text-gray-500 shadow-sm leading-tight text-center">
+                                                    ปิดใช้งาน
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        <div class="relative">
+                                            <button type="button"
+                                                onclick="openNotifyModal('{{ $item->news_id }}', '{{ addslashes($item->title) }}', '{{ route('datamanage.news.notifyOutlook', $item) }}')"
+                                                title="แจ้งเตือนผ่าน Outlook"
+                                                class="w-11 h-11 flex items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm active:scale-90 border border-blue-100 dark:border-blue-900/50">
+                                                <i class="fa-solid fa-envelope text-lg"></i>
+                                            </button>
+                                        </div>
+
                                         <a href="{{ route('datamanage.news.edit', $item) }}" title="แก้ไขข่าวสาร"
-                                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white transition-all transform hover:-translate-y-0.5 shadow-sm">
-                                            <i class="fa-solid fa-pen-to-square"></i>
+                                            class="w-11 h-11 flex items-center justify-center rounded-2xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm active:scale-90 border border-orange-100 dark:border-orange-900/50">
+                                            <i class="fa-solid fa-pen-to-square text-lg"></i>
                                         </a>
 
                                         <form method="POST" action="{{ route('datamanage.news.destroy', $item) }}"
@@ -219,8 +228,8 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" title="ลบข่าวสาร"
-                                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all transform hover:-translate-y-0.5 shadow-sm">
-                                                <i class="fa-solid fa-trash-can"></i>
+                                                class="w-11 h-11 flex items-center justify-center rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm active:scale-90 border border-red-100 dark:border-red-900/50">
+                                                <i class="fa-solid fa-trash-can text-lg"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -244,6 +253,146 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Modal (Single implementation outside the transform context) -->
+    <div id="email-notify-modal"
+        class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-[4px] z-[9999] flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-gray-800 w-full max-w-4xl h-[680px] rounded-[3rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden animate-popIn flex flex-col md:flex-row border border-white/20">
+
+            <!-- Left Side: Target Selection (Step 1) -->
+            <div
+                class="w-full md:w-[42%] bg-slate-50/50 dark:bg-gray-900/40 p-10 flex flex-col border-r border-slate-100 dark:border-gray-700/50">
+                <h5 class="text-[14px] font-black text-blue-600 uppercase tracking-[0.15em] mb-8 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                    STEP 1: เลือกกลุ่มเป้าหมาย
+                </h5>
+
+                <div class="space-y-8 flex-1 flex flex-col min-h-0">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-3">เลือกแผนก /
+                            ฝ่าย</label>
+                        <select id="modal-dept-select"
+                            class="w-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-2xl px-5 py-4 text-xs font-bold text-gray-700 dark:text-gray-200 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 transition-all outline-none"
+                            onchange="filterEmployeesByDeptModal(this.value)">
+                            <option value="all">ทั้งหมด (ทุกแผนก)</option>
+                            @foreach($departments as $dept)
+                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="flex-1 flex flex-col min-h-0">
+                        <div
+                            class="flex justify-between items-center mb-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                            <label>รายชื่อพนักงาน</label>
+                            <div class="flex gap-3">
+                                <button type="button" onclick="toggleSelectAllModal(true)"
+                                    class="text-blue-500 hover:text-blue-700 transition-colors uppercase">เลือกทั้งหมด</button>
+                                <span class="text-gray-200">|</span>
+                                <button type="button" onclick="toggleSelectAllModal(false)"
+                                    class="text-gray-400 hover:text-gray-600 transition-colors uppercase">ล้าง</button>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto pr-3 custom-scrollbar space-y-2" id="modal-employee-list">
+                            @foreach($employees as $emp)
+                                <label
+                                    class="employee-item group flex items-start gap-3 p-4 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-white dark:hover:bg-gray-800 transition-all cursor-pointer"
+                                    data-dept="{{ $emp->dept_id }}">
+                                    <div class="relative flex items-center mt-1">
+                                        <input type="checkbox" value="{{ strtolower($emp->email) }}"
+                                            class="employee-checkbox w-5 h-5 rounded-md border-slate-300 text-blue-600 focus:ring-blue-500/20 transition-all"
+                                            onchange="handleCheckboxChangeModal(this)">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p
+                                            class="text-[13px] font-bold text-gray-700 dark:text-gray-200 truncate group-hover:text-blue-600 transition-colors">
+                                            {{ $emp->fullname }}
+                                        </p>
+                                        <p class="text-[10px] text-gray-400 truncate">{{ strtolower($emp->email) }}</p>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Notification Summary -->
+            <div class="flex-1 p-12 flex flex-col bg-white dark:bg-gray-800 relative overflow-y-auto custom-scrollbar">
+                <button type="button" onclick="closeNotifyModal()"
+                    class="absolute top-8 right-8 w-10 h-10 flex items-center justify-center rounded-full text-gray-300 hover:bg-red-50 hover:text-red-500 transition-all">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+
+                <div class="mb-12">
+                    <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-1">แจ้งเตือน OUTLOOK</h4>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] opacity-70">NOTIFICATION
+                        SUMMARY</p>
+                    <p id="modal-news-title" class="text-[12px] font-medium text-blue-600 mt-2 line-clamp-1 italic"></p>
+                </div>
+
+                <form id="modal-notify-form" action="" method="POST" class="flex-1 flex flex-col space-y-10"
+                    onsubmit="return confirm('ส่งอีเมลแจ้งเตือน Outlook สำหรับข่าวนี้?');">
+                    @csrf
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">
+                                    รายชื่อผู้รับแจ้งเตือน <span id="recipient-count" class="ml-1 text-blue-600">(0)</span>
+                                </label>
+                                <button type="button" onclick="handleClearAllEmailsModal()"
+                                    class="text-[10px] font-bold text-red-500 hover:text-red-700 transition-colors uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-trash-can text-[10px]"></i> ล้างข้อมูล
+                                </button>
+                            </div>
+
+                            <select id="modal-select-emails" name="extra_emails[]" multiple
+                                class="select2-email w-full"></select>
+                            <p class="text-[11px] text-blue-500 font-medium mt-3 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-info text-[10px]"></i>
+                                ระบบจะรวมอีเมลจาก Checklist ด้านซ้ายและที่ระบุเอง
+                            </p>
+                        </div>
+
+                        <div>
+                            <label
+                                class="text-[11px] font-bold text-gray-500 mb-3 block uppercase tracking-widest">ระบุอีเมลอื่นๆ
+                                เพิ่มเติม</label>
+                            <div class="relative">
+                                <input type="email" id="modal-custom-email-input"
+                                    class="w-full px-6 py-5 text-sm bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 focus:border-blue-500 transition-all outline-none placeholder:text-gray-400"
+                                    placeholder="example@kumwell.com"
+                                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleAddCustomEmailModal(); }">
+                                <button type="button" onclick="handleAddCustomEmailModal()"
+                                    class="absolute right-2.5 top-2.5 w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all shadow-[0_8px_15px_-4px_rgba(37,99,235,0.4)] active:scale-90">
+                                    <i class="fa-solid fa-plus text-sm"></i>
+                                </button>
+                                <p class="hidden text-[10px] text-red-500 mt-3 items-center gap-1.5" id="modal-email-error">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    รูปแบบอีเมลไม่ถูกต้อง
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-10 flex gap-4">
+                        <button type="submit"
+                            class="flex-1 h-16 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-black rounded-2xl shadow-[0_15px_30px_-10px_rgba(37,99,235,0.4)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.5)] transition-all flex items-center justify-center gap-4 active:scale-95 group">
+                            <i
+                                class="fa-solid fa-paper-plane text-sm group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                            ส่งแจ้งเตือน
+                        </button>
+                        <button type="button" onclick="closeNotifyModal()"
+                            class="px-10 h-16 bg-slate-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold rounded-2xl hover:bg-slate-200 dark:hover:bg-gray-600 transition-all active:scale-95">
+                            ยกเลิก
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -293,7 +442,31 @@
             border: 1px solid #e2e8f0 !important;
             border-radius: 14px !important;
             min-height: 46px !important;
+            max-height: 180px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
             padding: 6px !important;
+        }
+
+        .select2-selection--multiple::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .select2-selection--multiple::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .select2-selection--multiple::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .select2-selection--multiple::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+        }
+
+        .dark .select2-selection--multiple::-webkit-scrollbar-thumb {
+            background: #4b5563;
         }
 
         .dark .select2-container--default .select2-selection--multiple {
@@ -342,9 +515,35 @@
         }
 
         .select2-dropdown {
-            border-radius: 14px !important;
+            border-radius: 20px !important;
             border: 1px solid #e2e8f0 !important;
             overflow: hidden !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #374151;
+        }
+
+        .employee-checkbox:checked {
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
         }
     </style>
 @endpush
@@ -354,95 +553,147 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        function isValidEmail(email) {
+        window.isValidEmail = function (email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        window.handleClearAllEmails = function (newsId) {
-            const $select = $(`#select-emails-${newsId}`);
-            $select.val(null).trigger('change');
+        // --- Single Modal Logic ---
+        const modal = document.getElementById('email-notify-modal');
+        const $modalSelect = $('#modal-select-emails');
+        const modalForm = document.getElementById('modal-notify-form');
+        const modalTitle = document.getElementById('modal-news-title');
+        const modalCustomInput = document.getElementById('modal-custom-email-input');
+        const modalError = document.getElementById('modal-email-error');
+
+        window.openNotifyModal = function (newsId, newsTitle, actionUrl) {
+            modalForm.action = actionUrl;
+            modalTitle.textContent = `เรื่อง: ${newsTitle}`;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            // Reset modal state
+            handleClearAllEmailsModal();
         };
 
-        window.handleAddCustomEmail = function (newsId) {
-            const input = document.getElementById(`input-custom-${newsId}`);
-            const email = (input.value || '').trim().toLowerCase();
-            const $select = $(`#select-emails-${newsId}`);
+        window.closeNotifyModal = function () {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
 
-            if (!email) {
-                alert('กรุณากรอกอีเมล');
-                input.focus();
-                return;
-            }
+        window.handleClearAllEmailsModal = function () {
+            $('#modal-select-emails').val(null).trigger('change');
+            document.querySelectorAll('#modal-employee-list .employee-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+            modalCustomInput.value = '';
+            modalError.classList.add('hidden');
+            modalError.classList.remove('flex');
+            document.getElementById('modal-dept-select').value = 'all';
+            filterEmployeesByDeptModal('all');
+        };
+
+        window.handleAddCustomEmailModal = function () {
+            const email = (modalCustomInput.value || '').trim().toLowerCase();
+
+            if (!email) return;
 
             if (!isValidEmail(email)) {
-                alert('กรุณากรอกอีเมลให้ถูกต้อง เช่น example@domain.com');
-                input.focus();
+                modalError.classList.remove('hidden');
+                modalError.classList.add('flex');
+                modalCustomInput.focus();
                 return;
             }
 
-            if ($select.find(`option[value="${email}"]`).length === 0) {
-                const option = new Option(email, email, true, true);
-                $select.append(option);
+            modalError.classList.add('hidden');
+            modalError.classList.remove('flex');
+
+            const $modalSelect = $('#modal-select-emails');
+            if ($modalSelect.find(`option[value="${email}"]`).length === 0) {
+                $modalSelect.append(new Option(email, email, true, true));
             }
 
-            let values = $select.val() || [];
-            if (!values.includes(email)) {
-                values.push(email);
-            }
+            let values = $modalSelect.val() || [];
+            if (!values.includes(email)) values.push(email);
+            $modalSelect.val(values).trigger('change');
 
-            $select.val(values).trigger('change');
-
-            input.value = '';
-            input.focus();
+            modalCustomInput.value = '';
+            modalCustomInput.focus();
         };
 
-        window.toggleEmailPanel = function (btn) {
-            document.querySelectorAll('.email-panel').forEach(panel => {
-                if (panel !== btn.nextElementSibling) {
-                    panel.classList.add('hidden');
+        window.filterEmployeesByDeptModal = function (deptId) {
+            const items = document.querySelectorAll('#modal-employee-list .employee-item');
+            items.forEach(item => {
+                if (deptId === 'all' || item.dataset.dept === deptId) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        };
+
+        window.toggleSelectAllModal = function (state) {
+            const visibleCheckboxes = document.querySelectorAll('#modal-employee-list .employee-item:not(.hidden) .employee-checkbox');
+            const $modalSelect = $('#modal-select-emails');
+            let values = $modalSelect.val() || [];
+
+            visibleCheckboxes.forEach(cb => {
+                cb.checked = state;
+                const email = cb.value;
+                if (state) {
+                    if (!values.includes(email)) values.push(email);
+                    if ($modalSelect.find(`option[value="${email}"]`).length === 0) {
+                        $modalSelect.append(new Option(email, email, true, true));
+                    }
+                } else {
+                    values = values.filter(v => v !== email);
                 }
             });
 
-            const panel = btn.nextElementSibling;
-            if (panel) {
-                panel.classList.toggle('hidden');
-            }
+            $modalSelect.val(values).trigger('change');
         };
 
-        window.closeEmailPanel = function (btn) {
-            const panel = btn.closest('.email-panel');
-            if (panel) panel.classList.add('hidden');
+        window.handleCheckboxChangeModal = function (cb) {
+            const email = cb.value;
+            const $modalSelect = $('#modal-select-emails');
+            let values = $modalSelect.val() || [];
+
+            if (cb.checked) {
+                if (!values.includes(email)) values.push(email);
+                if ($modalSelect.find(`option[value="${email}"]`).length === 0) {
+                    $modalSelect.append(new Option(email, email, true, true));
+                }
+            } else {
+                values = values.filter(v => v !== email);
+            }
+
+            $modalSelect.val(values).trigger('change');
         };
 
-        /* --- ปิดแผงเมื่อคลิกพื้นที่ว่างรอบๆ (ยกเว้นในแผงเอง หรือใน Select2) --- */
-        document.addEventListener('click', function (e) {
-            // เช็คว่าคลิกในแผงอีเมล หรือ ปุ่มกดเปิดแผง หรือ กล่อง Select2 (รวมถึง Dropdown)
-            const isClickInsidePanel = !!e.target.closest('.email-panel');
-            const isClickOnToggleButton = !!e.target.closest('[onclick*="toggleEmailPanel"]');
-            const isClickOnSelect2 = !!e.target.closest('.select2-container') || !!e.target.closest('.select2-selection__choice__remove');
-
-            if (!isClickInsidePanel && !isClickOnToggleButton && !isClickOnSelect2) {
-                document.querySelectorAll('.email-panel').forEach(panel => panel.classList.add('hidden'));
-            }
+        // Modal Backdrop Click
+        modal.addEventListener('mousedown', function (e) {
+            if (e.target === modal) closeNotifyModal();
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-            $('.select2-email').select2({
+            $('#modal-select-emails').select2({
                 width: '100%',
-                placeholder: 'เลือกหรือพิมพ์อีเมล',
+                placeholder: 'คัดเลือกผู้รับแจ้งเตือน...',
                 tags: true,
                 tokenSeparators: [',', ' '],
                 createTag: function (params) {
                     const term = $.trim(params.term).toLowerCase();
-                    if (term === '' || !isValidEmail(term)) {
-                        return null;
-                    }
-                    return {
-                        id: term,
-                        text: term,
-                        newTag: true
-                    };
+                    if (term === '' || !isValidEmail(term)) return null;
+                    return { id: term, text: term, newTag: true };
                 }
+            }).on('change', function () {
+                const currentValues = $(this).val() || [];
+                document.querySelectorAll('#modal-employee-list .employee-checkbox').forEach(cb => {
+                    cb.checked = currentValues.includes(cb.value);
+                });
+
+                // Update recipient count
+                const count = currentValues.length;
+                document.getElementById('recipient-count').textContent = `(${count})`;
             });
         });
     </script>

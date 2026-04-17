@@ -303,7 +303,7 @@
                 </a>
 
                 {{-- Card 6: จัดการข้อมูล (Admin only) --}}
-                @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))
+                @if(Auth::check() && (in_array(Auth::user()->dept_id, ['12', '14']) || Auth::user()->emp_code == '11648'))
                     <a href="{{ route('datamanage.welcomedatamanage') }}"
                         class="service-card rounded-2xl p-5 block animate-fadeInUp animate-delay-6">
                         <div class="flex items-start gap-4">

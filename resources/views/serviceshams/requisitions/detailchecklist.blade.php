@@ -1,7 +1,7 @@
 @extends('layouts.serviceitem.appservice')
 
 @section('content')
-    <div class="max-w-[1400px] mx-auto px-4 py-8 space-y-8">
+    <div class="max-w-[1400px] mx-auto px-4 py-8 lg:py-18 space-y-8">
 
         <!-- Header Section -->
         <div
@@ -25,6 +25,11 @@
                     class="px-6 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 font-black rounded-2xl border border-slate-100 transition-all active:scale-95 text-[13px] tracking-wide">
                     <i class="fa-solid fa-arrow-left mr-2 opacity-50"></i> กลับไปหน้ารวม
                 </a>
+                <a href="{{ route('requisitions.detail.pdf', $requisition->requisitions_id) }}"
+                    class="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-100 text-red-500 rounded-2xl hover:bg-red-50 transition-all shadow-sm"
+                    title="ดาวน์โหลด PDF">
+                    <i class="fa-solid fa-file-pdf text-xl"></i>
+                </a>
             </div>
         </div>
 
@@ -36,7 +41,8 @@
                     <i class="fa-solid fa-user-tie text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1.5 tracking-widest">ผู้ขอเบิก (Requester)</p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1.5 tracking-widest">ผู้ขอเบิก
+                        (Requester)</p>
                     <div class="flex flex-col">
                         <span
                             class="text-xl font-black text-slate-700 leading-tight">คุณ{{ $requisition->user->fullname }}</span>
@@ -47,12 +53,14 @@
                 </div>
             </div>
 
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex items-center gap-5 border-l-4 border-l-orange-400">
+            <div
+                class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex items-center gap-5 border-l-4 border-l-orange-400">
                 <div class="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center shadow-sm">
                     <i class="fa-solid fa-list-check text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1.5 tracking-widest">ความคืบหน้า (Progress)</p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1.5 tracking-widest">
+                        ความคืบหน้า (Progress)</p>
                     <div class="flex items-baseline gap-1">
                         <span id="progress-text" class="text-3xl font-black text-slate-800">
                             {{ $requisition->requisition_items->where('check_item', 1)->count() }} /
@@ -64,11 +72,13 @@
             </div>
 
             <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex items-center gap-5">
-                <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm">
+                <div
+                    class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm">
                     <i class="fa-solid fa-user-check text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1.5 tracking-widest">เจ้าหน้าที่จัดเตรียม (Staff)</p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1.5 tracking-widest">
+                        เจ้าหน้าที่จัดเตรียม (Staff)</p>
                     <p class="text-lg font-black text-slate-700 leading-none">
                         คุณ{{ $requisition->packing_staff->fullname ?? Auth::user()->fullname }}
                     </p>
@@ -82,11 +92,13 @@
             <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
                 <div class="flex items-center gap-3">
                     <div class="w-1.5 h-6 bg-red-600 rounded-full"></div>
-                    <h2 class="text-lg font-black text-slate-800 tracking-tight leading-none">รายการพัสดุที่ต้องจัด (Packing List)
+                    <h2 class="text-lg font-black text-slate-800 tracking-tight leading-none">รายการพัสดุที่ต้องจัด (Packing
+                        List)
                     </h2>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ติ๊กถูกเพื่อยืนยันรายการพัสดุ</span>
+                    <span
+                        class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ติ๊กถูกเพื่อยืนยันรายการพัสดุ</span>
                     <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center">
                         <i class="fa-solid fa-chevron-down text-[10px] text-slate-300 animate-bounce"></i>
                     </div>
@@ -100,11 +112,16 @@
                             <th
                                 class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest rounded-l-2xl text-center w-20">
                                 #</th>
-                            <th class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest">ชื่อรายการพัสดุ / SKU
+                            <th class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                                ชื่อรายการพัสดุ / SKU
                             </th>
-                            <th class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">จำนวนที่เบิก
+                            <th
+                                class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">
+                                จำนวนที่เบิก
                             </th>
-                            <th class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest text-right">มูลค่ารวม</th>
+                            <th
+                                class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest text-right">
+                                มูลค่ารวม</th>
                             <th
                                 class="px-6 py-5 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center rounded-r-2xl w-48">
                                 การตรวจสอบ</th>
@@ -115,7 +132,8 @@
                             <tr class="hover:bg-slate-50 transition-all duration-200 group {{ $item->check_item ? 'bg-emerald-50/10' : '' }}"
                                 id="row-{{ $item->requistionitem_id }}">
                                 <td class="px-6 py-6 text-center text-slate-300 font-black uppercase">
-                                    {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                                    {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
+                                </td>
                                 <td class="px-6 py-6 font-black text-slate-700">
                                     <div class="flex flex-col">
                                         <span
@@ -141,7 +159,7 @@
                                                 data-id="{{ $item->requistionitem_id }}" @if($item->check_item) checked @endif>
                                             <div
                                                 class="w-12 h-12 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center transition-all group-hover/label:border-red-400 group-hover/label:shadow-lg shadow-sm
-                                                        peer-checked:bg-emerald-500 peer-checked:border-emerald-500 peer-checked:shadow-emerald-100 peer-checked:scale-110">
+                                                                peer-checked:bg-emerald-500 peer-checked:border-emerald-500 peer-checked:shadow-emerald-100 peer-checked:scale-110">
                                                 <i
                                                     class="fa-solid fa-check text-slate-100 peer-checked:text-white text-xl transition-all {{ $item->check_item ? 'text-white' : '' }}"></i>
                                             </div>
@@ -164,8 +182,10 @@
                         <i class="fa-solid fa-calculator text-slate-400 text-xl"></i>
                     </div>
                     <div>
-                        <p class="text-[11px] font-black text-slate-500 uppercase leading-none mb-1.5 tracking-widest">สรุปมูลค่าประเมินพัสดุ (Valuation)</p>
-                        <p class="text-[13px] font-bold text-slate-500 leading-none tracking-wide opacity-80">รวมมูลค่าทั้งหมดของใบเบิกฉบับนี้</p>
+                        <p class="text-[11px] font-black text-slate-500 uppercase leading-none mb-1.5 tracking-widest">
+                            สรุปมูลค่าประเมินพัสดุ (Valuation)</p>
+                        <p class="text-[13px] font-bold text-slate-500 leading-none tracking-wide opacity-80">
+                            รวมมูลค่าทั้งหมดของใบเบิกฉบับนี้</p>
                     </div>
                 </div>
                 <div class="text-right">
@@ -201,7 +221,8 @@
                     </div>
                     <div class="flex flex-col items-start leading-none gap-1.5">
                         <span class="text-[18px] font-black">พบปัญหา / ยกเลิกการจัด</span>
-                        <span class="text-[10px] opacity-80 uppercase font-bold tracking-widest">Report Problem or Cancel</span>
+                        <span class="text-[10px] opacity-80 uppercase font-bold tracking-widest">Report Problem or
+                            Cancel</span>
                     </div>
                 </button>
 
@@ -417,7 +438,7 @@
                     customClass: { popup: 'rounded-[2rem]' }
                 });
             @endif
-        });
+            });
     </script>
 
     <style>

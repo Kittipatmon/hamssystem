@@ -99,14 +99,14 @@
                                         {{ $res->room->room_name ?? 'N/A' }}</div>
                                     <div class="text-[12px] text-slate-600 flex items-center gap-1 mt-0.5">
                                         <i class="fa-regular fa-calendar text-slate-400"></i>
-                                        {{ \Carbon\Carbon::parse($res->reservation_date)->translatedFormat('d M Y') }}
+                                        {{ \Carbon\Carbon::parse($res->reservation_date)->locale('th')->addYears(543)->translatedFormat('d M Y') }}
                                         <i class="fa-regular fa-clock text-slate-400 ml-1"></i>
-                                        {{ substr($res->start_time, 0, 5) }} - {{ substr($res->end_time, 0, 5) }}
+                                        {{ substr($res->start_time, 0, 5) }} - {{ substr($res->end_time, 0, 5) }} น.
                                     </div>
                                 </td>
                                 <td class="text-center">
                                     <div class="text-slate-700 font-medium">{{ $res->requester_name }}</div>
-                                    <div class="text-[11px] text-slate-400">{{ $res->user->employee_code ?? '' }}</div>
+                                    <div class="text-[11px] text-slate-400">{{ $res->user->emp_code ?? '' }}</div>
                                 </td>
                                 <td class="text-right">
                                     <div class="flex flex-col items-end gap-2 pr-2">
@@ -152,11 +152,21 @@
                                                 class="bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
                                                 <i class="fa-solid fa-check"></i> อนุมัติแล้ว
                                             </span>
+                                            @if($res->approvedBy)
+                                                <div class="text-[10px] text-emerald-600 mt-1 font-bold opacity-80">
+                                                    <i class="fa-solid fa-user-check mr-1"></i>โดย: {{ $res->approvedBy->fullname }}
+                                                </div>
+                                            @endif
                                         @elseif($res->status == 'rejected' || $res->status == 'ไม่อนุมัติ')
                                             <span
                                                 class="bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
                                                 <i class="fa-solid fa-xmark"></i> ไม่อนุมัติ
                                             </span>
+                                            @if($res->approvedBy)
+                                                <div class="text-[10px] text-red-600 mt-1 font-bold opacity-80">
+                                                    <i class="fa-solid fa-user-check mr-1"></i>โดย: {{ $res->approvedBy->fullname }}
+                                                </div>
+                                            @endif
                                         @elseif($res->status == 'cancelled' || $res->status == 'ยกเลิก')
                                             <span
                                                 class="bg-orange-100 text-orange-700 border border-orange-200 px-3 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm transition-all duration-300">

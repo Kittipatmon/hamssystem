@@ -128,7 +128,7 @@
         </div>
 
         <div class="info-section">
-            <p><strong>วันที่:</strong> {{ optional($requisition->request_date)->translatedFormat('d F Y') ?? now()->translatedFormat('d F Y') }}</p>
+            <p><strong>วันที่:</strong> {{ optional($requisition->request_date)->locale('th')->addYears(543)->isoFormat('D MMMM YYYY') ?? now()->locale('th')->addYears(543)->isoFormat('D MMMM YYYY') }}</p>
             <p><strong>เบิกของโดย:</strong> คุณ{{ $requisition->user->fullname ?? '-' }}</p>
         </div>
 
@@ -167,13 +167,13 @@
 
         <div class="signature-section">
             <div class="signature-box">
-                <p>อนุมัติโดย: ......................................................</p>
-                <p>วันที่: ..................... / ..................... / .....................</p>
-                <p>หมายเหตุ: ........................................................</p>
+                <p>อนุมัติโดย: {{ optional($requisition->approve_user)->fullname ?? '......................................................' }}</p>
+                <p>วันที่: {{ $requisition->approve_date ? optional($requisition->approve_date)->locale('th')->addYears(543)->isoFormat('D MMM YYYY') : '..................... / ..................... / .....................' }}</p>
+                <p>หมายเหตุ: {{ $requisition->approve_comment ?? '........................................................' }}</p>
             </div>
             <div class="signature-box right">
-                <p>จัดเตรียมของโดย: ......................................................</p>
-                <p>วันที่: ..................... / ..................... / .....................</p>
+                <p>จัดเตรียมของโดย: {{ optional($requisition->packing_staff)->fullname ?? '......................................................' }}</p>
+                <p>วันที่: {{ $requisition->packing_staff_date ? optional($requisition->packing_staff_date)->locale('th')->addYears(543)->isoFormat('D MMM YYYY') : '..................... / ..................... / .....................' }}</p>
                 <p>หมายเหตุ: ........................................................</p>
             </div>
         </div>

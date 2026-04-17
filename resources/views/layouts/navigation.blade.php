@@ -45,31 +45,13 @@
                 </a>
 
 
-                <!-- เกี่ยวกับเรา (dropdown) -->
-                <div class="dropdown dropdown-hover dropdown-end">
-                    <label tabindex="0"
-                        class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ request()->is('about*') || request()->routeIs('datamanage.news.*') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
-                        <i
-                            class="fa-regular fa-circle-question {{ request()->is('about*') || request()->routeIs('datamanage.news.*') ? '' : 'text-slate-400 group-hover:text-red-500' }}"></i>
-                        <span>เกี่ยวกับเรา</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
-                    </label>
-                    <ul tabindex="0"
-                        class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-56 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] z-50">
-                        <li>
-                            <a href="#"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                <i class="fa-regular fa-building text-red-400 w-4 text-center"></i> ข้อมูลบริษัท
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                <i class="fa-solid fa-users text-red-400 w-4 text-center"></i> ทีมงาน
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <!-- ประกาศ -->
+                <a href="{{ request()->routeIs('welcome') ? '#announcements-list' : route('welcome') . '#announcements-list' }}"
+                    id="nav-announcements"
+                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 text-slate-600 hover:bg-red-50 hover:text-red-600">
+                    <i class="fa-solid fa-bullhorn text-slate-400 group-hover:text-red-500"></i>
+                    <span>ประกาศ</span>
+                </a>
 
                 <!-- คู่มือการใช้ -->
                 <a href="#"
@@ -97,14 +79,14 @@
                             class="flex items-center gap-2 pl-2 pr-4 py-1.5 text-[14px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-full transition-all duration-300 hover:bg-red-50 hover:border-red-200 hover:text-red-700 cursor-pointer shadow-sm">
                             <div
                                 class="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-tr from-red-500 to-red-600 text-white flex items-center justify-center text-xs shadow-inner">
-                                @if(Auth::user()->photo_user)
+                                @if(Auth::check() && Auth::user()->photo_user)
                                     <img src="{{ asset(Auth::user()->photo_user) }}" alt="avatar"
                                         class="w-full h-full object-cover">
                                 @else
                                     <i class="fa-solid fa-user"></i>
                                 @endif
                             </div>
-                            <span>{{ Auth::user()->employee_code }}</span>
+                            <span>{{ Auth::user()->emp_code }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                         </label>
                         <ul tabindex="0"
@@ -112,7 +94,7 @@
                             <li class="px-4 py-3 border-b border-slate-100 mb-0 bg-slate-50/50 rounded-t-2xl">
                                 <div
                                     class="flex items-center gap-3 cursor-default hover:bg-transparent px-1 p-0 focus:!bg-transparent active:!bg-transparent focus:!text-current active:!text-current">
-                                    @if(Auth::user()->photo_user)
+                                    @if(Auth::check() && Auth::user()->photo_user)
                                         <div class="w-12 h-12 rounded-full ring-2 ring-red-100 overflow-hidden">
                                             <img src="{{ asset(Auth::user()->photo_user) }}" alt="Profile"
                                                 class="w-full h-full object-cover">
@@ -125,7 +107,7 @@
                                     @endif
                                     <div class="flex flex-col flex-1 truncate">
                                         <span
-                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->employee_code }}</span>
+                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->emp_code }}</span>
                                         <span
                                             class="text-[12px] text-slate-500 truncate">{{ Auth::user()->position ?? 'Employee' }}</span>
                                     </div>
@@ -170,28 +152,11 @@
                     หน้าหลัก
                 </a>
 
-                <details class="group [&_summary::-webkit-details-marker]:hidden" {{ request()->is('about*') || request()->routeIs('datamanage.news.*') ? 'open' : '' }}>
-                    <summary
-                        class="flex items-center justify-between px-4 py-3 text-[15px] font-medium rounded-xl cursor-pointer transition-colors {{ request()->is('about*') || request()->routeIs('datamanage.news.*') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
-                        <div class="flex items-center gap-3">
-                            <i
-                                class="fa-regular fa-circle-question w-5 text-center {{ request()->is('about*') || request()->routeIs('datamanage.news.*') ? 'text-red-500' : 'text-slate-400' }}"></i>
-                            เกี่ยวกับเรา
-                        </div>
-                        <i
-                            class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180"></i>
-                    </summary>
-                    <div class="mt-1 mb-2 ml-4 pl-4 border-l-2 border-red-100 flex flex-col gap-1">
-                        <a href="#"
-                            class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
-                            <i class="fa-regular fa-building text-red-400 w-4 text-center"></i> ข้อมูลบริษัท
-                        </a>
-                        <a href="#"
-                            class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
-                            <i class="fa-solid fa-users text-red-400 w-4 text-center"></i> ทีมงาน
-                        </a>
-                    </div>
-                </details>
+                <a href="{{ request()->routeIs('welcome') ? '#announcements-list' : route('welcome') . '#announcements-list' }}"
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-colors text-slate-600 hover:bg-slate-50">
+                    <i class="fa-solid fa-bullhorn w-5 text-center text-slate-400"></i>
+                    ประกาศ
+                </a>
 
                 <a href="#"
                     class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-colors {{ request()->is('manual*') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
@@ -217,7 +182,7 @@
                             <div class="flex items-center gap-3">
                                 <div
                                     class="w-8 h-8 rounded-full overflow-hidden bg-red-600 text-white flex items-center justify-center text-sm shadow-inner">
-                                    @if(Auth::user()->photo_user)
+                                    @if(Auth::check() && Auth::user()->photo_user)
                                         <img src="{{ asset(Auth::user()->photo_user) }}" alt="avatar"
                                             class="w-full h-full object-cover">
                                     @else
@@ -225,7 +190,7 @@
                                     @endif
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="leading-tight">{{ Auth::user()->employee_code }}</span>
+                                    <span class="leading-tight">{{ Auth::user()->emp_code }}</span>
                                     <span
                                         class="text-[11px] text-slate-400 font-medium font-normal leading-tight">{{ Auth::user()->first_name ?? 'ผู้ใช้งานระบบ' }}</span>
                                 </div>
@@ -288,10 +253,12 @@
         const navHome = document.getElementById('nav-home');
         const navNews = document.getElementById('nav-news');
         const navServices = document.getElementById('nav-services');
+        const navAnnouncements = document.getElementById('nav-announcements');
         const newsSection = document.getElementById('news');
         const servicesSection = document.getElementById('services');
+        const announcementsSection = document.getElementById('announcements-list');
 
-        const allNavs = [navHome, navNews, navServices].filter(Boolean);
+        const allNavs = [navHome, navNews, navServices, navAnnouncements].filter(Boolean);
         if (!navHome) return;
 
         const activeClasses = ['nav-active'];
@@ -333,6 +300,8 @@
                         activateOnly(navNews);
                     } else if (entry.target.id === 'services' && navServices) {
                         activateOnly(navServices);
+                    } else if (entry.target.id === 'announcements-list' && navAnnouncements) {
+                        activateOnly(navAnnouncements);
                     }
                 }
             });
@@ -340,12 +309,15 @@
 
         if (servicesSection) observer.observe(servicesSection);
         if (newsSection) observer.observe(newsSection);
+        if (announcementsSection) observer.observe(announcementsSection);
 
         // Initial state
         if (window.location.hash === '#news') {
             activateOnly(navNews);
         } else if (window.location.hash === '#services') {
             activateOnly(navServices);
+        } else if (window.location.hash === '#announcements-list') {
+            activateOnly(navAnnouncements);
         } else {
             activateOnly(navHome);
         }
@@ -356,6 +328,9 @@
         }
         if (navServices) {
             navServices.addEventListener('click', () => activateOnly(navServices));
+        }
+        if (navAnnouncements) {
+            navAnnouncements.addEventListener('click', () => activateOnly(navAnnouncements));
         }
         if (navHome) {
             navHome.addEventListener('click', () => {

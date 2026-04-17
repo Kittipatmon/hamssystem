@@ -133,7 +133,7 @@
         <h4 class="font-semibold mb-4 text-black">ข้อมูลพื้นฐาน</h4>
         <div class="grid grid-cols-2 gap-y-3 text-[13px]">
           <div class="text-black">รหัสพนักงาน</div>
-          <div class="text-black">{{ $user->employee_code ?? '11648' }}</div>
+          <div class="text-black">{{ $user->emp_code ?? '11648' }}</div>
 
           <div class="text-black">เพศ</div>
           <div class="text-black">{{ $user->sex ?? 'ชาย' }}</div>

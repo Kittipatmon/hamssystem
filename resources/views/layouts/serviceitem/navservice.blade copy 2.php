@@ -32,7 +32,7 @@
                 <a href="{{ route('items.itemsalllist') }}" class="pill">
                     <span>รายการอุปกรณ์</span>
                 </a>
-                @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))   
+                @if(Auth::check() && (in_array(Auth::user()->dept_id, ['12', '14']) || Auth::user()->emp_code == '11648'))   
                 <!-- เกี่ยวกับเรา (dropdown) -->
                 <div class="dropdown dropdown-center">
                     <label tabindex="0" class="pill cursor-pointer">
@@ -138,7 +138,7 @@
                     <div class="drawer-content">
                         <label for="my-drawer-5" class="pill drawer-button">
                             <i class="fa-solid fa-user"></i>
-                            <span>{{ Auth::user()->employee_code }}</span>
+                            <span>{{ Auth::user()->emp_code }}</span>
                             <i class="fa-solid fa-chevron-down text-[11px]"></i>
                         </label>
                     </div>
@@ -208,7 +208,7 @@
                 <!-- <div class="dropdown dropdown-end">
                     <label tabindex="0" class="pill cursor-pointer">
                         <i class="fa-solid fa-user"></i>
-                        <span>{{ Auth::user()->employee_code }}</span>
+                        <span>{{ Auth::user()->emp_code }}</span>
                         <i class="fa-solid fa-chevron-down text-[11px]"></i>
                     </label>
                     <ul tabindex="0"

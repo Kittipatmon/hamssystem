@@ -200,7 +200,7 @@
                 </a>
 
                 {{-- Card 6: Admin --}}
-                @if(Auth::check() && (in_array(Auth::user()->department_id, ['12', '14']) || Auth::user()->employee_code == '11648'))
+                @if(Auth::check() && (in_array(Auth::user()->dept_id, ['12', '14']) || Auth::user()->emp_code == '11648'))
                     <a href="{{ route('backend.welcomedatamanage') }}"
                         class="svc-card bg-white rounded-2xl shadow-sm overflow-hidden block">
                         <div class="relative overflow-hidden">

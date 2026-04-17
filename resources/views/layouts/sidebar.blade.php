@@ -16,15 +16,15 @@
 
         /* Custom Scrollbar */
         .sidebar-scroll::-webkit-scrollbar {
-            width: 5px;
+            width: 4px;
         }
 
         .sidebar-scroll::-webkit-scrollbar-track {
-            background: #121418;
+            background: #f8fafc;
         }
 
         .sidebar-scroll::-webkit-scrollbar-thumb {
-            background: #333;
+            background: #e2e8f0;
             border-radius: 10px;
         }
 
@@ -144,19 +144,20 @@
             class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
 
         <aside id="sidebar"
-            class="w-68 flex-shrink-0 flex flex-col h-full bg-[#0B1120] text-gray-300 border-r border-[#1E2B3C] shadow-xl z-30 fixed md:relative -translate-x-full md:translate-x-0 transition-all duration-300 overflow-hidden">
+            class="w-68 flex-shrink-0 flex flex-col h-full bg-white text-gray-600 border-r border-gray-100 shadow-sm z-30 fixed md:relative -translate-x-full md:translate-x-0 transition-all duration-300 overflow-hidden">
 
             <!-- Header -->
-            <div id="sidebar-header" class="h-20 flex items-center justify-between px-6 border-b border-gray-800/50">
+            <div id="sidebar-header" class="h-20 flex items-center justify-between px-6 border-b border-gray-50">
 
                 <div id="sidebar-logo"
                     class="flex items-center gap-3 overflow-hidden whitespace-nowrap transition-all duration-300 opacity-100">
-                    <div class="w-10 h-10 rounded-xl bg-[#D71920] flex items-center justify-center flex-shrink-0">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-[#D71920] flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/10">
                         <span class="font-bold text-white text-xl">H</span>
                     </div>
                     <a href="{{ route('welcome') }}">
                         <div class="flex flex-col leading-tight mt-1">
-                            <span class="text-[17px] font-bold tracking-wide text-white leading-none">Kumwell</span>
+                            <span class="text-[17px] font-bold tracking-wide text-gray-900 leading-none">Kumwell</span>
                             <span
                                 class="text-[10px] text-[#D71920] font-bold uppercase tracking-[0.1em] leading-none mt-1">HA
                                 SYSTEM</span>
@@ -173,8 +174,8 @@
 
             <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto overflow-x-hidden sidebar-scroll">
 
-                <div class="sidebar-text px-2 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main
-                    Menu</div>
+                <div class="sidebar-text px-2 mb-3 text-xs font-bold text-slate-400 uppercase tracking-widest">Main Menu
+                </div>
 
                 @php
                     $inventoryActive = request()->routeIs('items.*') || request()->routeIs('datamanage.news.*');
@@ -184,14 +185,17 @@
                     $housingActive = request()->routeIs('housing.*');
                 @endphp
 
+                @php
+                    $isDashboard = request()->routeIs('backend.welcomedatamanage') || request()->routeIs('housing.welcome');
+                @endphp
                 <a href="{{ route('backend.welcomedatamanage') }}"
-                    class="group relative flex items-center px-3 py-2 rounded-xl text-gray-400 hover:bg-gradient-to-r hover:from-kumwell-red hover:to-red-700 hover:text-white hover:shadow-lg hover:shadow-red-900/30 transition-all duration-200 {{ request()->routeIs('backend.welcomedatamanage') ? 'bg-gradient-to-r from-kumwell-red to-red-700 text-white shadow-lg' : '' }}">
+                    class="group relative flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 {{ $isDashboard ? 'bg-[#D71920] text-white shadow-lg shadow-red-500/20' : 'text-slate-600 hover:bg-slate-50 hover:text-kumwell-red' }}">
                     <i id="dashboard-icon"
-                        class="fa-solid fa-chart-pie text-sm w-6 text-center group-hover:text-white transition-colors mr-3"></i>
-                    <span class="sidebar-text">Dashboard</span>
+                        class="fa-solid fa-chart-pie text-sm w-6 text-center transition-colors mr-3 {{ $isDashboard ? 'text-white' : 'opacity-60 group-hover:text-kumwell-red' }}"></i>
+                    <span class="sidebar-text font-medium">Dashboard</span>
 
                     <div
-                        class="tooltip absolute left-14 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
+                        class="tooltip absolute left-14 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-xl hidden">
                         Dashboard
                     </div>
                 </a>
@@ -227,74 +231,61 @@
                     </div>
                 </div> -->
 
-                <div class="relative group">
-                    <button onclick="toggleDropdown('dropdown-policy')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $policyActive ? 'bg-white/5 text-white' : '' }}"
-                        id="btn-policy">
-                        <div class="flex items-center">
-                            <i id="icon-policy" class="fa-solid fa-users-gear text-sm w-6 text-center mr-3"></i>
-                            <span class="sidebar-text">จัดการนโยบาย/ขั้นตอน</span>
+                @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))
+                    <div class="relative group">
+                        <button onclick="toggleDropdown('dropdown-policy')"
+                            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 {{ $policyActive ? 'bg-kumwell-red text-white font-bold shadow-lg shadow-red-500/20' : 'text-slate-600 hover:bg-slate-50 hover:text-kumwell-red' }}"
+                            id="btn-policy">
+                            <div class="flex items-center">
+                                <i id="icon-policy"
+                                    class="fa-solid fa-users-gear text-sm w-6 text-center mr-3 {{ $policyActive ? 'text-white' : 'opacity-60' }}"></i>
+                                <span class="sidebar-text">จัดการนโยบาย/ขั้นตอน</span>
+                            </div>
+                            <i id="arrow-policy"
+                                class="sidebar-text fa-solid fa-chevron-down text-[10px] transition-transform duration-300 {{ $policyActive ? 'rotate-180' : '' }}"></i>
+                        </button>
+
+                        <div id="dropdown-policy"
+                            class="{{ $policyActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
+                            <a href="{{ route('backend.policy.index', ['type' => 'policy']) }}"
+                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->get('type') === 'policy' ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
+                                นโยบาย</a>
+                            <a href="{{ route('backend.policy.index', ['type' => 'operation']) }}"
+                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->get('type') === 'operation' ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
+                                หมวดหมู่การดำเนินงาน</a>
+                            <a href="{{ route('backend.announcement.index') }}"
+                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->routeIs('backend.announcement.*') ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
+                                จัดการประกาศ / แจ้งให้ทราบ</a>
                         </div>
-                        <i id="arrow-policy"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $policyActive ? 'rotate-180' : '' }}"></i>
-                    </button>
-
-                    <div id="dropdown-policy"
-                        class="{{ $policyActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
-                        <a href="{{ route('backend.policy.index', ['type' => 'policy']) }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->get('type') === 'policy' ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
-                            นโยบาย</a>
-                        <a href="{{ route('backend.policy.index', ['type' => 'operation']) }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->get('type') === 'operation' ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
-                            หมวดหมู่การดำเนินงาน</a>
-                        <a href="{{ route('backend.announcement.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('backend.announcement.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
-                            จัดการประกาศ / แจ้งให้ทราบ</a>
-
                     </div>
-
-                    <div
-                        class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
-                        จัดการนโยบาย/ขั้นตอน
-                    </div>
-                </div>
+                @endif
 
 
-                <div class="relative group">
-                    <button onclick="toggleDropdown('dropdown-hr')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $hamsActive ? 'bg-white/5 text-white' : '' }}"
-                        id="btn-hr">
-                        <div class="flex items-center">
-                            <i id="icon-hr" class="fa-solid fa-users-gear text-sm w-6 text-center mr-3"></i>
-                            <span class="sidebar-text">HAMS User</span>
+                @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))
+                    <div class="relative group">
+                        <button onclick="toggleDropdown('dropdown-hr')"
+                            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 {{ $hamsActive ? 'bg-kumwell-red text-white font-bold shadow-lg shadow-red-500/20' : 'text-slate-600 hover:bg-slate-50 hover:text-kumwell-red' }}"
+                            id="btn-hr">
+                            <div class="flex items-center">
+                                <i id="icon-hr"
+                                    class="fa-solid fa-user-group text-sm w-6 text-center mr-3 {{ $hamsActive ? 'text-white' : 'opacity-60' }}"></i>
+                                <span class="sidebar-text">HAMS User</span>
+                            </div>
+                            <i id="arrow-hr"
+                                class="sidebar-text fa-solid fa-chevron-down text-[10px] transition-transform duration-300 {{ $hamsActive ? 'rotate-180' : '' }}"></i>
+                        </button>
+
+                        <div id="dropdown-hr"
+                            class="{{ $hamsActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
+                            <a href="{{ route('users.index') }}"
+                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->routeIs('users.*') ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
+                                ข้อมูลพนักงาน</a>
+                            <a href="{{ route('departments.index') }}"
+                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->routeIs('departments.*') ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
+                                ข้อมูลแผนก</a>
                         </div>
-                        <i id="arrow-hr"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $hamsActive ? 'rotate-180' : '' }}"></i>
-                    </button>
-
-                    <div id="dropdown-hr"
-                        class="{{ $hamsActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
-                        <a href="{{ route('users.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('users.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
-                            ข้อมูลพนักงาน</a>
-                        <a href="{{ route('usertypes.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('usertypes.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
-                            ข้อมูลประเภทพนักงาน</a>
-                        <a href="{{ route('sections.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('sections.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
-                            ข้อมูลสายงาน</a>
-                        <a href="{{ route('divisions.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('divisions.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
-                            ข้อมูลฝ่าย</a>
-                        <a href="{{ route('departments.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('departments.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">-
-                            ข้อมูลแผนก</a>
                     </div>
-                    <div
-                        class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
-                        HAMS Settings
-                    </div>
-                </div>
+                @endif
 
                 <!-- <div class="relative group">
                     <button onclick="toggleDropdown('dropdown-suggestion')"
@@ -411,50 +402,50 @@
 
             </nav>
 
-            <div class="border-t border-gray-800 p-4 pb-6">
+            <div class="border-t border-gray-50 p-4 pb-6">
 
                 <div class="sidebar-text flex items-center justify-between mb-4 px-2">
                     <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Preferences</span>
                 </div>
 
                 <div
-                    class="sidebar-text flex items-center justify-between px-4 py-3 rounded-2xl bg-[#121620]/40 backdrop-blur-md border border-gray-800/60 mb-4 transition-all duration-300 hover:border-kumwell-red/30 group">
+                    class="sidebar-text flex items-center justify-between px-4 py-3 rounded-2xl bg-gray-50 border border-gray-100 mb-4 transition-all duration-300 hover:border-kumwell-red/30 group">
                     <div class="flex items-center gap-3">
                         <div
-                            class="w-8 h-8 rounded-xl bg-gray-800/50 flex items-center justify-center text-gray-500 group-hover:text-kumwell-red transition-colors duration-300">
+                            class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-gray-400 group-hover:text-kumwell-red transition-colors duration-300 shadow-sm">
                             <i class="fa-solid fa-moon text-sm"></i>
                         </div>
-                        <span class="text-xs font-medium text-gray-300">Dark Mode</span>
+                        <span class="text-xs font-medium text-gray-600">Dark Mode</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
                         <div
-                            class="w-14 h-7 bg-gray-700/50 rounded-full peer-focus:ring-2 peer-focus:ring-kumwell-red/20 peer-checked:bg-kumwell-red transition-all duration-300 shadow-inner">
+                            class="w-14 h-7 bg-gray-200 rounded-full peer-focus:ring-2 peer-focus:ring-kumwell-red/20 peer-checked:bg-kumwell-red transition-all duration-300 shadow-inner">
                             <div
                                 class="absolute inset-0 flex items-center justify-between px-2 pointer-events-none opacity-50">
-                                <i class="fa-solid fa-sun text-[10px] text-yellow-500"></i>
-                                <i class="fa-solid fa-moon text-[10px] text-blue-200"></i>
+                                <i class="fa-solid fa-sun text-[10px] text-yellow-600"></i>
+                                <i class="fa-solid fa-moon text-[10px] text-blue-400"></i>
                             </div>
                         </div>
                         <div
                             class="absolute top-1 left-1 bg-white w-5 h-5 rounded-full transition-all duration-300 peer-checked:translate-x-3.5 shadow-lg flex items-center justify-center">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-200"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-gray-100"></div>
                         </div>
                     </label>
                 </div>
 
                 <div id="user-profile" class="flex items-center gap-3 px-2">
                     <div
-                        class="w-10 h-10 rounded-full bg-[#1E2536] border border-gray-700 flex items-center justify-center text-white font-bold shadow-md shrink-0">
+                        class="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 font-bold shadow-sm shrink-0">
                         <i class="fa-solid fa-user"></i>
                     </div>
 
                     <div class="sidebar-text flex-1 min-w-0">
-                        <p class="text-[13px] font-medium text-white truncate">
+                        <p class="text-[13px] font-bold text-gray-900 truncate">
                             {{ Auth::user()->fullname }}
                         </p>
-                        <p class="text-[11px] text-gray-500 truncate mt-0.5">
-                            {{ Auth::user()->employee_code }}
+                        <p class="text-[11px] text-gray-400 truncate mt-0.5">
+                            {{ Auth::user()->emp_code }}
                         </p>
                     </div>
                 </div>
@@ -654,15 +645,20 @@
             const content = document.getElementById(dropdownId);
             const btn = content.previousElementSibling;
             const arrow = btn.querySelector('.fa-chevron-down');
+            const icon = btn.querySelector('i:first-child');
 
             if (content.classList.contains('hidden')) {
                 content.classList.remove('hidden');
                 arrow.classList.add('rotate-180');
-                btn.classList.add('bg-white/5', 'text-white');
+                btn.classList.add('bg-kumwell-red', 'text-white', 'font-bold', 'shadow-lg', 'shadow-red-500/20');
+                btn.classList.remove('text-slate-600', 'hover:bg-slate-50', 'hover:text-kumwell-red');
+                if (icon) icon.classList.remove('opacity-60');
             } else {
                 content.classList.add('hidden');
                 arrow.classList.remove('rotate-180');
-                btn.classList.remove('bg-white/5', 'text-white');
+                btn.classList.remove('bg-kumwell-red', 'text-white', 'font-bold', 'shadow-lg', 'shadow-red-500/20');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-50', 'hover:text-kumwell-red');
+                if (icon) icon.classList.add('opacity-60');
             }
         }
 

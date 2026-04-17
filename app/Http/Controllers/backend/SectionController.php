@@ -16,7 +16,12 @@ class SectionController extends Controller
             $query->where('section_code', 'like', "%{$search}%")
                   ->orWhere('section_name', 'like', "%{$search}%");
         }
-        $sections = $query->get();
+
+        try {
+            $sections = $query->get();
+        } catch (\Illuminate\Database\QueryException $e) {
+            $sections = collect();
+        }
 
         if ($request->ajax()) {
             return response()->json($sections);

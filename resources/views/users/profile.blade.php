@@ -64,7 +64,7 @@
                     <div class="relative shrink-0 group">
                         <div
                             class="w-36 h-36 rounded-[1.5rem] overflow-hidden border-4 border-white shadow-lg bg-gray-100 dark:bg-slate-800 ring-4 ring-gray-50 dark:ring-slate-900">
-                            @php $avatar = $user->photo_user; @endphp
+                            @php $avatar = optional($user)->photo_user; @endphp
                             @if($avatar)
                                 <img id="profile-image" src="{{ asset($avatar) }}" alt="Avatar"
                                     class="w-full h-full object-cover">
@@ -104,7 +104,7 @@
                             class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-semibold text-gray-500 dark:text-slate-400">
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-id-card" style="color:#b91c1c;opacity:.8;"></i>
-                                <span>{{ $user->employee_code }}</span>
+                                <span>{{ $user->emp_code }}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-briefcase" style="color:#b91c1c;opacity:.7;"></i>
@@ -243,7 +243,7 @@
                                 <div>
                                     <p class="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Employee
                                         Code</p>
-                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $user->employee_code }}
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $user->emp_code }}
                                     </p>
                                 </div>
                                 <div>

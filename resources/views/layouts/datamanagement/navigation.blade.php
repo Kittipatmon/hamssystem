@@ -2,7 +2,7 @@
 <nav
     class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
     @php
-        $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
     @endphp
     <div class="max-w-7xl mx-auto px-4 md:px-6">
         <div class="h-16 flex items-center justify-between">
@@ -37,7 +37,7 @@
                 <a href="{{ route('datamanage.news.newsalllist') }}"
                     class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('datamanage.news.newsalllist') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
                     <i
-                        class="fa-solid fa-house {{ request()->routeIs('datamanage.news.newsalllist') ? '' : 'text-slate-400 group-hover:text-red-500' }}"></i>
+                        class="fa-solid fa-newspaper {{ request()->routeIs('datamanage.news.newsalllist') ? '' : 'text-slate-400 group-hover:text-red-500' }}"></i>
                     <span>ข่าวสารทั้งหมด</span>
                 </a>
 
@@ -87,7 +87,7 @@
                                     <i class="fa-solid fa-user"></i>
                                 @endif
                             </div>
-                            <span>{{ Auth::user()->employee_code }}</span>
+                            <span>{{ Auth::user()->emp_code }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                         </label>
                         <ul tabindex="0"
@@ -108,7 +108,7 @@
                                     @endif
                                     <div class="flex flex-col flex-1 truncate">
                                         <span
-                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->employee_code }}</span>
+                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->emp_code }}</span>
                                         <span
                                             class="text-[12px] text-slate-500 truncate">{{ Auth::user()->position ?? 'Employee' }}</span>
                                     </div>
@@ -165,10 +165,17 @@
                     หน้าหลัก
                 </a>
                 <a href="{{ route('datamanage.news.newsalllist') }}"
-                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('datamanage.news.newsalllist') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('datamanage.news.newsalllist') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
                     <i
-                        class="fa-solid fa-house {{ request()->routeIs('datamanage.news.newsalllist') ? '' : 'text-slate-400 group-hover:text-red-500' }}"></i>
-                    <span>ข่าวสารทั้งหมด</span>
+                        class="fa-solid fa-newspaper w-5 text-center {{ request()->routeIs('datamanage.news.newsalllist') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                    ข่าวสารทั้งหมด
+                </a>
+
+                <a href="{{ route('backend.welcomedatamanage') }}"
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('backend.welcomedatamanage') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <i
+                        class="fa-solid fa-chart-pie w-5 text-center {{ request()->routeIs('backend.welcomedatamanage') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                    หน้ารายงาน
                 </a>
 
                 @if($isHamsOrAdmin)
@@ -215,7 +222,7 @@
                                     @endif
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="leading-tight">{{ Auth::user()->employee_code }}</span>
+                                    <span class="leading-tight">{{ Auth::user()->emp_code }}</span>
                                     <span
                                         class="text-[11px] text-slate-400 font-medium font-normal leading-tight">{{ Auth::user()->first_name ?? 'ผู้ใช้งานระบบ' }}</span>
                                 </div>

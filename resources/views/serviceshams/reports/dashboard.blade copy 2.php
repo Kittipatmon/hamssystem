@@ -65,7 +65,7 @@
                 <select name="department" class="w-full h-12 bg-slate-900 border-none rounded-xl px-4 text-white font-bold text-sm focus:ring-2 focus:ring-slate-500 appearance-none" data-cascade="department">
                     <option value="">ทั้งหมด (All)</option>
                     @foreach($departments as $d)
-                        <option value="{{ $d->department_id }}">{{ $d->department_name }} ({{ $d->department_fullname }})</option>
+                        <option value="{{ $d->dept_id }}">{{ $d->department_name }} ({{ $d->department_fullname }})</option>
                     @endforeach
                 </select>
             </div>

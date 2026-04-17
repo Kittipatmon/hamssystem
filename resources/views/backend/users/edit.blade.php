@@ -1,5 +1,5 @@
 @extends('layouts.sidebar')
-@section('title', 'แก้ไขข้อมูลพนักงาน : ' . $user->employee_code)
+@section('title', 'แก้ไขข้อมูลพนักงาน : ' . $user->emp_code)
 
 @section('content')
 <div class="container mx-auto px-2 py-4">
@@ -42,11 +42,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                         {{-- รหัสพนักงาน --}}
                         <div class="md:col-span-4 lg:col-span-3 form-control">
-                            <label class="label" for="employee_code">
+                            <label class="label" for="emp_code">
                                 <span class="label-text font-medium text-base-content/80">รหัสพนักงาน <span class="text-error">*</span></span>
                             </label>
-                            <input type="text" id="employee_code" name="employee_code"
-                                value="{{ old('employee_code', $user->employee_code) }}"
+                            <input type="text" id="emp_code" name="emp_code"
+                                value="{{ old('emp_code', $user->emp_code) }}"
                                 class="input input-bordered w-full focus:input-primary bg-base-100 dark:bg-gray-800 dark:text-white" required>
                         </div>
 
@@ -76,19 +76,19 @@
 
                         {{-- ชื่อ --}}
                         <div class="md:col-span-4 form-control">
-                            <label class="label" for="first_name">
+                            <label class="label" for="firstname">
                                 <span class="label-text font-medium text-base-content/80">ชื่อจริง <span class="text-error">*</span></span>
                             </label>
-                            <input type="text" id="first_name" name="first_name" value="{{ old('first_name', $user->first_name) }}"
+                            <input type="text" id="firstname" name="firstname" value="{{ old('firstname', $user->firstname) }}"
                                 class="input input-bordered w-full focus:input-primary bg-base-100 dark:bg-gray-800 dark:text-white" required>
                         </div>
-
+ 
                         {{-- นามสกุล --}}
                         <div class="md:col-span-4 form-control">
-                            <label class="label" for="last_name">
+                            <label class="label" for="lastname">
                                 <span class="label-text font-medium text-base-content/80">นามสกุล <span class="text-error">*</span></span>
                             </label>
-                            <input type="text" id="last_name" name="last_name" value="{{ old('last_name', $user->last_name) }}"
+                            <input type="text" id="lastname" name="lastname" value="{{ old('lastname', $user->lastname) }}"
                                 class="input input-bordered w-full focus:input-primary bg-base-100 dark:bg-gray-800 dark:text-white" required>
                         </div>
 
@@ -129,51 +129,21 @@
                         
                         {{-- แผนก --}}
                         <div class="form-control">
-                            <label class="label" for="department_id">
+                            <label class="label" for="dept_id">
                                 <span class="label-text font-medium text-base-content/80">แผนก</span>
                             </label>
-                            <select id="department_id" name="department_id" class="select select-bordered w-full focus:select-primary bg-base-100 dark:bg-gray-800 dark:text-white">
+                            <select id="dept_id" name="dept_id" class="select select-bordered w-full focus:select-primary bg-base-100 dark:bg-gray-800 dark:text-white">
                                 <option value="">-- เลือกแผนก --</option>
                                 @foreach ($departments as $department)
-                                <option value="{{ $department->department_id }}"
-                                    {{ old('department_id', $user->department_id) == $department->department_id ? 'selected' : '' }}>
-                                    {{ $department->department_name }}
+                                <option value="{{ $department->id }}"
+                                    {{ old('dept_id', $user->dept_id) == $department->id ? 'selected' : '' }}>
+                                    {{ $department->name }}
                                 </option>
                                 @endforeach
                             </select>
                         </div>
 
-                        {{-- ฝ่าย --}}
-                        <div class="form-control">
-                            <label class="label" for="division_id">
-                                <span class="label-text font-medium text-base-content/80">ฝ่าย</span>
-                            </label>
-                            <select id="division_id" name="division_id" class="select select-bordered w-full focus:select-primary bg-base-100 dark:bg-gray-800 dark:text-white">
-                                <option value="">-- เลือกฝ่าย --</option>
-                                @foreach ($divisions as $division)
-                                <option value="{{ $division->division_id }}"
-                                    {{ old('division_id', $user->division_id) == $division->division_id ? 'selected' : '' }}>
-                                    {{ $division->division_name }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        {{-- สายงาน --}}
-                        <div class="form-control">
-                            <label class="label" for="section_id">
-                                <span class="label-text font-medium text-base-content/80">สายงาน</span>
-                            </label>
-                            <select id="section_id" name="section_id" class="select select-bordered w-full focus:select-primary bg-base-100 dark:bg-gray-800 dark:text-white">
-                                <option value="">-- เลือกสายงาน --</option>
-                                @foreach ($sections as $section)
-                                <option value="{{ $section->section_id }}"
-                                    {{ old('section_id', $user->section_id) == $section->section_id ? 'selected' : '' }}>
-                                    {{ $section->section_name }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
+                        {{-- Legacy fields removed --}}
 
                          {{-- สถานที่ทำงาน --}}
                         <div class="form-control">
@@ -216,15 +186,15 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="form-control">
-                            <label class="label" for="level_user">
+                            <label class="label" for="role">
                                 <span class="label-text font-medium text-base-content/80">ระดับพนักงาน <span class="text-error">*</span></span>
                             </label>
-                            @php $levelOptions = \App\Models\User::getLevelUserOptions(); @endphp
-                            <select id="level_user" name="level_user" class="select select-bordered w-full focus:select-primary bg-base-100 dark:bg-gray-800 dark:text-white" required>
+                            @php $roleOptions = \App\Models\User::getRoleOptions(); @endphp
+                            <select id="role" name="role" class="select select-bordered w-full focus:select-primary bg-base-100 dark:bg-gray-800 dark:text-white" required>
                                 <option value="">-- เลือกระดับ --</option>
-                                @foreach ($levelOptions as $value => $meta)
+                                @foreach ($roleOptions as $value => $meta)
                                 <option value="{{ $value }}"
-                                    {{ old('level_user', $user->level_user) == $value ? 'selected' : '' }}>
+                                    {{ old('role', $user->role) == $value ? 'selected' : '' }}>
                                     {{ $meta['label'] }}
                                 </option>
                                 @endforeach
@@ -316,7 +286,7 @@
 
 <script>
     (function () {
-        const STATUS_INACTIVE = '{{ \App\Models\User::STATUS_INACTIVE }}';
+        const STATUS_RESIGN = 'resign';
         const statusSelect = document.getElementById('status');
         const wrapper = document.getElementById('endwork_fields_wrapper');
         const endworkDate = document.getElementById('endwork_date');
@@ -325,7 +295,7 @@
         if (!statusSelect || !wrapper || !endworkDate || !textarea) return;
 
         function syncEndworkComment() {
-            const isInactive = String(statusSelect.value) === String(STATUS_INACTIVE);
+            const isInactive = String(statusSelect.value) === String(STATUS_RESIGN);
             
             if(isInactive) {
                 wrapper.style.display = 'block';

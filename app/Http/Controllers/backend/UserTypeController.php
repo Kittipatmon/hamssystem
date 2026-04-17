@@ -16,7 +16,12 @@ class UserTypeController extends Controller
             $query->where('type_name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
         }
-        $userTypes = $query->get();
+        
+        try {
+            $userTypes = $query->get();
+        } catch (\Illuminate\Database\QueryException $e) {
+            $userTypes = collect();
+        }
 
         if ($request->ajax()) {
             return response()->json($userTypes);

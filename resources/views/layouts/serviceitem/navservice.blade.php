@@ -2,7 +2,7 @@
 <nav
     class="fixed top-0 left-0 right-0 z-[100] w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
     @php
-        $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
     @endphp
     <div class="max-w-[90rem] mx-auto px-4 md:px-6">
         <div class="h-16 flex items-center justify-between">
@@ -36,11 +36,20 @@
                 </a>
 
                 @if($isHamsOrAdmin)
+                    @php
+                        $pendingPackingCount = \App\Models\serviceshams\Requisitions::where('approve_status', 1)
+                            ->where('packing_staff_status', \App\Models\serviceshams\Requisitions::PACKING_STATUS_PENDING)
+                            ->where('status', '!=', \App\Models\serviceshams\Requisitions::STATUS_CANCELLED)
+                            ->count();
+                    @endphp
                     <a href="{{ route('serviceshams.welcomeservice') }}"
                         class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-white bg-red-600 shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600 border border-transparent' }}">
                         <i
                             class="fa-solid fa-square-poll-vertical {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-white' : 'text-slate-400 group-hover:text-red-500' }}"></i>
                         <span>ตรวจสอบ/เตรียมการ</span>
+                        @if($pendingPackingCount > 0)
+                            <span class="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full ml-1 shadow-sm">{{ $pendingPackingCount }}</span>
+                        @endif
                     </a>
                 @endif
 
@@ -53,18 +62,24 @@
 
                 @if(Auth::check())
                     @php
-                        $myPendingCount = \App\Models\serviceshams\Requisitions::where('requester_id', Auth::id())
+                        $userId = Auth::id();
+                        $toApproveCount = \App\Models\serviceshams\Requisitions::where('approve_id', $userId)
+                            ->where('approve_status', 0)
+                            ->where('status', \App\Models\serviceshams\Requisitions::STATUS_PENDING)
+                            ->count();
+                        $myReqPendingCount = \App\Models\serviceshams\Requisitions::where('requester_id', $userId)
                             ->whereIn('status', [\App\Models\serviceshams\Requisitions::STATUS_PENDING, \App\Models\serviceshams\Requisitions::STATUS_APPROVED])
                             ->count();
+                        $totalNavPendingCount = $toApproveCount + $myReqPendingCount;
                     @endphp
                     <a href="{{ route('requisitions.reqlistpending') }}"
                         class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('requisitions.reqlistpending') ? 'text-white bg-red-600 shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600 border border-transparent' }}">
                         <i
                             class="fa-solid fa-rotate {{ request()->routeIs('requisitions.reqlistpending') ? 'text-white fa-spin' : 'text-slate-400' }} text-xs"></i>
                         <span>รายการรอดำเนินการ</span>
-                        @if($myPendingCount > 0)
+                        @if($totalNavPendingCount > 0)
                             <span
-                                class="bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full ml-1 shadow-sm">{{ $myPendingCount }}</span>
+                                class="bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full ml-1 shadow-sm">{{ $totalNavPendingCount }}</span>
                         @endif
                     </a>
                 @endif
@@ -85,12 +100,12 @@
                     <!-- ข้อมูลทั่วไป (dropdown) -->
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
-                            class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer">
-                            <i class="fa-solid fa-server text-slate-400"></i>
+                            class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ request()->routeIs(['requisitions.reqchecklist', 'items.index', 'items_type.index']) ? 'text-white bg-red-600 shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                            <i class="fa-solid fa-server {{ request()->routeIs(['requisitions.reqchecklist', 'items.index', 'items_type.index']) ? 'text-white' : 'text-slate-400' }}"></i>
                             <span>ข้อมูลทั่วไป</span>
                             @if($checklistCount > 0)
                                 <span
-                                    class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1">{{ $checklistCount }}</span>
+                                    class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1 border border-white/20">{{ $checklistCount }}</span>
                             @endif
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
                         </label>
@@ -98,9 +113,9 @@
                             class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-56 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                             <li>
                                 <a href="{{ route('requisitions.reqchecklist') }}"
-                                    class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                                    class="flex items-center justify-between px-4 py-2.5 text-[14px] rounded-xl transition-all duration-300 {{ request()->routeIs('requisitions.reqchecklist') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
                                     <div class="flex items-center gap-3">
-                                        <i class="fa-solid fa-clipboard-check text-red-400 w-4 text-center"></i> Checklist
+                                        <i class="fa-solid fa-clipboard-check {{ request()->routeIs('requisitions.reqchecklist') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> Checklist
                                     </div>
                                     @if($checklistCount > 0)
                                         <span
@@ -110,14 +125,14 @@
                             </li>
                             <li>
                                 <a href="{{ route('items.index') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                    <i class="fa-solid fa-box text-red-400 w-4 text-center"></i> ข้อมูลอุปกรณ์
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] rounded-xl transition-all duration-300 {{ request()->routeIs('items.index') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i class="fa-solid fa-box {{ request()->routeIs('items.index') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> ข้อมูลอุปกรณ์
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('items_type.index') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                    <i class="fa-solid fa-tags text-red-400 w-4 text-center"></i> ข้อมูลประเภทอุปกรณ์
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] rounded-xl transition-all duration-300 {{ request()->routeIs('items_type.index') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i class="fa-solid fa-tags {{ request()->routeIs('items_type.index') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> ข้อมูลประเภทอุปกรณ์
                                 </a>
                             </li>
                         </ul>
@@ -125,32 +140,45 @@
                 @endif
 
 
-                @if(Auth::check() && Auth::user()->hr_status == \App\Models\User::HAMS_STATUS_ACTIVE)
+                @if(Auth::check() && $isHamsOrAdmin)
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
-                            class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer">
-                            <i class="fa-solid fa-chart-bar text-slate-400"></i>
+                            class="flex items-center gap-2 px-3 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ request()->routeIs(['requisitions.dashboard', 'requisitions.reqlistall', 'requisitions.reportslistall']) ? 'text-white bg-red-600 shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                            <i class="fa-solid fa-chart-bar {{ request()->routeIs(['requisitions.dashboard', 'requisitions.reqlistall', 'requisitions.reportslistall']) ? 'text-white' : 'text-slate-400' }}"></i>
                             <span>Reports</span>
+                            @if(isset($pendingPackingCount) && $pendingPackingCount > 0)
+                                <span class="bg-blue-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full ml-1 border border-white/20">{{ $pendingPackingCount }}</span>
+                            @endif
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
                         </label>
                         <ul tabindex="0"
                             class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-56 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                             <li>
                                 <a href="{{ route('requisitions.dashboard') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                    <i class="fa-solid fa-chart-line text-red-400 w-4 text-center"></i> Dashboard
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] rounded-xl transition-all duration-300 {{ request()->routeIs('requisitions.dashboard') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i class="fa-solid fa-chart-line {{ request()->routeIs('requisitions.dashboard') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> Dashboard
                                 </a>
                             </li>
-                            <li>
+                             <li>
                                 <a href="{{ route('requisitions.reqlistall') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                    <i class="fa-solid fa-history text-red-400 w-4 text-center"></i> ประวัติการเบิกอุปกรณ์
+                                    class="flex items-center justify-between px-4 py-2.5 text-[14px] rounded-xl transition-all duration-300 {{ request()->routeIs('requisitions.reqlistall') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-solid fa-history {{ request()->routeIs('requisitions.reqlistall') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> ประวัติการเบิกอุปกรณ์
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        @if($toApproveCount > 0)
+                                            <span class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full" title="รอคุณอนุมัติ">{{ $toApproveCount }}</span>
+                                        @endif
+                                        @if($pendingPackingCount > 0)
+                                            <span class="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full" title="รอดำเนินการจัดอุปกรณ์">{{ $pendingPackingCount }}</span>
+                                        @endif
+                                    </div>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('requisitions.reportslistall') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                    <i class="fa-solid fa-list-check text-red-400 w-4 text-center"></i> รายงานอุปกรณ์ทั้งหมด
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] rounded-xl transition-all duration-300 {{ request()->routeIs('requisitions.reportslistall') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i class="fa-solid fa-list-check {{ request()->routeIs('requisitions.reportslistall') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> รายงานอุปกรณ์ทั้งหมด
                                 </a>
                             </li>
                         </ul>
@@ -197,7 +225,7 @@
                                     <i class="fa-solid fa-user"></i>
                                 </div>
                             @endif
-                            <span class="max-w-[80px] truncate">{{ Auth::user()->employee_code }}</span>
+                            <span class="max-w-[100px] truncate">{{ Auth::user()->emp_code ?? 'My Account' }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                         </label>
                         <ul tabindex="0"
@@ -218,9 +246,9 @@
                                     @endif
                                     <div class="flex flex-col flex-1 truncate">
                                         <span
-                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->employee_code }}</span>
+                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? 'My Account' }}</span>
                                         <span
-                                            class="text-[12px] text-slate-500 truncate">{{ Auth::user()->position ?? 'Employee' }}</span>
+                                            class="text-[12px] text-slate-500 truncate">{{ Auth::user()->position && strtolower(Auth::user()->position) !== 'admin' ? Auth::user()->position : '' }}</span>
                                     </div>
                                 </div>
                             </li>
@@ -303,11 +331,22 @@
                 </a>
 
                 @if($isHamsOrAdmin)
-                    <a href="{{ route('serviceshams.welcomeservice') }}"
-                        class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('serviceshams.welcomeservice') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <a href="{{ route('requisitions.dashboard') }}"
+                        class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('requisitions.dashboard') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                         <i
-                            class="fa-solid fa-square-poll-vertical w-5 text-center {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-white' : 'text-slate-400' }}"></i>
-                        ตรวจสอบ/เตรียมการ
+                            class="fa-solid fa-chart-line w-5 text-center {{ request()->routeIs('requisitions.dashboard') ? 'text-white' : 'text-slate-400' }}"></i>
+                        Dashboard
+                    </a>
+                    <a href="{{ route('serviceshams.welcomeservice') }}"
+                        class="flex items-center justify-between px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('serviceshams.welcomeservice') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <div class="flex items-center gap-3">
+                            <i
+                                class="fa-solid fa-square-poll-vertical w-5 text-center {{ request()->routeIs('serviceshams.welcomeservice') ? 'text-white' : 'text-slate-400' }}"></i>
+                            ตรวจสอบ/เตรียมการ
+                        </div>
+                        @if(isset($pendingPackingCount) && $pendingPackingCount > 0)
+                            <span class="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">{{ $pendingPackingCount }}</span>
+                        @endif
                     </a>
                 @endif
 
@@ -326,31 +365,31 @@
                                 class="fa-solid fa-rotate w-5 text-center {{ request()->routeIs('requisitions.reqlistpending') ? 'text-white fa-spin' : 'text-slate-300' }}"></i>
                             รายการรอดำเนินการ
                         </div>
-                        @if(isset($myPendingCount) && $myPendingCount > 0)
+                        @if(isset($totalNavPendingCount) && $totalNavPendingCount > 0)
                             <span
-                                class="bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">{{ $myPendingCount }}</span>
+                                class="bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">{{ $totalNavPendingCount }}</span>
                         @endif
                     </a>
                 @endif
                 @if($isHamsOrAdmin)
                     <details class="group [&_summary::-webkit-details-marker]:hidden">
                         <summary
-                            class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
+                            class="flex items-center justify-between px-4 py-3 text-[15px] rounded-xl cursor-pointer transition-all duration-300 {{ request()->routeIs(['requisitions.reqchecklist', 'items.index', 'items_type.index']) ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'font-medium text-slate-600 hover:bg-slate-50' }}">
                             <div class="flex items-center gap-3">
-                                <i class="fa-solid fa-server w-5 text-center text-slate-400"></i> ข้อมูลทั่วไป
+                                <i class="fa-solid fa-server w-5 text-center {{ request()->routeIs(['requisitions.reqchecklist', 'items.index', 'items_type.index']) ? 'text-white' : 'text-slate-400' }}"></i> ข้อมูลทั่วไป
                             </div>
                             @if(isset($checklistCount) && $checklistCount > 0)
                                 <span
-                                    class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full mr-8">{{ $checklistCount }}</span>
+                                    class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full {{ request()->routeIs(['requisitions.reqchecklist', 'items.index', 'items_type.index']) ? 'border border-white/20' : '' }} mr-8">{{ $checklistCount }}</span>
                             @endif
                             <i
                                 class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180"></i>
                         </summary>
                         <div class="mt-1 mb-2 ml-4 pl-4 border-l-2 border-red-100 flex flex-col gap-1">
                             <a href="{{ route('requisitions.reqchecklist') }}"
-                                class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
+                                class="flex items-center justify-between px-4 py-2.5 text-[14px] rounded-lg transition-all duration-300 {{ request()->routeIs('requisitions.reqchecklist') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
                                 <div class="flex items-center gap-3">
-                                    <i class="fa-solid fa-clipboard-check text-red-400 w-4 text-center"></i> Checklist
+                                    <i class="fa-solid fa-clipboard-check {{ request()->routeIs('requisitions.reqchecklist') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> Checklist
                                 </div>
                                 @if(isset($checklistCount) && $checklistCount > 0)
                                     <span
@@ -359,40 +398,45 @@
                             </a>
                             <div class="h-px bg-slate-50 my-1"></div>
                             <a href="{{ route('items.index') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
-                                <i class="fa-solid fa-box text-red-400 w-4 text-center"></i> ข้อมูลอุปกรณ์
+                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] rounded-lg transition-all duration-300 {{ request()->routeIs('items.index') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                                <i class="fa-solid fa-box {{ request()->routeIs('items.index') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> ข้อมูลอุปกรณ์
                             </a>
                             <a href="{{ route('items_type.index') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
-                                <i class="fa-solid fa-tags text-red-400 w-4 text-center"></i> ข้อมูลประเภทอุปกรณ์
+                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] rounded-lg transition-all duration-300 {{ request()->routeIs('items_type.index') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                                <i class="fa-solid fa-tags {{ request()->routeIs('items_type.index') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> ข้อมูลประเภทอุปกรณ์
                             </a>
                         </div>
                     </details>
                 @endif
 
 
-                @if(Auth::check() && Auth::user()->hr_status == \App\Models\User::HAMS_STATUS_ACTIVE)
+                @if(Auth::check() && $isHamsOrAdmin)
                     <details class="group [&_summary::-webkit-details-marker]:hidden">
                         <summary
-                            class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
+                            class="flex items-center justify-between px-4 py-3 text-[15px] rounded-xl cursor-pointer transition-all duration-300 {{ request()->routeIs(['requisitions.dashboard', 'requisitions.reqlistall', 'requisitions.reportslistall']) ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'font-medium text-slate-600 hover:bg-slate-50' }}">
                             <div class="flex items-center gap-3">
-                                <i class="fa-solid fa-chart-bar w-5 text-center text-slate-400"></i> Reports
+                                <i class="fa-solid fa-chart-bar w-5 text-center {{ request()->routeIs(['requisitions.dashboard', 'requisitions.reqlistall', 'requisitions.reportslistall']) ? 'text-white' : 'text-slate-400' }}"></i> Reports
                             </div>
                             <i
                                 class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180"></i>
                         </summary>
                         <div class="mt-1 mb-2 ml-4 pl-4 border-l-2 border-red-100 flex flex-col gap-1">
                             <a href="{{ route('requisitions.dashboard') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
-                                <i class="fa-solid fa-chart-line text-red-400 w-4 text-center"></i> Dashboard
+                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] rounded-lg transition-all duration-300 {{ request()->routeIs('requisitions.dashboard') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                                <i class="fa-solid fa-chart-line {{ request()->routeIs('requisitions.dashboard') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> Dashboard
                             </a>
-                            <a href="{{ route('requisitions.reqlistall') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
-                                <i class="fa-solid fa-history text-red-400 w-4 text-center"></i> ประวัติการเบิกอุปกรณ์
+                             <a href="{{ route('requisitions.reqlistall') }}"
+                                class="flex items-center justify-between px-4 py-2.5 text-[14px] rounded-lg transition-all duration-300 {{ request()->routeIs('requisitions.reqlistall') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-history {{ request()->routeIs('requisitions.reqlistall') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> ประวัติการเบิกอุปกรณ์
+                                </div>
+                                @if(isset($toApproveCount) && $toApproveCount > 0)
+                                    <span class="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $toApproveCount }}</span>
+                                @endif
                             </a>
                             <a href="{{ route('requisitions.reportslistall') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
-                                <i class="fa-solid fa-list-check text-red-400 w-4 text-center"></i> รายงานอุปกรณ์ทั้งหมด
+                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] rounded-lg transition-all duration-300 {{ request()->routeIs('requisitions.reportslistall') ? 'bg-red-50 text-red-600 font-bold' : 'font-medium text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                                <i class="fa-solid fa-list-check {{ request()->routeIs('requisitions.reportslistall') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> รายงานอุปกรณ์ทั้งหมด
                             </a>
                         </div>
                     </details>
@@ -436,10 +480,9 @@
                                     </div>
                                 @endif
                                 <div class="flex flex-col">
+                                    <span class="leading-tight">{{ Auth::user()->fullname ?? 'My Account' }}</span>
                                     <span
-                                        class="leading-tight">{{ Auth::user()->fullname ?? Auth::user()->employee_code }}</span>
-                                    <span
-                                        class="text-[11px] text-slate-400 font-normal leading-tight">{{ Auth::user()->position ?? 'Employee' }}</span>
+                                        class="text-[11px] text-slate-400 font-normal leading-tight">{{ Auth::user()->position && strtolower(Auth::user()->position) !== 'admin' ? Auth::user()->position : '' }}</span>
                                 </div>
                             </div>
                             <i

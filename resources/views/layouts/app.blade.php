@@ -49,6 +49,22 @@
     </div>
 
     @stack('scripts')
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('login-success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'สำเร็จ!',
+                    text: "{{ session('login-success') }}",
+                    timer: 2500,
+                    showConfirmButton: false,
+                    position: 'top-end',
+                    toast: true
+                });
+            @endif
+        });
+    </script>
 </body>
 
 </html>

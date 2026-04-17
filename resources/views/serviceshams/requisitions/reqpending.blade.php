@@ -1,6 +1,6 @@
 @extends('layouts.serviceitem.appservice')
 @section('content')
-    <div class="max-w-[90rem] mx-auto px-4 py-8 space-y-8 uppercase tracking-tight">
+    <div class="max-w-[90rem] mx-auto px-4 py-4 lg:py-18 space-y-8 uppercase tracking-tight">
 
         <!-- Header Section with Stats -->
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
@@ -96,24 +96,57 @@
                                         ฿{{ number_format((float) $requisition->total_price, 2) }}
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        <span
-                                            class="px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-black uppercase shadow-sm">
-                                            รอดำเนินการ
-                                        </span>
+                                        @if($requisition->status == \App\Models\serviceshams\Requisitions::STATUS_PENDING)
+                                            <span class="px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-black uppercase shadow-sm">
+                                                รอดำเนินการ
+                                            </span>
+                                        @elseif($requisition->status == \App\Models\serviceshams\Requisitions::STATUS_APPROVED)
+                                            <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black uppercase shadow-sm">
+                                                รอดำเนินการจัดอุปกรณ์
+                                            </span>
+                                        @else
+                                            <span class="px-3 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100 text-[10px] font-black uppercase shadow-sm">
+                                                {{ $requisition->status_label }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-center gap-2">
+                                            @if($requisition->approve_id === Auth::id() && $requisition->approve_status == 0)
+                                                <div class="flex items-center bg-white border border-slate-200 rounded-xl p-0.5 shadow-sm">
+                                                    <button type="button" 
+                                                        class="w-10 h-10 flex items-center justify-center text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all btn-quick-approve"
+                                                        data-id="{{ $requisition->requisitions_id }}" data-status="1" title="อนุมัติ">
+                                                        <i class="fa-solid fa-check text-sm"></i>
+                                                    </button>
+                                                    <div class="w-px h-5 bg-slate-200 mx-1"></div>
+                                                    <button type="button" 
+                                                        class="w-10 h-10 flex items-center justify-center text-rose-500 hover:bg-rose-50 rounded-lg transition-all btn-quick-approve"
+                                                        data-id="{{ $requisition->requisitions_id }}" data-status="2" title="ปฏิเสธ">
+                                                        <i class="fa-solid fa-xmark text-sm"></i>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                            
                                             <a href="{{ route('requisitions.detailreqpedding', $requisition->requisitions_id) }}"
-                                                class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 hover:border-orange-500 hover:text-orange-600 text-slate-800 rounded-xl transition-all shadow-sm group-hover:shadow-md"
+                                                class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 hover:border-slate-400 text-slate-800 rounded-xl transition-all shadow-sm group-hover:shadow-md"
                                                 title="ดูรายละเอียด">
                                                 <i class="fa-solid fa-eye text-sm"></i>
                                             </a>
+                                            <a href="{{ route('requisitions.detail.pdf', $requisition->requisitions_id) }}"
+                                                class="w-10 h-10 flex items-center justify-center bg-white border border-red-100 text-red-500 rounded-xl hover:bg-red-50 transition-all shadow-sm group-hover:shadow-md"
+                                                title="ดาวน์โหลด PDF">
+                                                <i class="fa-solid fa-file-pdf text-sm"></i>
+                                            </a>
+                                            
+                                            @if($requisition->requester_id === Auth::id())
                                             <button
                                                 class="w-10 h-10 flex items-center justify-center bg-white border border-red-100 hover:bg-red-600 hover:text-white text-red-500 rounded-xl transition-all shadow-sm btn-cancel-req group-hover:shadow-md"
                                                 data-href="{{ route('requisitions.cancel', $requisition->requisitions_id) }}"
                                                 title="ยกเลิกใบเบิก">
-                                                <i class="fa-solid fa-xmark text-sm"></i>
+                                                <i class="fa-solid fa-trash-can text-sm"></i>
                                             </button>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -137,7 +170,14 @@
                             <div class="space-y-1">
                                 <span
                                     class="text-[10px] font-mono font-black text-orange-600 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100 w-fit">{{ $requisition->requisitions_code }}</span>
-                                <h3 class="text-xl font-black text-slate-800 tracking-tighter leading-none pt-1">Requesting...
+                                <h3 class="text-xl font-black text-slate-800 tracking-tighter leading-none pt-1">
+                                    @if($requisition->status == \App\Models\serviceshams\Requisitions::STATUS_PENDING)
+                                        Pending...
+                                    @elseif($requisition->status == \App\Models\serviceshams\Requisitions::STATUS_APPROVED)
+                                        To be Packed
+                                    @else
+                                        {{ $requisition->status_label }}
+                                    @endif
                                 </h3>
                             </div>
                         </div>
@@ -153,13 +193,33 @@
                                     class="text-[16px] font-black text-orange-600 ">฿{{ number_format((float) $requisition->total_price, 0) }}</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <a href="{{ route('requisitions.detailreqpedding', $requisition->requisitions_id) }}"
-                                class="flex-[3] h-14 flex items-center justify-center bg-slate-800 text-white font-black rounded-2xl shadow-lg shadow-slate-100">View
-                                Detail</a>
+                        <div class="flex flex-wrap items-center gap-3">
+                            @if($requisition->approve_id === Auth::id() && $requisition->approve_status == 0)
+                                <button type="button" 
+                                    class="flex-1 h-14 flex items-center justify-center bg-emerald-600 text-white font-black rounded-2xl shadow-lg btn-quick-approve"
+                                    data-id="{{ $requisition->requisitions_id }}" data-status="1">
+                                    <i class="fa-solid fa-check mr-2"></i> Approve
+                                </button>
+                                <button type="button" 
+                                    class="flex-1 h-14 flex items-center justify-center bg-rose-600 text-white font-black rounded-2xl shadow-lg btn-quick-approve"
+                                    data-id="{{ $requisition->requisitions_id }}" data-status="2">
+                                    <i class="fa-solid fa-xmark mr-2"></i> Reject
+                                </button>
+                            @else
+                                <a href="{{ route('requisitions.detailreqpedding', $requisition->requisitions_id) }}"
+                                    class="flex-[3] h-14 flex items-center justify-center bg-slate-800 text-white font-black rounded-2xl shadow-lg shadow-slate-100">View
+                                    Detail</a>
+                            @endif
+                            
+                            <a href="{{ route('requisitions.detail.pdf', $requisition->requisitions_id) }}"
+                                class="w-14 h-14 flex items-center justify-center bg-white border-2 border-slate-100 text-slate-500 rounded-2xl shadow-sm"><i
+                                    class="fa-solid fa-file-pdf"></i></a>
+                            
+                            @if($requisition->requester_id === Auth::id())
                             <button data-href="{{ route('requisitions.cancel', $requisition->requisitions_id) }}"
-                                class="flex-1 h-14 flex items-center justify-center bg-white border-2 border-red-50 text-red-500 rounded-2xl shadow-sm btn-cancel-req"><i
+                                class="w-14 h-14 flex items-center justify-center bg-white border-2 border-red-50 text-red-500 rounded-2xl shadow-sm btn-cancel-req"><i
                                     class="fa-solid fa-trash-can"></i></button>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -225,10 +285,15 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="flex items-center justify-center">
+                                        <div class="flex items-center justify-center gap-2">
                                             <a href="{{ route('requisitions.detailreqpedding', $requisition->requisitions_id) }}"
-                                                class="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-[12px] font-black rounded-xl transition-all shadow-lg shadow-slate-100">
+                                                class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-[12px] font-black rounded-xl transition-all shadow-lg shadow-slate-100">
                                                 <i class="fa-solid fa-magnifying-glass text-[10px]"></i> ตรวจสอบ
+                                            </a>
+                                            <a href="{{ route('requisitions.detail.pdf', $requisition->requisitions_id) }}"
+                                                class="w-10 h-10 flex items-center justify-center bg-white border border-red-100 text-red-600 rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                                title="ดาวน์โหลด PDF">
+                                                <i class="fa-solid fa-file-pdf"></i>
                                             </a>
                                         </div>
                                     </td>
@@ -265,10 +330,16 @@
                                 <p class="text-2xl font-black text-slate-800">
                                     ฿{{ number_format((float) $requisition->total_price, 0) }}</p>
                             </div>
-                            <a href="{{ route('requisitions.detailreqpedding', $requisition->requisitions_id) }}"
-                                class="h-12 w-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </a>
+                            <div class="flex items-center gap-3">
+                                <a href="{{ route('requisitions.detailreqpedding', $requisition->requisitions_id) }}"
+                                    class="h-12 flex-1 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                                    <i class="fa-solid fa-arrow-right mr-2"></i> View
+                                </a>
+                                <a href="{{ route('requisitions.detail.pdf', $requisition->requisitions_id) }}"
+                                    class="h-12 w-12 bg-white border-2 border-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 @endforeach
@@ -279,6 +350,53 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Quick Approve Handler
+            document.querySelectorAll('.btn-quick-approve').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    const id = this.dataset.id;
+                    const status = this.dataset.status;
+                    const statusName = status == 1 ? 'อนุมัติ' : 'ปฏิเสธ';
+                    const confirmButtonColor = status == 1 ? '#10b981' : '#f43f5e';
+                    
+                    Swal.fire({
+                        title: `ยืนยันการ${statusName}?`,
+                        text: `ต้องการ${statusName}ใบเบิกพัสดุนี้ใช่หรือไม่?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'ยืนยัน',
+                        cancelButtonText: 'ยกเลิก',
+                        confirmButtonColor: confirmButtonColor,
+                        customClass: { popup: 'rounded-[2rem]' }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch("{{ route('requisitions.quick_approve') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                                },
+                                body: JSON.stringify({ id: id, status: status })
+                            })
+                            .then(response => response.json())
+                            .then(res => {
+                                if (res.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'ดำเนินการสำเร็จ',
+                                        text: `ได้ทำการ${statusName}รายการเรียบร้อยแล้ว`,
+                                        customClass: { popup: 'rounded-[2rem]' },
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+
             document.querySelectorAll('.btn-cancel-req').forEach(function (btn) {
                 btn.addEventListener('click', function (e) {
                     e.preventDefault();

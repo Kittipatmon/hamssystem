@@ -512,7 +512,7 @@
                     ];
 
                     // Add Admin card if applicable
-                    if (Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648')) {
+                    if (Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))) {
                         $services[] = [
                             'route' => route('backend.welcomedatamanage'),
                             'title' => 'ระบบจัดการข้อมูลหลังบ้าน',
@@ -808,7 +808,7 @@
     </div>
 
     {{-- ============ ANNOUNCEMENT LIST SECTION ============ --}}
-    <div class="relative py-28 bg-[#FAF7F2] overflow-hidden">
+    <div class="relative py-28 bg-[#00000] overflow-hidden">
         {{-- Abstract background patterns --}}
         <div class="absolute inset-0 opacity-[0.015] pointer-events-none" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
 

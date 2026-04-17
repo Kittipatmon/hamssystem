@@ -182,11 +182,11 @@
                         @forelse($reservations as $res)
                             <tr class="hover">
                                 <td class="whitespace-nowrap">
-                                    {{ \Carbon\Carbon::parse($res->reservation_date)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($res->reservation_date)->locale('th')->addYears(543)->translatedFormat('d/m/Y') }}
                                 </td>
                                 <td class="font-medium text-slate-800">{{ $res->room->room_name ?? 'N/A' }}</td>
                                 <td class="whitespace-nowrap">{{ substr($res->start_time, 0, 5) }} -
-                                    {{ substr($res->end_time, 0, 5) }}
+                                    {{ substr($res->end_time, 0, 5) }} น.
                                 </td>
                                 <td>
                                     <div class="max-w-xs truncate" title="{{ $res->topic }}">{{ $res->topic }}</div>

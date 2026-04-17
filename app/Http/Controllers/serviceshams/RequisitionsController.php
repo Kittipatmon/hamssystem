@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\Department;
 use App\Models\Division;
 use App\Models\Section;
+use App\Models\User;
 
 class RequisitionsController extends Controller
 {
@@ -53,33 +54,98 @@ class RequisitionsController extends Controller
 
     public function ReqlistPending()
     {
-        $requisitions = Requisitions::where(function ($query) {
-            $query->whereIn('status', [Requisitions::STATUS_PENDING, Requisitions::STATUS_APPROVED])
-                ->orWhere(function ($q) {
-                    $q->where('status', Requisitions::STATUS_END_PROGRESS)
-                        ->where('updated_at', '>=', now()->subHours(24));
+        $userId = Auth::id();
+        $requisitions = Requisitions::where(function ($query) use ($userId) {
+            // 1. My own requests
+            $query->where('requester_id', $userId)
+                ->where(function ($q) {
+                    $q->whereIn('status', [Requisitions::STATUS_PENDING, Requisitions::STATUS_APPROVED])
+                        ->orWhere(function ($sq) {
+                            $sq->where('status', Requisitions::STATUS_END_PROGRESS)
+                                ->where('updated_at', '>=', now()->subHours(24));
+                        });
                 });
+
+            // 2. Requisitions I need to approve (Pending approval)
+            $query->orWhere(function ($q) use ($userId) {
+                $q->where('approve_id', $userId)
+                    ->where('approve_status', 0) // Pending
+                    ->where('status', Requisitions::STATUS_PENDING);
+            });
         })
-            ->where('requester_id', Auth::user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
         $requisition_items = Requisition_items::with('item')->get();
         return view('serviceshams.requisitions.reqpending', compact('requisitions', 'requisition_items'));
     }
 
-    public function ReqlistAll()
+    public function ReqlistAll(Request $request)
     {
         $query = Requisitions::orderBy('created_at', 'desc');
 
-        // Access Control: Non-HAMS/Admin only see their own
-        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        // Access Control: Non-HAMS/Admin only see their own OR those they need to approve
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isHamsOrAdmin) {
-            $query->where('requester_id', Auth::user()->id);
+            $query->where(function ($q) {
+                $q->where('requester_id', Auth::id())
+                    ->orWhere('approve_id', Auth::id());
+            });
+        }
+
+        if ($request->filled('year')) {
+            $query->whereYear('created_at', $request->year);
         }
 
         $requisitions = $query->get();
         $requisition_items = Requisition_items::with('item')->get();
-        return view('serviceshams.requisitions.reqlistall', compact('requisitions', 'requisition_items'));
+
+        $years = Requisitions::selectRaw('YEAR(created_at) as year')
+            ->whereNotNull('created_at')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        $approvers = User::select('id', 'firstname', 'lastname', 'dept_id', 'role')
+            ->with('department')
+            ->get();
+
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+
+        return view('serviceshams.requisitions.reqlistall', compact('requisitions', 'requisition_items', 'years', 'approvers', 'isHamsOrAdmin'));
+    }
+
+    public function updateAllApprovers(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'approve_id' => 'nullable|integer',
+        ]);
+
+        $item = Requisitions::findOrFail($request->id);
+
+        $item->update([
+            'approve_id' => $request->approve_id ?: null,
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function quickApprove(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'status' => 'required|integer', // 1: Approved, 2: Rejected
+        ]);
+
+        $item = Requisitions::findOrFail($request->id);
+
+        $item->update([
+            'approve_status' => $request->status,
+            'approve_id' => Auth::id(),
+            'approve_date' => now(),
+        ]);
+
+        return response()->json(['success' => true]);
     }
 
     // Removed showPDF method as export PDF feature is deprecated
@@ -90,7 +156,7 @@ class RequisitionsController extends Controller
 
         // Access Control
         $isOwner = $requisition->requester_id === Auth::id();
-        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isOwner && !$isHamsOrAdmin) {
             return redirect()->route('requisitions.reqlistpending')->with('error', 'Unauthorized access.');
         }
@@ -105,7 +171,7 @@ class RequisitionsController extends Controller
 
         // Access Control
         $isOwner = $requisition->requester_id === Auth::id();
-        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isOwner && !$isHamsOrAdmin) {
             return redirect()->route('requisitions.reqlistall')->with('error', 'Unauthorized access.');
         }
@@ -120,7 +186,7 @@ class RequisitionsController extends Controller
 
         // Access Control
         $isOwner = $requisition->requester_id === Auth::id();
-        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isOwner && !$isHamsOrAdmin) {
             return redirect()->route('requisitions.reqlistall')->with('error', 'Unauthorized access.');
         }
@@ -174,8 +240,15 @@ class RequisitionsController extends Controller
     public function dashboardRequisition()
     {
         // Lightweight initial data for SSR; heavy aggregations done once here then AJAX for filters.
-        $requisitions = Requisitions::select('requisitions_id', 'status', 'created_at', 'total_price')->get();
-        $requisition_items = Requisition_items::with(['item:item_id,name'])->select('requistionitem_id', 'requisition_id', 'item_id', 'quantity')->get();
+        $currentYear = date('Y');
+        $requisitions = Requisitions::whereYear('created_at', $currentYear)
+            ->select('requisitions_id', 'status', 'created_at', 'total_price')
+            ->get();
+        $requisition_id_list = $requisitions->pluck('requisitions_id');
+        $requisition_items = Requisition_items::with(['item:item_id,name'])
+            ->whereIn('requisition_id', $requisition_id_list)
+            ->select('requistionitem_id', 'requisition_id', 'item_id', 'quantity')
+            ->get();
 
         $totalRequisitions = $requisitions->count();
         $pendingRequisitions = $requisitions->where('status', Requisitions::STATUS_PENDING)->count();
@@ -208,25 +281,13 @@ class RequisitionsController extends Controller
             $monthlyRequisitionCounts[$monthKey][$status] = ($monthlyRequisitionCounts[$monthKey][$status] ?? 0) + 1;
         }
 
-        $sections = Section::all(['section_id', 'section_code', 'section_fullname']);
-        $divisions = Division::all(['division_id', 'division_name', 'division_fullname', 'section_id']);
-        $departments = Department::all(['department_id', 'department_name', 'department_fullname', 'division_id', 'section_id']);
+        $departments = Department::all(['id', 'name']);
 
-        // Build hierarchical maps for cascading filters (section -> divisions, division -> departments)
-        $divisionMap = $divisions->groupBy('section_id')->map(function ($group) {
-            return $group->map(fn($d) => [
-                'id' => $d->division_id,
-                'name' => $d->division_name,
-                'fullname' => $d->division_fullname
-            ])->values();
-        });
-        $departmentMap = $departments->groupBy('division_id')->map(function ($group) {
-            return $group->map(fn($d) => [
-                'id' => $d->department_id,
-                'name' => $d->department_name,
-                'fullname' => $d->department_fullname
-            ])->values();
-        });
+        $years = Requisitions::selectRaw('YEAR(created_at) as year')
+            ->whereNotNull('created_at')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
 
         return view('serviceshams.reports.dashboard', compact(
             'totalRequisitions',
@@ -238,11 +299,8 @@ class RequisitionsController extends Controller
             'itemTotals',
             'monthlyExpenseTotals',
             'monthlyRequisitionCounts',
-            'sections',
-            'divisions',
             'departments',
-            'divisionMap',
-            'departmentMap'
+            'years'
         ));
     }
 
@@ -252,32 +310,33 @@ class RequisitionsController extends Controller
      */
     public function dashboardData(Request $request)
     {
-        // Base query (date filters only). Structural filters will be applied via requester (User) relation.
+        // Base query
         $reqQuery = Requisitions::query()->select('requisitions_id', 'status', 'created_at', 'total_price', 'requester_id')
-            ->with(['user:id,section_id,division_id,department_id']);
+            ->with(['user:id,dept_id']);
 
-        if ($request->filled('date_from')) {
-            $reqQuery->where('created_at', '>=', Carbon::parse($request->date_from)->startOfDay());
-        }
-        if ($request->filled('date_to')) {
-            $reqQuery->where('created_at', '<=', Carbon::parse($request->date_to)->endOfDay());
+        if ($request->filled('year')) {
+            $reqQuery->whereYear('created_at', $request->year);
         }
 
         $filteredRequisitions = $reqQuery->get();
 
         // Apply structural filters based on requester (user) attributes instead of requisitions columns.
         // NOTE: User model uses a separate connection; we perform in-memory filtering to avoid cross-connection joins.
-        if ($request->filled('section')) {
-            $sectionVal = $request->input('section');
-            $filteredRequisitions = $filteredRequisitions->filter(fn($r) => optional($r->user)->section_id == $sectionVal);
-        }
-        if ($request->filled('division')) {
-            $divisionVal = $request->input('division');
-            $filteredRequisitions = $filteredRequisitions->filter(fn($r) => optional($r->user)->division_id == $divisionVal);
-        }
+        // Structural filtering for section/division is currently disconnected as these fields were removed in migration.
+        // Keeping logic for department only.
         if ($request->filled('department')) {
             $departmentVal = $request->input('department');
-            $filteredRequisitions = $filteredRequisitions->filter(fn($r) => optional($r->user)->department_id == $departmentVal);
+            $filteredRequisitions = $filteredRequisitions->filter(fn($r) => optional($r->user)->dept_id == $departmentVal);
+        }
+
+        if ($request->filled('search')) {
+            $kw = strtolower($request->input('search'));
+            $filteredRequisitions = $filteredRequisitions->filter(function ($r) use ($kw) {
+                $user = optional($r->user);
+                return str_contains(strtolower($user->fullname ?? ''), $kw) ||
+                    str_contains(strtolower($user->emp_code ?? ''), $kw) ||
+                    str_contains(strtolower($r->requisitions_code ?? ''), $kw);
+            });
         }
 
         // Rebuild IDs after structural filtering.
@@ -288,11 +347,8 @@ class RequisitionsController extends Controller
             ->leftJoin('items as i', 'ri.item_id', '=', 'i.item_id')
             ->whereIn('ri.requisition_id', $ids);
         // Date filters still applied to item aggregation.
-        if ($request->filled('date_from')) {
-            $itemsQuery->where('r.created_at', '>=', Carbon::parse($request->date_from)->startOfDay());
-        }
-        if ($request->filled('date_to')) {
-            $itemsQuery->where('r.created_at', '<=', Carbon::parse($request->date_to)->endOfDay());
+        if ($request->filled('year')) {
+            $itemsQuery->whereYear('r.created_at', $request->year);
         }
 
         // Monthly item usage
@@ -359,11 +415,11 @@ class RequisitionsController extends Controller
     public function Reportslistall(Request $request)
     {
         $query = Requisitions::query()
-            ->with(['user.section', 'user.division', 'user.department', 'requisition_items'])
+            ->with(['user.department', 'requisition_items'])
             ->orderBy('created_at', 'desc');
 
         // Access Control: Non-HAMS/Admin only see their own
-        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isHamsOrAdmin) {
             $query->where('requester_id', Auth::user()->id);
         }
@@ -384,29 +440,41 @@ class RequisitionsController extends Controller
     public function ReportslistallExportPdf(Request $request)
     {
         $query = Requisitions::query()
-            ->with(['user.section', 'user.division', 'user.department', 'requisition_items'])
+            ->with(['user.department', 'requisition_items'])
             ->orderBy('created_at', 'desc');
 
         // Access Control: Non-HAMS/Admin only see their own
-        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isHamsOrAdmin) {
             $query->where('requester_id', Auth::user()->id);
         }
 
-        if ($request->filled('start_date')) {
-            $query->where('created_at', '>=', Carbon::parse($request->input('start_date'))->startOfDay());
+        $df = $request->input('date_from') ?: $request->input('start_date');
+        $dt = $request->input('date_to') ?: $request->input('end_date');
+
+        if ($df) {
+            $query->where('created_at', '>=', Carbon::parse($df)->startOfDay());
         }
-        if ($request->filled('end_date')) {
-            $query->where('created_at', '<=', Carbon::parse($request->input('end_date'))->endOfDay());
+        if ($dt) {
+            $query->where('created_at', '<=', Carbon::parse($dt)->endOfDay());
+        }
+        if ($request->filled('year')) {
+            $query->whereYear('created_at', $request->year);
         }
 
         $requisitions = $query->get();
 
+        // Structural Filter: Department (in-memory due to cross-connection restrictions)
+        if ($request->filled('department')) {
+            $deptId = $request->input('department');
+            $requisitions = $requisitions->filter(fn($r) => optional($r->user)->dept_id == $deptId);
+        }
+
         // Render a dedicated PDF view
         $html = view('serviceshams.reports.reportslistall_pdf', [
             'requisitions' => $requisitions,
-            'start_date' => $request->input('start_date'),
-            'end_date' => $request->input('end_date'),
+            'start_date' => $df,
+            'end_date' => $dt,
         ])->render();
 
         // Use Dompdf via the barryvdh facade
@@ -421,23 +489,35 @@ class RequisitionsController extends Controller
     public function ReportslistallExportCsv(Request $request)
     {
         $query = Requisitions::query()
-            ->with(['user.section', 'user.division', 'user.department', 'requisition_items'])
+            ->with(['user.department', 'requisition_items'])
             ->orderBy('created_at', 'desc');
 
         // Access Control: Non-HAMS/Admin only see their own
-        $isHamsOrAdmin = (Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648';
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isHamsOrAdmin) {
             $query->where('requester_id', Auth::user()->id);
         }
 
-        if ($request->filled('start_date')) {
-            $query->where('created_at', '>=', Carbon::parse($request->input('start_date'))->startOfDay());
+        $df = $request->input('date_from') ?: $request->input('start_date');
+        $dt = $request->input('date_to') ?: $request->input('end_date');
+
+        if ($df) {
+            $query->where('created_at', '>=', Carbon::parse($df)->startOfDay());
         }
-        if ($request->filled('end_date')) {
-            $query->where('created_at', '<=', Carbon::parse($request->input('end_date'))->endOfDay());
+        if ($dt) {
+            $query->where('created_at', '<=', Carbon::parse($dt)->endOfDay());
+        }
+        if ($request->filled('year')) {
+            $query->whereYear('created_at', $request->year);
         }
 
         $requisitions = $query->get();
+
+        // Structural Filter: Department
+        if ($request->filled('department')) {
+            $deptId = $request->input('department');
+            $requisitions = $requisitions->filter(fn($r) => optional($r->user)->dept_id == $deptId);
+        }
 
         $filename = 'requisitions_report_' . now()->format('Ymd_His') . '.csv';
 
@@ -488,3 +568,4 @@ class RequisitionsController extends Controller
     }
 
 }
+

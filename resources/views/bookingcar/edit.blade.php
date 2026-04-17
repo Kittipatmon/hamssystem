@@ -1,7 +1,7 @@
 @extends('layouts.bookingcar.appcar')
 
 @section('content')
-    <div class="max-w-5xl mx-auto px-4 py-6 animate-fadeIn">
+    <div class="max-w-6xl mx-auto px-4 py-6 animate-fadeIn">
         <!-- Main Form Card -->
         <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
             <!-- Header -->
@@ -23,25 +23,24 @@
                 @csrf
                 @method('PUT')
 
-                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Left Column: Booking Info -->
-                    <div class="space-y-6">
-                        <div class="bg-slate-50/80 rounded-2xl p-6 border border-slate-100">
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
+                    <!-- Left Column: Booking Info & Return Info -->
+                    <div class="space-y-8">
+                        <!-- 1. Booking Info -->
+                        <div class="bg-slate-50/80 rounded-2xl p-6 border border-slate-100 shadow-sm">
                             <h3 class="text-slate-800 font-bold mb-6 flex items-center gap-2">
                                 <i class="fa-solid fa-circle-info text-blue-400"></i> ข้อมูลหลักการจอง
                             </h3>
 
                             <div class="space-y-4">
-                                <!-- Booker -->
                                 <div class="form-control w-full">
                                     <label class="label pb-1">
                                         <span class="label-text font-bold text-slate-700 text-base">ผู้จอง</span>
                                     </label>
-                                    <input type="text" value="{{ $booking->user->employee_code }} - {{ $booking->user->first_name }} {{ $booking->user->last_name }}" 
+                                    <input type="text" value="{{ $booking->user->emp_code }} - {{ $booking->user->first_name }} {{ $booking->user->last_name }}" 
                                         class="input input-bordered w-full bg-slate-200/50 text-slate-500 font-medium" disabled />
                                 </div>
 
-                                <!-- Vehicle -->
                                 <div class="form-control w-full">
                                     <label class="label pb-1">
                                         <span class="label-text font-bold text-red-600 text-base">รถส่วนกลาง *</span>
@@ -56,7 +55,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Assignee -->
                                 <div class="form-control w-full">
                                     <label class="label pb-1">
                                         <span class="label-text font-bold text-slate-700 text-base">ชื่อเจ้าของงาน / ผู้มอบหมายภารกิจ</span>
@@ -65,26 +63,75 @@
                                         placeholder="เช่น ชื่อผู้จัดการฝ่ายฯ"
                                         class="input input-bordered w-full border-slate-200 focus:border-blue-400 font-medium text-slate-700" />
                                 </div>
+                            </div>
+                        </div>
 
-                                <!-- Attachment -->
+                        <!-- 2. Post-travel / Return Information (VERTICAL ALIGNMENT) -->
+                        <div class="bg-emerald-50/50 rounded-2xl p-6 border border-emerald-100 shadow-sm border-l-4 border-l-emerald-500">
+                            <h3 class="text-emerald-800 font-bold mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-rotate-left text-emerald-500"></i> ข้อมูลหลังการเดินทาง / คืนรถ
+                            </h3>
+
+                            <div class="space-y-5">
                                 <div class="form-control w-full">
-                                    <label class="label pb-1">
-                                        <span class="label-text font-bold text-slate-700 text-base">แนบไฟล์ (เอกสารประกอบการจอง)</span>
+                                    <label class="label pb-1.5">
+                                        <span class="label-text font-bold text-slate-700">สถานะการคืนรถ *</span>
                                     </label>
-                                    <div class="flex flex-col gap-2">
-                                        <input type="file" name="attachment" class="file-input file-input-bordered w-full border-slate-200" />
-                                        @if($booking->attachment)
-                                            <a href="{{ asset($booking->attachment) }}" target="_blank" class="text-blue-600 text-sm hover:underline flex items-center gap-1 px-1">
-                                                <i class="fa-solid fa-paperclip"></i> ดูเอกสารปัจจุบัน
-                                            </a>
-                                        @endif
+                                    <select name="return_status" class="select select-bordered w-full border-emerald-200 focus:border-emerald-400 font-medium text-slate-700 shadow-sm" required>
+                                        <option value="ยังไม่ส่งคืน" {{ $booking->return_status == 'ยังไม่ส่งคืน' ? 'selected' : '' }}>ยังไม่ส่งคืน</option>
+                                        <option value="ส่งคืนแล้ว" {{ $booking->return_status == 'ส่งคืนแล้ว' ? 'selected' : '' }}>ส่งคืนแล้ว</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="form-control w-full">
+                                        <label class="label pb-1.5">
+                                            <span class="label-text font-bold text-slate-700 text-xs">เลขไมล์ก่อนเดินทาง</span>
+                                        </label>
+                                        <div class="relative group">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="fa-solid fa-gauge-high text-slate-400 text-xs group-focus-within:text-emerald-500 transition-colors"></i>
+                                            </div>
+                                            <input type="number" name="mileage_before" value="{{ old('mileage_before', $booking->mileage_before) }}" 
+                                                placeholder="0"
+                                                class="input input-bordered w-full pl-8 h-10 border-slate-200 font-medium text-slate-700 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 shadow-sm" />
+                                        </div>
                                     </div>
+                                    <div class="form-control w-full">
+                                        <label class="label pb-1.5">
+                                            <span class="label-text font-bold text-slate-700 text-xs">เลขไมล์หลังเดินทาง</span>
+                                        </label>
+                                        <div class="relative group">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="fa-solid fa-gauge-simple-high text-slate-400 text-xs group-focus-within:text-emerald-500 transition-colors"></i>
+                                            </div>
+                                            <input type="number" name="mileage_after" value="{{ old('mileage_after', $booking->mileage_after) }}" 
+                                                placeholder="0"
+                                                class="input input-bordered w-full pl-8 h-10 border-slate-200 font-medium text-slate-700 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 shadow-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-control w-full">
+                                    <label class="label pb-1.5">
+                                        <span class="label-text font-bold text-slate-700">หมายเหตุการคืนรถ</span>
+                                    </label>
+                                    <textarea name="note_returning" class="textarea textarea-bordered w-full border-slate-200 h-24" 
+                                        placeholder="ระบุหมายเหตุหรือปัญหา...">{{ old('note_returning', $booking->note_returning) }}</textarea>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <label class="label pb-0">
+                                        <span class="label-text font-bold text-slate-700 text-xs">อัปโหลดรูปภาพ (ก่อน/หลัง)</span>
+                                    </label>
+                                    <input type="file" name="attachment_going[]" multiple class="file-input file-input-bordered file-input-sm w-full border-slate-200" />
+                                    <input type="file" name="attachment_returning[]" multiple class="file-input file-input-bordered file-input-sm w-full border-slate-200 mt-1" />
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Current Status & Approval (Preserving existing functionality) -->
-                        <div class="bg-blue-50/50 rounded-2xl p-6 border border-blue-100">
+                        <!-- 3. Current Status & Approval -->
+                        <div class="bg-blue-50/50 rounded-2xl p-6 border border-blue-100 shadow-sm">
                             <h3 class="text-blue-800 font-bold mb-4 flex items-center gap-2">
                                 <i class="fa-solid fa-clipboard-check"></i> สถานะและการอนุมัติ
                             </h3>
@@ -97,11 +144,10 @@
                                         default => 'bg-red-500'
                                     };
                                 @endphp
-                                <span class="badge {{ $statusClass }} text-white border-0 font-bold">{{ $booking->status }}</span>
+                                <span class="badge {{ $statusClass }} text-white border-0 font-bold shadow-sm">{{ $booking->status }}</span>
                             </div>
-                            
                             <div class="flex gap-2">
-                                <select name="status" class="select select-bordered select-sm flex-1 border-blue-200">
+                                <select name="status" class="select select-bordered select-sm flex-1 border-blue-200 focus:border-blue-400 font-medium">
                                     <option value="รออนุมัติ" {{ $booking->status == 'รออนุมัติ' ? 'selected' : '' }}>รออนุมัติ</option>
                                     <option value="อนุมัติแล้ว" {{ $booking->status == 'อนุมัติแล้ว' ? 'selected' : '' }}>อนุมัติแล้ว</option>
                                     <option value="ไม่อนุมัติ" {{ $booking->status == 'ไม่อนุมัติ' ? 'selected' : '' }}>ไม่อนุมัติ</option>
@@ -111,145 +157,142 @@
                         </div>
                     </div>
 
-                    <!-- Right Column: Travel Details -->
-                    <div class="space-y-6">
-                        <div class="bg-white rounded-2xl p-6 border border-blue-100 h-full">
-                            <h3 class="text-slate-800 font-bold mb-6 flex justify-between items-center">
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-list-ul text-blue-400"></i> รายละเอียดการเดินทาง
+                    <!-- Right Column: Status Stepper & Travel Details -->
+                    <div class="space-y-8">
+                        <!-- Modern Status Stepper -->
+                        <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-full -mr-16 -mt-16 blur-3xl transition-all group-hover:bg-indigo-100/50"></div>
+                            <h3 class="text-slate-800 font-black text-lg mb-8 flex items-center gap-3 relative z-10">
+                                <div class="w-2 h-6 bg-indigo-600 rounded-full"></div>
+                                สถานะการดำเนินการ
+                            </h3>
+
+                            <div class="relative z-10 space-y-0">
+                                @php
+                                    $isApproved = in_array($booking->status, ['อนุมัติแล้ว']);
+                                    $isRejected = in_array($booking->status, ['ไม่อนุมัติ', 'ยกเลิก']);
+                                    $isReturned = $booking->return_status === 'ส่งคืนแล้ว';
+                                    $isPending = $booking->status === 'รออนุมัติ';
+                                @endphp
+
+                                <div class="flex gap-4 min-h-[70px]">
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg z-10">
+                                            <i class="fa-solid fa-file-signature text-[10px]"></i>
+                                        </div>
+                                        <div class="flex-1 w-[2px] bg-indigo-600"></div>
+                                    </div>
+                                    <div class="pb-4">
+                                        <p class="text-[13px] font-black text-slate-800 tracking-tight">ยื่นคำขอจองรถ</p>
+                                        <p class="text-[11px] font-bold text-slate-400 mt-0.5">{{ \Carbon\Carbon::parse($booking->created_at)->translatedFormat('d M Y') }}</p>
+                                    </div>
                                 </div>
+
+                                <div class="flex gap-4 min-h-[70px]">
+                                    <div class="flex flex-col items-center">
+                                        @if($isPending)
+                                            <div class="w-7 h-7 rounded-full bg-white border-4 border-amber-400 text-amber-500 flex items-center justify-center z-10 animate-pulse">
+                                                <i class="fa-solid fa-spinner fa-spin text-[10px]"></i>
+                                            </div>
+                                        @elseif($isApproved || $isReturned)
+                                            <div class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg z-10">
+                                                <i class="fa-solid fa-check text-[10px]"></i>
+                                            </div>
+                                        @elseif($isRejected)
+                                            <div class="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg z-10">
+                                                <i class="fa-solid fa-xmark text-[10px]"></i>
+                                            </div>
+                                        @else
+                                            <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-300 flex items-center justify-center z-10">
+                                                <i class="fa-solid fa-ellipsis text-[10px]"></i>
+                                            </div>
+                                        @endif
+                                        <div class="flex-1 w-[2px] {{ $isApproved || $isReturned ? 'bg-emerald-500' : ($isRejected ? 'bg-rose-500' : 'bg-slate-100') }}"></div>
+                                    </div>
+                                    <div class="pb-4">
+                                        <p class="text-[13px] font-black {{ $isPending ? 'text-amber-600' : ($isRejected ? 'text-rose-600' : 'text-slate-800') }} tracking-tight tracking-tight">พิจารณาคำขอ</p>
+                                        <p class="text-[11px] font-bold text-slate-400 mt-0.5">สถานะ: {{ $booking->status }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-4">
+                                    <div class="flex flex-col items-center">
+                                        @if($isReturned)
+                                            <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg z-10">
+                                                <i class="fa-solid fa-flag-checkered text-[10px]"></i>
+                                            </div>
+                                        @else
+                                            <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-300 flex items-center justify-center z-10">
+                                                <i class="fa-solid fa-car-side text-[10px]"></i>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="text-[13px] font-black {{ $isReturned ? 'text-blue-600' : 'text-slate-800' }} tracking-tight">ดำเนินการเสร็จสิ้น</p>
+                                        <p class="text-[11px] font-bold text-slate-400 mt-0.5">{{ $booking->return_status }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Travel Details Card -->
+                        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                            <h3 class="text-slate-800 font-bold mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-list-ul text-blue-400"></i> รายละเอียดการเดินทาง
                             </h3>
 
                             <div class="space-y-6">
                                 <!-- Date/Time Section -->
-                                <div>
-                                    <div class="flex justify-between items-center mb-4">
-                                        <h4 class="text-red-600 font-bold text-lg">ระบุวันเวลาที่เดินทาง *</h4>
-                                        <button type="button" class="btn btn-outline btn-info btn-xs rounded-lg gap-1 lowercase font-medium">
-                                            <i class="fa-regular fa-clock"></i> ตัวอย่างเวลา
-                                        </button>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="form-control">
+                                        <label class="label py-1">
+                                            <span class="label-text font-bold text-slate-700 text-xs">วันที่เริ่มเดินทาง</span>
+                                        </label>
+                                        <input type="date" name="start_date" value="{{ old('start_date', \Carbon\Carbon::parse($booking->start_time)->format('Y-m-d')) }}"
+                                            class="input input-bordered w-full h-10 border-slate-100 font-medium" />
                                     </div>
-
-                                    <div class="grid grid-cols-2 gap-4 mb-4">
-                                        <div class="form-control">
-                                            <label class="label py-1">
-                                                <span class="label-text font-bold text-slate-700"><i class="fa-solid fa-calendar-days text-red-500 mr-1"></i> วันที่เริ่มเดินทาง</span>
-                                            </label>
-                                            <input type="date" name="start_date" value="{{ old('start_date', \Carbon\Carbon::parse($booking->start_time)->format('Y-m-d')) }}"
-                                                class="input input-bordered w-full border-red-100" />
-                                        </div>
-                                        <div class="form-control">
-                                            <label class="label py-1">
-                                                <span class="label-text font-bold text-slate-700"><i class="fa-solid fa-calendar-days text-red-500 mr-1"></i> วันที่สิ้นสุด</span>
-                                            </label>
-                                            <input type="date" name="end_date" value="{{ old('end_date', \Carbon\Carbon::parse($booking->end_time)->format('Y-m-d')) }}"
-                                                class="input input-bordered w-full border-red-100" />
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div class="form-control">
-                                            <label class="label py-1">
-                                                <span class="label-text font-bold text-slate-400 text-xs">เวลาออกเดินทาง</span>
-                                            </label>
-                                            <div class="relative time-picker-container" id="start-time-picker">
-                                                <input type="text" name="start_time_only" id="start_time_input"
-                                                    value="{{ old('start_time_only', \Carbon\Carbon::parse($booking->start_time)->format('H:i')) }}"
-                                                    class="input input-bordered w-full pr-10 border-slate-200 cursor-pointer" readonly />
-                                                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-500 transition-colors time-picker-toggle">
-                                                    <i class="fa-regular fa-clock text-lg"></i>
-                                                </button>
-                                                <!-- Custom Time Picker Menu -->
-                                                <div class="time-picker-menu absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-[100] hidden p-4 min-w-[180px] animate-fadeIn">
-                                                    <div class="flex flex-col gap-4">
-                                                        <!-- Header Info -->
-                                                        <div class="flex gap-2 justify-center pb-2 border-b border-slate-50">
-                                                            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl current-hour-header">08</div>
-                                                            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl current-min-header">30</div>
-                                                        </div>
-                                                        <!-- Selection Columns -->
-                                                        <div class="flex gap-4 justify-center h-48 overflow-hidden relative">
-                                                            <!-- Hour Column -->
-                                                            <div class="flex-1 overflow-y-auto no-scrollbar hour-column text-center space-y-2 py-12 scroll-smooth">
-                                                                @for($i=0; $i<=23; $i++)
-                                                                    <div class="hour-item py-1 cursor-pointer transition-all rounded-lg hover:bg-slate-50 text-slate-400 font-medium" data-hour="{{ sprintf('%02d', $i) }}">{{ sprintf('%02d', $i) }}</div>
-                                                                @endfor
-                                                            </div>
-                                                            <!-- Minute Column -->
-                                                            <div class="flex-1 overflow-y-auto no-scrollbar min-column text-center space-y-2 py-12 scroll-smooth">
-                                                                @for($i=0; $i<=59; $i++)
-                                                                    <div class="min-item py-1 cursor-pointer transition-all rounded-lg hover:bg-slate-50 text-slate-400 font-medium" data-min="{{ sprintf('%02d', $i) }}">{{ sprintf('%02d', $i) }}</div>
-                                                                @endfor
-                                                            </div>
-                                                            <!-- Selection Overlay -->
-                                                            <div class="absolute top-1/2 left-0 w-full h-10 -translate-y-1/2 bg-blue-500/10 pointer-events-none rounded-lg border-y border-blue-500/20"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-control">
-                                            <label class="label py-1">
-                                                <span class="label-text font-bold text-slate-400 text-xs">เวลากลับโดยประมาณ</span>
-                                            </label>
-                                            <div class="relative time-picker-container" id="end-time-picker">
-                                                <input type="text" name="end_time_only" id="end_time_input"
-                                                    value="{{ old('end_time_only', \Carbon\Carbon::parse($booking->end_time)->format('H:i')) }}"
-                                                    class="input input-bordered w-full pr-10 border-slate-200 cursor-pointer" readonly />
-                                                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-500 transition-colors time-picker-toggle">
-                                                    <i class="fa-regular fa-clock text-lg"></i>
-                                                </button>
-                                                <!-- Custom Time Picker Menu -->
-                                                <div class="time-picker-menu absolute top-full right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-[100] hidden p-4 min-w-[180px] animate-fadeIn">
-                                                    <div class="flex flex-col gap-4">
-                                                        <!-- Header Info -->
-                                                        <div class="flex gap-2 justify-center pb-2 border-b border-slate-50">
-                                                            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl current-hour-header">17</div>
-                                                            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl current-min-header">00</div>
-                                                        </div>
-                                                        <!-- Selection Columns -->
-                                                        <div class="flex gap-4 justify-center h-48 overflow-hidden relative">
-                                                            <!-- Hour Column -->
-                                                            <div class="flex-1 overflow-y-auto no-scrollbar hour-column text-center space-y-2 py-12 scroll-smooth">
-                                                                @for($i=0; $i<=23; $i++)
-                                                                    <div class="hour-item py-1 cursor-pointer transition-all rounded-lg hover:bg-slate-50 text-slate-400 font-medium" data-hour="{{ sprintf('%02d', $i) }}">{{ sprintf('%02d', $i) }}</div>
-                                                                @endfor
-                                                            </div>
-                                                            <!-- Minute Column -->
-                                                            <div class="flex-1 overflow-y-auto no-scrollbar min-column text-center space-y-2 py-12 scroll-smooth">
-                                                                @for($i=0; $i<=59; $i++)
-                                                                    <div class="min-item py-1 cursor-pointer transition-all rounded-lg hover:bg-slate-50 text-slate-400 font-medium" data-min="{{ sprintf('%02d', $i) }}">{{ sprintf('%02d', $i) }}</div>
-                                                                @endfor
-                                                            </div>
-                                                            <!-- Selection Overlay -->
-                                                            <div class="absolute top-1/2 left-0 w-full h-10 -translate-y-1/2 bg-blue-500/10 pointer-events-none rounded-lg border-y border-blue-500/20"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="form-control">
+                                        <label class="label py-1">
+                                            <span class="label-text font-bold text-slate-700 text-xs">วันที่สิ้นสุด</span>
+                                        </label>
+                                        <input type="date" name="end_date" value="{{ old('end_date', \Carbon\Carbon::parse($booking->end_time)->format('Y-m-d')) }}"
+                                            class="input input-bordered w-full h-10 border-slate-100 font-medium" />
                                     </div>
                                 </div>
 
-                                <!-- Destination -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="form-control">
+                                        <label class="label py-1">
+                                            <span class="label-text font-bold text-slate-400 text-xs">เวลาออกเดินทาง</span>
+                                        </label>
+                                        <input type="text" name="start_time_only" 
+                                            value="{{ old('start_time_only', \Carbon\Carbon::parse($booking->start_time)->format('H:i')) }}"
+                                            class="input input-bordered w-full h-10 border-slate-100 font-medium" />
+                                    </div>
+                                    <div class="form-control">
+                                        <label class="label py-1">
+                                            <span class="label-text font-bold text-slate-400 text-xs">เวลากลับโดยประมาณ</span>
+                                        </label>
+                                        <input type="text" name="end_time_only" 
+                                            value="{{ old('end_time_only', \Carbon\Carbon::parse($booking->end_time)->format('H:i')) }}"
+                                            class="input input-bordered w-full h-10 border-slate-100 font-medium" />
+                                    </div>
+                                </div>
+
                                 <div class="form-control w-full">
                                     <label class="label pb-1">
-                                        <span class="label-text font-bold text-red-600 text-base">จุดหมายปลายทางของการเดินทาง *</span>
+                                        <span class="label-text font-bold text-red-600 text-xs">จุดหมายปลายทาง *</span>
                                     </label>
                                     <input type="text" name="destination" value="{{ old('destination', $booking->destination) }}"
-                                        placeholder="ระบุสถานที่ปลายทางที่จะเดินทางไป" 
-                                        class="input input-bordered w-full border-red-200" required />
+                                        class="input input-bordered w-full h-10 border-red-100 font-medium" required />
                                 </div>
 
-                                <!-- District & Province -->
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="form-control">
                                         <label class="label pb-1">
-                                            <span class="label-text font-bold text-red-600 text-base">จังหวัดที่จะเดินทางไป *</span>
+                                            <span class="label-text font-bold text-red-600 text-xs">จังหวัด *</span>
                                         </label>
-                                        <select name="province" id="province_select" 
-                                            class="select select-bordered w-full border-red-200 focus:border-red-400 font-medium text-slate-700" 
-                                            required>
+                                        <select name="province" id="province_select" class="select select-bordered select-sm w-full font-medium" required>
                                             <option value="" disabled>-- เลือกจังหวัด --</option>
                                             @foreach($provinces as $prov)
                                                 <option value="{{ $prov }}" {{ (old('province', $booking->province) == $prov) ? 'selected' : '' }}>{{ $prov }}</option>
@@ -258,11 +301,9 @@
                                     </div>
                                     <div class="form-control">
                                         <label class="label pb-1">
-                                            <span class="label-text font-bold text-red-600 text-base">อำเภอที่เดินทางไป *</span>
+                                            <span class="label-text font-bold text-red-600 text-xs">อำเภอ *</span>
                                         </label>
-                                        <select name="district" id="district_select" 
-                                            class="select select-bordered w-full border-red-200 focus:border-red-400 font-medium text-slate-700" 
-                                            required>
+                                        <select name="district" id="district_select" class="select select-bordered select-sm w-full font-medium" required>
                                             <option value="" disabled>-- เลือกอำเภอ --</option>
                                             @if($booking->district)
                                                 <option value="{{ $booking->district }}" selected>{{ $booking->district }}</option>
@@ -271,124 +312,20 @@
                                     </div>
                                 </div>
 
-                                <!-- Purpose -->
                                 <div class="form-control w-full">
                                     <label class="label pb-1">
-                                        <span class="label-text font-bold text-slate-700 text-base">วัตถุประสงค์ของการใช้รถ</span>
+                                        <span class="label-text font-bold text-slate-700 text-xs">วัตถุประสงค์ของการใช้รถ</span>
                                     </label>
-                                    <textarea name="purpose" class="textarea textarea-bordered w-full border-slate-200 h-24" 
-                                        placeholder="ระบุวัตถุประสงค์ในการเดินทาง...">{{ old('purpose', $booking->purpose) }}</textarea>
+                                    <textarea name="purpose" class="textarea textarea-bordered w-full h-20 border-slate-100" 
+                                        placeholder="ระบุวัตถุประสงค์...">{{ old('purpose', $booking->purpose) }}</textarea>
                                 </div>
 
-                                <!-- Passenger Count -->
                                 <div class="form-control w-full">
                                     <label class="label pb-1">
-                                        <span class="label-text font-bold text-slate-700 text-base">จำนวนผู้โดยสาร (ท่าน)</span>
+                                        <span class="label-text font-bold text-slate-700 text-xs">จำนวนผู้โดยสาร (ท่าน)</span>
                                     </label>
                                     <input type="number" name="passenger_count" value="{{ old('passenger_count', $booking->passenger_count ?? 1) }}" 
-                                        class="input input-bordered w-full border-slate-200" min="1" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Post-travel / Return Information -->
-                <div class="px-6 pb-8">
-                    <div class="bg-emerald-50/50 rounded-2xl p-6 border border-emerald-100">
-                        <h3 class="text-emerald-800 font-bold mb-6 flex items-center gap-2">
-                            <i class="fa-solid fa-rotate-left text-emerald-500"></i> ข้อมูลหลังการเดินทาง / คืนรถ
-                        </h3>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Return Status -->
-                            <div class="form-control w-full">
-                                <label class="label pb-1">
-                                    <span class="label-text font-bold text-slate-700 text-base">สถานะการคืนรถ *</span>
-                                </label>
-                                <select name="return_status" class="select select-bordered w-full border-emerald-200 focus:border-emerald-400 font-medium text-slate-700" required>
-                                    <option value="ยังไม่ส่งคืน" {{ $booking->return_status == 'ยังไม่ส่งคืน' ? 'selected' : '' }}>ยังไม่ส่งคืน</option>
-                                    <option value="ส่งคืนแล้ว" {{ $booking->return_status == 'ส่งคืนแล้ว' ? 'selected' : '' }}>ส่งคืนแล้ว</option>
-                                </select>
-                            </div>
-
-                            <!-- Mileage Before -->
-                            <div class="form-control w-full">
-                                <label class="label pb-1">
-                                    <span class="label-text font-bold text-slate-700 text-base">เลขไมล์ก่อนเดินทาง</span>
-                                </label>
-                                <input type="number" name="mileage_before" value="{{ old('mileage_before', $booking->mileage_before) }}" 
-                                    placeholder="0"
-                                    class="input input-bordered w-full border-slate-200 font-medium text-slate-700" />
-                            </div>
-
-                            <!-- Mileage After -->
-                            <div class="form-control w-full">
-                                <label class="label pb-1">
-                                    <span class="label-text font-bold text-slate-700 text-base">เลขไมล์หลังเดินทาง</span>
-                                </label>
-                                <input type="number" name="mileage_after" value="{{ old('mileage_after', $booking->mileage_after) }}" 
-                                    placeholder="0"
-                                    class="input input-bordered w-full border-slate-200 font-medium text-slate-700" />
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                            <!-- Note Returning -->
-                            <div class="form-control w-full">
-                                <label class="label pb-1">
-                                    <span class="label-text font-bold text-slate-700 text-base">หมายเหตุการคืนรถ</span>
-                                </label>
-                                <textarea name="note_returning" class="textarea textarea-bordered w-full border-slate-200 h-32" 
-                                    placeholder="ระบุหมายเหตุหรือปัญหาที่พบระหว่างการเดินทาง...">{{ old('note_returning', $booking->note_returning) }}</textarea>
-                            </div>
-
-                            <!-- File Uploads -->
-                            <div class="space-y-4">
-                                <div class="form-control w-full">
-                                    <label class="label pb-1">
-                                        <span class="label-text font-bold text-slate-700 text-base">รูปภาพก่อนเดินทาง (Going)</span>
-                                    </label>
-                                    <input type="file" name="attachment_going[]" multiple class="file-input file-input-bordered w-full border-slate-200" />
-                                    @if($booking->attachment_going)
-                                        @php $goingFiles = json_decode($booking->attachment_going, true); @endphp
-                                        @if(is_array($goingFiles))
-                                            <div class="flex flex-wrap gap-2 mt-2">
-                                                @foreach($goingFiles as $file)
-                                                    <a href="{{ asset($file) }}" target="_blank" class="badge badge-outline gap-1 py-3 hover:bg-slate-100">
-                                                        <i class="fa-solid fa-image"></i> ดูรูป
-                                                    </a>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <a href="{{ asset($booking->attachment_going) }}" target="_blank" class="badge badge-outline gap-1 py-3 mt-2 hover:bg-slate-100">
-                                                <i class="fa-solid fa-image"></i> ดูรูปปัจจุบัน
-                                            </a>
-                                        @endif
-                                    @endif
-                                </div>
-
-                                <div class="form-control w-full">
-                                    <label class="label pb-1">
-                                        <span class="label-text font-bold text-slate-700 text-base">รูปภาพหลังเดินทาง (Returning)</span>
-                                    </label>
-                                    <input type="file" name="attachment_returning[]" multiple class="file-input file-input-bordered w-full border-slate-200" />
-                                    @if($booking->attachment_returning)
-                                        @php $returningFiles = json_decode($booking->attachment_returning, true); @endphp
-                                        @if(is_array($returningFiles))
-                                            <div class="flex flex-wrap gap-2 mt-2">
-                                                @foreach($returningFiles as $file)
-                                                    <a href="{{ asset($file) }}" target="_blank" class="badge badge-outline gap-1 py-3 hover:bg-slate-100">
-                                                        <i class="fa-solid fa-image"></i> ดูรูป
-                                                    </a>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <a href="{{ asset($booking->attachment_returning) }}" target="_blank" class="badge badge-outline gap-1 py-3 mt-2 hover:bg-slate-100">
-                                                <i class="fa-solid fa-image"></i> ดูรูปปัจจุบัน
-                                            </a>
-                                        @endif
-                                    @endif
+                                        class="input input-bordered w-full h-10 border-slate-100 font-medium" min="1" />
                                 </div>
                             </div>
                         </div>
@@ -405,111 +342,11 @@
             </form>
         </div>
     </div>
-
-    <!-- Additional sections like Return Info could be placed here if needed, 
-         but kept in the main form for simplicity matching the mockup -->
 @endsection
-
-@push('styles')
-<style>
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    .time-picker-menu {
-        animation: slideDown 0.2s ease-out;
-        transform-origin: top;
-    }
-    
-    @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-10px) scaleY(0.9); }
-        to { opacity: 1; transform: translateY(0) scaleY(1); }
-    }
-
-    .hour-item.active, .min-item.active {
-        @apply bg-blue-500 text-white font-bold scale-110 shadow-md;
-    }
-</style>
-@endpush
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const containers = document.querySelectorAll('.time-picker-container');
-    
-    containers.forEach(container => {
-        const toggle = container.querySelector('.time-picker-toggle');
-        const input = container.querySelector('input');
-        const menu = container.querySelector('.time-picker-menu');
-        const hourHeader = container.querySelector('.current-hour-header');
-        const minHeader = container.querySelector('.current-min-header');
-        const hourItems = container.querySelectorAll('.hour-item');
-        const minItems = container.querySelectorAll('.min-item');
-        
-        // Parse initial value (24h format hh:mm)
-        const initialValue = input.value;
-        let [hour, min] = initialValue.split(':');
-
-        let currentHour = hour || '08';
-        let currentMin = min || '00';
-
-        const updateInput = () => {
-            input.value = `${currentHour}:${currentMin}`;
-            hourHeader.textContent = currentHour;
-            minHeader.textContent = currentMin;
-        };
-
-        const setActive = (items, value, attr) => {
-            items.forEach(item => {
-                if(item.getAttribute(attr) === value) {
-                    item.classList.add('active');
-                    // Auto scroll to active item
-                    const column = item.parentElement;
-                    const scrollOffset = item.offsetTop - column.offsetTop - (column.clientHeight / 2) + (item.clientHeight / 2);
-                    column.scrollTo({ top: scrollOffset, behavior: 'instant' });
-                } else {
-                    item.classList.remove('active');
-                }
-            });
-        };
-
-        // Initialize active states and scroll
-        const initPicker = () => {
-            setActive(hourItems, currentHour, 'data-hour');
-            setActive(minItems, currentMin, 'data-min');
-            hourHeader.textContent = currentHour;
-            minHeader.textContent = currentMin;
-        };
-
-        const toggleMenu = (e) => {
-            e.stopPropagation();
-            const isOpen = !menu.classList.contains('hidden');
-            document.querySelectorAll('.time-picker-menu').forEach(m => m.classList.add('hidden'));
-            if(!isOpen) {
-                menu.classList.remove('hidden');
-                initPicker(); // Scroll to current values when opened
-            }
-        };
-
-        toggle.addEventListener('click', toggleMenu);
-        input.addEventListener('click', toggleMenu);
-
-        hourItems.forEach(item => {
-            item.addEventListener('click', () => {
-                currentHour = item.getAttribute('data-hour');
-                setActive(hourItems, currentHour, 'data-hour');
-                updateInput();
-            });
-        });
-
-        minItems.forEach(item => {
-            item.addEventListener('click', () => {
-                currentMin = item.getAttribute('data-min');
-                setActive(minItems, currentMin, 'data-min');
-                updateInput();
-            });
-        });
-    });
-
     // Province & District Dependent Dropdown
     const provinceSelect = document.getElementById('province_select');
     const districtSelect = document.getElementById('district_select');
@@ -550,19 +387,10 @@ document.addEventListener('DOMContentLoaded', function() {
             loadDistricts(this.value);
         });
 
-        // Initial load for Edit Page
         if (provinceSelect.value) {
             loadDistricts(provinceSelect.value, "{{ old('district', $booking->district) }}");
         }
     }
-
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.time-picker-menu').forEach(m => m.classList.add('hidden'));
-    });
-
-    document.querySelectorAll('.time-picker-menu').forEach(m => {
-        m.addEventListener('click', e => e.stopPropagation());
-    });
 });
 </script>
 @endpush

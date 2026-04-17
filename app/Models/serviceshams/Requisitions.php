@@ -34,6 +34,18 @@ class Requisitions extends Model
         'packing_staff_date',
         'requisitions_code',
         'requester_comment',
+        'commander_id',
+        'commander_status',
+        'commander_comment',
+        'commander_date',
+        'managerhams_id',
+        'managerhams_status',
+        'managerhams_comment',
+        'managerhams_date',
+        'Committee_id',
+        'Committee_status',
+        'Committee_comment',
+        'Committee_date',
     ];
 
     protected $casts = [
@@ -43,6 +55,12 @@ class Requisitions extends Model
         'total_price' => 'decimal:2',
         'approve_status' => 'integer',
         'packing_staff_status' => 'integer',
+        'commander_status' => 'integer',
+        'managerhams_status' => 'integer',
+        'Committee_status' => 'integer',
+        'commander_date' => 'datetime',
+        'managerhams_date' => 'datetime',
+        'Committee_date' => 'datetime',
     ];
 
        public function user()
@@ -59,6 +77,21 @@ class Requisitions extends Model
     public function packing_staff()
     {
         return $this->belongsTo(User::class, 'packing_staff_id', 'id'); 
+    }
+
+    public function commander()
+    {
+        return $this->belongsTo(User::class, 'commander_id', 'id');
+    }
+
+    public function managerHams()
+    {
+        return $this->belongsTo(User::class, 'managerhams_id', 'id');
+    }
+
+    public function committee()
+    {
+        return $this->belongsTo(User::class, 'Committee_id', 'id');
     }
 
     public function requisition_items() {
@@ -80,7 +113,7 @@ class Requisitions extends Model
             'icon' => 'fa fa-clock',
         ],
         self::STATUS_APPROVED => [
-            'label' => 'อนุมัติ',
+            'label' => 'รอดำเนินการจัดอุปกรณ์',
             'color' => 'success',
             'class' => 'badge bg-success',
             'icon' => 'fa fa-check',
@@ -160,6 +193,22 @@ class Requisitions extends Model
     public function getApproveStatusLabelAttribute()
     {
         return self::attributeOptions['approve_status']['label'][$this->approve_status] ?? 'Unknown';
+    }
+
+    // Approver Status Labels
+    public function getCommanderStatusLabelAttribute()
+    {
+        return self::attributeOptions['approve_status']['label'][$this->commander_status] ?? 'Unknown';
+    }
+
+    public function getManagerhamsStatusLabelAttribute()
+    {
+        return self::attributeOptions['approve_status']['label'][$this->managerhams_status] ?? 'Unknown';
+    }
+
+    public function getCommitteeStatusLabelAttribute()
+    {
+        return self::attributeOptions['approve_status']['label'][$this->Committee_status] ?? 'Unknown';
     }
 
 

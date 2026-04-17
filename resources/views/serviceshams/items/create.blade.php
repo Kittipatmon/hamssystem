@@ -1,66 +1,179 @@
 @extends('layouts.serviceitem.appservice')
 @section('content')
-<div class="max-w-5xl mx-auto py-6 bg-white p-6 rounded shadow">
-	<h1 class="text-xl font-semibold mb-6">เพิ่มอุปกรณ์ใหม่ (Create Item)</h1>
+    <div class="max-w-4xl mx-auto py-8 lg:py-18 px-4 space-y-8 uppercase tracking-tight">
 
-	@if ($errors->any())
-		<div class="mb-4 p-4 rounded bg-red-50 border border-red-200 text-red-700">
-			<strong>เกิดข้อผิดพลาด:</strong>
-			<ul class="list-disc pl-5 mt-2 text-sm">
-				@foreach ($errors->all() as $error)
-					<li>{{ $error }}</li>
-				@endforeach
-			</ul>
-		</div>
-	@endif
+        <!-- Header Section -->
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 animate-zoom-in">
+            <div class="flex items-center gap-6">
+                <div class="w-16 h-16 bg-red-600 rounded-3xl flex items-center justify-center shadow-lg shadow-red-100">
+                    <i class="fa-solid fa-plus text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-slate-800 leading-none">เพิ่มพัสดุอุปกรณ์ใหม่</h1>
+                    <p class="text-[13px] text-slate-400 font-bold mt-1.5 uppercase">CREATE NEW ITEM CATALOG</p>
+                </div>
+                <a href="{{ route('items.index') }}"
+                    class="ml-auto w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 transition-all active:scale-95">
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+            </div>
+        </div>
 
-	<form action="{{ route('items.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-		@csrf
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-			<div>
-				<label class="block text-sm font-medium mb-1" for="item_code">รหัสอุปกรณ์ (Item Code)</label>
-				<input type="text" id="item_code" name="item_code" value="{{ old('item_code') }}" class="input input-bordered w-full" required>
-			</div>
-			<div>
-				<label class="block text-sm font-medium mb-1" for="name">ชื่ออุปกรณ์ (Name)</label>
-				<input type="text" id="name" name="name" value="{{ old('name') }}" class="input input-bordered w-full" required>
-			</div>
-			<div>
-				<label class="block text-sm font-medium mb-1" for="type_id">ประเภท (Type)</label>
-				<select id="type_id" name="type_id" class="input input-bordered w-full" required>
-					<option value="">-- เลือกประเภท --</option>
-					@foreach($items_types as $type)
-						<option value="{{ $type->item_type_id }}" @selected(old('type_id') == $type->item_type_id)>{{ $type->name }}</option>
-					@endforeach
-				</select>
-			</div>
-			<div>
-				<label class="block text-sm font-medium mb-1" for="quantity">จำนวน (Quantity)</label>
-				<input type="number" id="quantity" name="quantity" min="0" value="{{ old('quantity', 0) }}" class="input input-bordered w-full" required>
-			</div>
-			<div>
-				<label class="block text-sm font-medium mb-1" for="per_unit">ราคา/หน่วย (Price per Unit)</label>
-				<input type="number" step="0.01" id="per_unit" name="per_unit" value="{{ old('per_unit') }}" class="input input-bordered w-full" required>
-			</div>
-			<div>
-				<label class="block text-sm font-medium mb-1" for="item_pic">รูปภาพ (Image)</label>
-				<input type="file" id="item_pic" name="item_pic" accept="image/*" class="file-input file-input-warning w-full">
-			</div>
-		</div>
-		<div>
-			<label class="block text-sm font-medium mb-1" for="description">รายละเอียด (Description)</label>
-			<textarea id="description" name="description" rows="4" class="textarea textarea-bordered w-full" placeholder="รายละเอียดเพิ่มเติม">{{ old('description') }}</textarea>
-		</div>
-		<div class="flex items-center space-x-4">
-			<button type="submit" class="btn btn-success text-white">
-                <i class="fa-solid fa-floppy-disk mr-1"></i>
-                 บันทึกข้อมูล
-            </button>
-			<a href="{{ route('items.index') }}" class="btn btn-secondary">
-                <i class="fa-solid fa-cancel mr-1"></i>
-                ยกเลิก
-            </a>
-		</div>
-	</form>
-</div>
+        @if ($errors->any())
+            <div class="bg-red-50 border-2 border-red-100 p-6 rounded-[2rem] animate-zoom-in">
+                <div class="flex items-center gap-3 text-red-600 mb-3">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                    <span class="font-black text-sm uppercase">พบข้อผิดพลาดในการกรอกข้อมูล</span>
+                </div>
+                <ul class="list-disc pl-5 space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li class="text-xs font-bold text-red-500 leading-relaxed uppercase">{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <!-- Form Section -->
+        <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm border border-slate-100 animate-zoom-in"
+            style="animation-delay: 0.1s">
+            <form action="{{ route('items.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                @csrf
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Item Code -->
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+                            for="item_code">รหัสพัสดุ (ITEM CODE)</label>
+                        <input type="text" id="item_code" name="item_code" value="{{ old('item_code') }}"
+                            placeholder="เช่น HAMS-001"
+                            class="w-full h-14 px-6 bg-slate-50 border-2 border-slate-50 rounded-2xl text-slate-700 font-bold focus:bg-white focus:border-red-500 transition-all outline-none placeholder:text-slate-300"
+                            required>
+                    </div>
+
+                    <!-- Name -->
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+                            for="name">ชื่อเรียกอุปกรณ์ (NAME)</label>
+                        <input type="text" id="name" name="name" value="{{ old('name') }}"
+                            placeholder="ระบุชื่อพัสดุอุปกรณ์"
+                            class="w-full h-14 px-6 bg-slate-50 border-2 border-slate-50 rounded-2xl text-slate-700 font-bold focus:bg-white focus:border-red-500 transition-all outline-none placeholder:text-slate-300"
+                            required>
+                    </div>
+
+                    <!-- Type -->
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+                            for="type_id">ประเภทพัสดุ (CATEGORY)</label>
+                        <div class="relative">
+                            <select id="type_id" name="type_id"
+                                class="w-full h-14 px-6 bg-slate-50 border-2 border-slate-50 rounded-2xl text-slate-700 font-bold focus:bg-white focus:border-red-500 transition-all outline-none appearance-none cursor-pointer"
+                                required>
+                                <option value="">-- เลือกประเภทพัสดุ --</option>
+                                @foreach ($items_types as $type)
+                                    <option value="{{ $type->item_type_id }}" @selected(old('type_id') == $type->item_type_id)>
+                                        {{ $type->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <i
+                                class="fa-solid fa-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none text-xs"></i>
+                        </div>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+                            for="quantity">จำนวนเริ่มต้น (INITIAL QTY)</label>
+                        <input type="number" id="quantity" name="quantity" min="0" value="{{ old('quantity', 0) }}"
+                            class="w-full h-14 px-6 bg-slate-50 border-2 border-slate-50 rounded-2xl text-slate-700 font-bold focus:bg-white focus:border-red-500 transition-all outline-none"
+                            required>
+                    </div>
+
+                    <!-- Price per Unit -->
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+                            for="per_unit">ราคาต่อหน่วย (UNIT PRICE)</label>
+                        <div class="relative">
+                            <span class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold">฿</span>
+                            <input type="number" step="0.01" id="per_unit" name="per_unit" value="{{ old('per_unit') }}"
+                                placeholder="0.00"
+                                class="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-50 rounded-2xl text-slate-700 font-bold focus:bg-white focus:border-red-500 transition-all outline-none placeholder:text-slate-300"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+                            for="item_pic">รูปภาพประกอบ (THUMBNAIL)</label>
+                        <div class="relative">
+                            <input type="file" id="item_pic" name="item_pic" accept="image/*"
+                                class="w-full h-14 px-6 bg-slate-50 border-2 border-slate-50 rounded-2xl text-slate-700 font-bold focus:bg-white focus:border-red-500 transition-all outline-none file:hidden flex items-center pt-3.5 cursor-pointer">
+                            <i
+                                class="fa-solid fa-cloud-arrow-up absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1"
+                        for="description">รายละเอียดเพิ่มเติม (DESCRIPTION)</label>
+                    <textarea id="description" name="description" rows="4"
+                        placeholder="ระบุคุณสมบัติหรือข้อมูลอื่นๆ ของพัสดุอุปกรณ์"
+                        class="w-full p-6 bg-slate-50 border-2 border-slate-50 rounded-[2rem] text-slate-700 font-bold focus:bg-white focus:border-red-500 transition-all outline-none placeholder:text-slate-300 leading-relaxed">{{ old('description') }}</textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-slate-50 mt-12">
+                    <button type="submit"
+                        class="w-full sm:flex-[2] h-16 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl shadow-xl shadow-red-100 transition-all active:scale-95 flex items-center justify-center gap-3 group">
+                        <i class="fa-solid fa-floppy-disk group-hover:scale-110 transition-transform"></i>
+                        บันทึกข้อมูลอุปกรณ์
+                    </button>
+                    <a href="{{ route('items.index') }}"
+                        class="w-full sm:flex-1 h-16 bg-white border-2 border-slate-100 text-slate-400 font-black rounded-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-xmark"></i>
+                        ยกเลิก
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        @keyframes zoom-in {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-zoom-in {
+            animation: zoom-in 0.4s ease-out forwards;
+        }
+
+        /* Custom scrollbar for textarea */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #e2e8f0;
+        }
+    </style>
 @endsection

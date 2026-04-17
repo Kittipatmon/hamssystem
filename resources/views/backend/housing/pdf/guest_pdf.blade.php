@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <title>แบบฟอร์มขออนุญาตนำญาติเข้าพักอาศัย_{{ $guest->resident_guest_code }}</title>
@@ -10,6 +11,7 @@
             font-weight: normal;
             src: url("{{ public_path('fonts/THSarabunNew.ttf') }}") format('truetype');
         }
+
         @font-face {
             font-family: 'THSarabunNew';
             font-style: normal;
@@ -25,13 +27,16 @@
             margin: 0;
             padding: 0;
         }
+
         .container {
             padding: 10px 40px;
         }
+
         .logo-section {
             text-align: right;
             margin-bottom: 0;
         }
+
         .logo-text {
             font-family: Arial, sans-serif;
             font-size: 28px;
@@ -39,6 +44,7 @@
             color: #D71920;
             margin: 0;
         }
+
         .title {
             text-align: center;
             font-size: 20px;
@@ -46,30 +52,36 @@
             margin-top: 5px;
             margin-bottom: 20px;
         }
+
         .content {
             margin-bottom: 10px;
         }
+
         .dotted-line {
             display: inline-block;
             border-bottom: 1px dotted #000;
-            min-height: 14px;
-            line-height: 1;
+            min-height: 15px;
+            line-height: 1.1;
             padding: 0 5px;
             text-align: center;
-            vertical-align: middle;
-            margin-bottom: 3px;
+            vertical-align: baseline;
+            margin-bottom: 0px;
         }
+
         .row {
             margin-bottom: 12px;
         }
+
         .form-row {
             white-space: nowrap;
         }
+
         .box-grid {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
+
         .box-grid td {
             width: 50%;
             border: 1px solid #000;
@@ -78,30 +90,36 @@
             vertical-align: top;
             height: 140px;
         }
+
         .box-title {
             font-weight: bold;
             margin-bottom: 5px;
         }
+
         .footer-ref {
             margin-top: 30px;
             font-size: 12px;
             width: 100%;
         }
+
         .check-box {
             display: inline-block;
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border: 1px solid #000;
             margin-right: 5px;
             vertical-align: middle;
             text-align: center;
-            line-height: 12px;
-            font-size: 14px;
+            line-height: 14px;
             font-family: 'DejaVu Sans', sans-serif;
+            font-size: 12px;
+            margin-top: 2px;
         }
     </style>
 </head>
+
 <body>
+    @php \Carbon\Carbon::setLocale('th'); @endphp
     <div class="container">
         <div class="logo-section">
             <h1 class="logo-text">Kumwell</h1>
@@ -112,45 +130,74 @@
         </div>
 
         <div class="form-row" style="text-align: right; margin-bottom: 20px;">
-            วันที่ <span class="dotted-line" style="width: 30px;">{{ \Carbon\Carbon::parse($guest->request_date)->format('d') }}</span> 
-            เดือน <span class="dotted-line" style="width: 80px;">{{ \Carbon\Carbon::parse($guest->request_date)->translatedFormat('F') }}</span> 
-            พ.ศ. <span class="dotted-line" style="width: 40px;">{{ \Carbon\Carbon::parse($guest->request_date)->year + 543 }}</span>
+            วันที่ <span class="dotted-line"
+                style="width: 30px;">{{ \Carbon\Carbon::parse($guest->request_date)->format('d') }}</span>
+            เดือน <span class="dotted-line"
+                style="width: 80px;">{{ \Carbon\Carbon::parse($guest->request_date)->translatedFormat('F') }}</span>
+            พ.ศ. <span class="dotted-line"
+                style="width: 40px;">{{ \Carbon\Carbon::parse($guest->request_date)->year + 543 }}</span>
         </div>
 
         <div class="content">
             <div class="form-row row">
-                ข้าพเจ้า นาย/นาง/นางสาว <span class="dotted-line" style="width: 120px;">{{ $guest->first_name }}</span> นามสกุล <span class="dotted-line" style="width: 120px;">{{ $guest->last_name }}</span>
+                ข้าพเจ้า นาย/นาง/นางสาว <span class="dotted-line" style="width: 150px;">{{ $guest->first_name }}</span>
+                นามสกุล <span class="dotted-line" style="width: 150px;">{{ $guest->last_name }}</span>
             </div>
             <div class="form-row row">
-                ตำแหน่ง <span class="dotted-line" style="width: 130px;">{{ $guest->position }}</span> แผนก <span class="dotted-line" style="width: 100px;">{{ $guest->department }}</span> ฝ่าย <span class="dotted-line" style="width: 100px;">{{ $guest->section }}</span>
+                ตำแหน่ง <span class="dotted-line" style="width: 180px;">{{ $guest->position }}</span> แผนก <span
+                    class="dotted-line" style="width: 250px;">{{ $guest->department }}</span> ฝ่าย <span
+                    class="dotted-line" style="width: 100px;">{{ $guest->section }}</span>
             </div>
             <div class="row">
-                ซึ่งอยู่บ้านพักพนักงาน @if($guest->residence_type == 'โรงงานสำนักงานใหญ่') <span class="check-box">&#10003;</span> @else <span class="check-box"></span> @endif โรงงานบางใหญ่ @if($guest->residence_type == 'โรงงานไทรใหญ่') <span class="check-box">&#10003;</span> @else <span class="check-box"></span> @endif โรงงานไทรใหญ่
+                ซึ่งอยู่บ้านพักพนักงาน
+                @if(str_contains($guest->residence_type, 'บางใหญ่') || str_contains($guest->residence_type, 'สำนักงานใหญ่'))
+                <span class="check-box" style="margin-top: 8px;">&#10003;</span> @else <span class="check-box"
+                style="margin-top: 8px;"></span> @endif โรงงานบางใหญ่
+                @if(str_contains($guest->residence_type, 'ไทรใหญ่')) <span class="check-box"
+                style="margin-top: 8px;">&#10003;</span> @else <span class="check-box"
+                        style="margin-top: 8px;"></span>
+                    @endif โรงงานไทรใหญ่
             </div>
             <div class="form-row row">
-                ห้อง <span class="dotted-line" style="width: 100px;">{{ $guest->room_number }}</span> มีความประสงค์ขออนุญาตนำผู้มีรายชื่อดังต่อไปนี้
+                ห้อง <span class="dotted-line" style="width: 100px;">{{ $guest->room_number }}</span>
+                มีความประสงค์ขออนุญาตนำผู้มีรายชื่อดังต่อไปนี้
             </div>
 
             @php $members = $guest->members; @endphp
             @for ($i = 0; $i < 3; $i++)
-            <div class="form-row row">
-                {{ $i+1 }}. <span class="dotted-line" style="width: 280px;">{{ $members[$i]->full_name ?? '' }}</span> อายุ <span class="dotted-line" style="width: 40px;">{{ $members[$i]->age ?? '' }}</span> โทรศัพท์ <span class="dotted-line" style="width: 120px;"></span>
-            </div>
+                <div class="form-row row">
+                    {{ $i + 1 }}. <span class="dotted-line" style="width: 200px;">{{ $members[$i]->full_name ?? '' }}</span>
+                    อายุ <span class="dotted-line" style="width: 30px;">{{ $members[$i]->age ?? '' }}</span> โทรศัพท์ <span
+                        class="dotted-line" style="width: 150px;">{{ $members[$i]->phone ?? '' }}</span>
+                </div>
             @endfor
 
             <div class="form-row row">
-                บุคคลข้างต้นเกี่ยวข้องเป็น <span class="dotted-line" style="width: 250px;">{{ $guest->relationship }}</span> เข้ามาในบ้านพัก
+                บุคคลข้างต้นเกี่ยวข้องเป็น <span class="dotted-line"
+                    style="width: 250px;">{{ $guest->relationship }}</span> เข้ามาในบ้านพัก
             </div>
             <div class="form-row row">
-                ตั้งแต่วันที่ <span class="dotted-line" style="width: 30px;">{{ \Carbon\Carbon::parse($guest->start_date)->format('d') }}</span> เดือน <span class="dotted-line" style="width: 80px;">{{ \Carbon\Carbon::parse($guest->start_date)->translatedFormat('F') }}</span> พ.ศ. <span class="dotted-line" style="width: 40px;">{{ \Carbon\Carbon::parse($guest->start_date)->year + 543 }}</span> เวลา <span class="dotted-line" style="width: 60px;">{{ $guest->start_time }}</span> น.
+                ตั้งแต่วันที่ <span class="dotted-line"
+                    style="width: 30px;">{{ \Carbon\Carbon::parse($guest->start_date)->format('d') }}</span> เดือน <span
+                    class="dotted-line"
+                    style="width: 80px;">{{ \Carbon\Carbon::parse($guest->start_date)->translatedFormat('F') }}</span>
+                พ.ศ. <span class="dotted-line"
+                    style="width: 40px;">{{ \Carbon\Carbon::parse($guest->start_date)->year + 543 }}</span> เวลา <span
+                    class="dotted-line" style="width: 60px;">{{ $guest->start_time }}</span> น.
             </div>
             <div class="form-row row">
-                จนถึงวันที่ <span class="dotted-line" style="width: 30px;">{{ \Carbon\Carbon::parse($guest->end_date)->format('d') }}</span> เดือน <span class="dotted-line" style="width: 80px;">{{ \Carbon\Carbon::parse($guest->end_date)->translatedFormat('F') }}</span> พ.ศ. <span class="dotted-line" style="width: 40px;">{{ \Carbon\Carbon::parse($guest->end_date)->year + 543 }}</span> เวลา <span class="dotted-line" style="width: 60px;">{{ $guest->end_time }}</span> น.
+                จนถึงวันที่ <span class="dotted-line"
+                    style="width: 30px;">{{ \Carbon\Carbon::parse($guest->end_date)->format('d') }}</span> เดือน <span
+                    class="dotted-line"
+                    style="width: 80px;">{{ \Carbon\Carbon::parse($guest->end_date)->translatedFormat('F') }}</span>
+                พ.ศ. <span class="dotted-line"
+                    style="width: 40px;">{{ \Carbon\Carbon::parse($guest->end_date)->year + 543 }}</span> เวลา <span
+                    class="dotted-line" style="width: 60px;">{{ $guest->end_time }}</span> น.
             </div>
             <div class="row">
                 รวมเป็นระยะเวลา <span class="dotted-line" style="width: 60px;">{{ $guest->total_days }}</span> วัน
             </div>
-            
+
             <div class="row" style="text-align: center; margin-top: 20px; font-weight: bold;">
                 จึงเรียนมาเพื่อโปรดพิจารณา
             </div>
@@ -161,10 +208,16 @@
                 <td>
                     <div class="box-title">[1] ผู้ขอบ้านพัก</div>
                     <div style="margin-top: 10px;">
-                        ลงชื่อ <span class="dotted-line" style="width: 180px;"></span> 
+                        ลงชื่อ <span class="dotted-line" style="width: 180px;">{{ $guest->first_name }}
+                            {{ $guest->last_name }}</span>
                     </div>
                     <div style="margin-top: 10px;">
-                        วันที่ <span class="dotted-line" style="width: 25px;"></span> / <span class="dotted-line" style="width: 25px;"></span> / <span class="dotted-line" style="width: 35px;"></span>
+                        วันที่ <span class="dotted-line"
+                            style="width: 25px;">{{ \Carbon\Carbon::parse($guest->request_date)->format('d') }}</span> /
+                        <span class="dotted-line"
+                            style="width: 25px;">{{ \Carbon\Carbon::parse($guest->request_date)->format('m') }}</span> /
+                        <span class="dotted-line"
+                            style="width: 35px;">{{ \Carbon\Carbon::parse($guest->request_date)->year + 543 }}</span>
                     </div>
                     <div style="margin-top: 15px; font-size: 13px;">
                         เอกสารที่ใช้ประกอบ<br>
@@ -173,17 +226,25 @@
                 </td>
                 <td>
                     <div class="box-title">[2] ความเห็นของผู้บังคับบัญชา</div>
-                    <div style="margin-top: 5px;">
+                    <div style="margin-top: 8px;">
                         <span class="check-box">{!! $guest->commander_status == 1 ? '&#10003;' : '' !!}</span> อนุมัติ
                     </div>
-                    <div style="margin-top: 5px;">
-                        <span class="check-box">{!! $guest->commander_status == 2 ? '&#10003;' : '' !!}</span> ไม่อนุมัติ เนื่องจาก <span class="dotted-line" style="width: 130px;">{{ $guest->commander_comment }}</span>
+                    <div style="margin-top: 8px;">
+                        <span class="check-box">{!! $guest->commander_status == 2 ? '&#10003;' : '' !!}</span>
+                        ไม่อนุมัติ เนื่องจาก <span class="dotted-line"
+                            style="width: 130px;">{{ $guest->commander_comment }}</span>
                     </div>
                     <div style="margin-top: 30px;">
-                        ลงชื่อ <span class="dotted-line" style="width: 180px;">{{ $guest->commander_id ? \App\Models\User::find($guest->commander_id)->fullname : '' }}</span> 
+                        ลงชื่อ <span class="dotted-line"
+                            style="width: 180px;">{{ $guest->commander_id ? \App\Models\User::find($guest->commander_id)->fullname : '' }}</span>
                     </div>
                     <div style="margin-top: 10px;">
-                        วันที่ <span class="dotted-line" style="width: 25px;">{{ $guest->commander_date ? \Carbon\Carbon::parse($guest->commander_date)->format('d') : '' }}</span> / <span class="dotted-line" style="width: 25px;">{{ $guest->commander_date ? \Carbon\Carbon::parse($guest->commander_date)->format('m') : '' }}</span> / <span class="dotted-line" style="width: 35px;">{{ $guest->commander_date ? \Carbon\Carbon::parse($guest->commander_date)->year + 543 : '' }}</span>
+                        วันที่ <span class="dotted-line"
+                            style="width: 25px;">{{ $guest->commander_date ? \Carbon\Carbon::parse($guest->commander_date)->format('d') : '' }}</span>
+                        / <span class="dotted-line"
+                            style="width: 25px;">{{ $guest->commander_date ? \Carbon\Carbon::parse($guest->commander_date)->format('m') : '' }}</span>
+                        / <span class="dotted-line"
+                            style="width: 35px;">{{ $guest->commander_date ? \Carbon\Carbon::parse($guest->commander_date)->year + 543 : '' }}</span>
                     </div>
                 </td>
             </tr>
@@ -191,25 +252,39 @@
                 <td>
                     <div class="box-title">[3] ผู้จัดการแผนกจัดการและบำรุงอาคาร</div>
                     <div style="margin-top: 30px;">
-                        ลงชื่อ <span class="dotted-line" style="width: 180px;">{{ $guest->managerhams_id ? \App\Models\User::find($guest->managerhams_id)->fullname : '' }}</span> 
+                        ลงชื่อ <span class="dotted-line"
+                            style="width: 180px;">{{ $guest->managerhams_id ? \App\Models\User::find($guest->managerhams_id)->fullname : '' }}</span>
                     </div>
                     <div style="margin-top: 10px;">
-                        วันที่ <span class="dotted-line" style="width: 25px;">{{ $guest->managerhams_date ? \Carbon\Carbon::parse($guest->managerhams_date)->format('d') : '' }}</span> / <span class="dotted-line" style="width: 25px;">{{ $guest->managerhams_date ? \Carbon\Carbon::parse($guest->managerhams_date)->format('m') : '' }}</span> / <span class="dotted-line" style="width: 35px;">{{ $guest->managerhams_date ? \Carbon\Carbon::parse($guest->managerhams_date)->year + 543 : '' }}</span>
+                        วันที่ <span class="dotted-line"
+                            style="width: 25px;">{{ $guest->managerhams_date ? \Carbon\Carbon::parse($guest->managerhams_date)->format('d') : '' }}</span>
+                        / <span class="dotted-line"
+                            style="width: 25px;">{{ $guest->managerhams_date ? \Carbon\Carbon::parse($guest->managerhams_date)->format('m') : '' }}</span>
+                        / <span class="dotted-line"
+                            style="width: 35px;">{{ $guest->managerhams_date ? \Carbon\Carbon::parse($guest->managerhams_date)->year + 543 : '' }}</span>
                     </div>
                 </td>
                 <td>
                     <div class="box-title">[4] กรรมการบ้านพัก</div>
-                    <div style="margin-top: 5px;">
+                    <div style="margin-top: 8px;">
                         <span class="check-box">{!! $guest->Committee_status == 1 ? '&#10003;' : '' !!}</span> อนุมัติ
                     </div>
-                    <div style="margin-top: 5px;">
-                        <span class="check-box">{!! $guest->Committee_status == 2 ? '&#10003;' : '' !!}</span> ไม่อนุมัติ เนื่องจาก <span class="dotted-line" style="width: 130px;">{{ $guest->Committee_comment }}</span>
+                    <div style="margin-top: 8px;">
+                        <span class="check-box">{!! $guest->Committee_status == 2 ? '&#10003;' : '' !!}</span>
+                        ไม่อนุมัติ เนื่องจาก <span class="dotted-line"
+                            style="width: 130px;">{{ $guest->Committee_comment }}</span>
                     </div>
                     <div style="margin-top: 30px;">
-                        ลงชื่อ <span class="dotted-line" style="width: 180px;">{{ $guest->Committee_id ? \App\Models\User::find($guest->Committee_id)->fullname : '' }}</span> 
+                        ลงชื่อ <span class="dotted-line"
+                            style="width: 180px;">{{ $guest->Committee_id ? \App\Models\User::find($guest->Committee_id)->fullname : '' }}</span>
                     </div>
                     <div style="margin-top: 10px;">
-                         วันที่ <span class="dotted-line" style="width: 25px;">{{ $guest->Committee_date ? \Carbon\Carbon::parse($guest->Committee_date)->format('d') : '' }}</span> / <span class="dotted-line" style="width: 25px;">{{ $guest->Committee_date ? \Carbon\Carbon::parse($guest->Committee_date)->format('m') : '' }}</span> / <span class="dotted-line" style="width: 35px;">{{ $guest->Committee_date ? \Carbon\Carbon::parse($guest->Committee_date)->year + 543 : '' }}</span>
+                        วันที่ <span class="dotted-line"
+                            style="width: 25px;">{{ $guest->Committee_date ? \Carbon\Carbon::parse($guest->Committee_date)->format('d') : '' }}</span>
+                        / <span class="dotted-line"
+                            style="width: 25px;">{{ $guest->Committee_date ? \Carbon\Carbon::parse($guest->Committee_date)->format('m') : '' }}</span>
+                        / <span class="dotted-line"
+                            style="width: 35px;">{{ $guest->Committee_date ? \Carbon\Carbon::parse($guest->Committee_date)->year + 543 : '' }}</span>
                     </div>
                 </td>
             </tr>
@@ -231,4 +306,5 @@
         </div>
     </div>
 </body>
+
 </html>

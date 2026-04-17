@@ -48,41 +48,30 @@
                 <thead class="kumwell-table-header dark:text-gray-300">
                     <tr class="border-b border-gray-200 dark:border-white/5">
                         <th class="py-4 pl-6 text-left">ลำดับ</th>
-                        <th class="text-left">สังกัดฝ่าย</th>
-                        <th class="text-left">ชื่อย่อ (Name)</th>
-                        <th class="text-left">ชื่อเต็ม (Fullname)</th>
-                        <th class="text-center">สถานะ</th>
-                        <th class="w-28 text-center pr-6">จัดการ</th>
+                        <th class="text-left">ชื่อแผนก</th>
+                        <th class="text-center font-semibold">สถานะ</th>
+                        <th class="w-28 text-center pr-6 font-semibold">จัดการ</th>
                     </tr>
                 </thead>
-                    <tbody id="departmentsBody">
+                <tbody id="departmentsBody">
                     @foreach ($departments as $department)
                         <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200 border-b border-gray-100 dark:border-white/5">
                             <td class="pl-6 font-medium text-gray-400">{{ $loop->iteration }}</td>
                             <td>
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-layer-group text-xs opacity-40"></i>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ $department->division->division_fullname ?? '-' }}</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-kumwell-red/10 flex items-center justify-center text-kumwell-red">
+                                        <i class="fa-solid fa-building text-xs"></i>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-gray-900 dark:text-white">{{ $department->name }}</span>
+                                        <span class="text-[10px] text-gray-400 uppercase tracking-tighter">DEPT-{{ str_pad($department->id, 3, '0', STR_PAD_LEFT) }}</span>
+                                    </div>
                                 </div>
                             </td>
-                            <td>
-                                <span class="bg-kumwell-red/10 text-kumwell-red px-2 py-0.5 rounded font-bold text-xs">
-                                    {{ $department->department_name }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="font-medium text-gray-900 dark:text-white">{{ $department->department_fullname }}</div>
-                            </td>
                             <td class="text-center">
-                                @if ($department->department_status === 0)
-                                    <div class="kumwell-badge bg-success/10 text-success border border-success/20">
-                                        <i class="fa-solid fa-check-circle text-[10px]"></i> ใช้งาน
-                                    </div>
-                                @else
-                                    <div class="kumwell-badge bg-error/10 text-error border border-error/20">
-                                        <i class="fa-solid fa-times-circle text-[10px]"></i> ไม่ใช้งาน
-                                    </div>
-                                @endif
+                                <div class="kumwell-badge bg-success/10 text-success border border-success/20">
+                                    <i class="fa-solid fa-check-circle text-[10px]"></i> ใช้งานปกติ
+                                </div>
                             </td>
                             <td class="pr-6">
                                 <div class="flex justify-center gap-2">
@@ -91,7 +80,7 @@
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
                                     <button type="button" class="btn btn-circle btn-ghost btn-xs hover:bg-error/20 hover:text-error transition-all"
-                                        onclick="deleteDepartment({{ $department->department_id }})" title="ลบ">
+                                        onclick="deleteDepartment({{ $department->dept_id }})" title="ลบ">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </div>
@@ -214,7 +203,7 @@
 
             function openEditModal(department) {
                 modalTitle.innerText = 'แก้ไขข้อมูลแผนก';
-                form.action = '{{ url("departments") }}/' + department.department_id;
+                form.action = '{{ url("departments") }}/' + department.dept_id;
                 methodField.value = 'PUT';
 
                 document.getElementById('division_id').value = department.division_id;
@@ -362,7 +351,7 @@
                 if (data.length === 0) {
                     departmentsBody.innerHTML = `
                         <tr>
-                            <td colspan="6" class="text-center py-16">
+                            <td colspan="4" class="text-center py-16">
                                 <div class="flex flex-col items-center gap-3 text-gray-400">
                                     <i class="fa-solid fa-folder-open text-4xl opacity-20"></i>
                                     <p class="text-sm">ไม่พบข้อมูลแผนก</p>
@@ -374,35 +363,26 @@
                 }
 
                 data.forEach((d, index) => {
-                    const statusBadge = d.department_status === 0 
-                        ? `<div class="kumwell-badge bg-success/10 text-success border border-success/20">
-                                <i class="fa-solid fa-check-circle text-[10px]"></i> ใช้งาน
-                           </div>`
-                        : `<div class="kumwell-badge bg-error/10 text-error border border-error/20">
-                                <i class="fa-solid fa-times-circle text-[10px]"></i> ไม่ใช้งาน
-                           </div>`;
-
-                    const divisionName = d.division ? (d.division.division_fullname || '-') : '-';
-
                     const row = document.createElement('tr');
                     row.className = 'hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200 border-b border-gray-100 dark:border-white/5';
                     row.innerHTML = `
                         <td class="pl-6 font-medium text-gray-400">${index + 1}</td>
                         <td>
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-layer-group text-xs opacity-40"></i>
-                                <span class="font-medium text-gray-700 dark:text-gray-300">${divisionName}</span>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-kumwell-red/10 flex items-center justify-center text-kumwell-red">
+                                    <i class="fa-solid fa-building text-xs"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-gray-900 dark:text-white">${d.name}</span>
+                                    <span class="text-[10px] text-gray-400 uppercase tracking-tighter">DEPT-${(d.id || 0).toString().padStart(3, '0')}</span>
+                                </div>
                             </div>
                         </td>
-                        <td>
-                            <span class="bg-kumwell-red/10 text-kumwell-red px-2 py-0.5 rounded font-bold text-xs uppercase tracking-wider">
-                                ${d.department_name}
-                            </span>
+                        <td class="text-center">
+                            <div class="kumwell-badge bg-success/10 text-success border border-success/20">
+                                <i class="fa-solid fa-check-circle text-[10px]"></i> ใช้งานปกติ
+                            </div>
                         </td>
-                        <td>
-                            <div class="font-medium text-gray-900 dark:text-white">${d.department_fullname}</div>
-                        </td>
-                        <td class="text-center">${statusBadge}</td>
                         <td class="pr-6">
                             <div class="flex justify-center gap-2">
                                 <button type="button" class="btn btn-circle btn-ghost btn-xs hover:bg-warning/20 hover:text-warning transition-all"
@@ -410,7 +390,7 @@
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                                 <button type="button" class="btn btn-circle btn-ghost btn-xs hover:bg-error/20 hover:text-error transition-all"
-                                    onclick="deleteDepartment(${d.department_id})" title="ลบ">
+                                    onclick="deleteDepartment(${d.id})" title="ลบ">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </div>

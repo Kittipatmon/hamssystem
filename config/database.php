@@ -68,7 +68,7 @@ return [
             'url' => env('USERKMLNEW_DB_URL'),
             'host' => env('USERKMLNEW_DB_HOST', '127.0.0.1'),
             'port' => env('USERKMLNEW_DB_PORT', '3306'),
-            'database' => env('USERKMLNEW_DB_DATABASE', 'userkmlsystem'),
+            'database' => env('USERKMLNEW_DB_DATABASE', 'appkum_user'),
             'username' => env('USERKMLNEW_DB_USERNAME', 'root'),
             'password' => env('USERKMLNEW_DB_PASSWORD', 'KTPPUz2546#11PCRU64'),
             'unix_socket' => env('USERKMLNEW_DB_SOCKET', ''),

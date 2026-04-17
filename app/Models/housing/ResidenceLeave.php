@@ -24,6 +24,16 @@ class ResidenceLeave extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
+    public function managerHams()
+    {
+        return $this->belongsTo(User::class, 'managerhams_id', 'id');
+    }
+
+    public function committee()
+    {
+        return $this->belongsTo(User::class, 'Committee_id', 'id');
+    }
+
     public function room()
     {
         return $this->belongsTo(ResidenceRoom::class, 'residence_room_id', 'residence_room_id');

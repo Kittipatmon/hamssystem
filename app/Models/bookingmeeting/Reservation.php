@@ -37,8 +37,15 @@ class Reservation extends Model
         'dinner_detail',
         'break_afternoon_detail',
         'budget_file',
-        'color'
+        'color',
+        'approved_by',
+        'approved_at'
     ];
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by', 'id');
+    }
 
     public function user()
     {

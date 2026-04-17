@@ -11,19 +11,29 @@ class DivisionController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Division::with('section');
+        $query = Division::query();
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where('division_name', 'like', "%{$search}%")
                   ->orWhere('division_fullname', 'like', "%{$search}%");
         }
-        $divisions = $query->get();
+
+        try {
+            $divisions = $query->with('section')->get();
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Illuminate\Support\Facades\Log::warning("Table 'divisions' not found: " . $e->getMessage());
+            $divisions = collect();
+        }
 
         if ($request->ajax()) {
             return response()->json($divisions);
         }
 
-        $sections = Section::all();
+        try {
+            $sections = Section::all();
+        } catch (\Illuminate\Database\QueryException $e) {
+            $sections = collect();
+        }
         return view('backend.division.index', compact('divisions', 'sections'));
     }
 

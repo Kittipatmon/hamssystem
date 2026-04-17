@@ -85,6 +85,11 @@
                     <i class="fa-regular fa-calendar-alt mr-2 text-red-400"></i>
                     {{ optional($news->published_date)->format('d M Y') }}
                 </div>
+
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 text-white px-3 py-1 rounded-full text-xs shadow-lg flex items-center">
+                    <i class="fa-regular fa-eye mr-2 text-blue-400"></i>
+                    {{ number_format($news->views_count ?? 0) }}
+                </div>
                 
                 @if($news->newto)
                     <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg shadow-red-600/30">

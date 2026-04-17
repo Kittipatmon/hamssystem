@@ -8,8 +8,6 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;400;600&family=Prompt:wght@200;400;600&display=swap"
         rel="stylesheet">
-    <!-- Select2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         body {
             font-family: 'Prompt', 'Kanit', sans-serif;
@@ -46,33 +44,6 @@
             padding-left: 2.25rem;
         }
 
-        /* Select2 alignment and look to match input with icon */
-        .select2-container--default .select2-selection--single {
-            height: 42px;
-            border: 0;
-            border-radius: 0.5rem;
-            /* rounded-lg */
-        }
-
-        .select2-container .select2-selection--single .select2-selection__rendered {
-            line-height: 42px;
-            padding-left: 2.25rem;
-            /* space for the left icon */
-            color: #1f2937;
-            /* text-gray-800 */
-        }
-
-        .select2-container .select2-selection--single .select2-selection__arrow {
-            height: 42px;
-            right: 0.5rem;
-        }
-
-        .select2-container--default .select2-selection--single:focus,
-        .select2-container--default.select2-container--focus .select2-selection--single {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
-            /* focus:ring-blue-600 */
-        }
     </style>
 </head>
 
@@ -104,31 +75,21 @@
                         <form method="POST" action="{{ route('login') }}" class="space-y-4">
                             @csrf
 
-                            <!-- employee_code -->
+                            <!-- emp_code -->
                             <div>
-                                <label for="employee_code" class="sr-only">Employee Code</label>
+                                <label for="emp_code" class="sr-only">Employee Code</label>
                                 <div class="relative">
                                     <svg class="input-icon size-4" xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 24 24" fill="currentColor">
                                         <path
                                             d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5Zm0 2c-4.418 0-8 2.239-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.761-3.582-5-8-5Z" />
                                     </svg>
-                                    <!-- <input id="employee_code" name="employee_code" type="text" value="{{ old('employee_code') }}" required autofocus autocomplete="username"
-                                           placeholder="Employee Code"
-                                           class="input-field w-full rounded-lg border-0 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 py-2.5" /> -->
-                                    <select id="employee_code" name="employee_code" required
-                                        data-placeholder="Employee Code"
-                                        class="employee-select input-field w-full rounded-lg border-0 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 py-2.5">
-                                        <option value=""></option>
-                                        @foreach($users as $employee)
-                                            <option value="{{ $employee->employee_code }}" {{ old('employee_code') == $employee->employee_code ? 'selected' : '' }}>
-                                                {{ $employee->employee_code }} - {{ $employee->first_name }}
-                                                {{ $employee->last_name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <input id="emp_code" name="emp_code" type="text"
+                                        value="{{ old('emp_code') }}" required autofocus autocomplete="username"
+                                        placeholder="รหัสพนักงาน"
+                                        class="input-field w-full rounded-lg border-0 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 py-2.5" />
                                 </div>
-                                @error('employee_code')
+                                @error('emp_code')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -189,45 +150,19 @@
             }
         })();
 
-        // Load jQuery & Select2 (CDN) then initialize
-        (function () {
-            const initSelect2 = () => {
-                const select = $('#employee_code');
-                if (select.length) {
-                    select.select2({
-                        placeholder: select.data('placeholder') || 'Employee Code',
-                        allowClear: true,
-                        width: '100%',
-                    });
-                }
-            };
-
-            // If jQuery not present, inject scripts
-            if (typeof window.jQuery === 'undefined') {
-                const jq = document.createElement('script');
-                jq.src = 'https://code.jquery.com/jquery-3.7.1.min.js';
-                jq.onload = () => {
-                    const s2 = document.createElement('script');
-                    s2.src = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js';
-                    s2.onload = initSelect2;
-                    document.head.appendChild(s2);
-                };
-                document.head.appendChild(jq);
-            } else {
-                // jQuery exists, just load select2 if missing
-                if (typeof $.fn.select2 === 'undefined') {
-                    const s2 = document.createElement('script');
-                    s2.src = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js';
-                    s2.onload = initSelect2;
-                    document.head.appendChild(s2);
-                } else {
-                    initSelect2();
-                }
-            }
-        })();
-
-
-
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('logout-success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'ออกจากระบบ!',
+                    text: "{{ session('logout-success') }}",
+                    timer: 2500,
+                    showConfirmButton: false,
+                    position: 'top-end',
+                    toast: true
+                });
+            @endif
+        });
     </script>
 </body>
 

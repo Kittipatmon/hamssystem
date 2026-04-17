@@ -32,7 +32,7 @@ class ReservationsController extends Controller
 
             return [
                 'id' => $res->reservation_id,
-                'title' => ($res->room ? $res->room->room_name : 'Room') . ' - ' . ($res->user ? $res->user->employee_code : 'User'),
+                'title' => ($res->room ? $res->room->room_name : 'Room') . ' - ' . ($res->user ? $res->user->emp_code : 'User'),
                 'start' => $start,
                 'end' => $end,
                 'extendedProps' => [
@@ -210,3 +210,4 @@ class ReservationsController extends Controller
         return redirect()->route('reservations.welcomemeeting')->with('success', 'ส่งคำร้องขอจองห้องประชุมเรียบร้อยแล้ว');
     }
 }
+

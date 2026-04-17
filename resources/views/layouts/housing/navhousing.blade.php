@@ -2,7 +2,7 @@
 <nav
     class="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
     @php
-        $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
     @endphp
     <div class="max-w-7xl mx-auto px-4 md:px-6">
         <div class="h-16 flex items-center justify-between">
@@ -49,10 +49,16 @@
                 <!-- ติดตามสถานะ -->
                 @php
                     $userId = Auth::id();
+                    // Count items where the user is the APPLICANT and needs to act (e.g., status 4: Returned)
+                    $uRequests = \App\Models\housing\ResidenceRequest::where('user_id', $userId)->where('send_status', 4)->count();
+                    $uAgreements = \App\Models\housing\ResidenceAgreement::where('user_id', $userId)->where('send_status', 4)->count();
+                    $uGuests = \App\Models\housing\ResidentGuestRequest::where('user_id', $userId)->where('send_status', 4)->count();
+                    $uLeaves = \App\Models\housing\ResidenceLeave::where('user_id', $userId)->where('send_status', 4)->count();
+                    
                     $userActionCount = 0;
                     if (Auth::check()) {
-                        // 1. My own requests needing action (e.g. status 3 = wait for agreement)
-                        $myActionCount = \App\Models\housing\ResidenceRequest::where('user_id', $userId)->where('send_status', 3)->count();
+                        // 1. My own requests needing action (e.g. status 7 = room assigned, please create agreement)
+                        $myActionCount = \App\Models\housing\ResidenceRequest::where('user_id', $userId)->where('send_status', 7)->count();
 
                         // 2. Others' requests waiting for my approval
                         $pendingForMeCount = 0;
@@ -105,7 +111,7 @@
                         // 3. Repairs assigned to me (status 1)
                         $myRepairTasks = \App\Models\housing\ResidenceRepair::where('technician_id', $userId)->where('status', 1)->count();
 
-                        $userActionCount = $myActionCount + $pendingForMeCount + $myRepairTasks;
+                        $userActionCount = $myActionCount + $pendingForMeCount + $myRepairTasks + $uRequests + $uAgreements + $uGuests + $uLeaves;
                     }
                 @endphp
                 <a href="{{ route('housing.my_requests') }}"
@@ -179,75 +185,95 @@
                 @if($isHamsOrAdmin)
                     @php
                         $userId = Auth::id();
-                        $pRequests = \App\Models\housing\ResidenceRequest::where(function ($q) use ($userId) {
-                            $q->where(function ($sq) use ($userId) {
-                                $sq->where('send_status', 0)->where('commander_id', $userId);
-                            })
+                        $user = Auth::user();
+                        // For HAMS Admins, show ALL pending items. For others (if any), show only assigned.
+                        if ($user && ($user->role === 'admin' || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor)) {
+                            $pRequests = \App\Models\housing\ResidenceRequest::whereIn('send_status', [0, 1, 2])->count();
+                            $pAgreements = \App\Models\housing\ResidenceAgreement::whereIn('send_status', [0, 1, 2])->count();
+                            $pGuests = \App\Models\housing\ResidentGuestRequest::whereIn('send_status', [0, 1, 2])->count();
+                            $pLeaves = \App\Models\housing\ResidenceLeave::whereIn('send_status', [0, 1, 2])->count();
+                        } else {
+                            $pRequests = \App\Models\housing\ResidenceRequest::where(function ($q) use ($userId) {
+                                $q->where(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 0)->where('commander_id', $userId);
+                                })
                                 ->orWhere(function ($sq) use ($userId) {
                                     $sq->where('send_status', 1)->where('managerhams_id', $userId);
                                 })
                                 ->orWhere(function ($sq) use ($userId) {
                                     $sq->where('send_status', 2)->where('Committee_id', $userId);
                                 });
-                        })->count();
-                        $pAgreements = \App\Models\housing\ResidenceAgreement::where(function ($q) use ($userId) {
-                            $q->where(function ($sq) use ($userId) {
-                                $sq->where('send_status', 0)->where('commander_id', $userId);
-                            })
+                            })->count();
+                            $pAgreements = \App\Models\housing\ResidenceAgreement::where(function ($q) use ($userId) {
+                                $q->where(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 0)->where('commander_id', $userId);
+                                })
                                 ->orWhere(function ($sq) use ($userId) {
                                     $sq->where('send_status', 1)->where('managerhams_id', $userId);
                                 })
                                 ->orWhere(function ($sq) use ($userId) {
                                     $sq->where('send_status', 2)->where('Committee_id', $userId);
                                 });
-                        })->count();
-                        $pGuests = \App\Models\housing\ResidentGuestRequest::where(function ($q) use ($userId) {
-                            $q->where(function ($sq) use ($userId) {
-                                $sq->where('send_status', 0)->where('commander_id', $userId);
-                            })
+                            })->count();
+                            $pGuests = \App\Models\housing\ResidentGuestRequest::where(function ($q) use ($userId) {
+                                $q->where(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 0)->where('commander_id', $userId);
+                                })
                                 ->orWhere(function ($sq) use ($userId) {
                                     $sq->where('send_status', 1)->where('managerhams_id', $userId);
                                 })
                                 ->orWhere(function ($sq) use ($userId) {
                                     $sq->where('send_status', 2)->where('Committee_id', $userId);
                                 });
-                        })->count();
-                        $pLeaves = \App\Models\housing\ResidenceLeave::where(function ($q) use ($userId) {
-                            $q->where(function ($sq) use ($userId) {
-                                $sq->where('send_status', 0)->where('managerhams_id', $userId);
-                            })
+                            })->count();
+                            $pLeaves = \App\Models\housing\ResidenceLeave::where(function ($q) use ($userId) {
+                                $q->where(function ($sq) use ($userId) {
+                                    $sq->where('send_status', 0)->where('managerhams_id', $userId);
+                                })
                                 ->orWhere(function ($sq) use ($userId) {
                                     $sq->where('send_status', 2)->where('Committee_id', $userId);
                                 });
-                        })->count();
+                            })->count();
+                        }
+                        
+                        // Pending Repairs for Management (Status 0: Waiting for assignment)
+                        $pRepairs = \App\Models\housing\ResidenceRepair::where('status', 0)->count();
+                        
                         $totalPendingApprovals = $pRequests + $pAgreements + $pGuests + $pLeaves;
+                        $totalManageBadge = $totalPendingApprovals + $pRepairs;
                     @endphp
 
                     <!-- จัดการข้อมูล (dropdown) -->
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
-                            class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer {{ request()->routeIs('housing.management') ? 'bg-red-600 text-white shadow-md shadow-red-200' : '' }}">
-                            <div class="relative">
-                                <i
-                                    class="fa-solid fa-server {{ request()->routeIs('housing.management') ? '' : 'text-slate-400' }}"></i>
-                                @if($totalPendingApprovals > 0)
-                                    <span
-                                        class="absolute -top-1.5 -right-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] text-white ring-2 ring-white">
-                                        {{ $totalPendingApprovals }}
-                                    </span>
-                                @endif
-                            </div>
+                            class="relative flex items-center gap-2 px-4 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer {{ request()->routeIs('housing.management') ? 'bg-red-600 text-white shadow-md shadow-red-200' : '' }}">
+                            <i
+                                class="fa-solid fa-server {{ request()->routeIs('housing.management') ? '' : 'text-slate-400' }}"></i>
                             <span>จัดการ</span>
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
+                            
+                            @if($totalManageBadge > 0)
+                                <span
+                                    class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white ring-2 ring-white shadow-md animate-pulse">
+                                    {{ $totalManageBadge }}
+                                </span>
+                            @endif
                         </label>
                         <ul tabindex="0"
                             class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-64 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] right-0 origin-top-right">
                             <li>
                                 <a href="{{ route('housing.management') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('housing.management') && (!request()->filled('tab') || request()->get('tab') == 'requests') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
-                                    <i
-                                        class="fa-solid fa-table-list w-4 text-center {{ request()->routeIs('housing.management') && (!request()->filled('tab') || request()->get('tab') == 'requests') ? 'text-red-600' : 'text-red-400' }}"></i>
-                                    จัดการข้อมูลทั้งหมด
+                                    class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('housing.management') && (!request()->filled('tab') || request()->get('tab') == 'requests') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <div class="flex items-center gap-3">
+                                        <i
+                                            class="fa-solid fa-table-list w-4 text-center {{ request()->routeIs('housing.management') && (!request()->filled('tab') || request()->get('tab') == 'requests') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                        จัดการข้อมูลทั้งหมด
+                                    </div>
+                                    @if($totalPendingApprovals > 0)
+                                        <span class="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] text-center shadow-sm">
+                                            {{ $totalPendingApprovals }}
+                                        </span>
+                                    @endif
                                 </a>
                             </li>
                             <li>
@@ -268,10 +294,17 @@
                             </li>
                             <li>
                                 <a href="{{ route('housing.management', ['tab' => 'repairs']) }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->get('tab') == 'repairs' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
-                                    <i
-                                        class="fa-solid fa-screwdriver-wrench w-4 text-center {{ request()->get('tab') == 'repairs' ? 'text-red-600' : 'text-red-400' }}"></i>
-                                    จัดการงานซ่อม
+                                    class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->get('tab') == 'repairs' ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <div class="flex items-center gap-3">
+                                        <i
+                                            class="fa-solid fa-screwdriver-wrench w-4 text-center {{ request()->get('tab') == 'repairs' ? 'text-red-600' : 'text-red-400' }}"></i>
+                                        จัดการงานซ่อม
+                                    </div>
+                                    @if($pRepairs > 0)
+                                        <span class="px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[18px] text-center shadow-sm">
+                                            {{ $pRepairs }}
+                                        </span>
+                                    @endif
                                 </a>
                             </li>
                             <li>
@@ -311,7 +344,7 @@
                                     <i class="fa-solid fa-user"></i>
                                 @endif
                             </div>
-                            <span>{{ Auth::user()->employee_code }}</span>
+                            <span>{{ Auth::user()->emp_code }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                         </label>
                         <ul tabindex="0"
@@ -332,7 +365,7 @@
                                     @endif
                                     <div class="flex flex-col flex-1 truncate">
                                         <span
-                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->employee_code }}</span>
+                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->emp_code }}</span>
                                         <span
                                             class="text-[12px] text-slate-500 truncate">{{ Auth::user()->position ?? 'Employee' }}</span>
                                     </div>
@@ -480,7 +513,7 @@
                                     @endif
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="leading-tight">{{ Auth::user()->employee_code }}</span>
+                                    <span class="leading-tight">{{ Auth::user()->emp_code }}</span>
                                     <span
                                         class="text-[11px] text-slate-400 font-medium font-normal leading-tight">{{ Auth::user()->first_name ?? 'ผู้ใช้งานระบบ' }}</span>
                                 </div>

@@ -26,6 +26,21 @@ class ResidentGuestRequest extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
+    public function commander()
+    {
+        return $this->belongsTo(User::class, 'commander_id', 'id');
+    }
+
+    public function managerHams()
+    {
+        return $this->belongsTo(User::class, 'managerhams_id', 'id');
+    }
+
+    public function committee()
+    {
+        return $this->belongsTo(User::class, 'Committee_id', 'id');
+    }
+
     public function members()
     {
         return $this->hasMany(ResidentGuestMember::class, 'guest_request_id', 'resident_guest_id');

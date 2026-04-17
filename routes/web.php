@@ -112,13 +112,17 @@ Route::middleware('auth')->group(function () {
     Route::get('requisitions/detailreqlistall/{id}', [RequisitionsController::class, 'DetailReqAlllist'])->name('requisitions.detailreqlistall');
     Route::get('requisitions/detail/pdf/{id}', [RequisitionsController::class, 'DetailExportPdf'])->name('requisitions.detail.pdf');
     Route::get('requisitions/cancel/{id}', [RequisitionsController::class, 'cancel'])->name('requisitions.cancel');
-    //dashboard route
-    Route::get('requisitions/dashboard', [RequisitionsController::class, 'dashboardRequisition'])->name('requisitions.dashboard');
-    Route::get('requisitions/dashboard/data', [RequisitionsController::class, 'dashboardData'])->name('requisitions.dashboard.data');
+    Route::post('requisitions/update-all-approvers', [RequisitionsController::class, 'updateAllApprovers'])->name('requisitions.update_all_approvers');
+    Route::post('requisitions/quick-approve', [RequisitionsController::class, 'quickApprove'])->name('requisitions.quick_approve');
+    //dashboard and report route
+    Route::middleware('hams.report.access')->group(function () {
+        Route::get('requisitions/dashboard', [RequisitionsController::class, 'dashboardRequisition'])->name('requisitions.dashboard');
+        Route::get('requisitions/dashboard/data', [RequisitionsController::class, 'dashboardData'])->name('requisitions.dashboard.data');
 
-    Route::get('requisitions/reportslistall', [RequisitionsController::class, 'Reportslistall'])->name('requisitions.reportslistall');
-    Route::get('requisitions/reportslistall/export/pdf', [RequisitionsController::class, 'ReportslistallExportPdf'])->name('requisitions.reportslistall.export.pdf');
-    Route::get('requisitions/reportslistall/export/csv', [RequisitionsController::class, 'ReportslistallExportCsv'])->name('requisitions.reportslistall.export.csv');
+        Route::get('requisitions/reportslistall', [RequisitionsController::class, 'Reportslistall'])->name('requisitions.reportslistall');
+        Route::get('requisitions/reportslistall/export/pdf', [RequisitionsController::class, 'ReportslistallExportPdf'])->name('requisitions.reportslistall.export.pdf');
+        Route::get('requisitions/reportslistall/export/csv', [RequisitionsController::class, 'ReportslistallExportCsv'])->name('requisitions.reportslistall.export.csv');
+    });
 
 
     //Checklist route
@@ -148,7 +152,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('rooms', \App\Http\Controllers\bookingmeeting\BackendRoomsController::class);
         Route::put('reservations/{id}/update-status', [\App\Http\Controllers\bookingmeeting\BackendReservationsController::class, 'updateStatus'])->name('reservations.update_status');
         Route::resource('reservations', \App\Http\Controllers\bookingmeeting\BackendReservationsController::class);
-        Route::get('report', [\App\Http\Controllers\bookingmeeting\BackendReportController::class, 'index'])->name('report.index');
+        Route::get('report', [\App\Http\Controllers\bookingmeeting\BackendReportController::class, 'index'])->name('report.index')->middleware('hams.report.access');
     });
 
     //bookingcar
@@ -159,9 +163,11 @@ Route::middleware('auth')->group(function () {
         Route::post('store', [BookingCarController::class, 'store'])->name('store');
 
         // Admin / Management routes
-        Route::get('dashboard', [BookingCarController::class, 'dashboard'])->name('dashboard');
-        Route::get('export-excel', [BookingCarController::class, 'exportExcel'])->name('export.excel');
-        Route::get('report', [BookingCarController::class, 'report'])->name('report');
+        Route::middleware('hams.report.access')->group(function () {
+            Route::get('dashboard', [BookingCarController::class, 'dashboard'])->name('dashboard');
+            Route::get('export-excel', [BookingCarController::class, 'exportExcel'])->name('export.excel');
+            Route::get('report', [BookingCarController::class, 'report'])->name('report');
+        });
         Route::get('edit/{id}', [BookingCarController::class, 'edit'])->name('edit');
         Route::put('update/{id}', [BookingCarController::class, 'update'])->name('update');
         Route::put('approve/{id}', [BookingCarController::class, 'approve'])->name('approve');
@@ -183,6 +189,9 @@ Route::middleware('auth')->group(function () {
         Route::put('inspections/{id}', [BackendVehicleController::class, 'updateInspection'])->name('inspections.update');
         Route::delete('inspections/{id}', [BackendVehicleController::class, 'destroyInspection'])->name('inspections.destroy');
     });
+
+    // HAMS Editor Permission
+    Route::post('users/{id}/toggle-hams-editor', [UserController::class, 'toggleHamsEditor'])->name('users.toggle_hams_editor');
 
     // Backend Management
     Route::resource('users', UserController::class);
@@ -210,20 +219,35 @@ Route::middleware('auth')->group(function () {
         Route::post('guest/store', [EmployeeHousingController::class, 'storeGuest'])->name('guest.store');
         Route::get('leave/create', [EmployeeHousingController::class, 'leaveForm'])->name('leave.create');
         Route::post('leave/store', [EmployeeHousingController::class, 'storeLeave'])->name('leave.store');
-        Route::get('management', [EmployeeHousingController::class, 'management'])->name('management');
-        Route::delete('destroy/{type}/{id}', [EmployeeHousingController::class, 'destroy'])->name('destroy');
+        Route::get('request/{id}/edit', [EmployeeHousingController::class, 'editRequest'])->name('request.edit');
+        Route::put('request/{id}', [EmployeeHousingController::class, 'updateRequest'])->name('request.update');
+        Route::get('agreement/{id}/edit', [EmployeeHousingController::class, 'editAgreement'])->name('agreement.edit');
+        Route::put('agreement/{id}', [EmployeeHousingController::class, 'updateAgreement'])->name('agreement.update');
+        Route::get('guest/{id}/edit', [EmployeeHousingController::class, 'editGuest'])->name('guest.edit');
+        Route::put('guest/{id}', [EmployeeHousingController::class, 'updateGuest'])->name('guest.update');
+        Route::get('leave/{id}/edit', [EmployeeHousingController::class, 'editLeave'])->name('leave.edit');
+        Route::put('leave/{id}', [EmployeeHousingController::class, 'updateLeave'])->name('leave.update');
+
+        // Management & Report (Protected)
+        Route::middleware('hams.report.access')->group(function () {
+            Route::get('management', [EmployeeHousingController::class, 'management'])->name('management');
+            Route::get('report', [EmployeeHousingController::class, 'reportDashboard'])->name('report');
+            Route::post('update-approver', [EmployeeHousingController::class, 'updateApprover'])->name('update_approver');
+            Route::post('update-all-approvers', [EmployeeHousingController::class, 'updateAllApprovers'])->name('update_all_approvers');
+            Route::post('assign-room', [EmployeeHousingController::class, 'assignRoom'])->name('assign_room');
+            Route::post('committee/store', [EmployeeHousingController::class, 'storeCommittee'])->name('committee.store');
+            Route::put('committee/{id}', [EmployeeHousingController::class, 'updateCommittee'])->name('committee.update');
+            Route::delete('committee/{id}', [EmployeeHousingController::class, 'destroyCommittee'])->name('committee.destroy');
+            Route::delete('destroy/{type}/{id}', [EmployeeHousingController::class, 'destroy'])->name('destroy');
+        });
+        
         Route::post('approve/{type}/{id}', [EmployeeHousingController::class, 'approve'])->name('approve');
-        Route::post('update-approver', [EmployeeHousingController::class, 'updateApprover'])->name('update_approver');
-        Route::post('assign-room', [EmployeeHousingController::class, 'assignRoom'])->name('assign_room');
+
+        // Other Housing Routes
         Route::get('room-detail/{id}', [EmployeeHousingController::class, 'roomDetail'])->name('room_detail');
         Route::get('my-requests', [EmployeeHousingController::class, 'myRequests'])->name('my_requests');
         Route::get('request-detail/{type}/{id}', [EmployeeHousingController::class, 'requestDetail'])->name('request_detail');
         Route::get('committee/chart', [EmployeeHousingController::class, 'committeeChart'])->name('committee_chart');
-        Route::post('committee/store', [EmployeeHousingController::class, 'storeCommittee'])->name('committee.store');
-        Route::put('committee/{id}', [EmployeeHousingController::class, 'updateCommittee'])->name('committee.update');
-        Route::delete('committee/{id}', [EmployeeHousingController::class, 'destroyCommittee'])->name('committee.destroy');
-
-        Route::get('report', [EmployeeHousingController::class, 'reportDashboard'])->name('report');
 
         // Repairs
         Route::get('repair/create', [EmployeeHousingController::class, 'repairForm'])->name('repair.create');

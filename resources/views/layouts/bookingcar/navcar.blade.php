@@ -47,7 +47,12 @@
                 </a>
 
                 @php
-                    $isHamsOrAdmin = Auth::check() && ((Auth::user()->department && Auth::user()->department->department_name === 'HAMS') || Auth::user()->employee_code === '11648');
+                    $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+                    
+                    $pCarBookingsTotal = 0;
+                    if ($isHamsOrAdmin) {
+                        $pCarBookingsTotal = \App\Models\bookingcar\BookingCar::where('status', 'รออนุมัติ')->count();
+                    }
                 @endphp
                 @if($isHamsOrAdmin)
                     @php
@@ -55,19 +60,31 @@
                     @endphp
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
-                            class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ $isReportRoute ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                            class="relative flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ $isReportRoute ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
                             <i class="fa-solid fa-server {{ $isReportRoute ? 'text-white' : 'text-slate-400' }}"></i>
                             <span>รายงาน</span>
                             <i class="fa-solid fa-chevron-down text-[10px] {{ $isReportRoute ? 'text-white' : 'opacity-70' }} ml-1"></i>
+                            
+                            @if($pCarBookingsTotal > 0)
+                                <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white ring-2 ring-white shadow-md animate-pulse font-black">
+                                    {{ $pCarBookingsTotal }}
+                                </span>
+                            @endif
                         </label>
                         <ul tabindex="0"
                             class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-64 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] right-0 origin-top-right">
-                            <li>
+                             <li>
                                 <a href="{{ route('bookingcar.dashboard') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('bookingcar.dashboard') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-700 hover:bg-red-50' }}">
-                                    <i
-                                        class="fa-solid fa-list-ul w-4 text-center {{ request()->routeIs('bookingcar.dashboard') ? 'text-red-600' : 'text-red-400 font-bold' }}"></i>
-                                    จัดการรายการจอง
+                                    class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('bookingcar.dashboard') ? 'bg-red-50 text-red-600' : 'text-slate-600 hover:text-red-700 hover:bg-red-50' }}">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-solid fa-list-ul w-4 text-center {{ request()->routeIs('bookingcar.dashboard') ? 'text-red-600' : 'text-red-400 font-bold' }}"></i>
+                                        จัดการรายการจอง
+                                    </div>
+                                    @if($pCarBookingsTotal > 0)
+                                        <span class="flex items-center justify-center min-w-[20px] h-5 px-1 bg-red-600 text-[10px] text-white rounded-lg shadow-sm font-black">
+                                            {{ $pCarBookingsTotal }}
+                                        </span>
+                                    @endif
                                 </a>
                             </li>
                             <li>
@@ -116,7 +133,7 @@
                                     <i class="fa-solid fa-user"></i>
                                 @endif
                             </div>
-                            <span>{{ Auth::user()->employee_code }}</span>
+                            <span>{{ Auth::user()->emp_code }}</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                         </label>
                         <ul tabindex="0"
@@ -137,7 +154,7 @@
                                     @endif
                                     <div class="flex flex-col flex-1 truncate">
                                         <span
-                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->employee_code }}</span>
+                                            class="text-[15px] font-bold text-slate-800 truncate">{{ Auth::user()->fullname ?? Auth::user()->emp_code }}</span>
                                         <span
                                             class="text-[12px] text-slate-500 truncate">{{ Auth::user()->position ?? 'Employee' }}</span>
                                     </div>
@@ -214,16 +231,27 @@
                             class="flex items-center justify-between px-4 py-3 text-[15px] font-medium text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
                             <div class="flex items-center gap-3">
                                 <i class="fa-solid fa-server w-5 text-center text-slate-400"></i> รายงาน
+                                @if($pCarBookingsTotal > 0)
+                                    <span class="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-500 text-[10px] text-white rounded-full font-black ml-1 shadow-sm">
+                                        {{ $pCarBookingsTotal }}
+                                    </span>
+                                @endif
                             </div>
                             <i
                                 class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180"></i>
                         </summary>
                         <div class="mt-1 mb-2 ml-4 pl-4 border-l-2 border-red-100 flex flex-col gap-1">
-                            <a href="{{ route('bookingcar.dashboard') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-lg transition-colors {{ request()->routeIs('bookingcar.dashboard') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
-                                <i
-                                    class="fa-solid fa-list-ul w-4 text-center {{ request()->routeIs('bookingcar.dashboard') ? 'text-red-600' : 'text-red-400' }}"></i>
-                                รายการจอง
+                             <a href="{{ route('bookingcar.dashboard') }}"
+                                class="flex items-center justify-between px-4 py-2.5 text-[14px] font-medium rounded-lg transition-colors {{ request()->routeIs('bookingcar.dashboard') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-list-ul w-4 text-center {{ request()->routeIs('bookingcar.dashboard') ? 'text-red-600' : 'text-red-400' }}"></i>
+                                    รายการจอง
+                                </div>
+                                @if($pCarBookingsTotal > 0)
+                                    <span class="flex items-center justify-center min-w-[20px] h-5 px-1 bg-red-600 text-[10px] text-white rounded-lg shadow-sm font-black">
+                                        {{ $pCarBookingsTotal }}
+                                    </span>
+                                @endif
                             </a>
                             <a href="{{ route('bookingcar.report') }}"
                                 class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-lg transition-colors {{ request()->routeIs('bookingcar.report') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
@@ -266,7 +294,7 @@
                                     @endif
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="leading-tight">{{ Auth::user()->employee_code }}</span>
+                                    <span class="leading-tight">{{ Auth::user()->emp_code }}</span>
                                     <span
                                         class="text-[11px] text-slate-400 font-medium font-normal leading-tight">{{ Auth::user()->first_name ?? 'ผู้ใช้งานระบบ' }}</span>
                                 </div>

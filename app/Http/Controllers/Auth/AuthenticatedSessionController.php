@@ -18,8 +18,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        $users = User::all();
-        return view('auth.login', compact('users'));
+        return view('auth.login');
     }
 
     /**
@@ -31,7 +30,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('welcome', absolute: false));
+        return redirect()->intended(route('welcome', absolute: false))
+            ->with('login-success', 'ยินดีต้อนรับเข้าสู่ระบบคุณ ' . Auth::user()->fullname);
     }
 
     /**
@@ -45,6 +45,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('logout-success', 'ออกจากระบบเรียบร้อยแล้ว');
     }
 }

@@ -10,7 +10,7 @@
         </a>
     </div>
 
-    <form action="{{ route('departments.update', $department->department_id) }}" method="POST">
+    <form action="{{ route('departments.update', $department->dept_id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -62,3 +62,4 @@
     </form>
 </div>
 @endsection
+

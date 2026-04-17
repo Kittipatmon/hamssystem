@@ -40,28 +40,28 @@
                         'label' => 'คำขอเข้าพัก', 
                         'icon' => 'fa-file-circle-plus', 
                         'color' => 'text-red-500',
-                        'count' => \App\Models\housing\ResidenceRequest::where('user_id', $userId)->where('send_status', '<', 6)->count()
+                        'count' => \App\Models\housing\ResidenceRequest::where('user_id', $userId)->whereIn('send_status', [4, 7])->count()
                     ],
                     [
                         'id' => 'tab-agreements', 
                         'label' => 'ข้อตกลงเข้าพัก', 
                         'icon' => 'fa-file-signature', 
                         'color' => 'text-blue-500',
-                        'count' => \App\Models\housing\ResidenceAgreement::where('user_id', $userId)->where('send_status', '<', 6)->count()
+                        'count' => \App\Models\housing\ResidenceAgreement::where('user_id', $userId)->where('send_status', 4)->count()
                     ],
                     [
                         'id' => 'tab-guests', 
                         'label' => 'นำญาติเข้าพัก', 
                         'icon' => 'fa-people-arrows', 
                         'color' => 'text-purple-500',
-                        'count' => \App\Models\housing\ResidentGuestRequest::where('user_id', $userId)->where('send_status', '<', 3)->count()
+                        'count' => \App\Models\housing\ResidentGuestRequest::where('user_id', $userId)->where('send_status', 4)->count()
                     ],
                     [
                         'id' => 'tab-leaves', 
                         'label' => 'คำร้องย้ายออก', 
                         'icon' => 'fa-right-from-bracket', 
                         'color' => 'text-orange-500',
-                        'count' => \App\Models\housing\ResidenceLeave::where('user_id', $userId)->where('send_status', '<', 3)->count()
+                        'count' => \App\Models\housing\ResidenceLeave::where('user_id', $userId)->where('send_status', 4)->count()
                     ],
                 ]);
             @endphp
@@ -89,7 +89,7 @@
                                 <h3 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest flex items-center gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> คำขอเข้าพักที่รอคุณอนุมัติ
                                 </h3>
-                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['requests'], 'type' => 'request'])
+                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['requests'], 'type' => 'request', 'is_pending' => true])
                             </div>
                         @endif
                         @if(count($pendingApprovals['agreements']))
@@ -97,7 +97,7 @@
                                 <h3 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest flex items-center gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> ข้อตกลงที่รอคุณอนุมัติ
                                 </h3>
-                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['agreements'], 'type' => 'agreement'])
+                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['agreements'], 'type' => 'agreement', 'is_pending' => true])
                             </div>
                         @endif
                         @if(count($pendingApprovals['guests']))
@@ -105,7 +105,7 @@
                                 <h3 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest flex items-center gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> คำขอนำญาติเข้าพักที่รอคุณอนุมัติ
                                 </h3>
-                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['guests'], 'type' => 'guest'])
+                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['guests'], 'type' => 'guest', 'is_pending' => true])
                             </div>
                         @endif
                         @if(count($pendingApprovals['leaves']))
@@ -113,7 +113,7 @@
                                 <h3 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest flex items-center gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span> คำร้องขอย้ายออกที่รอคุณอนุมัติ
                                 </h3>
-                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['leaves'], 'type' => 'leave'])
+                                @include('backend.housing.partials.request_list', ['items' => $pendingApprovals['leaves'], 'type' => 'leave', 'is_pending' => true])
                             </div>
                         @endif
 
@@ -134,22 +134,22 @@
 
             <div id="content-tab-requests"
                 class="tab-panel {{ $totalPending > 0 ? 'hidden' : '' }} bg-white dark:bg-gray-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm overflow-x-auto">
-                @include('backend.housing.partials.request_list', ['items' => $requests, 'type' => 'request'])
+                @include('backend.housing.partials.request_list', ['items' => $requests, 'type' => 'request', 'is_pending' => false])
             </div>
 
             <div id="content-tab-agreements"
                 class="tab-panel hidden bg-white dark:bg-gray-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm overflow-x-auto">
-                @include('backend.housing.partials.request_list', ['items' => $agreements, 'type' => 'agreement'])
+                @include('backend.housing.partials.request_list', ['items' => $agreements, 'type' => 'agreement', 'is_pending' => false])
             </div>
 
             <div id="content-tab-guests"
                 class="tab-panel hidden bg-white dark:bg-gray-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm overflow-x-auto">
-                @include('backend.housing.partials.request_list', ['items' => $guests, 'type' => 'guest'])
+                @include('backend.housing.partials.request_list', ['items' => $guests, 'type' => 'guest', 'is_pending' => false])
             </div>
 
             <div id="content-tab-leaves"
                 class="tab-panel hidden bg-white dark:bg-gray-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm overflow-x-auto">
-                @include('backend.housing.partials.request_list', ['items' => $leaves, 'type' => 'leave'])
+                @include('backend.housing.partials.request_list', ['items' => $leaves, 'type' => 'leave', 'is_pending' => false])
             </div>
         </div>
 

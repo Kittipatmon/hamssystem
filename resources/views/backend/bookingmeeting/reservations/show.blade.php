@@ -26,11 +26,11 @@
                         <h2 class="text-lg font-bold text-slate-800">รายละเอียดการจอง: {{ $reservation->reservation_code }}
                         </h2>
                         <p class="text-xs text-slate-500 mt-0.5">ถูกสร้างเมื่อ
-                            {{ $reservation->created_at->format('d/m/Y H:i') }}
+                            {{ $reservation->created_at->locale('th')->addYears(543)->translatedFormat('d/m/Y H:i') }} น.
                         </p>
                     </div>
                 </div>
-                <div>
+                <div class="flex flex-col items-end gap-1">
                     @if($reservation->status == 'pending')
                         <span
                             class="bg-amber-100 text-amber-700 border border-amber-200 px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5">
@@ -51,6 +51,17 @@
                             class="bg-orange-100 text-orange-700 border border-orange-200 px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5">
                             <i class="fa-solid fa-ban"></i> ยกเลิก
                         </span>
+                    @endif
+
+                    @if ($reservation->approvedBy)
+                        <div class="text-[11px] font-bold mt-1 {{ $reservation->status == 'rejected' ? 'text-red-500' : 'text-emerald-600' }}">
+                            <i class="fa-solid fa-user-check mr-1"></i>โดย: {{ $reservation->approvedBy->fullname }}
+                        </div>
+                        @if ($reservation->approved_at)
+                            <div class="text-[9px] text-slate-400">
+                                เมื่อ: {{ \Carbon\Carbon::parse($reservation->approved_at)->locale('th')->addYears(543)->translatedFormat('d M Y H:i') }} น.
+                            </div>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -77,7 +88,7 @@
                             <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">วันที่</p>
                             <p class="font-medium text-slate-800 mt-1"><i
                                     class="fa-regular fa-calendar text-slate-400 mr-1"></i>
-                                {{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d F Y') }}</p>
+                                {{ \Carbon\Carbon::parse($reservation->reservation_date)->locale('th')->addYears(543)->translatedFormat('d F Y') }}</p>
                         </div>
                         <div>
                             <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">เวลา</p>
@@ -94,7 +105,7 @@
                         <div>
                             <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">ผู้ขอจอง</p>
                             <p class="font-medium text-slate-800 mt-1">{{ $reservation->requester_name }} <span
-                                    class="text-slate-500 text-sm font-normal">({{ $reservation->user->employee_code ?? '' }})</span>
+                                    class="text-slate-500 text-sm font-normal">({{ $reservation->user->emp_code ?? '' }})</span>
                             </p>
                         </div>
                     </div>

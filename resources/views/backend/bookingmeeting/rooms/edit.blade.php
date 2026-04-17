@@ -119,7 +119,7 @@
                                 <div class="flex items-center gap-2">
                                     <div
                                         class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center">
-                                        <i class="fa-solid fa-projector"></i>
+                                        <i class="fa-solid fa-display"></i>
                                     </div>
                                     <span class="text-sm font-medium text-slate-700">Projector / จอภาพ</span>
                                 </div>

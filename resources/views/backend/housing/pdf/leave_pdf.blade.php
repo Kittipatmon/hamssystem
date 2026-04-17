@@ -52,12 +52,12 @@
         .dotted-line {
             display: inline-block;
             border-bottom: 1px dotted #000;
-            min-height: 14px;
-            line-height: 1;
+            min-height: 15px;
+            line-height: 1.1;
             padding: 0 5px;
             text-align: center;
-            vertical-align: middle;
-            margin-bottom: 3px;
+            vertical-align: baseline;
+            margin-bottom: 0px;
         }
         .row {
             margin-bottom: 12px;
@@ -95,13 +95,15 @@
             margin-right: 5px;
             vertical-align: middle;
             text-align: center;
-            line-height: 12px;
+            line-height: 14px;
             font-family: 'DejaVu Sans', sans-serif;
-            font-size: 14px;
+            font-size: 12px;
+            margin-top: 2px;
         }
     </style>
 </head>
 <body>
+    @php \Carbon\Carbon::setLocale('th'); @endphp
     <div class="container">
         <div class="logo-section">
             <h1 class="logo-text">Kumwell</h1>
@@ -119,10 +121,10 @@
 
         <div class="content">
             <div class="form-row row">
-                ข้าพเจ้า นาย/นาง/นางสาว <span class="dotted-line" style="width: 120px;">{{ $leave->first_name }}</span> นามสกุล <span class="dotted-line" style="width: 120px;">{{ $leave->last_name }}</span>
+                ข้าพเจ้า นาย/นาง/นางสาว <span class="dotted-line" style="width: 150px;">{{ $leave->first_name }}</span> นามสกุล <span class="dotted-line" style="width: 150px;">{{ $leave->last_name }}</span>
             </div>
             <div class="form-row row">
-                ตำแหน่ง <span class="dotted-line" style="width: 130px;">{{ $leave->position }}</span> แผนก <span class="dotted-line" style="width: 100px;">{{ $leave->department }}</span> ฝ่าย <span class="dotted-line" style="width: 100px;">{{ $leave->section }}</span>
+                ตำแหน่ง <span class="dotted-line" style="width: 180px;">{{ $leave->position }}</span> แผนก <span class="dotted-line" style="width: 250px;">{{ $leave->department }}</span> ฝ่าย <span class="dotted-line" style="width: 100px;">{{ $leave->section }}</span>
             </div>
             <div class="row">
             <div class="row">
@@ -149,10 +151,10 @@
                 <td rowspan="2">
                     <div class="box-title">[1] ผู้พักอาศัย</div>
                     <div style="margin-top: 50px;">
-                        ลงชื่อ <span class="dotted-line" style="width: 180px;"></span> 
+                        ลงชื่อ <span class="dotted-line" style="width: 180px;">{{ $leave->first_name }} {{ $leave->last_name }}</span> 
                     </div>
                     <div style="margin-top: 10px;">
-                        วันที่ <span class="dotted-line" style="width: 25px;"></span> / <span class="dotted-line" style="width: 25px;"></span> / <span class="dotted-line" style="width: 35px;"></span>
+                        วันที่ <span class="dotted-line" style="width: 25px;">{{ \Carbon\Carbon::parse($leave->request_date)->format('d') }}</span> / <span class="dotted-line" style="width: 25px;">{{ \Carbon\Carbon::parse($leave->request_date)->format('m') }}</span> / <span class="dotted-line" style="width: 35px;">{{ \Carbon\Carbon::parse($leave->request_date)->year + 543 }}</span>
                     </div>
                 </td>
                 <td>

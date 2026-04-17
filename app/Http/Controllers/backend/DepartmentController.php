@@ -11,11 +11,10 @@ class DepartmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Department::with('division');
+        $query = Department::query();
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('department_name', 'like', "%{$search}%")
-                  ->orWhere('department_fullname', 'like', "%{$search}%");
+            $query->where('name', 'like', "%{$search}%");
         }
         $departments = $query->get();
 
@@ -23,7 +22,7 @@ class DepartmentController extends Controller
             return response()->json($departments);
         }
 
-        $divisions = Division::all();
+        $divisions = collect([]);
         return view('backend.department.index', compact('departments', 'divisions'));
     }
 
@@ -46,9 +45,7 @@ class DepartmentController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'division_id' => 'required',
-            'department_name' => 'required|string|max:255',
-            'department_status' => 'required',
+            'name' => 'required|string|max:255',
         ]);
 
         $department = Department::findOrFail($id);

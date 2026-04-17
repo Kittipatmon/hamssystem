@@ -60,6 +60,11 @@
                             }
                         }
                         $isCurrentApprover = (Auth::id() == $currentVal);
+                        
+                        // Hide buttons if specifically told we are in a tracking context and not pending
+                        if (isset($is_pending) && !$is_pending) {
+                            $isCurrentApprover = false;
+                        }
                     @endphp
 
                     <div class="flex flex-col items-center gap-1">
@@ -70,6 +75,11 @@
                                     onclick="handleApproval('{{ $type }}', {{ $itemId }}, 'approve', this)"
                                     class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white flex items-center justify-center border border-emerald-200 transition-all shadow-sm" title="อนุมัติ">
                                     <i class="fa-solid fa-check text-xs"></i>
+                                </button>
+                                <button type="button" 
+                                    onclick="handleApproval('{{ $type }}', {{ $itemId }}, 'correct', this)"
+                                    class="w-8 h-8 rounded-full bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white flex items-center justify-center border border-purple-200 transition-all shadow-sm" title="ส่งกลับแก้ไข">
+                                    <i class="fa-solid fa-rotate-left text-xs"></i>
                                 </button>
                                 <button type="button" 
                                     onclick="handleApproval('{{ $type }}', {{ $itemId }}, 'reject', this)"
@@ -99,6 +109,24 @@
                             class="inline-flex items-center justify-center bg-white hover:bg-blue-50 text-slate-400 hover:text-blue-500 w-8 h-8 rounded-full border border-slate-200 hover:border-blue-200 transition-all shadow-sm" title="พิมพ์ PDF">
                                 <i class="fa-solid fa-file-pdf text-xs"></i>
                             </a>
+                            @endif
+                            
+                            @if($item->send_status == 4 && Auth::id() == $item->user_id)
+                            @php
+                                $editRoute = match ($type) {
+                                    'request' => route('housing.request.edit', $itemId),
+                                    'agreement' => route('housing.agreement.edit', $itemId),
+                                    'guest' => route('housing.guest.edit', $itemId),
+                                    'leave' => route('housing.leave.edit', $itemId),
+                                    default => null
+                                };
+                            @endphp
+                            @if($editRoute)
+                            <a href="{{ $editRoute }}" 
+                                class="inline-flex items-center justify-center bg-white hover:bg-amber-50 text-slate-400 hover:text-amber-500 w-8 h-8 rounded-full border border-slate-200 hover:border-amber-200 transition-all shadow-sm" title="แก้ไขข้อมูล">
+                                <i class="fa-solid fa-pen-to-square text-xs"></i>
+                            </a>
+                            @endif
                             @endif
                             
                             @if($item->send_status == 0)

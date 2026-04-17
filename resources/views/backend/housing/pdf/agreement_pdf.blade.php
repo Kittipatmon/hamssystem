@@ -52,12 +52,12 @@
         .dotted-line {
             display: inline-block;
             border-bottom: 1px dotted #000;
-            min-height: 14px;
-            line-height: 1;
+            min-height: 15px;
+            line-height: 1.1;
             padding: 0 5px;
             text-align: center;
-            vertical-align: middle;
-            margin-bottom: 3px;
+            vertical-align: baseline;
+            margin-bottom: 0px;
         }
         .row {
             margin-bottom: 12px;
@@ -91,15 +91,19 @@
             page-break-before: always;
         }
         ol {
-            margin-left: 30px;
+            margin-left: 15px;
+            padding-left: 25px;
         }
         ol li {
-            margin-bottom: 8px;
-            text-align: justify;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            text-align: left;
+            padding-left: 5px;
         }
     </style>
 </head>
 <body>
+    @php \Carbon\Carbon::setLocale('th'); @endphp
     <!-- PAGE 1 -->
     <div class="container">
         <div class="logo-section">
@@ -123,10 +127,10 @@
                 $lastName = $names[1] ?? '';
             @endphp
             <div class="form-row row">
-                ข้าพเจ้า นาย/นาง/นางสาว <span class="dotted-line" style="width: 120px;">{{ $firstName }}</span> นามสกุล <span class="dotted-line" style="width: 120px;">{{ $lastName }}</span>
+                ข้าพเจ้า นาย/นาง/นางสาว <span class="dotted-line" style="width: 150px;">{{ $firstName }}</span> นามสกุล <span class="dotted-line" style="width: 150px;">{{ $lastName }}</span>
             </div>
             <div class="form-row row">
-                ตำแหน่ง <span class="dotted-line" style="width: 130px;">{{ $agreement->position }}</span> แผนก <span class="dotted-line" style="width: 100px;">{{ $agreement->department }}</span> ฝ่าย <span class="dotted-line" style="width: 100px;">{{ $agreement->section }}</span> ซึ่งต่อไปนี้เรียกว่า "ผู้พักอาศัย"
+                ตำแหน่ง <span class="dotted-line" style="width: 180px;">{{ $agreement->position }}</span> แผนก <span class="dotted-line" style="width: 250px;">{{ $agreement->department }}</span> ฝ่าย <span class="dotted-line" style="width: 100px;">{{ $agreement->section }}</span> ซึ่งต่อไปนี้เรียกว่า "ผู้พักอาศัย"
             </div>
             <div class="row">
                 ขอทำข้อตกลงกับ บริษัท คัมเวล คอร์ปอเรชั่น จำกัด (มหาชน) เพื่อให้การเข้าพักอาศัยเป็นไปตามระเบียบของ บริษัท คัมเวล คอร์ปอเรชั่น จำกัด (มหาชน) ว่าด้วย การให้พนักงานเข้าพักอาศัยในบ้านพักของบริษัทฯ โดยมีข้อตกลงดังต่อไปนี้
@@ -155,10 +159,10 @@
                 <td>
                     <div class="box-title">[1] ผู้ขอบ้านพัก</div>
                     <div style="margin-top: 30px;">
-                        ลงชื่อ <span class="dotted-line" style="width: 180px;"></span> 
+                        ลงชื่อ <span class="dotted-line" style="width: 180px;">{{ $agreement->full_name }}</span> 
                     </div>
                     <div style="margin-top: 10px;">
-                        วันที่ <span class="dotted-line" style="width: 25px;"></span> / <span class="dotted-line" style="width: 25px;"></span> / <span class="dotted-line" style="width: 35px;"></span>
+                        วันที่ <span class="dotted-line" style="width: 25px;">{{ \Carbon\Carbon::parse($agreement->agreement_date)->format('d') }}</span> / <span class="dotted-line" style="width: 25px;">{{ \Carbon\Carbon::parse($agreement->agreement_date)->format('m') }}</span> / <span class="dotted-line" style="width: 35px;">{{ \Carbon\Carbon::parse($agreement->agreement_date)->year + 543 }}</span>
                     </div>
                 </td>
                 <td>

@@ -1,5 +1,5 @@
 @extends('layouts.sidebar')
-@section('title', 'รายละเอียดพนักงาน : ' . $user->employee_code)
+@section('title', 'รายละเอียดพนักงาน : ' . $user->emp_code)
 
 @section('content')
 <div class="container mx-auto px-4 py-8 max-w-7xl">
@@ -41,7 +41,7 @@
                     <div class="w-full mt-6 grid grid-cols-2 gap-4">
                         <div class="flex flex-col p-3 rounded-2xl bg-base-200/50 dark:bg-gray-700/30">
                             <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">รหัสพนักงาน</span>
-                            <span class="font-mono font-bold text-primary text-lg">{{ $user->employee_code }}</span>
+                            <span class="font-mono font-bold text-primary text-lg">{{ $user->emp_code }}</span>
                         </div>
                         <div class="flex flex-col p-3 rounded-2xl bg-base-200/50 dark:bg-gray-700/30">
                             <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">อายุงาน</span>

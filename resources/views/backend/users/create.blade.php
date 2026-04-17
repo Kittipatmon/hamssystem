@@ -20,12 +20,12 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-3">
             <div>
-                <label for="employee_code" class="block font-medium mb-1">รหัสพนักงาน <span
+                <label for="emp_code" class="block font-medium mb-1">รหัสพนักงาน <span
                         class="text-red-500">*</span></label>
-                <input type="text" name="employee_code" id="employee_code" value="{{ old('employee_code') }}"
-                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('employee_code') input-error @enderror"
+                <input type="text" name="emp_code" id="emp_code" value="{{ old('emp_code') }}"
+                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('emp_code') input-error @enderror"
                     required>
-                @error('employee_code')
+                @error('emp_code')
                 <span class="text-sm text-red-500">{{ $message }}</span>
                 @enderror
             </div>
@@ -66,22 +66,22 @@
                 @enderror
             </div>
             <div>
-                <label for="first_name" class="block font-medium mb-1">ชื่อจริง <span
+                <label for="firstname" class="block font-medium mb-1">ชื่อจริง <span
                         class="text-red-500">*</span></label>
-                <input type="text" name="first_name" id="first_name" value="{{ old('first_name') }}"
-                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('first_name') input-error @enderror"
+                <input type="text" name="firstname" id="firstname" value="{{ old('firstname') }}"
+                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('firstname') input-error @enderror"
                     required>
-                @error('first_name')
+                @error('firstname')
                 <span class="text-sm text-red-500">{{ $message }}</span>
                 @enderror
             </div>
             <div>
-                <label for="last_name" class="block font-medium mb-1">นามสกุล <span
+                <label for="lastname" class="block font-medium mb-1">นามสกุล <span
                         class="text-red-500">*</span></label>
-                <input type="text" name="last_name" id="last_name" value="{{ old('last_name') }}"
-                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('last_name') input-error @enderror"
+                <input type="text" name="lastname" id="lastname" value="{{ old('lastname') }}"
+                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('lastname') input-error @enderror"
                     required>
-                @error('last_name')
+                @error('lastname')
                 <span class="text-sm text-red-500">{{ $message }}</span>
                 @enderror
             </div>
@@ -100,48 +100,21 @@
                 @enderror
             </div>
             <div>
-                <label for="department_id" class="block font-medium mb-1">แผนก</label>
-                <select name="department_id" id="department_id"
-                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('department_id') input-error @enderror">
+                <label for="dept_id" class="block font-medium mb-1">แผนก</label>
+                <select name="dept_id" id="dept_id"
+                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('dept_id') input-error @enderror">
                     <option value="">-- เลือกแผนก --</option>
                     @foreach($departments as $department)
-                    <option value="{{ $department->department_id }}" @if(old('department_id')==$department->
-                        department_id) selected @endif>{{ $department->department_name }}
-                        ({{ $department->department_fullname }})</option>
+                    <option value="{{ $department->id }}" @if(old('dept_id')==$department->id) selected @endif>
+                        {{ $department->name }}
+                    </option>
                     @endforeach
                 </select>
-                @error('department_id')
+                @error('dept_id')
                 <span class="text-sm text-red-500">{{ $message }}</span>
                 @enderror
             </div>
-            <div>
-                <label for="division_id" class="block font-medium mb-1">ฝ่าย</label>
-                <select name="division_id" id="division_id"
-                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('division_id') input-error @enderror">
-                    <option value="">-- เลือกฝ่าย --</option>
-                    @foreach($divisions as $division)
-                    <option value="{{ $division->division_id }}" @if(old('division_id')==$division->division_id)
-                        selected @endif>{{ $division->division_name }} ({{ $division->division_fullname }}) </option>
-                    @endforeach
-                </select>
-                @error('division_id')
-                <span class="text-sm text-red-500">{{ $message }}</span>
-                @enderror
-            </div>
-            <div>
-                <label for="section_id" class="block font-medium mb-1">สายงาน</label>
-                <select name="section_id" id="section_id"
-                    class="input input-bordered w-full dark:bg-gray-700 px-3 py-2 @error('section_id') input-error @enderror">
-                    <option value="">-- เลือกสายงาน --</option>
-                    @foreach($sections as $section)
-                    <option value="{{ $section->section_id }}" @if(old('section_id')==$section->section_id) selected
-                        @endif>{{ $section->section_code }}</option>
-                    @endforeach
-                </select>
-                @error('section_id')
-                <span class="text-sm text-red-500">{{ $message }}</span>
-                @enderror
-            </div>
+            {{-- Legacy fields removed --}}
         </div>
 <!-- workplace -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
@@ -181,23 +154,23 @@
             <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">สิทธิ์การใช้งาน</span>
         </div>
         @php
-        $levelOptions = \App\Models\User::getLevelUserOptions();
+        $roleOptions = \App\Models\User::getRoleOptions();
         @endphp
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="form-control w-full">
                 <label class="label"><span class="label-text font-medium">ระดับพนักงาน <span
                             class="text-red-500">*</span></span></label>
-                <select name="level_user"
-                    class="select select-bordered w-full dark:bg-gray-700 @error('level_user') select-error @enderror"
+                <select name="role"
+                    class="select select-bordered w-full dark:bg-gray-700 @error('role') select-error @enderror"
                     required>
                     <option value="">เลือกระดับ</option>
-                    @foreach($levelOptions as $value => $meta)
-                    <option value="{{ $value }}" @if(old('level_user')==$value) selected @endif>
+                    @foreach($roleOptions as $value => $meta)
+                    <option value="{{ $value }}" @if(old('role')==$value) selected @endif>
                         {{ $meta['label'] }}
                     </option>
                     @endforeach
                 </select>
-                @error('level_user')
+                @error('role')
                 <span class="text-sm text-red-500">{{ $message }}</span>
                 @enderror
             </div>

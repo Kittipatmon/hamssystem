@@ -6,11 +6,11 @@
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
         :root {
-            --bg: #f8fafc;
+            --bg: #ffffff;
             --surface: #ffffff;
             --border: #f1f5f9;
-            --accent: #6366f1;
-            --accent-soft: #eef2ff;
+            --accent: #dc2626;
+            --accent-soft: #fef2f2;
             --text-primary: #0f172a;
             --text-secondary: #475569;
             --text-muted: #94a3b8;
@@ -41,17 +41,26 @@
             position: relative;
         }
 
-        .db-wrap::before {
-            content: '';
-            position: absolute;
-            top: -10%;
-            right: -10%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
-            z-index: 0;
-            pointer-events: none;
+        @media (max-width: 1200px) {
+            .db-wrap {
+                padding: 2rem 1.5rem;
+            }
         }
+
+        @media (max-width: 768px) {
+            .db-wrap {
+                padding: 1rem 0;
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .db-wrap {
+                padding: 0.5rem 0;
+            }
+        }
+
 
         /* ── Header ── */
         .db-header {
@@ -59,7 +68,7 @@
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 1.5rem;
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.5);
@@ -70,6 +79,36 @@
             position: relative;
             z-index: 10;
             animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @media (max-width: 640px) {
+            .db-header {
+                padding: 1.25rem 1rem;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1.25rem;
+                border-radius: 0;
+                margin-left: 0;
+                margin-right: 0;
+                border-left: none;
+                border-right: none;
+            }
+            .db-header__left {
+                justify-content: center;
+                text-align: center;
+            }
+            .db-header__right {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .db-header__right {
+                grid-template-columns: 1fr;
+            }
         }
 
         .db-header__left {
@@ -87,7 +126,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 8px 16px -4px rgba(220, 38, 38, 0.3);
         }
 
         .db-logo i {
@@ -161,7 +200,7 @@
  
          .btn-primary:hover {
              background: var(--accent);
-             box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2);
+             box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.2);
          }
 
         /* ── Filter Bar ── */
@@ -171,8 +210,20 @@
             border-radius: var(--radius-card);
             padding: 2rem 2.5rem;
             box-shadow: var(--shadow-md);
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
             animation: fadeInDown 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+            position: relative;
+            z-index: 50;
+        }
+
+        @media (max-width: 640px) {
+            .db-filters {
+                padding: 1.5rem 1rem;
+                margin-bottom: 2rem;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
         }
 
         .filters-label {
@@ -196,8 +247,21 @@
 
         .filters-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 0.875rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .filters-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
         }
 
         .field-wrap {
@@ -217,18 +281,17 @@
 
         .field-input {
             width: 100%;
-            height: 2.5rem;
+            height: 2.8rem;
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
             padding: 0 0.875rem;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: var(--text-primary);
             font-family: inherit;
             outline: none;
-            appearance: none;
-            transition: border-color 0.15s, box-shadow 0.15s;
+            transition: all 0.2s ease;
         }
 
         .field-input:focus {
@@ -250,15 +313,26 @@
             animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
-        @media (max-width: 900px) {
-            .db-stats {
-                grid-template-columns: repeat(3, 1fr);
+        @media (max-width: 1100px) {
+            .db-stats { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .db-stats { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 0;
+            }
+            .stat-card {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
             }
         }
 
-        @media (max-width: 560px) {
-            .db-stats {
-                grid-template-columns: repeat(1, 1fr);
+        @media (max-width: 480px) {
+            .db-stats { 
+                grid-template-columns: 1fr;
+                gap: 0;
             }
         }
 
@@ -274,6 +348,17 @@
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
+        }
+
+        @media (max-width: 640px) {
+            .stat-card {
+                padding: 1rem;
+                gap: 0.75rem;
+                border-radius: var(--radius-md);
+            }
+            .stat-value {
+                font-size: 1.5rem;
+            }
         }
 
         .stat-card:hover {
@@ -340,9 +425,16 @@
             animation: fadeInDown 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1200px) {
+            .db-charts-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
             .db-charts-row {
                 grid-template-columns: 1fr;
+                gap: 1rem;
             }
         }
 
@@ -355,6 +447,26 @@
             display: flex;
             flex-direction: column;
             transition: all 0.3s ease;
+            min-height: 400px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        @media (max-width: 640px) {
+            .chart-card {
+                padding: 1.25rem;
+                min-height: 350px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chart-card {
+                padding: 1rem 0.85rem;
+                min-height: 320px;
+            }
         }
 
         .chart-card:hover {
@@ -366,6 +478,39 @@
             align-items: flex-start;
             justify-content: space-between;
             margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            .chart-card__head {
+                flex-direction: column;
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        .chart-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .toggle-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            white-space: nowrap;
+        }
+
+        .chart-body {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            min-height: 0;
         }
 
         .chart-title {
@@ -395,6 +540,18 @@
             box-shadow: var(--shadow-md);
             margin-bottom: 3rem;
             animation: fadeInDown 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @media (max-width: 640px) {
+            .db-expense {
+                padding: 1.5rem 1rem;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+            .expense-chart-wrap {
+                min-height: 250px !important;
+            }
         }
 
         .expense-head {
@@ -456,6 +613,14 @@
             flex-direction: column;
             align-items: center;
             gap: 1.5rem;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        @media (max-width: 640px) {
+            .loading-box {
+                padding: 2rem;
+            }
         }
 
         .spinner {
@@ -505,6 +670,67 @@
             background: var(--border);
             align-self: stretch;
         }
+
+        @media (max-width: 640px) {
+            .vdivider {
+                display: none;
+            }
+        }
+
+        /* ── Top Items List ── */
+        .top-items-list {
+            margin: 1.5rem 0 0 0;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .top-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .top-item:last-child {
+            border-bottom: none;
+        }
+
+        .top-item__dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .top-item__name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .top-item__qty {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 640px) {
+            .top-item__name {
+                max-width: 120px;
+            }
+        }
     </style>
 
     <div class="db-wrap">
@@ -522,58 +748,10 @@
                 <button id="btnResetFilters" type="button" class="btn btn-ghost">
                     <i class="fa-solid fa-rotate-left"></i> Reset
                 </button>
-                <button id="btnExportCsv" type="button" class="btn btn-primary">
-                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                <button id="btnExportPdf" type="button" class="btn btn-primary">
+                    <i class="fa-solid fa-file-pdf"></i> Export PDF
                 </button>
             </div>
-        </div>
-
-        <!-- ── Filters ── -->
-        <div class="db-filters">
-            <div class="filters-label"><i class="fa-solid fa-sliders" style="color:var(--text-muted);font-size:0.65rem"></i>
-                Filters</div>
-            <form id="filterForm" class="filters-grid">
-                <div class="field-wrap">
-                    <span class="field-label">จากวันที่</span>
-                    <input type="date" name="date_from" class="field-input">
-                </div>
-                <div class="field-wrap">
-                    <span class="field-label">ถึงวันที่</span>
-                    <input type="date" name="date_to" class="field-input">
-                </div>
-                <div class="field-wrap">
-                    <span class="field-label">สายงาน (Section)</span>
-                    <select name="section" class="field-input">
-                        <option value="">ทั้งหมด</option>
-                        @foreach($sections as $s)
-                            <option value="{{ $s->section_id }}">{{ $s->section_code }} — {{ $s->section_fullname }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="field-wrap">
-                    <span class="field-label">ฝ่าย (Division)</span>
-                    <select name="division" class="field-input" data-cascade="division">
-                        <option value="">ทั้งหมด</option>
-                        @foreach($divisions as $d)
-                            <option value="{{ $d->division_id }}">{{ $d->division_name }} — {{ $d->division_fullname }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="field-wrap">
-                    <span class="field-label">แผนก (Dept)</span>
-                    <select name="department" class="field-input" data-cascade="department">
-                        <option value="">ทั้งหมด</option>
-                        @foreach($departments as $d)
-                            <option value="{{ $d->department_id }}">{{ $d->department_name }} — {{ $d->department_fullname }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="field-wrap">
-                    <span class="field-label">ค้นหา (Search)</span>
-                    <input type="text" id="searchInput" placeholder="Search items…" class="field-input">
-                </div>
-            </form>
         </div>
 
         <!-- ── Summary Stats ── -->
@@ -629,9 +807,40 @@
                 </div>
                 <div>
                     <div class="stat-label">คำขอทั้งหมด</div>
-                    <div class="stat-value" data-summary="total">{{ $totalRequisitions }}</div>
+                     <div class="stat-value" data-summary="total">{{ $totalRequisitions }}</div>
                 </div>
             </div>
+        </div>
+
+        <!-- ── Filters ── -->
+        <div class="db-filters">
+            <div class="filters-label"><i class="fa-solid fa-sliders" style="color:var(--text-muted);font-size:0.65rem"></i>
+                Filters & Parameters</div>
+            <form id="filterForm" class="filters-grid">
+                <div class="field-wrap">
+                    <span class="field-label">เลือกปี (Year)</span>
+                    <select name="year" class="field-input">
+                        <option value="">ทั้งหมด</option>
+                        @foreach($years as $y)
+                            <option value="{{ $y }}" {{ $y == date('Y') ? 'selected' : '' }}>ปี {{ $y + 543 }} ({{ $y }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="field-wrap">
+                    <span class="field-label">แผนก (Dept)</span>
+                    <select name="department" class="field-input" data-cascade="department">
+                        <option value="">ทั้งหมด</option>
+                        @foreach($departments as $d)
+                            <option value="{{ $d->dept_id }}">{{ $d->department_name }} — {{ $d->department_fullname }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="field-wrap">
+                    <span class="field-label">ค้นหา (Search)</span>
+                    <input type="text" id="searchInput" name="search" placeholder="ค้นหาตามชื่อ หรือ รหัส..." class="field-input">
+                </div>
+            </form>
         </div>
 
         <!-- ── Charts Row ── -->
@@ -703,7 +912,7 @@
                     </div>
                 </div>
             </div>
-            <div style="min-height:140px">
+            <div class="expense-chart-wrap" style="min-height:140px">
                 <canvas id="monthlyExpenseLine" height="55"></canvas>
             </div>
         </div>
@@ -822,6 +1031,7 @@
             const showLegend = document.getElementById('chkBarLegend').checked;
 
             // 1. Bar
+            const isMobile = window.innerWidth < 640;
             const barData = buildBarDatasets(reqCounts, { percentMode });
             if (barChart) barChart.destroy();
             barChart = new Chart(document.getElementById('monthlyBarChart'), {
@@ -829,13 +1039,32 @@
                 data: barData,
                 options: {
                     responsive: true, maintainAspectRatio: false,
+                    barPercentage: isMobile ? 0.8 : 0.6,
+                    categoryPercentage: isMobile ? 0.9 : 0.8,
                     plugins: {
-                        legend: { display: showLegend, position: 'bottom', labels: { font: { weight: '600', size: 11 }, usePointStyle: true, pointStyleWidth: 8 } },
+                        legend: { 
+                            display: showLegend, 
+                            position: 'bottom', 
+                            labels: { 
+                                font: { weight: '600', size: isMobile ? 9 : 11 }, 
+                                usePointStyle: true, 
+                                pointStyleWidth: 8,
+                                padding: isMobile ? 10 : 20
+                            } 
+                        },
                         tooltip: { ...tooltipDefaults, callbacks: { label: ctx => { const l = ctx.dataset.label || ''; const v = ctx.parsed.y; return percentMode ? `${l}: ${v.toFixed(1)}%` : `${l}: ${v}`; } } }
                     },
                     scales: {
-                        x: { stacked: true, grid: { display: false }, ticks: { font: { weight: '600', size: 11 } } },
-                        y: { stacked: true, beginAtZero: true, grid: { color: gridColor }, ticks: { font: { weight: '500', size: 10 }, callback: v => percentMode ? `${v}%` : v } }
+                        x: { 
+                            stacked: true, 
+                            grid: { display: false }, 
+                            ticks: { 
+                                font: { weight: '600', size: isMobile ? 9 : 11 },
+                                maxRotation: isMobile ? 45 : 0,
+                                minRotation: isMobile ? 0 : 0
+                            } 
+                        },
+                        y: { stacked: true, beginAtZero: true, grid: { color: gridColor }, ticks: { font: { weight: '500', size: isMobile ? 8 : 10 }, callback: v => percentMode ? `${v}%` : v } }
                     }
                 }
             });
@@ -882,7 +1111,7 @@
                         pointBackgroundColor: '#4f46e5',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
-                        pointRadius: 5,
+                        pointRadius: isMobile ? 3 : 5,
                         backgroundColor: 'rgba(79,70,229,0.07)',
                         tension: 0.4,
                         fill: true
@@ -892,8 +1121,8 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false }, tooltip: tooltipDefaults },
                     scales: {
-                        x: { grid: { display: false }, ticks: { font: { weight: '600', size: 11 } } },
-                        y: { grid: { color: gridColor }, ticks: { font: { weight: '500', size: 10 } } }
+                        x: { grid: { display: false }, ticks: { font: { weight: '600', size: isMobile ? 9 : 11 } } },
+                        y: { grid: { color: gridColor }, ticks: { font: { weight: '500', size: isMobile ? 8 : 10 } } }
                     }
                 }
             });
@@ -911,7 +1140,7 @@
                         borderColor: '#16a34a',
                         borderWidth: 2.5,
                         pointBackgroundColor: '#16a34a',
-                        pointRadius: 0,
+                        pointRadius: isMobile ? 0 : 3,
                         backgroundColor: 'rgba(22,163,74,0.06)',
                         tension: 0.3,
                         fill: true
@@ -922,8 +1151,8 @@
                     interaction: { intersect: false },
                     plugins: { legend: { display: false }, tooltip: { ...tooltipDefaults, callbacks: { label: ctx => `฿ ${formatCurrency(ctx.parsed.y)}` } } },
                     scales: {
-                        x: { grid: { display: false }, ticks: { font: { weight: '600', size: 11 } } },
-                        y: { beginAtZero: true, grid: { color: gridColor }, ticks: { font: { weight: '500', size: 10 }, callback: v => `฿${(v / 1000).toFixed(0)}k` } }
+                        x: { grid: { display: false }, ticks: { font: { weight: '600', size: isMobile ? 9 : 11 } } },
+                        y: { beginAtZero: true, grid: { color: gridColor }, ticks: { font: { weight: '500', size: isMobile ? 8 : 10 }, callback: v => `฿${(v / 1000).toFixed(0)}k` } }
                     }
                 }
             });
@@ -946,58 +1175,21 @@
 
         document.getElementById('searchInput').addEventListener('input', debounce(fetchData, 500));
         document.getElementById('btnResetFilters').addEventListener('click', () => {
-            document.getElementById('filterForm').reset();
-            handleSectionChange();
-            fetchData();
+            handleReset();
         });
-        document.getElementById('btnExportCsv').addEventListener('click', () => {
-            const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-            const lines = [];
-            const df = document.querySelector('input[name="date_from"]').value || '';
-            const dt = document.querySelector('input[name="date_to"]').value || '';
-            const nowStr = new Date().toLocaleString('th-TH');
-            lines.push([q('HAMS ANALYTICS - REPORT')].join(','));
-            lines.push([q('Exported At'), q(nowStr)].join(','));
-            lines.push([q('Date Range'), q(df || 'Genesis'), q('TO'), q(dt || 'Present')].join(','));
-            lines.push('');
-            const sum = currentData.summary || {};
-            lines.push([q('SUMMARY STATS')].join(','));
-            lines.push([q('Pending'), q('Approved'), q('Cancelled'), q('Rejected'), q('Total')].join(','));
-            lines.push([sum.pending || 0, sum.approved || 0, sum.cancelled || 0, sum.rejected || 0, sum.total || 0].map(q).join(','));
-            const csv = '\uFEFF' + lines.join('\n');
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `HAMS_Dashboard_Export_${Date.now()}.csv`; a.click();
+        document.getElementById('btnExportPdf').addEventListener('click', () => {
+            const form = document.getElementById('filterForm');
+            const params = new URLSearchParams(new FormData(form)).toString();
+            window.location.href = `{{ route('requisitions.reportslistall.export.pdf') }}?${params}`;
         });
 
         document.querySelectorAll('#filterForm input, #filterForm select').forEach(el => el.addEventListener('change', debounce(fetchData, 300)));
         document.getElementById('chkBarLegend').addEventListener('change', () => renderCharts(currentData));
         document.getElementById('chkBarPercent').addEventListener('change', () => renderCharts(currentData));
 
-        const sectionSelect = document.querySelector('select[name="section"]');
-        const divisionSelect = document.querySelector('select[name="division"]');
-        const departmentSelect = document.querySelector('select[name="department"]');
 
-        function rebuildOptions(selectEl, items) {
-            const currentVal = selectEl.value;
-            const opts = [`<option value="">ทั้งหมด</option>`].concat(items.map(i => `<option value="${i.id}">${i.name} (${i.fullname})</option>`));
-            selectEl.innerHTML = opts.join('');
-            if (items.some(i => String(i.id) === String(currentVal))) { selectEl.value = currentVal; } else { selectEl.value = ''; }
-        }
-
-        function handleSectionChange() {
-            const sid = sectionSelect.value;
-            const divisions = sid ? (divisionMap[sid] || []) : allDivisions;
-            rebuildOptions(divisionSelect, divisions);
-            rebuildOptions(departmentSelect, []);
-        }
-        function handleDivisionChange() {
-            const did = divisionSelect.value;
-            const departments = did ? (departmentMap[did] || []) : (sectionSelect.value ? [] : allDepartments);
-            rebuildOptions(departmentSelect, departments);
-        }
-
-        sectionSelect.addEventListener('change', handleSectionChange);
-        divisionSelect.addEventListener('change', handleDivisionChange);
+        // sectionSelect.addEventListener('change', handleSectionChange);
+        // divisionSelect.addEventListener('change', handleDivisionChange);
 
         // Init
         renderCharts(currentData);

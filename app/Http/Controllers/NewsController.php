@@ -20,14 +20,21 @@ class NewsController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('datamanage.news.index', compact('news'));
+        // Fetch departments and active employees for news notification targeting
+        $departments = \App\Models\Department::orderBy('name')->get();
+        $employees = \App\Models\User::active()
+            ->whereNotNull('email')
+            ->orderBy('firstname')
+            ->get();
+
+        return view('datamanage.news.index', compact('news', 'departments', 'employees'));
     }
 
     public function create()
     {
         $news = new News([
             'is_active' => true,
-            'published_date' => now()->toDateString(),
+            'published_date' => now(),
         ]);
         return view('datamanage.news.create', compact('news'));
     }
@@ -145,6 +152,18 @@ class NewsController extends Controller
     public function detail($id)
     {
         $news = News::findOrFail($id);
+
+        // Log the view
+        \App\Models\NewsLog::create([
+            'news_id' => $id,
+            'user_id' => auth()->id(),
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        // Increment total views
+        $news->increment('views_count');
+
         return view('datamanage.news.detail', compact('news'));
     }
 

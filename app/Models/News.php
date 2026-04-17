@@ -19,10 +19,11 @@ class News extends Model
         'published_date',
         'is_active',
         'image_path',
+        'views_count',
     ];
 
     protected $casts = [
-        'published_date' => 'date',
+        'published_date' => 'datetime',
         'is_active' => 'boolean',
     ];
 }
