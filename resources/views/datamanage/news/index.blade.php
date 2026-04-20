@@ -336,8 +336,7 @@
                     <p id="modal-news-title" class="text-[12px] font-medium text-blue-600 mt-2 line-clamp-1 italic"></p>
                 </div>
 
-                <form id="modal-notify-form" action="" method="POST" class="flex-1 flex flex-col space-y-10"
-                    onsubmit="return confirm('ส่งอีเมลแจ้งเตือน Outlook สำหรับข่าวนี้?');">
+                <form id="modal-notify-form" action="" method="POST" class="flex-1 flex flex-col space-y-10">
                     @csrf
                     <div class="space-y-6">
                         <div>
@@ -545,6 +544,11 @@
         .employee-checkbox:checked {
             background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
         }
+
+        /* Ensure SweetAlert2 is on top of modals with z-index 9999 */
+        .swal2-container {
+            z-index: 11000 !important;
+        }
     </style>
 @endpush
 
@@ -694,6 +698,37 @@
                 // Update recipient count
                 const count = currentValues.length;
                 document.getElementById('recipient-count').textContent = `(${count})`;
+            });
+
+            // Handle Notification Form Submission with SweetAlert
+            modalForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                const recipientCount = ($('#modal-select-emails').val() || []).length;
+                if (recipientCount === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'กรุณาเลือกผู้รับ',
+                        text: 'กรุณาเลือกพนักงานหรือระบุอีเมลผู้รับอย่างน้อย 1 รายการ',
+                        confirmButtonColor: '#2563eb',
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'ยืนยันการส่งแจ้งเตือน?',
+                    text: `ระบบจะส่งอีเมลแจ้งเตือน Outlook ไปยังรายชื่อที่เลือกทั้งหมด ${recipientCount} รายการ`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2563eb',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> ยืนยันส่งอีเมล',
+                    cancelButtonText: 'ยกเลิก',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit();
+                    }
+                });
             });
         });
     </script>
