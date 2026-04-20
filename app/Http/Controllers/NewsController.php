@@ -24,6 +24,7 @@ class NewsController extends Controller
         $departments = \App\Models\Department::orderBy('name')->get();
         $employees = \App\Models\User::active()
             ->whereNotNull('email')
+            ->where('role', '!=', 'admin')
             ->orderBy('firstname')
             ->get();
 
