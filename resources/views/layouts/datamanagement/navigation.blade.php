@@ -132,12 +132,12 @@
                                     <i class="fa-solid fa-circle-question text-red-400 w-4 text-center"></i> ช่วยเหลือ
                                 </a>
                             </li>
-                            <li class="mt-1 border-t border-slate-100"></li>
-                            <li class="p-0">
-                                <form method="POST" action="{{ route('logout') }}" class="p-0 m-0 w-full">
+                            <li class="mt-1 border-t border-slate-100 p-0"></li>
+                            <li class="!p-0 m-0">
+                                <form method="POST" action="{{ route('logout') }}" class="p-0 m-0 w-full block">
                                     @csrf
                                     <button type="submit"
-                                        class="flex items-center w-full gap-3 px-4 py-2.5 text-[14px] font-semibold text-red-600 hover:bg-red-50 rounded-b-2xl transition-colors text-left">
+                                        class="flex items-center w-full gap-3 px-4 py-2.5 text-[14px] font-semibold text-red-600 hover:bg-red-50 rounded-none rounded-b-2xl transition-colors text-left !bg-transparent hover:!bg-red-50">
                                         <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> ออกจากระบบ
                                     </button>
                                 </form>
@@ -156,25 +156,25 @@
         </div>
 
         <!-- Mobile nav -->
-        <div id="mnav" class="md:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn">
+        <div id="mnav" class="md:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[75vh] overflow-y-auto custom-scrollbar">
             <div class="flex flex-col gap-1.5 px-2">
                 <a href="{{ route('welcome') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('welcome') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('welcome') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                     <i
-                        class="fa-solid fa-house w-5 text-center {{ request()->routeIs('welcome') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                        class="fa-solid fa-house w-5 text-center {{ request()->routeIs('welcome') ? 'text-white' : 'text-slate-400' }}"></i>
                     หน้าหลัก
                 </a>
                 <a href="{{ route('datamanage.news.newsalllist') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('datamanage.news.newsalllist') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('datamanage.news.newsalllist') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                     <i
-                        class="fa-solid fa-newspaper w-5 text-center {{ request()->routeIs('datamanage.news.newsalllist') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                        class="fa-solid fa-newspaper w-5 text-center {{ request()->routeIs('datamanage.news.newsalllist') ? 'text-white' : 'text-slate-400' }}"></i>
                     ข่าวสารทั้งหมด
                 </a>
 
                 <a href="{{ route('backend.welcomedatamanage') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('backend.welcomedatamanage') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:bg-slate-50' }}">
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('backend.welcomedatamanage') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                     <i
-                        class="fa-solid fa-chart-pie w-5 text-center {{ request()->routeIs('backend.welcomedatamanage') ? 'text-red-500' : 'text-slate-400' }}"></i>
+                        class="fa-solid fa-chart-pie w-5 text-center {{ request()->routeIs('backend.welcomedatamanage') ? 'text-white' : 'text-slate-400' }}"></i>
                     หน้ารายงาน
                 </a>
 
@@ -235,10 +235,18 @@
                                 class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <i class="fa-regular fa-id-badge text-red-400 w-4 text-center"></i> โปรไฟล์
                             </a>
+                            <a href="#"
+                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
+                                <i class="fa-solid fa-gear text-red-400 w-4 text-center"></i> การตั้งค่า
+                            </a>
+                            <a href="/help"
+                                class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
+                                <i class="fa-solid fa-circle-question text-red-400 w-4 text-center"></i> ช่วยเหลือ
+                            </a>
                             <form method="POST" action="{{ route('logout') }}" class="p-0 m-0">
                                 @csrf
                                 <button type="submit"
-                                    class="flex items-center w-full gap-6 px-4 py-2.5 text-[14px] font-bold text-red-600 rounded-lg hover:bg-red-50 transition-colors text-center">
+                                    class="flex items-center w-full gap-3 px-4 py-2.5 text-[14px] font-bold text-red-600 rounded-lg hover:bg-red-50 transition-colors text-left">
                                     <i class="fa-solid fa-right-from-bracket text-red-500 w-4 text-center"></i> ออกจากระบบ
                                 </button>
                             </form>
@@ -265,5 +273,20 @@
 
     .animate-fadeIn {
         animation: fadeIn 0.15s ease-out forwards;
+    }
+
+    /* Force logout button to fill full dropdown width */
+    .dropdown-content.menu li.\\!p-0 {
+        padding: 0 !important;
+    }
+
+    .dropdown-content.menu li.\\!p-0>form {
+        width: 100% !important;
+        display: block !important;
+    }
+
+    .dropdown-content.menu li.\\!p-0>form>button {
+        width: 100% !important;
+        border-radius: 0 0 1rem 1rem !important;
     }
 </style>

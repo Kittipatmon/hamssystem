@@ -332,7 +332,7 @@
 
         {{-- ============ INTEGRATED ANNOUNCEMENT SECTION ============ --}}
         @if(isset($announcements) && $announcements->count())
-            <div class="absolute left-0 right-0 z-40 bg-zinc-950/20 backdrop-blur-md border-t border-white/10 group">
+            <div class="absolute left-0 right-0 z-40 bg-zinc-950/20 backdrop-blur-md group">
                 <div class="bg-red-600/90 py-3.5 relative overflow-hidden">
                     <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-6 relative z-10 font-noto">
