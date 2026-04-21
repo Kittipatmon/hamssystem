@@ -1,27 +1,31 @@
 {
-    "$schema": "https://json.schemastore.org/package.json",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "build": "vite build",
-        "dev": "vite"
-    },
-    "devDependencies": {
-        "@tailwindcss/forms": "^0.5.2",
-        "@tailwindcss/vite": "^4.1.17",
-        "alpinejs": "^3.4.2",
-        "axios": "^1.11.0",
-        "concurrently": "^9.0.1",
-        "daisyui": "^5.4.7",
-        "laravel-vite-plugin": "^2.0.0",
-        "tailwindcss": "^4.1.17",
-        "vite": "^7.0.7"
-    },
-    "dependencies": {
-        "@fortawesome/fontawesome-free": "^7.1.0",
-        "chart.js": "^4.5.1",
-        "jquery": "^4.0.0",
-        "select2": "^4.1.0-rc.0",
-        "sweetalert2": "^11.26.3"
-    }
+  "$schema": "https://json.schemastore.org/package.json",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "npm run build && wrangler dev"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.33.0",
+    "@tailwindcss/forms": "^0.5.2",
+    "@tailwindcss/vite": "^4.1.17",
+    "alpinejs": "^3.4.2",
+    "axios": "^1.11.0",
+    "concurrently": "^9.0.1",
+    "daisyui": "^5.4.7",
+    "laravel-vite-plugin": "^2.0.0",
+    "tailwindcss": "^4.1.17",
+    "vite": "^7.0.7",
+    "wrangler": "^4.84.0"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.1.0",
+    "chart.js": "^4.5.1",
+    "jquery": "^4.0.0",
+    "select2": "^4.1.0-rc.0",
+    "sweetalert2": "^11.26.3"
+  }
 }
