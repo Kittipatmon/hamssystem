@@ -480,15 +480,6 @@
                 });
             }
             
-            // Check for missing profile data
-            const posInput = document.querySelector('input[name="position"]');
-            const deptInput = document.querySelector('input[name="department"]');
-            const sectInput = document.querySelector('input[name="section"]');
-
-            const position = posInput ? posInput.value : '';
-            const department = deptInput ? deptInput.value : '';
-            const section = sectInput ? sectInput.value : '';
-
             // Initial bind for edit mode
             document.querySelectorAll('.remove-dep').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -502,14 +493,27 @@
                 });
             });
 
-            if (!position || !department || !section) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'ข้อมูลของคุณยังไม่ครบถ้วน',
-                    text: 'ตรวจพบว่าข้อมูล ตำแหน่ง, แผนก หรือฝ่าย ของคุณยังไม่มีในระบบ กรุณาตรวจสอบและระบุข้อมูลเพิ่มให้ครบถ้วนก่อนส่งคำร้อง',
-                    confirmButtonColor: '#ff9800',
-                });
-            }
+            // Check for missing profile data on submit
+            const form = document.getElementById('requestForm');
+            form.addEventListener('submit', (e) => {
+                const posInput = document.querySelector('input[name="position"]');
+                const deptInput = document.querySelector('input[name="department"]');
+                const sectInput = document.querySelector('input[name="section"]');
+
+                const position = posInput ? posInput.value : '';
+                const department = deptInput ? deptInput.value : '';
+                const section = sectInput ? sectInput.value : '';
+
+                if (!position || !department || !section) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ข้อมูลของคุณยังไม่ครบถ้วน',
+                        text: 'ตรวจพบว่าข้อมูล ตำแหน่ง, แผนก หรือฝ่าย ของคุณยังไม่มีในระบบ กรุณาตรวจสอบและระบุข้อมูลเพิ่มให้ครบถ้วนก่อนส่งคำร้อง',
+                        confirmButtonColor: '#ff9800',
+                    });
+                }
+            });
         });
     </script>
 @endsection

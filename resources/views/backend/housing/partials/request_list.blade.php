@@ -1,9 +1,9 @@
 <table class="w-full text-sm">
     <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-bold tracking-widest border-b border-slate-100">
         <tr>
-            <th class="px-4 py-4 text-left">เลขที่คำขอ</th>
-            <th class="px-4 py-4 text-left">วันที่ยื่นคำขอ</th>
-            <th class="px-4 py-4 text-left">สถานะปัจจุบัน</th>
+            <th class="px-4 py-4 text-left"><span class="hidden md:inline">เลขที่คำขอ</span><span class="md:hidden">คำขอ</span></th>
+            <th class="px-4 py-4 text-left"><span class="hidden md:inline">วันที่ยื่นคำขอ</span><span class="md:hidden">วันที่</span></th>
+            <th class="px-4 py-4 text-left"><span class="hidden md:inline">สถานะปัจจุบัน</span><span class="md:hidden">สถานะ</span></th>
             <th class="px-4 py-4 text-center">จัดการ</th>
         </tr>
     </thead>
@@ -31,11 +31,16 @@
                 <td class="px-4 py-5 text-slate-500 font-medium">
                     {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
                 </td>
-                <td class="px-4 py-5">
+                <td class="px-4 py-5 whitespace-nowrap">
                     <span
-                        class="px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($item->send_status) }} shadow-sm">
-                        <i class="fa-solid fa-circle-dot mr-1 animate-pulse"></i>
-                        {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($item->send_status, $type) }}
+                        class="inline-flex items-center px-2 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($item->send_status) }} shadow-sm">
+                        <i class="fa-solid fa-circle-dot mr-1.5 animate-pulse shrink-0"></i>
+                        <span class="hidden md:inline">
+                            {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($item->send_status, $type) }}
+                        </span>
+                        <span class="md:hidden">
+                            {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusShortLabel($item->send_status, $type) }}
+                        </span>
                     </span>
                 </td>
                 <td class="px-4 py-5 text-center">

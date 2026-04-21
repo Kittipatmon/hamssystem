@@ -1,7 +1,7 @@
 @extends('layouts.housing.apphousing')
 @section('title', 'จัดการข้อมูลบ้านพัก')
 @section('content')
-    <style>
+     <style>
         @keyframes glow-attention {
             0% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
             50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); }
@@ -12,14 +12,61 @@
             background-color: rgba(254, 242, 242, 0.4) !important;
             border-left: 5px solid #ef4444 !important;
         }
-        .island-tab {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        /* Premium Tab System */
+        .management-tabs-container {
+            padding: 6px;
+            background: #f1f5f9;
+            border-radius: 28px;
+            display: inline-flex;
+            width: fit-content;
         }
-        .island-tab.active {
+
+        .management-tab {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            border-radius: 22px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #64748b;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .management-tab:hover {
+            color: #475569;
+        }
+
+        .management-tab.active {
+            color: #0f172a;
             background: white;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            color: #1e293b;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            transform: scale(1.02);
         }
+
+        .management-tab.active i {
+            color: #dc2626;
+        }
+
+        .badge-count {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 900;
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.4);
+            border: 2px solid white;
+        }
+
         .premium-table thead th {
             letter-spacing: 0.05em;
             font-weight: 800;
@@ -28,27 +75,41 @@
             display: flex;
             justify-content: center;
         }
+
+        @media (max-width: 1024px) {
+            .management-tabs-container {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                border-radius: 32px;
+                padding: 12px;
+            }
+            .management-tab {
+                width: 100%;
+                padding: 16px 24px;
+                border-radius: 20px;
+            }
+        }
     </style>
 
-    <div class="max-w-7xl mx-auto space-y-8 pb-20">
+    <div class="max-w-7xl mx-auto space-y-8 pb-20 px-4 md:px-0 mt-6 lg:mt-0">
         
         {{-- Header Section --}}
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div class="flex items-center gap-5">
-                <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-2xl shadow-slate-200">
+                <div class="w-16 h-16 rounded-3xl bg-slate-900 flex items-center justify-center shadow-2xl shadow-slate-200">
                     <i class="fa-solid fa-screwdriver-wrench text-white text-2xl"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-black text-slate-800 tracking-tight">ระบบบริหารจัดการ</h1>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-black rounded-md uppercase tracking-widest">Administrator</span>
-                        <div class="w-1 h-1 rounded-full bg-slate-300"></div>
-                        <p class="text-slate-500 text-sm font-medium">จัดการคำร้องและตรวจสอบข้อมูลบ้านพัก</p>
+                    <div class="flex items-center gap-3 mt-1.5">
+                        <span class="px-2.5 py-1 bg-red-600 text-white text-[9px] font-black rounded-full uppercase tracking-[0.15em] shadow-lg shadow-red-200">Administrator</span>
+                        <p class="text-slate-400 text-sm font-medium">จัดการคำร้องและตรวจสอบข้อมูลบ้านพัก</p>
                     </div>
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <a href="{{ route('housing.welcome') }}" class="group flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+                <a href="{{ route('housing.welcome') }}" class="group flex items-center gap-2.5 px-6 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm active:scale-95">
                     <i class="fa-solid fa-house-chimney text-slate-400 group-hover:text-red-500 transition-colors"></i>
                     กลับหน้าหลัก
                 </a>
@@ -56,20 +117,20 @@
         </div>
 
         {{-- Main Control Island --}}
-        <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
             
             {{-- Filter Bar --}}
-            <div class="p-8 border-b border-slate-50 bg-slate-50/30">
-                <form method="GET" action="{{ route('housing.management') }}" class="flex flex-col md:flex-row gap-4">
+            <div class="p-8 border-b border-slate-50 bg-slate-50/10">
+                <form method="GET" action="{{ route('housing.management') }}" class="flex flex-col md:flex-row gap-5">
                     <div class="flex-1 relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
                         <input type="text" name="search" value="{{ request('search') }}" 
                             placeholder="ค้นหาเลขที่คำร้อง, ชื่อพนักงาน, หรือหน่วยงาน..." 
-                            class="w-full pl-12 pr-4 py-4 bg-white border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all">
+                            class="w-full pl-14 pr-5 py-4.5 bg-white border border-slate-200 rounded-3xl text-sm font-medium focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all placeholder:text-slate-400 shadow-sm">
                     </div>
-                    <div class="w-full md:w-64 relative">
-                        <i class="fa-solid fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <select name="status" class="w-full pl-12 pr-10 py-4 bg-white border-slate-200 rounded-2xl text-sm font-bold text-slate-700 appearance-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all">
+                    <div class="w-full md:w-72 relative">
+                        <i class="fa-solid fa-layer-group absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        <select name="status" class="w-full pl-14 pr-12 py-4.5 bg-white border border-slate-200 rounded-3xl text-sm font-bold text-slate-700 appearance-none focus:ring-4 focus:ring-red-500/5 focus:border-red-500 transition-all shadow-sm">
                             <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>ทุกสถานะรายการ</option>
                             <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>รอผู้บังคับบัญชา / จัดการ</option>
                             <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>รอ ผจก. แผนกจัดการฯ</option>
@@ -78,10 +139,11 @@
                             <option value="3" {{ request('status') === '3' ? 'selected' : '' }}>ผ่านการอนุมัติ (รอขั้นถัดไป)</option>
                             <option value="6" {{ request('status') === '6' ? 'selected' : '' }}>เสร็จสิ้น (เข้าพักแล้ว)</option>
                         </select>
+                        <i class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none text-xs"></i>
                     </div>
                     <input type="hidden" name="tab" value="{{ $tab }}">
-                    <button type="submit" class="px-8 py-4 bg-red-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-red-200 hover:bg-red-700 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-sliders"></i> ค้นหา
+                    <button type="submit" class="px-10 py-4.5 bg-red-600 text-white rounded-3xl font-black text-sm shadow-xl shadow-red-200 hover:bg-red-700 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-filter"></i> ค้นหา
                     </button>
                 </form>
             </div>
@@ -121,23 +183,23 @@
                 }
 
                 $tabsInfo = [
-                    'requests' => ['ชื่อ' => 'คำขอเข้าพัก', 'ไอคอน' => 'fa-file-circle-plus', 'สี' => 'red', 'นับ' => $pRequestsTotal],
-                    'agreements' => ['ชื่อ' => 'ข้อตกลงพนักงาน', 'ไอคอน' => 'fa-file-signature', 'สี' => 'blue', 'นับ' => $pAgreementsTotal],
-                    'guests' => ['ชื่อ' => 'นำญาติเข้าพัก', 'ไอคอน' => 'fa-people-arrows', 'สี' => 'purple', 'นับ' => $pGuestsTotal],
-                    'leaves' => ['ชื่อ' => 'ขอย้ายออก', 'ไอคอน' => 'fa-right-from-bracket', 'สี' => 'orange', 'นับ' => $pLeavesTotal],
-                    'repairs' => ['ชื่อ' => 'รายการแจ้งซ่อม', 'ไอคอน' => 'fa-screwdriver-wrench', 'สี' => 'emerald', 'นับ' => $pRepairsTotal]
+                    'requests' => ['ชื่อ' => 'คำขอเข้าพัก', 'ไอคอน' => 'fa-file-circle-plus', 'นับ' => $pRequestsTotal],
+                    'agreements' => ['ชื่อ' => 'ข้อตกลงพนักงาน', 'ไอคอน' => 'fa-file-signature', 'นับ' => $pAgreementsTotal],
+                    'guests' => ['ชื่อ' => 'นำญาติเข้าพัก', 'ไอคอน' => 'fa-people-arrows', 'นับ' => $pGuestsTotal],
+                    'leaves' => ['ชื่อ' => 'ขอย้ายออก', 'ไอคอน' => 'fa-right-from-bracket', 'นับ' => $pLeavesTotal],
+                    'repairs' => ['ชื่อ' => 'รายการแจ้งซ่อม', 'ไอคอน' => 'fa-screwdriver-wrench', 'นับ' => $pRepairsTotal]
                 ];
             @endphp
 
-            <div class="px-8 pt-6">
-                <div class="flex flex-wrap items-center gap-2 p-1.5 bg-slate-100 rounded-2xl w-fit">
+            <div class="px-8 pt-8">
+                <div class="management-tabs-container">
                     @foreach($tabsInfo as $key => $info)
                         <a href="{{ route('housing.management', array_merge(request()->query(), ['tab' => $key])) }}"
-                            class="island-tab flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-black transition-all {{ $tab == $key ? 'active text-red-600' : 'text-slate-500 hover:text-slate-700' }}">
-                            <i class="fa-solid {{ $info['ไอคอน'] }} {{ $tab == $key ? 'text-red-600' : 'text-slate-400' }}"></i> 
-                            {{ $info['ชื่อ'] }}
+                            class="management-tab {{ $tab == $key ? 'active' : '' }}">
+                            <i class="fa-solid {{ $info['ไอคอน'] }} text-lg"></i> 
+                            <span class="whitespace-nowrap">{{ $info['ชื่อ'] }}</span>
                             @if($info['นับ'] > 0)
-                                <span class="flex items-center justify-center min-w-[20px] h-5 px-1 bg-red-600 text-[10px] text-white rounded-lg shadow-sm">
+                                <span class="badge-count">
                                     {{ $info['นับ'] }}
                                 </span>
                             @endif
@@ -207,9 +269,10 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-5">
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($r->send_status) }}">
-                                                <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
-                                                {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($r->send_status, 'request') }}
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($r->send_status) }} whitespace-nowrap">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-current shrink-0"></div>
+                                                <span class="hidden lg:inline">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($r->send_status, 'request') }}</span>
+                                                <span class="lg:hidden">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusShortLabel($r->send_status, 'request') }}</span>
                                             </span>
                                         </td>
                                         <td class="px-4 py-5">
@@ -313,9 +376,10 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-5">
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($a->send_status) }}">
-                                                <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
-                                                {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($a->send_status, 'agreement') }}
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($a->send_status) }} whitespace-nowrap">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-current shrink-0"></div>
+                                                <span class="hidden lg:inline">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($a->send_status, 'agreement') }}</span>
+                                                <span class="lg:hidden">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusShortLabel($a->send_status, 'agreement') }}</span>
                                             </span>
                                         </td>
                                         <td class="px-4 py-5 text-center">
@@ -373,8 +437,9 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-5">
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($g->send_status) }}">
-                                                {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($g->send_status, 'guest') }}
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($g->send_status) }} whitespace-nowrap">
+                                                <span class="hidden lg:inline">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($g->send_status, 'guest') }}</span>
+                                                <span class="lg:hidden">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusShortLabel($g->send_status, 'guest') }}</span>
                                             </span>
                                         </td>
                                         <td class="px-4 py-5 text-center">
@@ -421,8 +486,9 @@
                                             <p class="text-[9px] text-slate-400 mt-1">ย้ายออก: {{ \Carbon\Carbon::parse($l->move_out_date)->translatedFormat('d M Y') }}</p>
                                         </td>
                                         <td class="px-4 py-5">
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($l->send_status) }}">
-                                                {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($l->send_status, 'leave') }}
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($l->send_status) }} whitespace-nowrap">
+                                                <span class="hidden lg:inline">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($l->send_status, 'leave') }}</span>
+                                                <span class="lg:hidden">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusShortLabel($l->send_status, 'leave') }}</span>
                                             </span>
                                         </td>
                                         <td class="px-4 py-5 text-center">

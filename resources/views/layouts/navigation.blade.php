@@ -22,7 +22,7 @@
             </a>
 
             <!-- Right: Navigation Links -->
-            <div class="hidden md:flex items-center gap-2 lg:gap-3">
+            <div class="hidden xl:flex items-center gap-2 lg:gap-3">
 
                 <!-- หน้าแรก -->
                 <a href="{{ route('welcome') }}" id="nav-home"
@@ -33,14 +33,15 @@
                 </a>
                 <a href="{{ request()->routeIs('welcome') ? '#services' : route('welcome') . '#services' }}"
                     id="nav-services"
-                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 text-slate-600 hover:bg-red-50 hover:text-red-600">
-                    <i class="fa-solid fa-concierge-bell text-slate-400 group-hover:text-red-500"></i>
+                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('serviceshams.*') || request()->routeIs('items.*') || request()->routeIs('requisitions.*') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                    <i
+                        class="fa-solid fa-concierge-bell {{ request()->routeIs('serviceshams.*') || request()->routeIs('items.*') || request()->routeIs('requisitions.*') ? 'text-white' : 'text-slate-400 group-hover:text-red-500' }}"></i>
                     <span>งานสนับสนุน</span>
                 </a>
                 <a href="{{ request()->routeIs('welcome') ? '#news' : route('welcome') . '#news' }}" id="nav-news"
                     class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('datamanage.news.newsalllist') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
                     <i
-                        class="fa-solid fa-newspaper {{ request()->routeIs('datamanage.news.newsalllist') ? '' : 'text-slate-400 group-hover:text-red-500' }}"></i>
+                        class="fa-solid fa-newspaper {{ request()->routeIs('datamanage.news.newsalllist') ? 'text-white' : 'text-slate-400 group-hover:text-red-500' }}"></i>
                     <span>ข่าวสาร/ประชาสัมพันธ์</span>
                 </a>
 
@@ -48,8 +49,9 @@
                 <!-- ประกาศ -->
                 <a href="{{ request()->routeIs('welcome') ? '#announcements-list' : route('welcome') . '#announcements-list' }}"
                     id="nav-announcements"
-                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 text-slate-600 hover:bg-red-50 hover:text-red-600">
-                    <i class="fa-solid fa-bullhorn text-slate-400 group-hover:text-red-500"></i>
+                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('announcements.*') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                    <i
+                        class="fa-solid fa-bullhorn {{ request()->routeIs('announcements.*') ? 'text-white' : 'text-slate-400 group-hover:text-red-500' }}"></i>
                     <span>ประกาศ</span>
                 </a>
 
@@ -115,8 +117,9 @@
                             </li>
                             <li>
                                 <a href="{{ route('profileUser') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                    <i class="fa-regular fa-id-badge text-red-400 w-4 text-center"></i> โปรไฟล์
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('profileUser') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i
+                                        class="fa-regular fa-id-badge {{ request()->routeIs('profileUser') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> โปรไฟล์
                                 </a>
                             </li>
                             <li>
@@ -148,38 +151,41 @@
 
             <!-- Mobile menu button -->
             <button
-                class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors border border-slate-200"
+                class="xl:hidden flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 border border-slate-200 shadow-sm relative z-[110]"
                 onclick="document.getElementById('mnav').classList.toggle('hidden')">
-                <i class="fa-solid fa-bars text-lg"></i>
+                <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
 
         <!-- Mobile nav -->
-        <div id="mnav" class="md:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[75vh] overflow-y-auto custom-scrollbar">
+        <div id="mnav"
+            class="xl:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[75vh] overflow-y-auto custom-scrollbar relative z-[100]">
             <div class="flex flex-col gap-1.5 px-2">
-                <a href="{{ route('welcome') }}"
+                <a href="{{ route('welcome') }}" id="mnav-home"
                     class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('welcome') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                     <i
                         class="fa-solid fa-house w-5 text-center {{ request()->routeIs('welcome') ? 'text-white' : 'text-slate-400' }}"></i>
                     หน้าหลัก
                 </a>
 
-                <a href="{{ request()->routeIs('welcome') ? '#services' : route('welcome') . '#services' }}"
-                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 text-slate-600 hover:bg-slate-50">
-                    <i class="fa-solid fa-concierge-bell w-5 text-center text-slate-400"></i>
+                <a href="{{ request()->routeIs('welcome') ? '#services' : route('welcome') . '#services' }}" id="mnav-services"
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('serviceshams.*') || request()->routeIs('items.*') || request()->routeIs('requisitions.*') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <i
+                        class="fa-solid fa-concierge-bell w-5 text-center {{ request()->routeIs('serviceshams.*') || request()->routeIs('items.*') || request()->routeIs('requisitions.*') ? 'text-white' : 'text-slate-400' }}"></i>
                     งานสนับสนุน
                 </a>
 
-                <a href="{{ request()->routeIs('welcome') ? '#news' : route('welcome') . '#news' }}"
+                <a href="{{ request()->routeIs('welcome') ? '#news' : route('welcome') . '#news' }}" id="mnav-news"
                     class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('datamanage.news.newsalllist') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                     <i
                         class="fa-solid fa-newspaper w-5 text-center {{ request()->routeIs('datamanage.news.newsalllist') ? 'text-white' : 'text-slate-400' }}"></i>
                     ข่าวสาร/ประชาสัมพันธ์
                 </a>
 
-                <a href="{{ request()->routeIs('welcome') ? '#announcements-list' : route('welcome') . '#announcements-list' }}"
-                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 text-slate-600 hover:bg-slate-50">
-                    <i class="fa-solid fa-bullhorn w-5 text-center text-slate-400"></i>
+                <a href="{{ request()->routeIs('welcome') ? '#announcements-list' : route('welcome') . '#announcements-list' }}" id="mnav-announcements"
+                    class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('announcements.*') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <i
+                        class="fa-solid fa-bullhorn w-5 text-center {{ request()->routeIs('announcements.*') ? 'text-white' : 'text-slate-400' }}"></i>
                     ประกาศ
                 </a>
 
@@ -203,7 +209,7 @@
                     <details
                         class="group [&_summary::-webkit-details-marker]:hidden bg-slate-50 rounded-xl border border-slate-100 mt-2 z-50">
                         <summary
-                            class="flex items-center justify-between px-4 py-3 text-[15px] font-bold text-slate-700 cursor-pointer transition-colors">
+                            class="flex items-center justify-between px-4 py-3 text-[15px] font-bold cursor-pointer transition-colors {{ request()->routeIs('profileUser') ? 'bg-red-600 text-white shadow-md shadow-red-100' : 'text-slate-700' }} rounded-xl">
                             <div class="flex items-center gap-3">
                                 <div
                                     class="w-8 h-8 rounded-full overflow-hidden bg-red-600 text-white flex items-center justify-center text-sm shadow-inner">
@@ -221,7 +227,7 @@
                                 </div>
                             </div>
                             <i
-                                class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180 text-slate-400"></i>
+                                class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180 {{ request()->routeIs('profileUser') ? 'text-white' : 'text-slate-400' }}"></i>
                         </summary>
                         <div class="mt-1 mb-2 flex flex-col gap-1 px-2 pb-2">
                             <a href="{{ route('profileUser') }}"
@@ -302,54 +308,81 @@
         const navNews = document.getElementById('nav-news');
         const navServices = document.getElementById('nav-services');
         const navAnnouncements = document.getElementById('nav-announcements');
+
+        const mnavHome = document.getElementById('mnav-home');
+        const mnavNews = document.getElementById('mnav-news');
+        const mnavServices = document.getElementById('mnav-services');
+        const mnavAnnouncements = document.getElementById('mnav-announcements');
+
         const newsSection = document.getElementById('news');
         const servicesSection = document.getElementById('services');
         const announcementsSection = document.getElementById('announcements-list');
 
-        const allNavs = [navHome, navNews, navServices, navAnnouncements].filter(Boolean);
-        if (!navHome) return;
+        const allNavs = [
+            navHome, navNews, navServices, navAnnouncements,
+            mnavHome, mnavNews, mnavServices, mnavAnnouncements
+        ].filter(Boolean);
 
-        const activeClasses = ['nav-active'];
-        const inactiveClasses = ['text-slate-600', 'hover:bg-red-50', 'hover:text-red-600'];
-        const bladeActiveClasses = ['bg-red-600', 'text-white', 'shadow-md', 'shadow-red-200'];
+        if (allNavs.length === 0) return;
+
+        const inactiveClasses = ['text-slate-600', 'hover:bg-red-50', 'hover:text-red-600', 'hover:bg-slate-50'];
+        const allRedClasses = ['bg-red-600', 'text-white', 'shadow-md', 'shadow-red-200', 'shadow-red-100', 'font-bold', 'nav-active'];
+        const activeClasses = ['bg-red-600', 'text-white', 'shadow-md', 'shadow-red-200', 'font-bold', 'nav-active'];
+
+        // Flag to prevent scroll listener from fighting with manual clicks
+        let isManualAction = false;
+        let manualActionTimeout;
 
         function setActive(el, isActive) {
             if (!el) return;
             if (isActive) {
                 el.classList.add(...activeClasses);
                 el.classList.remove(...inactiveClasses);
-                el.classList.remove(...bladeActiveClasses);
                 const icon = el.querySelector('i');
-                if (icon) icon.classList.remove('text-slate-400');
+                if (icon) {
+                    icon.classList.remove('text-slate-400');
+                    icon.classList.add('text-white');
+                }
             } else {
-                el.classList.remove(...activeClasses);
-                el.classList.remove(...bladeActiveClasses);
+                el.classList.remove(...allRedClasses);
                 el.classList.add(...inactiveClasses);
                 const icon = el.querySelector('i');
-                if (icon) icon.classList.add('text-slate-400');
+                if (icon) {
+                    icon.classList.add('text-slate-400');
+                    icon.classList.remove('text-white');
+                }
             }
         }
 
-        function activateOnly(target) {
-            allNavs.forEach(nav => setActive(nav, nav === target));
+        function activateOnly(targetType) {
+            // targetType is 'home', 'news', 'services', or 'announcements'
+            allNavs.forEach(nav => {
+                const isMatch = (targetType === 'home' && (nav === navHome || nav === mnavHome)) ||
+                                (targetType === 'news' && (nav === navNews || nav === mnavNews)) ||
+                                (targetType === 'services' && (nav === navServices || nav === mnavServices)) ||
+                                (targetType === 'announcements' && (nav === navAnnouncements || nav === mnavAnnouncements));
+                setActive(nav, isMatch);
+            });
         }
 
         // Observe sections
         const observerOptions = {
             root: null,
-            rootMargin: '-10% 0px -80% 0px',
-            threshold: 0
+            rootMargin: '-40% 0px -40% 0px',
+            threshold: [0, 0.1]
         };
 
         const observer = new IntersectionObserver((entries) => {
+            if (isManualAction) return; // Ignore observer while manual scroll is active
+            
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    if (entry.target.id === 'news' && navNews) {
-                        activateOnly(navNews);
-                    } else if (entry.target.id === 'services' && navServices) {
-                        activateOnly(navServices);
-                    } else if (entry.target.id === 'announcements-list' && navAnnouncements) {
-                        activateOnly(navAnnouncements);
+                    if (entry.target.id === 'news') {
+                        activateOnly('news');
+                    } else if (entry.target.id === 'services') {
+                        activateOnly('services');
+                    } else if (entry.target.id === 'announcements-list') {
+                        activateOnly('announcements');
                     }
                 }
             });
@@ -359,40 +392,61 @@
         if (newsSection) observer.observe(newsSection);
         if (announcementsSection) observer.observe(announcementsSection);
 
+        function updateFromHash() {
+            const hash = window.location.hash;
+            if (hash === '#news') {
+                activateOnly('news');
+            } else if (hash === '#services') {
+                activateOnly('services');
+            } else if (hash === '#announcements-list') {
+                activateOnly('announcements');
+            } else if (window.scrollY < 200) {
+                activateOnly('home');
+            }
+        }
+
         // Initial state
-        if (window.location.hash === '#news') {
-            activateOnly(navNews);
-        } else if (window.location.hash === '#services') {
-            activateOnly(navServices);
-        } else if (window.location.hash === '#announcements-list') {
-            activateOnly(navAnnouncements);
-        } else {
-            activateOnly(navHome);
+        updateFromHash();
+
+        // Listen for hash changes (clicking links)
+        window.addEventListener('hashchange', updateFromHash);
+
+        function handleManualClick(target) {
+            isManualAction = true;
+            clearTimeout(manualActionTimeout);
+            activateOnly(target);
+            // Allow scroll listener again after scroll animation likely finished
+            manualActionTimeout = setTimeout(() => {
+                isManualAction = false;
+            }, 1000);
         }
 
         // Click handlers for immediate feedback
-        if (navNews) {
-            navNews.addEventListener('click', () => activateOnly(navNews));
-        }
-        if (navServices) {
-            navServices.addEventListener('click', () => activateOnly(navServices));
-        }
-        if (navAnnouncements) {
-            navAnnouncements.addEventListener('click', () => activateOnly(navAnnouncements));
-        }
-        if (navHome) {
-            navHome.addEventListener('click', () => {
-                if (window.location.pathname === '/' || window.location.pathname === '/welcome') {
-                    activateOnly(navHome);
-                }
-            });
-        }
+        [navNews, mnavNews].forEach(el => el?.addEventListener('click', () => handleManualClick('news')));
+        [navServices, mnavServices].forEach(el => el?.addEventListener('click', () => handleManualClick('services')));
+        [navAnnouncements, mnavAnnouncements].forEach(el => el?.addEventListener('click', () => handleManualClick('announcements')));
+        [navHome, mnavHome].forEach(el => el?.addEventListener('click', () => {
+            if (window.location.pathname === '/' || window.location.pathname === '/welcome') {
+                handleManualClick('home');
+            }
+        }));
 
         // Top of page = Home active
         window.addEventListener('scroll', () => {
-            if (window.scrollY < 200) {
-                activateOnly(navHome);
+            if (isManualAction) return;
+            if (window.scrollY < 100) {
+                activateOnly('home');
             }
+        });
+
+        // Close mobile nav on link click with a slight delay to allow navigation/scrolling
+        [mnavHome, mnavNews, mnavServices, mnavAnnouncements].forEach(el => {
+            el?.addEventListener('click', () => {
+                setTimeout(() => {
+                    const mnav = document.getElementById('mnav');
+                    if (mnav) mnav.classList.add('hidden');
+                }, 300);
+            });
         });
     });
 </script>

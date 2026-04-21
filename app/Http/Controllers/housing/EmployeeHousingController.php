@@ -1615,6 +1615,36 @@ class EmployeeHousingController extends Controller
         }
     }
 
+    public static function getStatusShortLabel($status, $type = 'request')
+    {
+        $status = intval($status);
+        switch ($status) {
+            case 0:
+                if ($type == 'leave') return 'รอฝ่ายจัดการ';
+                return 'รอหัวหน้างาน';
+            case 1:
+                return 'รอฝ่ายจัดการ';
+            case 2:
+                return 'รอกรรมการ';
+            case 3:
+                if ($type == 'request') return 'ผ่านอนุมัติ';
+                if ($type == 'leave') return 'อนุมัติย้ายออก';
+                return 'สำเร็จ';
+            case 7:
+                return 'มอบหมายห้อง';
+            case 4:
+                return 'แก้ไข';
+            case 5:
+                return 'ยกเลิก';
+            case 6:
+                return 'สำเร็จ';
+            case 8:
+                return 'ไม่อนุมัติ';
+            default:
+                return 'N/A';
+        }
+    }
+
     public static function getStatusColor($status)
     {
         return match (intval($status)) {

@@ -451,8 +451,9 @@
                         <div class="w-10 h-10 rounded-full {{ $isRejected ? 'bg-rose-500' : 'bg-blue-500' }} text-white flex items-center justify-center shrink-0 shadow-lg {{ $isRejected ? 'shadow-rose-200' : 'shadow-blue-200' }}">
                             <i class="fa-solid {{ $isRejected ? 'fa-circle-xmark' : 'fa-circle-dot animate-pulse' }}"></i>
                         </div>
-                        <span class="font-black {{ $isRejected ? 'text-rose-600' : 'text-blue-600' }} text-[14px] leading-relaxed">
-                            {{ $officialStatus }}
+                        <span class="font-black {{ $isRejected ? 'text-rose-600' : 'text-blue-600' }} text-[14px] leading-relaxed whitespace-nowrap">
+                            <span class="hidden md:inline">{{ $officialStatus }}</span>
+                            <span class="md:hidden">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusShortLabel($item->send_status, $type) }}</span>
                         </span>
                     </div>
                 </div>

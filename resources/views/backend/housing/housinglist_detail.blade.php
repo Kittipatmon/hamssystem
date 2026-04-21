@@ -329,8 +329,9 @@
                             </div>
                         </div>
                         <div class="px-6 py-3 bg-slate-50 dark:bg-gray-700/20 border-t border-slate-100 dark:border-gray-600 flex justify-between items-center">
-                            <span class="px-2 py-1 rounded-lg text-[9px] font-black uppercase border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($latestReq->send_status) }}">
-                                สถานะ: {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($latestReq->send_status, 'request') }}
+                            <span class="px-2 py-1 rounded-lg text-[9px] font-black uppercase border {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusColor($latestReq->send_status) }} whitespace-nowrap">
+                                <span class="hidden md:inline">สถานะ: {{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusLabel($latestReq->send_status, 'request') }}</span>
+                                <span class="md:hidden">{{ \App\Http\Controllers\housing\EmployeeHousingController::getStatusShortLabel($latestReq->send_status, 'request') }}</span>
                             </span>
                             <a href="{{ route('housing.request_detail', ['type' => 'request', 'id' => $latestReq->id]) }}" 
                                class="text-[10px] font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1">

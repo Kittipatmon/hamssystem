@@ -156,17 +156,21 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        const position = document.querySelector('input[name="position"]').value;
-        const department = document.querySelector('input[name="department"]').value;
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            const position = document.querySelector('input[name="position"]').value;
+            const department = document.querySelector('input[name="department"]').value;
 
-        if (!position || !department) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'ข้อมูลของคุณยังไม่ครบถ้วน',
-                text: 'ตรวจพบว่าข้อมูล ตำแหน่ง หรือ แผนก ของคุณยังไม่มีในระบบ กรุณาตรวจสอบและระบุข้อมูลเพิ่มให้ครบถ้วนก่อนส่งสัญญา',
-                confirmButtonColor: '#ff9800',
-            });
-        }
+            if (!position || !department) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ข้อมูลของคุณยังไม่ครบถ้วน',
+                    text: 'ตรวจพบว่าข้อมูล ตำแหน่ง หรือ แผนก ของคุณยังไม่มีในระบบ กรุณาตรวจสอบและระบุข้อมูลเพิ่มให้ครบถ้วนก่อนส่งสัญญา',
+                    confirmButtonColor: '#ff9800',
+                });
+            }
+        });
     });
 </script>
 @endsection
