@@ -15,9 +15,17 @@
                 </div>
                 <span>กลับไปหน้ารายการ</span>
             </a>
-            <div class="text-right">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-white">ห้อง {{ $room->room_number }}</h2>
-                <p class="text-xs text-slate-400 font-medium">พื้นที่: {{ $room->residence->name }}</p>
+            <div class="text-right flex items-center gap-3">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white">ห้อง {{ $room->room_number }}</h2>
+                    <p class="text-xs text-slate-400 font-medium">พื้นที่: {{ $room->residence->name }}</p>
+                </div>
+                @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]) || Auth::user()->is_hams_editor)
+                    <button onclick="openEditRoomModal()"
+                        class="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-650 font-bold text-xs flex items-center gap-1 transition-all">
+                        <i class="fa-solid fa-pen-to-square"></i> แก้ไขห้อง
+                    </button>
+                @endif
             </div>
         </div>
 
@@ -459,6 +467,175 @@
                         });
                 }
             });
+        }
+
+    <!-- Edit Room Modal -->
+    <div id="editRoomModal" class="hidden fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen p-4 text-center">
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="closeEditRoomModal()"></div>
+            <div class="relative inline-block align-middle bg-white rounded-xl text-left shadow-2xl transform transition-all max-w-md w-full overflow-hidden border border-slate-200">
+                <div class="bg-slate-800 px-6 py-4 flex items-center justify-between border-b border-slate-700 text-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-white shadow-inner">
+                            <i class="fa-solid fa-bed text-lg text-sky-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white leading-tight">แก้ไขข้อมูลห้องพัก</h3>
+                    </div>
+                    <button type="button" onclick="closeEditRoomModal()" class="text-slate-400 hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <form id="editRoomForm" onsubmit="submitEditRoomForm(event)" enctype="multipart/form-data">
+                    <input type="hidden" name="residence_room_id" value="{{ $room->residence_room_id }}">
+                    <div class="px-6 py-6 bg-slate-50 space-y-4 text-slate-800">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-650 mb-1.5">เลข/ชื่อห้อง <span class="text-red-500">*</span></label>
+                                <input type="text" name="room_number" required value="{{ $room->room_number }}"
+                                    class="w-full rounded-lg border border-slate-300 focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm h-10 px-3 transition-all font-bold text-slate-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-650 mb-1.5">ระดับชั้น <span class="text-red-500">*</span></label>
+                                <input type="number" name="floor" required min="1" max="{{ $room->residence->total_floors }}" value="{{ $room->floor }}"
+                                    class="w-full rounded-lg border border-slate-300 focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm h-10 px-3 transition-all font-mono font-bold text-slate-700">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-650 mb-1.5">ความจุผู้เข้าพัก (คน) <span class="text-red-500">*</span></label>
+                                <input type="number" name="capacity" required min="1" value="{{ $room->capacity }}"
+                                    class="w-full rounded-lg border border-slate-300 focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm h-10 px-3 transition-all font-mono font-bold text-slate-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-650 mb-1.5">ราคาต่อหน่วย (บาท) <span class="text-red-500">*</span></label>
+                                <input type="number" name="price" required min="0" value="{{ $room->price }}"
+                                    class="w-full rounded-lg border border-slate-300 focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm h-10 px-3 transition-all font-mono font-bold text-slate-700">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-650 mb-1.5">รูปภาพห้อง</label>
+                            <input type="file" name="image_file" accept="image/*"
+                                class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition-all cursor-pointer">
+                            @if($room->image)
+                                <p class="text-[10px] text-slate-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-image"></i> มีรูปภาพเดิมอยู่ในระบบ</p>
+                            @endif
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-650 mb-1.5">หมายเหตุห้อง</label>
+                            <input type="text" name="note" value="{{ $room->note }}" placeholder="ระบุหมายเหตุห้อง..."
+                                class="w-full rounded-lg border border-slate-300 focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm h-10 px-3 transition-all">
+                        </div>
+                    </div>
+                    <div class="px-6 py-4 bg-slate-100 border-t border-slate-200 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closeEditRoomModal()" class="px-5 py-2.5 text-xs font-bold text-slate-555 hover:bg-slate-200 bg-white border border-slate-200 rounded-lg transition-colors">ยกเลิก</button>
+                        <button type="submit" class="px-8 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg shadow-sm transition-all flex items-center gap-1">
+                            <i class="fa-solid fa-floppy-disk"></i> บันทึก
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function submitRoomAssignment(roomId) {
+            const requestId = document.getElementById('requestSelect').value;
+
+            if (!requestId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'คำแนะนำ',
+                    text: 'กรุณาเลือกผู้ส่งคำขอจากรายการก่อนครับ',
+                    confirmButtonColor: '#dc2626'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'ยืนยันการมอบหมาย?',
+                text: "ระบบจะทำการมอบหมายห้องและแจ้งเตือนไปยังผู้ใช้งานทันที",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('{{ route("housing.assign_room") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            room_id: roomId,
+                            request_id: requestId
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'สำเร็จ!',
+                                    text: 'มอบหมายห้องพักเรียบร้อยแล้ว',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    window.location.href = "{{ route('housing.houselist') }}";
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'ผิดพลาด',
+                                    text: data.message || 'เกิดข้อผิดพลาดในการดำเนินการ'
+                                });
+                            }
+                        });
+                }
+            });
+        }
+
+        function openEditRoomModal() {
+            document.getElementById('editRoomModal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeEditRoomModal() {
+            document.getElementById('editRoomModal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        function submitEditRoomForm(e) {
+            e.preventDefault();
+            const form = document.getElementById('editRoomForm');
+            const formData = new FormData(form);
+
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+            fetch('{{ route("housing.room.update") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({ icon: 'success', title: 'สำเร็จ!', timer: 1500, showConfirmButton: false }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('ผิดพลาด', data.message || 'ไม่สามารถบันทึกได้', 'error');
+                }
+            })
+            .catch(() => { Swal.fire('ผิดพลาด', 'การเชื่อมต่อขัดข้อง', 'error'); });
         }
 
         $(document).ready(function () {

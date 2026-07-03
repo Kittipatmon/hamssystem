@@ -9,6 +9,9 @@
         href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;400;600&family=Prompt:wght@200;400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+        <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> -->
+
     <style>
         body {
             font-family: 'Prompt', 'Kanit', sans-serif;
@@ -73,7 +76,7 @@
                         </div>
                         <p class="text-sm/6 mb-4 opacity-90">กรุณาเข้าสู่ระบบเพื่อใช้งานระบบ</p>
 
-                        <form method="POST" action="{{ route('login') }}" class="space-y-4">
+                        <form method="POST" action="{{ route('login', [], false) }}" class="space-y-4">
                             @csrf
 
                             <!-- emp_code -->
@@ -121,6 +124,8 @@
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
+
+
 
                             <button type="submit"
                                 class="w-full gradient-btn text-white font-semibold py-2.5 rounded-full shadow-md hover:opacity-95 transition">

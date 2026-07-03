@@ -37,8 +37,8 @@ class Items extends Model
         'send_status'    => 'int',
     ];
 
-        public function items_type()
+    public function items_type()
     {
-        return $this->belongsTo(Items_type::class, 'type_id', 'item_type_id');
+        return $this->belongsTo('App\Models\serviceshams\Items_type', 'type_id', 'item_type_id');
     }
 }

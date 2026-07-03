@@ -12,17 +12,36 @@ class ReservationsController extends Controller
 {
     public function welcomeReservations()
     {
-        $rooms = Rooms::where('status', 1)->get();
+        $rooms = \Illuminate\Support\Facades\Cache::remember('welcome_rooms_all', 120, function() {
+            return Rooms::where('status', 1)->get();
+        });
         // Limit the number of rooms displayed on the sidebar to 3
-        $sidebarRooms = Rooms::where('status', 1)->take(3)->get();
+        $sidebarRooms = \Illuminate\Support\Facades\Cache::remember('welcome_rooms_sidebar', 120, function() {
+            return Rooms::where('status', 1)->take(3)->get();
+        });
         return view('bookingmeeting.welcomemeeting', compact('rooms', 'sidebarRooms'));
     }
 
-    public function events()
+    public function events(Request $request)
     {
-        $reservations = Reservation::with(['user', 'room'])
-            ->where('status', '!=', 'cancelled')
-            ->get();
+        $query = Reservation::with(['user', 'room'])
+            ->where('status', '!=', 'cancelled');
+
+        if ($request->has('start') && $request->has('end')) {
+            $start = substr($request->start, 0, 10);
+            $end = substr($request->end, 0, 10);
+            
+            $query->where(function ($q) use ($start, $end) {
+                $q->whereBetween('reservation_date', [$start, $end])
+                  ->orWhereBetween('reservation_dateend', [$start, $end])
+                  ->orWhere(function ($q2) use ($start, $end) {
+                      $q2->where('reservation_date', '<=', $start)
+                         ->where('reservation_dateend', '>=', $end);
+                  });
+            });
+        }
+
+        $reservations = $query->get();
 
         $events = $reservations->map(function ($res) {
             // Mapping times to ISO 8601 for FullCalendar

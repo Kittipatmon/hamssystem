@@ -34,12 +34,25 @@ class BookingCarController extends Controller
                     ->where('end_time', '>', $startDatetime);
             })
             ->pluck('vehicle_id')
-            ->unique()
-            ->values()
             ->toArray();
 
+        // Also identify vehicles that have an active/past approved booking that is still not returned
+        // Only block if the new booking starts today or earlier (prevent blocking future/advance bookings)
+        $unreturnedVehicleIds = [];
+        if (\Carbon\Carbon::parse($startDatetime)->lte(now()->endOfDay())) {
+            $unreturnedVehicleIds = BookingCar::where('status', 'อนุมัติแล้ว')
+                ->where('return_status', 'ยังไม่ส่งคืน')
+                ->where('start_time', '<', $startDatetime)
+                ->pluck('vehicle_id')
+                ->toArray();
+        }
+
+        $mergedOccupied = array_values(array_unique(array_merge($occupiedVehicleIds, $unreturnedVehicleIds)));
+
         return response()->json([
-            'occupied_vehicle_ids' => $occupiedVehicleIds
+            'occupied_vehicle_ids' => $mergedOccupied,
+            'conflict_vehicle_ids' => $occupiedVehicleIds,
+            'unreturned_vehicle_ids' => $unreturnedVehicleIds
         ]);
     }
 
@@ -94,6 +107,12 @@ class BookingCarController extends Controller
             ->orderBy('start_time', 'asc')
             ->get();
 
+        $thisMonthBookings = BookingCar::with(['user', 'vehicle'])
+            ->whereMonth('start_time', now()->month)
+            ->whereYear('start_time', now()->year)
+            ->orderBy('start_time', 'asc')
+            ->get();
+
         $returnedBookings = BookingCar::with(['user', 'vehicle'])
             ->where('return_status', 'ส่งคืนแล้ว')
             ->orderBy('returned_at', 'desc')
@@ -114,7 +133,7 @@ class BookingCarController extends Controller
             sort($provinces);
         }
 
-        return view('bookingcar.welcome', compact('vehicles', 'previewVehicles', 'calendarBookings', 'upcomingBookings', 'returnedBookings', 'currentUserId', 'isHamsOrAdmin', 'existingDistricts', 'provinces'));
+        return view('bookingcar.welcome', compact('vehicles', 'previewVehicles', 'calendarBookings', 'upcomingBookings', 'thisMonthBookings', 'returnedBookings', 'currentUserId', 'isHamsOrAdmin', 'existingDistricts', 'provinces'));
     }
 
     public function vehicles()
@@ -123,13 +142,20 @@ class BookingCarController extends Controller
         // Note: Using status_vehicles = 1 for general pool cars, but we want all active ones here as per user request to see 'all'
         $vehicles = Vehicle::whereIn('status', ['available', '1'])->get();
 
+        // Identify vehicles that are currently overdue (approved, still not returned, end_time in the past)
+        $overdueVehicleIds = BookingCar::where('status', 'อนุมัติแล้ว')
+            ->where('return_status', 'ยังไม่ส่งคืน')
+            ->where('end_time', '<', now())
+            ->pluck('vehicle_id')
+            ->toArray();
+
         // Get unique filter values for the sidebar/header
         $types = Vehicle::whereIn('status', ['available', '1'])->pluck('type')->unique()->filter()->values();
         $fuels = Vehicle::whereIn('status', ['available', '1'])->pluck('filling_type')->unique()->filter()->values();
         $seats = Vehicle::whereIn('status', ['available', '1'])->pluck('seat')->unique()->sort()->values();
         $usageTypes = Vehicle::whereIn('status', ['available', '1'])->pluck('status_vehicles')->unique()->values();
 
-        return view('bookingcar.vehicles', compact('vehicles', 'types', 'fuels', 'seats', 'usageTypes'));
+        return view('bookingcar.vehicles', compact('vehicles', 'types', 'fuels', 'seats', 'usageTypes', 'overdueVehicleIds'));
     }
 
     public function store(Request $request)
@@ -171,14 +197,30 @@ class BookingCarController extends Controller
         $startDatetime = $request->booking_date . ' ' . $request->start_time . ':00';
         $endDatetime = $request->booking_date_end . ' ' . $request->end_time . ':00';
 
-        // Additional validation for same-day start/end time
-        if ($request->booking_date === $request->booking_date_end && $request->end_time <= $request->start_time) {
-            return redirect()->back()->with('error', 'เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้นสำหรับการจองในวันเดียวกัน')->withInput();
+        // Unified Carbon validation for date & time ranges
+        $start = \Carbon\Carbon::parse($startDatetime);
+        $end = \Carbon\Carbon::parse($endDatetime);
+        if ($end->lte($start)) {
+            return redirect()->back()->with('error', 'วันเวลาสิ้นสุดการเดินทางต้องอยู่หลังวันเวลาเริ่มต้นการเดินทาง')->withInput();
         }
 
-        // Check for conflicts
+        // Check if the vehicle has any unreturned past approved booking (only if starting today or earlier)
+        $unreturned = false;
+        if ($start->lte(now()->endOfDay())) {
+            $unreturned = BookingCar::where('vehicle_id', $request->vehicle_id)
+                ->where('status', 'อนุมัติแล้ว')
+                ->where('return_status', 'ยังไม่ส่งคืน')
+                ->where('start_time', '<', $startDatetime)
+                ->exists();
+        }
+
+        if ($unreturned) {
+            return redirect()->back()->with('error', 'ไม่สามารถจองรถคันนี้ได้เนื่องจากรถคันนี้ยังไม่ได้ถูกส่งคืนจากรายการจองก่อนหน้า')->withInput();
+        }
+
+        // Check for conflicts against approved bookings
         $conflict = BookingCar::where('vehicle_id', $request->vehicle_id)
-            ->whereIn('status', ['อนุมัติแล้ว', 'รออนุมัติ'])
+            ->where('status', 'อนุมัติแล้ว')
             ->where('return_status', '!=', 'ส่งคืนแล้ว')
             ->where(function ($query) use ($startDatetime, $endDatetime) {
                 $query->where('start_time', '<', $endDatetime)
@@ -508,11 +550,17 @@ class BookingCarController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // Calculate global stats for cards
-        $totalBookings = BookingCar::count();
-        $approvedBookings = BookingCar::where('status', 'อนุมัติแล้ว')->count();
-        $pendingBookings = BookingCar::where('status', 'รออนุมัติ')->count();
-        $rejectedBookings = BookingCar::where('status', 'ไม่อนุมัติ')->orWhere('status', 'ยกเลิก')->count();
+        $stats = BookingCar::selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'อนุมัติแล้ว' THEN 1 ELSE 0 END) as approved,
+            SUM(CASE WHEN status = 'รออนุมัติ' THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN status IN ('ไม่อนุมัติ', 'ยกเลิก') THEN 1 ELSE 0 END) as rejected
+        ")->first();
+
+        $totalBookings = $stats->total ?? 0;
+        $approvedBookings = $stats->approved ?? 0;
+        $pendingBookings = $stats->pending ?? 0;
+        $rejectedBookings = $stats->rejected ?? 0;
 
         // 1. Usage Trends (By Month - Current Year)
         $usageMonthly = BookingCar::select(DB::raw('MONTH(created_at) as month'), DB::raw('count(*) as count'))
@@ -676,6 +724,36 @@ class BookingCarController extends Controller
             $booking->returned_at = now();
         }
 
+        // Clean up files if status is updated to 'ยกเลิก' or 'ไม่อนุมัติ'
+        if ($request->status === 'ยกเลิก' || $request->status === 'ไม่อนุมัติ') {
+            if ($booking->attachment && file_exists(public_path($booking->attachment))) {
+                @unlink(public_path($booking->attachment));
+            }
+            if ($booking->attachment_going) {
+                $goingPaths = json_decode($booking->attachment_going, true);
+                if (is_array($goingPaths)) {
+                    foreach ($goingPaths as $path) {
+                        if (file_exists(public_path($path))) {
+                            @unlink(public_path($path));
+                        }
+                    }
+                }
+            }
+            if ($booking->attachment_returning) {
+                $returningPaths = json_decode($booking->attachment_returning, true);
+                if (is_array($returningPaths)) {
+                    foreach ($returningPaths as $path) {
+                        if (file_exists(public_path($path))) {
+                            @unlink(public_path($path));
+                        }
+                    }
+                }
+            }
+            $booking->attachment = null;
+            $booking->attachment_going = null;
+            $booking->attachment_returning = null;
+        }
+
         $booking->save();
 
         if ($booking->vehicle) {
@@ -708,6 +786,36 @@ class BookingCarController extends Controller
             $booking->approved_at = now();
         }
 
+        // Clean up files if status is updated to 'ยกเลิก' or 'ไม่อนุมัติ'
+        if ($request->status === 'ยกเลิก' || $request->status === 'ไม่อนุมัติ') {
+            if ($booking->attachment && file_exists(public_path($booking->attachment))) {
+                @unlink(public_path($booking->attachment));
+            }
+            if ($booking->attachment_going) {
+                $goingPaths = json_decode($booking->attachment_going, true);
+                if (is_array($goingPaths)) {
+                    foreach ($goingPaths as $path) {
+                        if (file_exists(public_path($path))) {
+                            @unlink(public_path($path));
+                        }
+                    }
+                }
+            }
+            if ($booking->attachment_returning) {
+                $returningPaths = json_decode($booking->attachment_returning, true);
+                if (is_array($returningPaths)) {
+                    foreach ($returningPaths as $path) {
+                        if (file_exists(public_path($path))) {
+                            @unlink(public_path($path));
+                        }
+                    }
+                }
+            }
+            $booking->attachment = null;
+            $booking->attachment_going = null;
+            $booking->attachment_returning = null;
+        }
+
         $booking->save();
 
         return redirect()->route('bookingcar.dashboard')->with('success', 'อัปเดตสถานะการอนุมัติเรียบร้อยแล้ว');
@@ -722,8 +830,8 @@ class BookingCarController extends Controller
             return redirect()->back()->with('error', 'คุณไม่สามารถยกเลิกการจองของผู้อื่นได้');
         }
 
-        // Prevent cancellation if the booking has already started
-        if (now()->greaterThan(\Carbon\Carbon::parse($booking->start_time))) {
+        // Prevent cancellation if the booking has already started and is approved
+        if ($booking->status === 'อนุมัติแล้ว' && now()->greaterThan(\Carbon\Carbon::parse($booking->start_time))) {
             return redirect()->back()->with('error', 'ไม่สามารถยกเลิกการจองที่เริ่มไปแล้วได้');
         }
 

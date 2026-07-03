@@ -8,8 +8,10 @@ class ResidenceRoom extends Model
 {
     protected $table = 'residence_room';
     protected $primaryKey = 'residence_room_id';
+    public $incrementing = false;
 
     protected $fillable = [
+        'residence_room_id',
         'residence_id',
         'room_number',
         'floor',

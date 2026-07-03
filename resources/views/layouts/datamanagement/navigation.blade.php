@@ -25,7 +25,7 @@
             </a>
 
             <!-- Right: Navigation Links -->
-            <div class="hidden xl:flex items-center gap-2 lg:gap-3">
+            <div class="hidden lg:flex items-center gap-2 lg:gap-3">
 
                 <!-- หน้าแรก -->
                 <a href="{{ route('welcome') }}"
@@ -35,9 +35,9 @@
                     <span>หน้าหลัก</span>
                 </a>
                 <a href="{{ route('datamanage.news.newsalllist') }}"
-                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('datamanage.news.*') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                    class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 {{ request()->routeIs('datamanage.news.newsalllist') || request()->routeIs('datamanage.news.detail') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
                     <i
-                        class="fa-solid fa-newspaper {{ request()->routeIs('datamanage.news.*') ? 'text-white' : 'text-slate-400' }}"></i>
+                        class="fa-solid fa-newspaper {{ request()->routeIs('datamanage.news.newsalllist') || request()->routeIs('datamanage.news.detail') ? 'text-white' : 'text-slate-400' }}"></i>
                     <span>ข่าวสารทั้งหมด</span>
                 </a>
 
@@ -45,17 +45,17 @@
                     <!-- ข้อมูลทั่วไป (dropdown) -->
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
-                            class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer {{ request()->routeIs('datamanage.news.index') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600' }}">
-                            <i class="fa-solid fa-server {{ request()->routeIs('datamanage.news.index') ? 'text-white' : 'text-slate-400' }}"></i>
+                            class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer {{ request()->routeIs('datamanage.news.index') || request()->routeIs('datamanage.news.create') || request()->routeIs('datamanage.news.edit') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600' }}">
+                            <i class="fa-solid fa-server {{ request()->routeIs('datamanage.news.index') || request()->routeIs('datamanage.news.create') || request()->routeIs('datamanage.news.edit') ? 'text-white' : 'text-slate-400' }}"></i>
                             <span>ข้อมูลทั่วไป</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] {{ request()->routeIs('datamanage.news.index') ? 'text-white' : 'opacity-70' }} ml-1"></i>
+                            <i class="fa-solid fa-chevron-down text-[10px] {{ request()->routeIs('datamanage.news.index') || request()->routeIs('datamanage.news.create') || request()->routeIs('datamanage.news.edit') ? 'text-white' : 'opacity-70' }} ml-1"></i>
                         </label>
                         <ul tabindex="0"
                             class="dropdown-content menu bg-white rounded-2xl mt-0 translate-y-1 p-0 w-64 shadow-xl border border-red-50 gap-0 animate-fadeIn before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-['']">
                             <li>
                                 <a href="{{ route('datamanage.news.index') }}"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('datamanage.news.index') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
-                                    <i class="fa-regular fa-newspaper {{ request()->routeIs('datamanage.news.index') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> ข้อมูลข่าวสาร
+                                    class="flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium rounded-xl transition-colors {{ request()->routeIs('datamanage.news.index') || request()->routeIs('datamanage.news.create') || request()->routeIs('datamanage.news.edit') ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-600 hover:text-red-600 hover:bg-red-50' }}">
+                                    <i class="fa-regular fa-newspaper {{ request()->routeIs('datamanage.news.index') || request()->routeIs('datamanage.news.create') || request()->routeIs('datamanage.news.edit') ? 'text-red-600' : 'text-red-400' }} w-4 text-center"></i> ข้อมูลข่าวสาร
                                 </a>
                             </li>
                         </ul>
@@ -149,14 +149,14 @@
 
             <!-- Mobile menu button -->
             <button
-                class="xl:hidden flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 border border-slate-200 shadow-sm relative z-[110]"
+                class="lg:hidden flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 border border-slate-200 shadow-sm relative z-[110]"
                 onclick="document.getElementById('mnav').classList.toggle('hidden')">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
 
         <!-- Mobile nav -->
-        <div id="mnav" class="xl:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[75vh] overflow-y-auto custom-scrollbar">
+        <div id="mnav" class="lg:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[75vh] overflow-y-auto custom-scrollbar">
             <div class="flex flex-col gap-1.5 px-2">
                 <a href="{{ route('welcome') }}"
                     class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('welcome') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">

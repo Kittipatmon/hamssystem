@@ -24,73 +24,17 @@
     <!-- Main Container -->
     <div class="flex flex-col-reverse lg:grid lg:grid-cols-4 gap-6">
 
-      <!-- Left Column: Rooms Information (Bottom on Mobile) -->
+      <!-- Left Column: Booking Details of the Month -->
       <div class="lg:col-span-1 space-y-4">
-        <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-door-open text-[#c31919] mr-2"></i>
-          ข้อมูลห้องประชุม</h2>
-        @foreach($sidebarRooms as $room)
-          <div class="card bg-white shadow-sm border border-slate-200 p-0 transition-transform hover:scale-[1.02]">
-            <!-- Room Image -->
-            <figure class="h-32 bg-slate-100 relative border-b border-slate-200 flex items-center justify-center">
-              @php
-                $images = is_string($room->images) ? json_decode($room->images, true) : $room->images;
-                $firstImage = !empty($images) && is_array($images) ? $images[0] : null;
-
-                $imagePathUrl = null;
-                if ($firstImage) {
-                  if (file_exists(public_path('images/room/' . $firstImage))) {
-                    $imagePathUrl = asset('images/room/' . $firstImage);
-                  } elseif (file_exists(public_path('images/' . $firstImage))) {
-                    $imagePathUrl = asset('images/' . $firstImage);
-                  } elseif (file_exists(public_path($firstImage))) {
-                    $imagePathUrl = asset($firstImage);
-                  }
-                }
-              @endphp
-
-              @if($imagePathUrl)
-                <img src="{{ $imagePathUrl }}" alt="{{ $room->room_name }}" class="w-full h-full object-cover"
-                  onerror="this.style.display='none'">
-              @else
-                <div class="text-slate-400 flex flex-col items-center">
-                  <i class="fa-regular fa-image text-2xl mb-1"></i>
-                  <span class="text-xs">ไม่มีรูปภาพ</span>
-                </div>
-              @endif
-            </figure>
-
-            <!-- Room Info -->
-            <div class="p-4">
-              <h3 class="font-bold text-[#c31919] uppercase text-sm mb-1">{{ $room->room_name }}</h3>
-              <p class="text-[11px] text-slate-600 mb-2 truncate" title="{{ $room->room_type }}">
-                {{ $room->room_type ?? 'ห้องประชุมขนาดเล็ก' }}
-              </p>
-
-              <div class="space-y-1 mb-3 text-xs text-slate-700">
-                <p class="flex items-center"><i class="fa-solid fa-users w-5 text-center text-slate-400"></i>
-                  &nbsp;<span>ความจุ: <span class="font-medium">{{ $room->capacity }}</span> ท่าน</span>
-                </p>
-                <p class="flex items-start"><i class="fa-solid fa-map-location-dot w-5 text-center text-slate-400 mt-1"></i>
-                  &nbsp;<span class="break-words whitespace-normal flex-1">สิ่งอำนวยความสะดวก: {{ $room->location ?? '-' }}
-                    @if($room->floor) (ชั้น {{ $room->floor }}) @endif</span>
-                </p>
-                @if($room->has_projector)
-                  <p class="flex items-start"><i class="fa-solid fa-video w-5 text-center text-slate-400 mt-1"></i> <span
-                class="break-words whitespace-normal flex-1">มีโปรเจคเตอร์</span></p>@endif
-                @if($room->has_video_conf)
-                  <p class="flex items-start"><i class="fa-solid fa-satellite-dish w-5 text-center text-slate-400 mt-1"></i>
-                    <span class="break-words whitespace-normal flex-1">มี Video Conference</span>
-                </p>@endif
-              </div>
-
-              @if($room->description)
-                <div class="mt-2 text-xs text-slate-600 line-clamp-2" title="{{ $room->description }}">
-                  <i class="fa-solid fa-circle-info text-slate-400 mr-1"></i> {{ $room->description }}
-                </div>
-              @endif
-            </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-md p-4">
+          <h2 class="text-base font-black text-slate-800 flex items-center gap-2 pb-3 border-b border-slate-200">
+            <i class="fa-solid fa-receipt text-[#c31919] text-lg"></i>
+            <span>รายการจองเดือนนี้</span>
+          </h2>
+          <div id="bookingList" class="mt-4 space-y-3 max-h-[600px] overflow-y-auto pr-1">
+            <div class="text-center py-8 text-slate-400 text-xs italic">กำลังโหลดข้อมูลการจอง...</div>
           </div>
-        @endforeach
+        </div>
       </div>
 
       <!-- Right Column: Calendar (Top on Mobile) -->
@@ -142,7 +86,7 @@
 
   <!-- Booking Modal -->
   <dialog id="booking_modal" class="modal">
-    <div class="modal-box w-11/12 max-w-3xl p-6 relative overflow-y-auto overflow-x-hidden">
+    <div class="modal-box w-11/12 max-w-3xl p-6 relative overflow-y-auto overflow-x-hidden max-h-[85vh]">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
         onclick="document.getElementById('booking_modal').close()"><i class="fa-solid fa-xmark"></i></button>
       <h3 class="font-bold text-lg mb-4 text-[#c31919] pb-2 border-b border-slate-100">
@@ -803,7 +747,7 @@
         document.getElementById('booking_modal').showModal();
       @endif
 
-                    var calendarEl = document.getElementById('calendar');
+      var calendarEl = document.getElementById('calendar');
       var calendar = new FullCalendar.Calendar(calendarEl, {
         locale: 'th',
         initialView: 'dayGridMonth',
@@ -823,6 +767,14 @@
           hour12: false
         },
         events: '{{ route('reservations.events') }}',
+        eventsSet: function (events) {
+          updateBookingList(events);
+        },
+        datesSet: function () {
+          if (typeof calendar !== 'undefined') {
+            updateBookingList(calendar.getEvents());
+          }
+        },
         eventTextColor: '#ffffff',
         eventDisplay: 'block',
         height: 'auto',
@@ -848,128 +800,214 @@
           showBookingModal(info.dateStr);
         },
         eventClick: function (info) {
-          const props = info.event.extendedProps;
-          const startTimeFormatted = props.start_time_formatted || '-';
-          const endTimeFormatted = props.end_time_formatted || '-';
-          const timeStr = `${startTimeFormatted} - ${endTimeFormatted} น.`;
-
-          const bookerName = props.first_name && props.last_name ? props.first_name + ' ' + props.last_name : '-';
-          const topic = props.topic || 'ไม่ระบุ';
-          const objective = props.objective || 'ไม่ระบุ';
-          const details = props.details || 'ไม่ระบุ';
-          const participantCount = props.participant_count || '-';
-          const requesterName = props.requester_name || 'ไม่ระบุ';
-
-          let cateringHtml = '';
-          if (props.break_morning || props.lunch || props.break_afternoon || props.dinner) {
-            cateringHtml = `
-                            <div class="mt-3 p-3 bg-white rounded-lg border border-slate-100 text-left">
-                              <p class="font-bold text-slate-800 border-b border-slate-50 mb-2 pb-1 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                                <i class="fa-solid fa-utensils text-slate-400"></i> การบริการอาหารและเครื่องดื่ม
-                              </p>
-                          `;
-            if (props.break_morning) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• เบรคเช้า:</span> <span class="text-slate-600">${props.break_morning_detail || 'ตามความเหมาะสม'}</span></p>`;
-            if (props.lunch) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• อาหารกลางวัน:</span> <span class="text-slate-600">${props.lunch_detail || 'ตามความเหมาะสม'}</span></p>`;
-            if (props.break_afternoon) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• เบรคบ่าย:</span> <span class="text-slate-600">${props.break_afternoon_detail || 'ตามความเหมาะสม'}</span></p>`;
-            if (props.dinner) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• อาหารเย็น:</span> <span class="text-slate-600">${props.dinner_detail || 'ตามความเหมาะสม'}</span></p>`;
-            cateringHtml += '</div>';
-          }
-
-          const currentUserId = {{ Auth::id() ?? 'null' }};
-          const isOwner = currentUserId === props.user_id;
-          const isPending = props.status === 'pending' || props.status === 'รออนุมัติ' || props.status === 'รอดำเนินการ';
-          const eventEnd = info.event.end || info.event.start;
-          const isEnded = new Date(eventEnd) < new Date();
-          const canCancel = isOwner && !isEnded && isPending;
-
-          Swal.fire({
-            title: '<h2 class="text-3xl font-black text-slate-800 text-center mb-0">รายละเอียดการจองห้องประชุม</h2>',
-            html: `
-                      <div class="mt-8 text-center space-y-2.5 text-slate-700">
-                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">ชื่อผู้จอง:</span> ${bookerName}</p>
-                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">เจ้าของงาน:</span> ${requesterName}</p>
-                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">วันที่เริ่ม:</span> ${startTimeFormatted} น.</p>
-                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">วันที่สิ้นสุด:</span> ${endTimeFormatted} น.</p>
-
-                          <p class="text-[22px] font-bold text-red-600 mt-4">
-                              ห้องประชุม: ${info.event.title}
-                          </p>
-
-                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">หัวข้อ:</span> ${topic}</p>
-                          <p class="text-lg text-slate-500 font-medium">${objective}</p>
-
-                          <p class="text-xl font-medium"><span class="font-bold text-slate-900">จำนวนผู้เข้าประชุม:</span> ${participantCount} ท่าน</p>
-
-                          <p class="text-xl font-bold mt-4 leading-none ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'text-emerald-600' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'text-amber-500' : 'text-red-500')}">
-                              สถานะ: ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'อนุมัติแล้ว' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'รออนุมัติ' : 'ยกเลิก / ไม่อนุมัติ')}
-                          </p>
-
-                          <div class="mt-8 mb-6">
-                              <div class="w-full ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'bg-emerald-50 border-emerald-100' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100')} py-3 rounded-xl flex items-center justify-center gap-2 border">
-                                   <i class="fa-solid ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'fa-circle-check text-emerald-500' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'fa-clock text-amber-500' : 'fa-circle-xmark text-red-500')} text-xl"></i>
-                                   <span class="text-xl font-bold ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'text-emerald-600' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'text-amber-600' : 'text-red-600')}">
-                                      ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'ปกติ / ยืนยันแล้ว' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'รอดำเนินการอนุมัติ' : (props.status === 'rejected' || props.status === 'ไม่อนุมัติ' ? 'รายการนี้ไม่ได้รับการอนุมัติ' : 'รายการนี้ถูกยกเลิก'))}
-                                   </span>
-                              </div>
-                          </div>
-                      </div>
-                  `,
-            showConfirmButton: true,
-            confirmButtonText: 'ปิด',
-            confirmButtonColor: '#94a3b8',
-            showDenyButton: canCancel,
-            denyButtonText: '<i class="fa-solid fa-trash-can text-sm mr-1"></i> ยกเลิกการจอง',
-            denyButtonColor: '#e53935',
-            customClass: {
-              popup: 'rounded-[2rem] shadow-2xl border border-slate-100 p-8',
-              confirmButton: 'shadow-lg rounded-xl px-12 py-3 text-lg font-bold',
-              denyButton: 'shadow-lg rounded-xl px-8 py-3 text-sm font-bold'
-            }
-          }).then((result) => {
-            if (result.isDenied) {
-              Swal.fire({
-                title: 'ยืนยันการยกเลิก?',
-                text: "คุณแน่ใจหรือไม่ที่จะยกเลิกการจองนี้?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e53935',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'ใช่, ยกเลิกเลย',
-                cancelButtonText: 'ปิดหน้าต่าง'
-              }).then((res) => {
-                if (res.isConfirmed) {
-                  fetch(`/reservations/cancel/${info.event.id}`, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                  })
-                    .then(response => response.json())
-                    .then(data => {
-                      if (data.success) {
-                        Swal.fire({
-                          title: 'สำเร็จ!',
-                          text: data.message,
-                          icon: 'success',
-                          confirmButtonText: 'ตกลง',
-                          confirmButtonColor: '#e53935'
-                        }).then(() => {
-                          info.event.remove(); // Remove from calendar display
-                        });
-                      } else {
-                        Swal.fire('เกิดข้อผิดพลาด', data.message || 'ไม่สามารถยกเลิกได้', 'error');
-                      }
-                    })
-                    .catch(error => {
-                      Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error');
-                    });
-                }
-              });
-            }
-          });
+          showEventDetails(info.event);
         }
       });
+
+      function showEventDetails(event) {
+        const props = event.extendedProps;
+        const startTimeFormatted = props.start_time_formatted || '-';
+        const endTimeFormatted = props.end_time_formatted || '-';
+        const timeStr = `${startTimeFormatted} - ${endTimeFormatted} น.`;
+
+        const bookerName = props.first_name && props.last_name ? props.first_name + ' ' + props.last_name : '-';
+        const topic = props.topic || 'ไม่ระบุ';
+        const objective = props.objective || 'ไม่ระบุ';
+        const details = props.details || 'ไม่ระบุ';
+        const participantCount = props.participant_count || '-';
+        const requesterName = props.requester_name || 'ไม่ระบุ';
+
+        let cateringHtml = '';
+        if (props.break_morning || props.lunch || props.break_afternoon || props.dinner) {
+          cateringHtml = `
+                          <div class="mt-3 p-3 bg-white rounded-lg border border-slate-100 text-left">
+                            <p class="font-bold text-slate-800 border-b border-slate-50 mb-2 pb-1 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                              <i class="fa-solid fa-utensils text-slate-400"></i> การบริการอาหารและเครื่องดื่ม
+                            </p>
+                        `;
+          if (props.break_morning) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• เบรคเช้า:</span> <span class="text-slate-600">${props.break_morning_detail || 'ตามความเหมาะสม'}</span></p>`;
+          if (props.lunch) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• อาหารกลางวัน:</span> <span class="text-slate-600">${props.lunch_detail || 'ตามความเหมาะสม'}</span></p>`;
+          if (props.break_afternoon) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• เบรคบ่าย:</span> <span class="text-slate-600">${props.break_afternoon_detail || 'ตามความเหมาะสม'}</span></p>`;
+          if (props.dinner) cateringHtml += `<p class="text-[12.5px] leading-relaxed"><span class="font-medium">• อาหารเย็น:</span> <span class="text-slate-600">${props.dinner_detail || 'ตามความเหมาะสม'}</span></p>`;
+          cateringHtml += '</div>';
+        }
+
+        const currentUserId = {{ Auth::id() ?? 'null' }};
+        const isOwner = currentUserId === props.user_id;
+        const isPending = props.status === 'pending' || props.status === 'รออนุมัติ' || props.status === 'รอดำเนินการ';
+        const eventEnd = event.end || event.start;
+        const isEnded = new Date(eventEnd) < new Date();
+        const canCancel = isOwner && !isEnded && isPending;
+
+        Swal.fire({
+          title: '<h2 class="text-3xl font-black text-slate-800 text-center mb-0">รายละเอียดการจองห้องประชุม</h2>',
+          html: `
+                    <div class="mt-8 text-center space-y-2.5 text-slate-700">
+                        <p class="text-xl font-medium"><span class="font-bold text-slate-900">ชื่อผู้จอง:</span> ${bookerName}</p>
+                        <p class="text-xl font-medium"><span class="font-bold text-slate-900">เจ้าของงาน:</span> ${requesterName}</p>
+                        <p class="text-xl font-medium"><span class="font-bold text-slate-900">วันที่เริ่ม:</span> ${startTimeFormatted} น.</p>
+                        <p class="text-xl font-medium"><span class="font-bold text-slate-900">วันที่สิ้นสุด:</span> ${endTimeFormatted} น.</p>
+
+                        <p class="text-[22px] font-bold text-red-600 mt-4">
+                            ห้องประชุม: ${event.title}
+                        </p>
+
+                        <p class="text-xl font-medium"><span class="font-bold text-slate-900">หัวข้อ:</span> ${topic}</p>
+                        <p class="text-lg text-slate-500 font-medium">${objective}</p>
+
+                        <p class="text-xl font-medium"><span class="font-bold text-slate-900">จำนวนผู้เข้าประชุม:</span> ${participantCount} ท่าน</p>
+
+                        <p class="text-xl font-bold mt-4 leading-none ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'text-emerald-600' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'text-amber-500' : 'text-red-500')}">
+                            สถานะ: ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'อนุมัติแล้ว' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'รออนุมัติ' : 'ยกเลิก / ไม่อนุมัติ')}
+                        </p>
+
+                        <div class="mt-8 mb-6">
+                            <div class="w-full ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'bg-emerald-50 border-emerald-100' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100')} py-3 rounded-xl flex items-center justify-center gap-2 border">
+                                 <i class="fa-solid ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'fa-circle-check text-emerald-500' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'fa-clock text-amber-500' : 'fa-circle-xmark text-red-500')} text-xl"></i>
+                                 <span class="text-xl font-bold ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'text-emerald-600' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'text-amber-600' : 'text-red-600')}">
+                                    ${['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'ปกติ / ยืนยันแล้ว' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'รอดำเนินการอนุมัติ' : (props.status === 'rejected' || props.status === 'ไม่อนุมัติ' ? 'รายการนี้ไม่ได้รับการอนุมัติ' : 'รายการนี้ถูกยกเลิก'))}
+                                 </span>
+                            </div>
+                        </div>
+                    </div>
+                `,
+          showConfirmButton: true,
+          confirmButtonText: 'ปิด',
+          confirmButtonColor: '#94a3b8',
+          showDenyButton: canCancel,
+          denyButtonText: '<i class="fa-solid fa-trash-can text-sm mr-1"></i> ยกเลิกการจอง',
+          denyButtonColor: '#e53935',
+          customClass: {
+            popup: 'rounded-[2rem] shadow-2xl border border-slate-100 p-8',
+            confirmButton: 'shadow-lg rounded-xl px-12 py-3 text-lg font-bold',
+            denyButton: 'shadow-lg rounded-xl px-8 py-3 text-sm font-bold'
+          }
+        }).then((result) => {
+          if (result.isDenied) {
+            Swal.fire({
+              title: 'ยืนยันการยกเลิก?',
+              text: "คุณแน่ใจหรือไม่ที่จะยกเลิกการจองนี้?",
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#e53935',
+              cancelButtonColor: '#64748b',
+              confirmButtonText: 'ใช่, ยกเลิกเลย',
+              cancelButtonText: 'ปิดหน้าต่าง'
+            }).then((res) => {
+              if (res.isConfirmed) {
+                fetch(`/reservations/cancel/${event.id}`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                  }
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      Swal.fire({
+                        title: 'สำเร็จ!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#e53935'
+                      }).then(() => {
+                        event.remove(); // Remove from calendar display
+                      });
+                    } else {
+                      Swal.fire('เกิดข้อผิดพลาด', data.message || 'ไม่สามารถยกเลิกได้', 'error');
+                    }
+                  })
+                  .catch(error => {
+                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error');
+                  });
+              }
+            });
+          }
+        });
+      }
+
+      function updateBookingList(events) {
+        const bookingListEl = document.getElementById('bookingList');
+        if (!bookingListEl) return;
+
+        const currentMonth = calendar.getDate().getMonth();
+        const currentYear = calendar.getDate().getFullYear();
+
+        const filteredEvents = events.filter(event => {
+          const startDate = new Date(event.start);
+          return startDate.getMonth() === currentMonth && startDate.getFullYear() === currentYear;
+        });
+
+        filteredEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+        if (filteredEvents.length === 0) {
+          bookingListEl.innerHTML = `
+            <div class="text-center py-12">
+              <div class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-2 border border-slate-100 text-slate-300">
+                <i class="fa-regular fa-calendar-xmark text-lg"></i>
+              </div>
+              <p class="text-xs font-bold text-slate-700">ไม่มีการจองในเดือนนี้</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">กดปุ่มสีแดงด้านบนเพื่อสร้างรายการจอง</p>
+            </div>`;
+          return;
+        }
+
+        bookingListEl.innerHTML = filteredEvents.map(event => {
+          const startDate = new Date(event.start);
+          const endDate = event.end ? new Date(event.end) : null;
+          
+          const thaiDay = startDate.toLocaleDateString('th-TH', { day: 'numeric' });
+          const thaiMonth = startDate.toLocaleDateString('th-TH', { month: 'short' });
+          
+          let dateRangeStr = '';
+          if (endDate) {
+            const startZero = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+            const endZero = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+            if (endZero > startZero) {
+              const startFmt = startDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+              const endFmt = endDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+              dateRangeStr = `<span class="text-[10px] text-red-600 font-bold block mt-1"><i class="fa-regular fa-calendar-days mr-1"></i> จองข้ามวัน: ${startFmt} - ${endFmt}</span>`;
+            }
+          }
+          
+          const props = event.extendedProps;
+          const roomName = event.title;
+          const topic = props.topic || 'ไม่ระบุหัวข้อ';
+          const booker = props.first_name && props.last_name ? props.first_name + ' ' + props.last_name : 'ไม่ระบุชื่อ';
+          const color = event.backgroundColor || '#dc2626';
+          
+          const statusStr = ['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'อนุมัติแล้ว' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'รออนุมัติ' : 'ยกเลิก');
+          const statusColorClass = ['acknowledge', 'approved', 'อนุมัติ', 'เสร็จสิ้น'].includes(props.status) ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (['pending', 'รออนุมัติ', 'รอดำเนินการ'].includes(props.status) ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-red-50 text-red-700 border-red-200');
+
+          return `
+            <div class="p-3 bg-slate-50/50 border border-slate-200 rounded-lg shadow-sm hover:shadow hover:bg-white transition-all flex gap-3 items-start border-l-4 cursor-pointer text-left" 
+                 style="border-left-color: ${color}"
+                 onclick="showEventDetailById('${event.id}')">
+              <div class="flex flex-col items-center justify-center bg-white border border-slate-200 rounded p-1 min-w-[48px] shrink-0 text-center shadow-sm">
+                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider leading-none">${thaiMonth}</span>
+                <span class="text-sm font-black text-slate-800 leading-none mt-1">${thaiDay}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-[#c31919] text-[11px] truncate uppercase">${roomName}</h4>
+                <p class="text-[11px] font-bold text-slate-700 truncate mt-0.5" title="${topic}">${topic}</p>
+                ${dateRangeStr}
+                <div class="flex justify-between items-center mt-2 gap-2">
+                  <span class="text-[10px] text-slate-400 font-medium truncate">${booker}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[8px] font-bold border ${statusColorClass} shrink-0">${statusStr}</span>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
+      window.showEventDetailById = function(id) {
+        const event = calendar.getEventById(id);
+        if (event) {
+          showEventDetails(event);
+        }
+      }
+
       calendar.render();
 
       // Dragging Logic for Notification Box

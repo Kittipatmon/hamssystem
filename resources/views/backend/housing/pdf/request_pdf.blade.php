@@ -157,12 +157,11 @@
         <div class="content">
             <div class="row">
                 ด้วยข้าพเจ้ามีความต้องการเข้าพักอาศัยในบ้านพักของพนักงาน ที่
-                <span class="check-box"
-                    style="margin-top: 8px;">{!! $requestData->site == 'โรงงานบางใหญ่' ? '&#10003;' : '' !!}</span>
-                โรงงานบางใหญ่
-                <span class="check-box"
-                    style="margin-top: 8px;">{!! $requestData->site == 'โรงงานไทรใหญ่' ? '&#10003;' : '' !!}</span>
-                โรงงานไทรใหญ่
+                @foreach(\App\Models\housing\Residence::all() as $res)
+                    <span class="check-box"
+                        style="margin-top: 8px;">{!! $requestData->site == $res->name ? '&#10003;' : '' !!}</span>
+                    {{ $res->name }}
+                @endforeach
             </div>
             <div class="row">โดยมีรายละเอียดข้อมูลส่วนตัวของข้าพเจ้าเพื่อประกอบการพิจารณาดังนี้</div>
 

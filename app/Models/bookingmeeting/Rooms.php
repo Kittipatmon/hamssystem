@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\BookingMeeting;
+namespace App\Models\bookingmeeting;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -47,9 +47,8 @@ class Rooms extends Model
         $this->attributes['images'] = is_array($value) ? json_encode($value) : $value;
     }
 
-    // Scope example
-    public function scopeActive($query)
+    public function reservations()
     {
-        return $query->where('status', 1);
+        return $this->hasMany(Reservation::class, 'room_id', 'room_id');
     }
 }

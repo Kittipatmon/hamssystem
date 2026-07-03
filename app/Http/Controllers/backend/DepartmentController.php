@@ -4,6 +4,7 @@ namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Department;
 use App\Models\Division;
 
@@ -11,6 +12,10 @@ class DepartmentController extends Controller
 {
     public function index(Request $request)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $query = Department::query();
         if ($request->filled('search')) {
             $search = $request->search;
@@ -28,12 +33,16 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
             'division_id' => 'required',
             'department_name' => 'required|string|max:255',
         ]);
 
-        Department::create($request->all());
+        Department::create($validated);
 
         if ($request->ajax()) {
             return response()->json(['success' => true]);
@@ -44,12 +53,16 @@ class DepartmentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
         $department = Department::findOrFail($id);
-        $department->update($request->all());
+        $department->update($validated);
 
         if ($request->ajax()) {
             return response()->json(['success' => true]);
@@ -60,6 +73,10 @@ class DepartmentController extends Controller
 
     public function destroy($id)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $department = Department::findOrFail($id);
         $department->delete();
 

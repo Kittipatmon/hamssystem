@@ -123,23 +123,15 @@ class EmployeeHousingController extends Controller
         $recentLeaves = ResidenceLeave::with('user')
             ->orderBy('created_at', 'desc')->take(5)->get();
 
-        $residenceRooms = ResidenceRoom::with([
-            'stays' => function ($q) {
+        $totalRooms = ResidenceRoom::count();
+        $occupiedRooms = ResidenceRoom::whereHas('stays', function ($q) {
+            $q->where('is_current', 1);
+        })->count();
+        
+        $availableRooms = ResidenceRoom::where('residence_room_status', '!=', 2)
+            ->whereDoesntHave('stays', function ($q) {
                 $q->where('is_current', 1);
-            }
-        ])->get();
-        $totalRooms = $residenceRooms->count();
-        $availableRooms = 0;
-        $occupiedRooms = 0;
-        foreach ($residenceRooms as $room) {
-            $hasOccupant = $room->stays->isNotEmpty();
-            $status = $room->residence_room_status;
-            if ($status != 2 && !$hasOccupant) {
-                $availableRooms++;
-            } elseif ($hasOccupant) {
-                $occupiedRooms++;
-            }
-        }
+            })->count();
 
         $pendingRequests = ResidenceRequest::where('send_status', 0)->count()
             + ResidenceAgreement::where('send_status', 0)->count()
@@ -190,35 +182,34 @@ class EmployeeHousingController extends Controller
     }
 
     // ==================== HOUSE LIST (ROOM GRID) ====================
-    public function houselist()
+    public function houselist(Request $request)
     {
-        $residences = Residence::with([
+        $query = Residence::with([
             'rooms' => function ($q) {
-                $q->orderBy('floor')->orderBy('room_number');
+                $q->orderBy('floor')->orderBy('residence_room_id', 'asc');
             },
             'rooms.stays' => function ($q) {
                 $q->where('is_current', 1)->with(['resident', 'latestRequest']);
             }
-        ])->get();
+        ]);
 
-        $allRooms = $residences->flatMap->rooms;
-        $totalRooms = $allRooms->count();
-        $availableRooms = 0;
-        $occupiedRooms = 0;
-        $maintenanceRooms = 0;
-
-        foreach ($allRooms as $room) {
-            $status = $room->residence_room_status;
-            $hasOccupant = $room->stays->where('is_current', 1)->isNotEmpty();
-
-            if ($status == 2) {
-                $maintenanceRooms++;
-            } elseif ($hasOccupant) {
-                $occupiedRooms++;
-            } else {
-                $availableRooms++;
-            }
+        if ($request->has('residence_id')) {
+            $query->where('residence_id', $request->residence_id);
         }
+        $residences = $query->get();
+
+        $roomQuery = ResidenceRoom::query();
+        if ($request->has('residence_id')) {
+            $roomQuery->where('residence_id', $request->residence_id);
+        }
+
+        $totalRooms = (clone $roomQuery)->count();
+        $maintenanceRooms = (clone $roomQuery)->where('residence_room_status', 2)->count();
+        $occupiedRooms = (clone $roomQuery)->where('residence_room_status', '!=', 2)
+            ->whereHas('stays', function ($q) {
+                $q->where('is_current', 1);
+            })->count();
+        $availableRooms = $totalRooms - $maintenanceRooms - $occupiedRooms;
 
         // Fetch eligible requesters (Approved by Committee but no room assigned)
         $eligibleRequesters = ResidenceRequest::where('send_status', 3)->get();
@@ -231,6 +222,23 @@ class EmployeeHousingController extends Controller
             'residences',
             'eligibleRequesters'
         ));
+    }
+
+    // ==================== RESIDENCE INFO (DETAIL PAGE) ====================
+    public function residenceInfo($id)
+    {
+        $residence = Residence::with(['rooms'])->findOrFail($id);
+        
+        $features = [
+            'bed' => 'เตียงนอนขนาดมาตรฐาน',
+            'ac' => 'เครื่องปรับอากาศประหยัดไฟเบอร์ 5',
+            'closet' => 'ตู้เสื้อผ้าบิวท์อิน',
+            'bathroom' => 'ห้องน้ำในตัวพร้อมสุขภัณฑ์ครบชุด',
+            'balcony' => 'ระเบียงส่วนตัว',
+            'security' => 'ระบบรักษาความปลอดภัย 24 ชม.'
+        ];
+        
+        return view('backend.housing.residence_info', compact('residence', 'features'));
     }
 
     // ==================== HOUSING REQUEST (QF-HAMS-02) ====================
@@ -473,9 +481,45 @@ class EmployeeHousingController extends Controller
         return redirect()->route('housing.my_requests')->with('success', 'แก้ไขข้อตกลงเข้าพักเรียบร้อยแล้ว');
     }
 
+    /**
+     * Check if the logged-in user is authorized to view or manage the housing item.
+     */
+    private function checkHousingAccess($item): bool
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        // 1. Admin, HAMS (dept 14, 16) or hams_editor has full access
+        if ($user->role === 'admin' || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor) {
+            return true;
+        }
+
+        // 2. Owner of the item has access
+        if ($item->user_id === $user->id) {
+            return true;
+        }
+
+        // 3. Designated approver (Commander, Manager, Committee) of the item has access
+        if (
+            (isset($item->commander_id) && $item->commander_id === $user->id) ||
+            (isset($item->managerhams_id) && $item->managerhams_id === $user->id) ||
+            (isset($item->Committee_id) && $item->Committee_id === $user->id)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function exportRequestPdf($id)
     {
         $requestData = ResidenceRequest::with(['user', 'dependents'])->findOrFail($id);
+
+        if (!$this->checkHousingAccess($requestData)) {
+            abort(403, 'Unauthorized access.');
+        }
 
         $pdf = app('dompdf.wrapper');
         $pdf->loadView('backend.housing.pdf.request_pdf', compact('requestData'));
@@ -488,6 +532,11 @@ class EmployeeHousingController extends Controller
     public function exportAgreementPdf($id)
     {
         $agreement = ResidenceAgreement::with(['user'])->findOrFail($id);
+
+        if (!$this->checkHousingAccess($agreement)) {
+            abort(403, 'Unauthorized access.');
+        }
+
         $pdf = app('dompdf.wrapper');
         $pdf->loadView('backend.housing.pdf.agreement_pdf', compact('agreement'));
         $pdf->setPaper('A4', 'portrait');
@@ -499,6 +548,11 @@ class EmployeeHousingController extends Controller
     public function exportGuestPdf($id)
     {
         $guest = ResidentGuestRequest::with(['user', 'members'])->findOrFail($id);
+
+        if (!$this->checkHousingAccess($guest)) {
+            abort(403, 'Unauthorized access.');
+        }
+
         $pdf = app('dompdf.wrapper');
         $pdf->loadView('backend.housing.pdf.guest_pdf', compact('guest'));
         $pdf->setPaper('A4', 'portrait');
@@ -510,6 +564,11 @@ class EmployeeHousingController extends Controller
     public function exportLeavePdf($id)
     {
         $leave = ResidenceLeave::with(['user'])->findOrFail($id);
+
+        if (!$this->checkHousingAccess($leave)) {
+            abort(403, 'Unauthorized access.');
+        }
+
         $pdf = app('dompdf.wrapper');
         $pdf->loadView('backend.housing.pdf.leave_pdf', compact('leave'));
         $pdf->setPaper('A4', 'portrait');
@@ -1184,6 +1243,10 @@ class EmployeeHousingController extends Controller
                 abort(404);
         }
 
+        if (!$this->checkHousingAccess($item)) {
+            abort(403, 'Unauthorized access.');
+        }
+
         return view('backend.housing.request_detail', compact('item', 'type'));
     }
 
@@ -1192,6 +1255,9 @@ class EmployeeHousingController extends Controller
     {
         $item = null;
         switch ($type) {
+            case 'residence':
+                $item = Residence::findOrFail($id);
+                break;
             case 'request':
                 $item = ResidenceRequest::findOrFail($id);
                 break;
@@ -1209,17 +1275,50 @@ class EmployeeHousingController extends Controller
         }
 
         // Security Check: Only owner or official can delete
-        if ($item->user_id !== Auth::id() && Auth::user()->level_user < 3) {
-            return back()->with('error', 'คุณไม่ได้รับอนุญาตให้ลบรายการนี้');
-        }
+        $user = Auth::user();
+        $isHams = ($user->role === 'admin' || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor);
 
-        // Status Check: Only status 0 can be deleted by user
-        if ($item->send_status >= 1 && Auth::user()->level_user < 3) {
-            return back()->with('error', 'ใบคำขอถูกส่งไปพิจารณาแล้ว ไม่สามารถยกเลิกได้');
+        if ($type === 'residence') {
+            if (!$isHams) {
+                return back()->with('error', 'คุณไม่ได้รับอนุญาตให้ลบข้อมูลนี้');
+            }
+
+            // Check if any room has stays (active or history)
+            $hasStays = ResidenceStay::whereIn('residence_room_id', function ($query) use ($id) {
+                $query->select('residence_room_id')
+                    ->from('residence_room')
+                    ->where('residence_id', $id);
+            })->exists();
+
+            if ($hasStays) {
+                return back()->with('error', 'ไม่สามารถลบอาคารนี้ได้ เนื่องจากมีประวัติการเข้าพักในระบบแล้ว');
+            }
+
+            $hasRepairs = ResidenceRepair::whereIn('residence_room_id', function ($query) use ($id) {
+                $query->select('residence_room_id')
+                    ->from('residence_room')
+                    ->where('residence_id', $id);
+            })->exists();
+
+            if ($hasRepairs) {
+                return back()->with('error', 'ไม่สามารถลบอาคารนี้ได้ เนื่องจากมีประวัติการแจ้งซ่อมในระบบแล้ว');
+            }
+        } else {
+            if ($item->user_id !== Auth::id() && !$isHams && Auth::user()->level_user < 3) {
+                return back()->with('error', 'คุณไม่ได้รับอนุญาตให้ลบรายการนี้');
+            }
+
+            // Status Check: Only status 0 can be deleted by user
+            if ($item->send_status >= 1 && !$isHams && Auth::user()->level_user < 3) {
+                return back()->with('error', 'ใบคำขอถูกส่งไปพิจารณาแล้ว ไม่สามารถยกเลิกได้');
+            }
         }
 
         // Perform deletion
         switch ($type) {
+            case 'residence':
+                ResidenceRoom::where('residence_id', $item->residence_id)->delete();
+                break;
             case 'request':
                 $item->dependents()->delete();
                 break;
@@ -1228,6 +1327,10 @@ class EmployeeHousingController extends Controller
                 break;
         }
         $item->delete();
+
+        if ($type === 'residence') {
+            return back()->with('success', 'ลบข้อมูลอาคารและห้องพักทั้งหมดเรียบร้อยแล้ว');
+        }
 
         return back()->with('success', 'ยกเลิกรายการเรียบร้อยแล้ว');
     }
@@ -1575,6 +1678,293 @@ class EmployeeHousingController extends Controller
         HousingCommittee::findOrFail($id)->delete();
 
         return back()->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
+    }
+
+    public function residenceCreate()
+    {
+        $residences = Residence::orderBy('name', 'asc')->get();
+        return view('backend.housing.residence_create', compact('residences'));
+    }
+
+    public function residenceStore(Request $request)
+    {
+        $request->validate([
+            'mode' => 'required|in:new,existing',
+            'residence_id' => 'required_if:mode,existing|nullable|integer|exists:residence,residence_id',
+            'name' => 'required_if:mode,new|nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'blueprint_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'total_floors' => 'required_if:mode,new|nullable|integer|min:1',
+            'total_rooms' => 'required|integer|min:1',
+            'rooms' => 'required|array',
+            'rooms.*.room_number' => 'required|string|max:100',
+            'rooms.*.floor' => 'required|integer|min:1',
+            'rooms.*.capacity' => 'required|integer|min:1',
+            'rooms.*.price' => 'required|numeric|min:0',
+            'rooms.*.note' => 'nullable|string|max:500',
+            'rooms.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $blueprintPath = null;
+            if ($request->hasFile('blueprint_image')) {
+                $file = $request->file('blueprint_image');
+                $filename = time() . '_blueprint_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/housing_residences'), $filename);
+                $blueprintPath = 'uploads/housing_residences/' . $filename;
+            }
+
+            $coverPath = null;
+            if ($request->hasFile('cover_image')) {
+                $file = $request->file('cover_image');
+                $filename = time() . '_cover_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/housing_residences'), $filename);
+                $coverPath = 'uploads/housing_residences/' . $filename;
+            }
+
+            if ($request->mode === 'new') {
+                $nextResidenceId = (Residence::max('residence_id') ?? 0) + 1;
+                $residence = Residence::create([
+                    'residence_id' => $nextResidenceId,
+                    'name' => $request->name,
+                    'address' => $request->address,
+                    'blueprint_image' => $blueprintPath,
+                    'cover_image' => $coverPath,
+                    'total_floors' => $request->total_floors,
+                    'total_rooms' => $request->total_rooms,
+                    'user_createdid' => Auth::id(),
+                ]);
+            } else {
+                $residence = Residence::findOrFail($request->residence_id);
+                // Increment total rooms count
+                $residence->increment('total_rooms', $request->total_rooms);
+                $updateData = [];
+                if ($blueprintPath) {
+                    $updateData['blueprint_image'] = $blueprintPath;
+                }
+                if ($coverPath) {
+                    $updateData['cover_image'] = $coverPath;
+                }
+                if (!empty($updateData)) {
+                    $residence->update($updateData);
+                }
+            }
+
+            $nextRoomId = ResidenceRoom::max('residence_room_id') ?? 0;
+            foreach ($request->rooms as $index => $roomData) {
+                $nextRoomId++;
+                $imagePath = null;
+                if ($request->hasFile("rooms.{$index}.image")) {
+                     $file = $request->file("rooms.{$index}.image");
+                     $filename = time() . '_room_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                     $file->move(public_path('uploads/housing_rooms'), $filename);
+                     $imagePath = 'uploads/housing_rooms/' . $filename;
+                }
+
+                ResidenceRoom::create([
+                    'residence_room_id' => $nextRoomId,
+                    'residence_id' => $residence->residence_id,
+                    'room_number' => $roomData['room_number'],
+                    'floor' => $roomData['floor'],
+                    'residence_room_status' => 0, // vacant
+                    'note' => $roomData['note'] ?? null,
+                    'capacity' => $roomData['capacity'],
+                    'price' => $roomData['price'],
+                    'image' => $imagePath,
+                    'user_createdid' => Auth::id(),
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('housing.houselist')->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว เพิ่มห้องพักใหม่จำนวน ' . $request->total_rooms . ' ห้อง');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' . $e->getMessage());
+        }
+    }
+
+    public function residenceEdit($id)
+    {
+        $residence = Residence::with(['rooms' => function ($q) {
+            $q->orderBy('floor', 'asc')->orderBy('room_number', 'asc');
+        }])->findOrFail($id);
+        
+        return view('backend.housing.residence_edit', compact('residence'));
+    }
+
+    public function residenceUpdateAll(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'blueprint_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'total_floors' => 'required|integer|min:1',
+            'total_rooms' => 'required|integer|min:1',
+            'rooms' => 'required|array',
+            'rooms.*.residence_room_id' => 'nullable|integer',
+            'rooms.*.room_number' => 'required|string|max:100',
+            'rooms.*.floor' => 'required|integer|min:1',
+            'rooms.*.capacity' => 'required|integer|min:1',
+            'rooms.*.price' => 'required|numeric|min:0',
+            'rooms.*.note' => 'nullable|string|max:500',
+            'rooms.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $residence = Residence::findOrFail($id);
+            
+            $blueprintPath = $residence->blueprint_image;
+            if ($request->hasFile('blueprint_image')) {
+                $file = $request->file('blueprint_image');
+                $filename = time() . '_blueprint_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/housing_residences'), $filename);
+                $blueprintPath = 'uploads/housing_residences/' . $filename;
+            }
+
+            $coverPath = $residence->cover_image;
+            if ($request->hasFile('cover_image')) {
+                $file = $request->file('cover_image');
+                $filename = time() . '_cover_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/housing_residences'), $filename);
+                $coverPath = 'uploads/housing_residences/' . $filename;
+            }
+
+            $residence->update([
+                'name' => $request->name,
+                'address' => $request->address,
+                'blueprint_image' => $blueprintPath,
+                'cover_image' => $coverPath,
+                'total_floors' => $request->total_floors,
+                'total_rooms' => $request->total_rooms,
+                'user_updateid' => Auth::id(),
+            ]);
+
+            $nextRoomId = ResidenceRoom::max('residence_room_id') ?? 0;
+
+            foreach ($request->rooms as $index => $roomData) {
+                $roomId = $roomData['residence_room_id'] ?? null;
+                $imagePath = null;
+                if ($request->hasFile("rooms.{$index}.image")) {
+                     $file = $request->file("rooms.{$index}.image");
+                     $filename = time() . '_room_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                     $file->move(public_path('uploads/housing_rooms'), $filename);
+                     $imagePath = 'uploads/housing_rooms/' . $filename;
+                }
+
+                if ($roomId) {
+                    $room = ResidenceRoom::where('residence_id', $residence->residence_id)
+                        ->where('residence_room_id', $roomId)
+                        ->firstOrFail();
+
+                    $updateData = [
+                        'room_number' => $roomData['room_number'],
+                        'floor' => $roomData['floor'],
+                        'capacity' => $roomData['capacity'],
+                        'price' => $roomData['price'],
+                        'note' => $roomData['note'] ?? null,
+                        'user_updateid' => Auth::id(),
+                    ];
+
+                    if ($imagePath) {
+                        $updateData['image'] = $imagePath;
+                    }
+
+                    $room->update($updateData);
+                } else {
+                    $nextRoomId++;
+                    ResidenceRoom::create([
+                        'residence_room_id' => $nextRoomId,
+                        'residence_id' => $residence->residence_id,
+                        'room_number' => $roomData['room_number'],
+                        'floor' => $roomData['floor'],
+                        'residence_room_status' => 0, // vacant
+                        'note' => $roomData['note'] ?? null,
+                        'capacity' => $roomData['capacity'],
+                        'price' => $roomData['price'],
+                        'image' => $imagePath,
+                        'user_createdid' => Auth::id(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('housing.houselist')->with('success', 'แก้ไขข้อมูลบ้านพักและห้องพักเรียบร้อยแล้ว');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' . $e->getMessage());
+        }
+    }
+
+    public function residenceUpdate(Request $request)
+    {
+        $request->validate([
+            'residence_id' => 'required|integer|exists:residence,residence_id',
+            'name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'total_floors' => 'required|integer|min:1',
+        ]);
+
+        try {
+            $res = Residence::findOrFail($request->residence_id);
+            $res->update([
+                'name' => $request->name,
+                'address' => $request->address,
+                'total_floors' => $request->total_floors,
+                'user_updateid' => Auth::id(),
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function roomUpdate(Request $request)
+    {
+        $request->validate([
+            'residence_room_id' => 'required|integer|exists:residence_room,residence_room_id',
+            'room_number' => 'required|string|max:100',
+            'floor' => 'required|integer|min:1',
+            'capacity' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'note' => 'nullable|string|max:500',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        ]);
+
+        try {
+            $room = ResidenceRoom::findOrFail($request->residence_room_id);
+            
+            $imagePath = $room->image;
+            if ($request->hasFile('image_file')) {
+                $file = $request->file('image_file');
+                $filename = time() . '_room_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/housing_rooms'), $filename);
+                $imagePath = 'uploads/housing_rooms/' . $filename;
+            }
+
+            $room->update([
+                'room_number' => $room->room_number, // We can let room number be read-only or updated, let's keep it updated
+                'room_number' => $request->room_number,
+                'floor' => $request->floor,
+                'capacity' => $request->capacity,
+                'price' => $request->price,
+                'note' => $request->note,
+                'image' => $imagePath,
+                'user_updateid' => Auth::id(),
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     // ==================== HELPER: Status Label ====================

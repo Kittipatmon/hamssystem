@@ -98,6 +98,147 @@
             align-items: center;
             gap: 0.25rem;
         }
+
+        /* -------------------------------------------------------------
+           CLINICAL GRID & HOSPITAL STRUCTURE DESIGN SYSTEM
+           ------------------------------------------------------------- */
+        .clinical-sidebar {
+            background-color: #ffffff;
+            border-right: 2px solid #cbd5e1;
+        }
+        .dark .clinical-sidebar {
+            background-color: #1a1d24;
+            border-right: 2px solid #334155;
+        }
+        .clinical-header {
+            border-bottom: 2px solid #cbd5e1;
+            background-color: #f8fafc;
+        }
+        .dark .clinical-header {
+            border-bottom: 2px solid #334155;
+            background-color: #121418;
+        }
+        
+        /* Menu Grid Cards (Folder/Registry Style) */
+        .menu-grid-item {
+            border: 1.5px solid #cbd5e1 !important;
+            border-radius: 6px !important;
+            background-color: #ffffff !important;
+            color: #334155 !important;
+            transition: all 0.15s ease-in-out;
+            font-weight: 600;
+        }
+        .dark .menu-grid-item {
+            border-color: #475569 !important;
+            background-color: #242933 !important;
+            color: #cbd5e1 !important;
+        }
+        .menu-grid-item:hover {
+            border-color: #D71920 !important;
+            background-color: #fef2f2 !important;
+            color: #D71920 !important;
+        }
+        .dark .menu-grid-item:hover {
+            border-color: #D71920 !important;
+            background-color: #271c1f !important;
+            color: #ff8a8a !important;
+        }
+        .menu-grid-item.active-menu {
+            background-color: #D71920 !important;
+            border-color: #b71515 !important;
+            color: #ffffff !important;
+        }
+        .dark .menu-grid-item.active-menu {
+            background-color: #D71920 !important;
+            border-color: #a11318 !important;
+            color: #ffffff !important;
+        }
+
+        .clinical-section-header {
+            font-size: 10px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.1em;
+            color: #475569;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            background-color: #f1f5f9;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .dark .clinical-section-header {
+            color: #94a3b8;
+            background-color: #121418;
+            border-color: #475569;
+        }
+
+        /* Submenu Clinical Panel */
+        .submenu-clinical-panel {
+            background-color: #f8fafc;
+            border-left: 2px solid #cbd5e1;
+            border-right: 2px solid #cbd5e1;
+            border-bottom: 2px solid #cbd5e1;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            margin-top: -3px;
+            padding: 8px 12px;
+        }
+        .dark .submenu-clinical-panel {
+            background-color: #121418;
+            border-color: #475569;
+        }
+
+        /* Hospital Grid Table Layout */
+        .clinical-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px !important;
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+        }
+        .dark .clinical-table {
+            background-color: #1e2129;
+            border-color: #475569;
+        }
+        .clinical-table th {
+            background-color: #f1f5f9 !important;
+            color: #1e293b !important;
+            font-weight: 800 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 10px 14px !important;
+            border: 1px solid #cbd5e1 !important;
+            text-align: left;
+        }
+        .dark .clinical-table th {
+            background-color: #121418 !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+        }
+        .clinical-table td {
+            padding: 10px 14px !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #334155;
+            vertical-align: middle;
+        }
+        .dark .clinical-table td {
+            border-color: #475569 !important;
+            color: #e2e8f0;
+        }
+        .clinical-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .dark .clinical-table tr:nth-child(even) {
+            background-color: #242933;
+        }
+        .clinical-table tr:hover {
+            background-color: #f1f5f9;
+            transition: background-color 0.1s ease;
+        }
+        .dark .clinical-table tr:hover {
+            background-color: #2a2e38;
+        }
     </style>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -138,316 +279,146 @@
 </head>
 
 <body class="bg-gray-50 dark:bg-kumwell-dark text-gray-800 dark:text-gray-200 antialiased">
-
-    <div class="flex h-screen overflow-hidden relative">
+<div class="flex h-screen overflow-hidden relative">
 
         <!-- Mobile Overlay Backdrop -->
         <div id="sidebar-backdrop"
             class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
 
         <aside id="sidebar"
-            class="w-68 flex-shrink-0 flex flex-col h-full bg-white text-gray-600 border-r border-gray-100 shadow-sm z-30 fixed md:relative -translate-x-full md:translate-x-0 transition-all duration-300 overflow-hidden">
+            class="w-68 flex-shrink-0 flex flex-col h-full clinical-sidebar z-30 fixed md:relative -translate-x-full md:translate-x-0 transition-all duration-300 overflow-hidden">
 
             <!-- Header -->
-            <div id="sidebar-header" class="h-20 flex items-center justify-between px-6 border-b border-gray-50">
-
+            <div id="sidebar-header" class="h-20 flex items-center justify-between px-5 clinical-header">
                 <div id="sidebar-logo"
-                    class="flex items-center gap-3 overflow-hidden whitespace-nowrap transition-all duration-300 opacity-100">
+                    class="flex items-center gap-2.5 overflow-hidden whitespace-nowrap transition-all duration-300 opacity-100">
                     <div
-                        class="w-10 h-10 rounded-xl bg-[#D71920] flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/10">
-                        <span class="font-bold text-white text-xl">H</span>
+                        class="w-9 h-9 rounded bg-[#D71920] flex items-center justify-center flex-shrink-0 shadow-sm border border-red-700">
+                        <span class="font-black text-white text-lg tracking-wider">K</span>
                     </div>
                     <a href="{{ route('welcome') }}">
-                        <div class="flex flex-col leading-tight mt-1">
-                            <span class="text-[17px] font-bold tracking-wide text-gray-900 leading-none">Kumwell</span>
-                            <span
-                                class="text-[10px] text-[#D71920] font-bold uppercase tracking-[0.1em] leading-none mt-1">HA
-                                SYSTEM</span>
+                        <div class="flex flex-col leading-none">
+                            <span class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Kumwell</span>
+                            <span class="text-[9px] text-[#D71920] font-black uppercase tracking-widest mt-1">HA SYSTEM</span>
                         </div>
                     </a>
                 </div>
 
                 <button id="sidebar-toggle-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-white transition-all focus:outline-none">
-                    <i id="icon-bars" class="fa-solid fa-bars text-lg hidden-force"></i>
-                    <i id="icon-chevron" class="fa-solid fa-chevron-left text-sm"></i>
+                    class="p-1.5 rounded border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-all focus:outline-none">
+                    <i id="icon-bars" class="fa-solid fa-bars text-sm hidden-force"></i>
+                    <i id="icon-chevron" class="fa-solid fa-chevron-left text-xs"></i>
                 </button>
             </div>
 
-            <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto overflow-x-hidden sidebar-scroll">
+            @php
+                $inventoryActive = request()->routeIs('items.*') || request()->routeIs('datamanage.news.*');
+                $policyActive = request()->routeIs('backend.policy.*') || request()->routeIs('backend.announcement.*');
+                $hamsActive = request()->routeIs('users.*') || request()->routeIs('usertypes.*') || request()->routeIs('sections.*') || request()->routeIs('divisions.*') || request()->routeIs('departments.*');
+                $meetingActive = request()->routeIs('backend.bookingmeeting.rooms.*') || request()->routeIs('backend.bookingmeeting.reservations.*') || request()->routeIs('backend.bookingmeeting.report.*');
+                $housingActive = request()->routeIs('housing.*');
+                $isDashboard = request()->routeIs('backend.welcomedatamanage') || request()->routeIs('housing.welcome');
+            @endphp
 
-                <div class="sidebar-text px-2 mb-3 text-xs font-bold text-slate-400 uppercase tracking-widest">Main Menu
+            <nav class="flex-1 px-3 py-4 space-y-3 overflow-y-auto overflow-x-hidden sidebar-scroll bg-slate-50/50 dark:bg-zinc-900/10">
+                
+                <div>
+                    <span class="clinical-section-header sidebar-text">Main Registry Control</span>
+                    <div class="space-y-1.5">
+                        <!-- Dashboard -->
+                        <a href="{{ route('backend.welcomedatamanage') }}"
+                            class="group relative flex items-center px-3 py-2.5 menu-grid-item {{ $isDashboard ? 'active-menu' : '' }}">
+                            <i id="dashboard-icon" class="fa-solid fa-chart-pie text-sm w-5 text-center mr-2.5 shrink-0"></i>
+                            <span class="sidebar-text text-[13px]">Dashboard</span>
+                        </a>
+
+                        <!-- policy management -->
+                        @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))
+                            <div class="relative group">
+                                <button onclick="toggleDropdown('dropdown-policy')"
+                                    class="w-full flex items-center justify-between px-3 py-2.5 menu-grid-item {{ $policyActive ? 'active-menu' : '' }}"
+                                    id="btn-policy">
+                                    <div class="flex items-center min-w-0">
+                                        <i id="icon-policy" class="fa-solid fa-users-gear text-sm w-5 text-center mr-2.5 shrink-0"></i>
+                                        <span class="sidebar-text text-[13px] truncate">จัดการนโยบาย/ขั้นตอน</span>
+                                    </div>
+                                    <i id="arrow-policy" class="sidebar-text fa-solid fa-chevron-down text-[9px] transition-transform duration-300 {{ $policyActive ? 'rotate-180' : '' }}"></i>
+                                </button>
+
+                                <div id="dropdown-policy" class="{{ $policyActive ? '' : 'hidden' }} submenu-clinical-panel space-y-1">
+                                    <a href="{{ route('backend.policy.index', ['type' => 'policy']) }}"
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->get('type') === 'policy' ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-600' : '' }}">- นโยบาย</a>
+                                    <a href="{{ route('backend.policy.index', ['type' => 'operation']) }}"
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->get('type') === 'operation' ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-600' : '' }}">- หมวดหมู่การดำเนินงาน</a>
+                                    <a href="{{ route('backend.announcement.index') }}"
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->routeIs('backend.announcement.*') ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-600' : '' }}">- จัดการประกาศ / แจ้งให้ทราบ</a>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- hams user management -->
+                        @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))
+                            <div class="relative group">
+                                <button onclick="toggleDropdown('dropdown-hr')"
+                                    class="w-full flex items-center justify-between px-3 py-2.5 menu-grid-item {{ $hamsActive ? 'active-menu' : '' }}"
+                                    id="btn-hr">
+                                    <div class="flex items-center min-w-0">
+                                        <i id="icon-hr" class="fa-solid fa-user-group text-sm w-5 text-center mr-2.5 shrink-0"></i>
+                                        <span class="sidebar-text text-[13px] truncate">HAMS User</span>
+                                    </div>
+                                    <i id="arrow-hr" class="sidebar-text fa-solid fa-chevron-down text-[9px] transition-transform duration-300 {{ $hamsActive ? 'rotate-180' : '' }}"></i>
+                                </button>
+
+                                <div id="dropdown-hr" class="{{ $hamsActive ? '' : 'hidden' }} submenu-clinical-panel space-y-1">
+                                    <a href="{{ route('users.index') }}"
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->routeIs('users.*') ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-650' : '' }}">- ข้อมูลพนักงาน</a>
+                                    <a href="{{ route('departments.index') }}"
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->routeIs('departments.*') ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-650' : '' }}">- ข้อมูลแผนก</a>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
                 </div>
-
-                @php
-                    $inventoryActive = request()->routeIs('items.*') || request()->routeIs('datamanage.news.*');
-                    $policyActive = request()->routeIs('backend.policy.*') || request()->routeIs('backend.announcement.*');
-                    $hamsActive = request()->routeIs('users.*') || request()->routeIs('usertypes.*') || request()->routeIs('sections.*') || request()->routeIs('divisions.*') || request()->routeIs('departments.*');
-                    $meetingActive = request()->routeIs('backend.bookingmeeting.rooms.*') || request()->routeIs('backend.bookingmeeting.reservations.*') || request()->routeIs('backend.bookingmeeting.report.*');
-                    $housingActive = request()->routeIs('housing.*');
-                @endphp
-
-                @php
-                    $isDashboard = request()->routeIs('backend.welcomedatamanage') || request()->routeIs('housing.welcome');
-                @endphp
-                <a href="{{ route('backend.welcomedatamanage') }}"
-                    class="group relative flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 {{ $isDashboard ? 'bg-[#D71920] text-white shadow-lg shadow-red-500/20' : 'text-slate-600 hover:bg-slate-50 hover:text-kumwell-red' }}">
-                    <i id="dashboard-icon"
-                        class="fa-solid fa-chart-pie text-sm w-6 text-center transition-colors mr-3 {{ $isDashboard ? 'text-white' : 'opacity-60 group-hover:text-kumwell-red' }}"></i>
-                    <span class="sidebar-text font-medium">Dashboard</span>
-
-                    <div
-                        class="tooltip absolute left-14 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-xl hidden">
-                        Dashboard
-                    </div>
-                </a>
-
-                <!-- <div class="relative group">
-                    <button onclick="toggleDropdown('dropdown-datapublic')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $inventoryActive ? 'bg-white/5 text-white' : '' }}"
-                        id="btn-datapublic">
-                        <div class="flex items-center">
-                            <i id="icon-datapublic" class="fa-solid fa-database text-sm w-6 text-center mr-3"></i>
-                            <span class="sidebar-text text-left">รายงานเบิกอุปกรณ์สำนักงาน</span>
-                        </div>
-                        <i id="arrow-datapublic"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $inventoryActive ? 'rotate-180' : '' }}"></i>
-                    </button>
-
-                    <div id="dropdown-datapublic"
-                        class="{{ $inventoryActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
-                        <a href="{{ route('items.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">
-                            - รายการเบิกอุปกรณ์
-                        </a>
-                        <a href="{{ route('datamanage.news.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">
-                            - ข้อมูลข่าวสาร
-                        </a>
-                    </div>
-
-
-                    <div
-                        class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
-                        ข้อมูลทั่วไป
-                    </div>
-                </div> -->
-
-                @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))
-                    <div class="relative group">
-                        <button onclick="toggleDropdown('dropdown-policy')"
-                            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 {{ $policyActive ? 'bg-kumwell-red text-white font-bold shadow-lg shadow-red-500/20' : 'text-slate-600 hover:bg-slate-50 hover:text-kumwell-red' }}"
-                            id="btn-policy">
-                            <div class="flex items-center">
-                                <i id="icon-policy"
-                                    class="fa-solid fa-users-gear text-sm w-6 text-center mr-3 {{ $policyActive ? 'text-white' : 'opacity-60' }}"></i>
-                                <span class="sidebar-text">จัดการนโยบาย/ขั้นตอน</span>
-                            </div>
-                            <i id="arrow-policy"
-                                class="sidebar-text fa-solid fa-chevron-down text-[10px] transition-transform duration-300 {{ $policyActive ? 'rotate-180' : '' }}"></i>
-                        </button>
-
-                        <div id="dropdown-policy"
-                            class="{{ $policyActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
-                            <a href="{{ route('backend.policy.index', ['type' => 'policy']) }}"
-                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->get('type') === 'policy' ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
-                                นโยบาย</a>
-                            <a href="{{ route('backend.policy.index', ['type' => 'operation']) }}"
-                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->get('type') === 'operation' ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
-                                หมวดหมู่การดำเนินงาน</a>
-                            <a href="{{ route('backend.announcement.index') }}"
-                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->routeIs('backend.announcement.*') ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
-                                จัดการประกาศ / แจ้งให้ทราบ</a>
-                        </div>
-                    </div>
-                @endif
-
-
-                @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))
-                    <div class="relative group">
-                        <button onclick="toggleDropdown('dropdown-hr')"
-                            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 {{ $hamsActive ? 'bg-kumwell-red text-white font-bold shadow-lg shadow-red-500/20' : 'text-slate-600 hover:bg-slate-50 hover:text-kumwell-red' }}"
-                            id="btn-hr">
-                            <div class="flex items-center">
-                                <i id="icon-hr"
-                                    class="fa-solid fa-user-group text-sm w-6 text-center mr-3 {{ $hamsActive ? 'text-white' : 'opacity-60' }}"></i>
-                                <span class="sidebar-text">HAMS User</span>
-                            </div>
-                            <i id="arrow-hr"
-                                class="sidebar-text fa-solid fa-chevron-down text-[10px] transition-transform duration-300 {{ $hamsActive ? 'rotate-180' : '' }}"></i>
-                        </button>
-
-                        <div id="dropdown-hr"
-                            class="{{ $hamsActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
-                            <a href="{{ route('users.index') }}"
-                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->routeIs('users.*') ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
-                                ข้อมูลพนักงาน</a>
-                            <a href="{{ route('departments.index') }}"
-                                class="block px-3 py-2 rounded-lg text-[13px] text-slate-500 hover:text-kumwell-red hover:bg-red-50/50 transition-colors {{ request()->routeIs('departments.*') ? 'text-kumwell-red bg-red-50/50 font-bold' : '' }}">-
-                                ข้อมูลแผนก</a>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- <div class="relative group">
-                    <button onclick="toggleDropdown('dropdown-suggestion')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
-                        id="btn-suggestion">
-                        <div class="flex items-center">
-                            <i id="icon-suggestion" class="fa-solid fa-database text-sm w-6 text-center mr-3"></i>
-                            <span class="sidebar-text">รายการร้องเรียน</span>
-                        </div>
-                        <i id="arrow-suggestion"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200"></i>
-                    </button>
-
-                    <div id="dropdown-suggestion" class="hidden pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
-                        <a href=""
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">
-                            - Dashboard
-                        </a>
-                        <a href=""
-                            class="flex justify-between items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors">
-                            <span>- รับเรื่องร้องเรียน</span>
-
-
-                        </a>
-                    </div>
-
-                    <div
-                        class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
-                        ข้อมูลทั่วไป
-                    </div>
-                </div> -->
-
-                <!-- <div class="relative group">
-                    <button onclick="toggleDropdown('dropdown-bookingmeeting')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $meetingActive ? 'bg-white/5 text-white' : '' }}"
-                        id="btn-bookingmeeting">
-                        <div class="flex items-center">
-                            <i id="icon-bookingmeeting" class="fa-solid fa-door-open text-sm w-6 text-center mr-3"></i>
-                            <span
-                                class="sidebar-text text-left break-words whitespace-normal leading-tight">ระบบจัดการห้องประชุม</span>
-                        </div>
-                        <i id="arrow-bookingmeeting"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $meetingActive ? 'rotate-180' : '' }}"></i>
-                    </button>
-
-                    <div id="dropdown-bookingmeeting"
-                        class="{{ $meetingActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
-                        <a href="{{ route('backend.bookingmeeting.rooms.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('backend.bookingmeeting.rooms.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
-                            - จัดการข้อมูลห้องประชุม
-                        </a>
-                        <a href="{{ route('backend.bookingmeeting.reservations.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('backend.bookingmeeting.reservations.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
-                            - รายการจองห้องประชุม
-                        </a>
-                        <a href="{{ route('backend.bookingmeeting.report.index') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('backend.bookingmeeting.report.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
-                            - รายงานจัดห้องประชุม
-                        </a>
-                    </div>
-
-                    <div
-                        class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
-                        ระบบจัดการห้องประชุม
-                    </div>
-                </div> -->
-
-                <!-- <div class="relative group">
-                    <button onclick="toggleDropdown('dropdown-housing')"
-                        class="w-full flex items-center justify-between px-3 py-1 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all duration-200 {{ $housingActive ? 'bg-white/5 text-white' : '' }}"
-                        id="btn-housing">
-                        <div class="flex items-center">
-                            <i id="icon-housing" class="fa-solid fa-house-chimney text-sm w-6 text-center mr-3"></i>
-                            <span
-                                class="sidebar-text text-left break-words whitespace-normal leading-tight">ระบบจัดการบ้านพัก</span>
-                        </div>
-                        <i id="arrow-housing"
-                            class="sidebar-text fa-solid fa-chevron-down text-xs transition-transform duration-200 {{ $housingActive ? 'rotate-180' : '' }}"></i>
-                    </button>
-
-                    <div id="dropdown-housing"
-                        class="{{ $housingActive ? '' : 'hidden' }} pl-10 pr-2 py-1 space-y-1 transition-all duration-300">
-                        <a href="{{ route('housing.welcome') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.welcome') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
-                            - Dashboard บ้านพัก
-                        </a>
-                        <a href="{{ route('housing.request.create') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.request.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
-                            - คำขอเข้าพักบ้านพัก
-                        </a>
-                        <a href="{{ route('housing.agreement.create') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.agreement.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
-                            - ข้อตกลงเข้าพักอาศัย
-                        </a>
-                        <a href="{{ route('housing.guest.create') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.guest.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
-                            - ขออนุญาตนำญาติเข้าพัก
-                        </a>
-                        <a href="{{ route('housing.leave.create') }}"
-                            class="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.leave.*') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
-                            - คำร้องย้ายออก
-                        </a>
-                        <a href="{{ route('housing.management') }}"
-                            class="flex justify-between items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-kumwell-red hover:bg-gray-800/50 transition-colors {{ request()->routeIs('housing.management') ? 'text-kumwell-red bg-gray-800/50 font-medium' : '' }}">
-                            <span>- จัดการข้อมูลทั้งหมด</span>
-                        </a>
-                    </div>
-
-                    <div
-                        class="tooltip absolute left-14 top-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none z-50 whitespace-nowrap ml-2 shadow-md border border-gray-700 hidden">
-                        ระบบจัดการบ้านพัก
-                    </div>
-                </div> -->
 
             </nav>
 
-            <div class="border-t border-gray-50 p-4 pb-6">
-
-                <div class="sidebar-text flex items-center justify-between mb-4 px-2">
-                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Preferences</span>
+            <!-- Preferences & Profile footer block -->
+            <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-zinc-900/50 space-y-2.5">
+                <div class="sidebar-text flex items-center justify-between px-1">
+                    <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Preferences</span>
                 </div>
 
-                <div
-                    class="sidebar-text flex items-center justify-between px-4 py-3 rounded-2xl bg-gray-50 border border-gray-100 mb-4 transition-all duration-300 hover:border-kumwell-red/30 group">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-gray-400 group-hover:text-kumwell-red transition-colors duration-300 shadow-sm">
-                            <i class="fa-solid fa-moon text-sm"></i>
+                <div class="sidebar-text flex items-center justify-between px-3 py-2 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-900 shadow-sm transition-all hover:border-[#D71920]/30 group">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6.5 h-6.5 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-[#D71920] transition-colors duration-300">
+                            <i class="fa-solid fa-moon text-xs"></i>
                         </div>
-                        <span class="text-xs font-medium text-gray-600">Dark Mode</span>
+                        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">Dark Mode</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
-                        <div
-                            class="w-14 h-7 bg-gray-200 rounded-full peer-focus:ring-2 peer-focus:ring-kumwell-red/20 peer-checked:bg-kumwell-red transition-all duration-300 shadow-inner">
-                            <div
-                                class="absolute inset-0 flex items-center justify-between px-2 pointer-events-none opacity-50">
-                                <i class="fa-solid fa-sun text-[10px] text-yellow-600"></i>
-                                <i class="fa-solid fa-moon text-[10px] text-blue-400"></i>
+                        <div class="w-12 h-6 bg-slate-200 dark:bg-slate-800 rounded-full peer-focus:ring-2 peer-focus:ring-[#D71920]/20 peer-checked:bg-[#D71920] transition-all duration-300 shadow-inner">
+                            <div class="absolute inset-0 flex items-center justify-between px-2 pointer-events-none opacity-40">
+                                <i class="fa-solid fa-sun text-[9px] text-yellow-600"></i>
+                                <i class="fa-solid fa-moon text-[9px] text-blue-400"></i>
                             </div>
                         </div>
-                        <div
-                            class="absolute top-1 left-1 bg-white w-5 h-5 rounded-full transition-all duration-300 peer-checked:translate-x-3.5 shadow-lg flex items-center justify-center">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-100"></div>
-                        </div>
+                        <div class="absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full transition-all duration-300 peer-checked:translate-x-6 shadow-sm"></div>
                     </label>
                 </div>
 
-                <div id="user-profile" class="flex items-center gap-3 px-2">
-                    <div
-                        class="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 font-bold shadow-sm shrink-0">
-                        <i class="fa-solid fa-user"></i>
+                <!-- Admin Card style layout -->
+                <div id="user-profile" class="flex items-center gap-3 p-3 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-900 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[#D71920]"></div>
+                    <div class="w-9 h-9 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 font-bold shrink-0">
+                        <i class="fa-solid fa-id-card text-sm"></i>
                     </div>
-
                     <div class="sidebar-text flex-1 min-w-0">
-                        <p class="text-[13px] font-bold text-gray-900 truncate">
+                        <p class="text-[12px] font-black text-slate-800 dark:text-white truncate">
                             {{ Auth::user()->fullname }}
                         </p>
-                        <p class="text-[11px] text-gray-400 truncate mt-0.5">
-                            {{ Auth::user()->emp_code }}
+                        <p class="text-[10px] text-slate-400 font-bold tracking-wider mt-0.5">
+                            ID: {{ Auth::user()->emp_code }}
                         </p>
                     </div>
                 </div>
@@ -652,14 +623,12 @@
             if (content.classList.contains('hidden')) {
                 content.classList.remove('hidden');
                 arrow.classList.add('rotate-180');
-                btn.classList.add('bg-kumwell-red', 'text-white', 'font-bold', 'shadow-lg', 'shadow-red-500/20');
-                btn.classList.remove('text-slate-600', 'hover:bg-slate-50', 'hover:text-kumwell-red');
+                btn.classList.add('active-menu');
                 if (icon) icon.classList.remove('opacity-60');
             } else {
                 content.classList.add('hidden');
                 arrow.classList.remove('rotate-180');
-                btn.classList.remove('bg-kumwell-red', 'text-white', 'font-bold', 'shadow-lg', 'shadow-red-500/20');
-                btn.classList.add('text-slate-600', 'hover:bg-slate-50', 'hover:text-kumwell-red');
+                btn.classList.remove('active-menu');
                 if (icon) icon.classList.add('opacity-60');
             }
         }

@@ -24,6 +24,6 @@ class Items_type extends Model
     }
     public function item()
     {
-        return $this->belongsTo(Items::class, 'cart_item_id', 'item_id');
+        return $this->belongsTo('App\Models\serviceshams\Items', 'cart_item_id', 'item_id');
     }
 }

@@ -1,7 +1,7 @@
 <?php
 // app/Models/Serviceshams/RequisitionItem.php
 
-namespace App\Models\Serviceshams;
+namespace App\Models\serviceshams;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -42,7 +42,7 @@ class Requisition_items extends Model
 
     public function item()
     {
-        return $this->belongsTo(Items::class, 'item_id', 'item_id');
+        return $this->belongsTo('App\Models\serviceshams\Items', 'item_id', 'item_id');
     }
 
 }

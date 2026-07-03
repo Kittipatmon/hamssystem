@@ -7,6 +7,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
+    @if(request()->secure())
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    @endif
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -26,7 +29,7 @@
 </head>
 
 <body class="font-sans antialiased">
-    <div class="min-h-screen">
+    <div class="min-h-screen pt-16">
         @include('layouts.serviceitem.navservice')
 
         <!-- Page Heading -->
@@ -39,7 +42,7 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="p-0 sm:p-4 md:p-6 pt-[100px] bg-slate-50/30">
+        <main class="p-4 md:p-6 bg-slate-50/30">
             @yield('content')
         </main>
 
@@ -52,10 +55,39 @@
             document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Success',
-                    text: "{{ session('success') }}",
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'OK'
+                    title: "{{ session('success') }}",
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
+    @if (session('warning'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'warning',
+                    title: "{{ session('warning') }}",
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: "{{ session('error') }}",
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1500,
+                    showConfirmButton: false
                 });
             });
         </script>

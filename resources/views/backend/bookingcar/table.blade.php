@@ -31,7 +31,7 @@
             scrollbar-color: #cbd5e1 transparent;
         }
     </style>
-    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 animate-fadeIn">
 
         <!-- New Premium Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -57,6 +57,62 @@
                     class="btn bg-red-600 hover:bg-red-700 text-white border-0 shadow-lg shadow-red-200 rounded-2xl px-4 sm:px-8 transition-all hover:scale-105 active:scale-95 text-xs sm:text-sm h-10 sm:h-12">
                     <i class="fa-solid fa-plus mr-1 sm:mr-2 text-base sm:text-lg"></i> เพิ่มรถ
                 </button>
+            </div>
+        </div>
+
+        @php
+            $totalCount = $vehicles->count();
+            $availableCount = $vehicles->where('status', 'available')->count();
+            $busyCount = $totalCount - $availableCount;
+            
+            $overdueCount = 0;
+            foreach($vehicles as $v) {
+                $latestInsp = $v->latestInspection();
+                $lastMaintMile = $latestInsp ? (int) $latestInsp->mileage : 0;
+                $goalMileage = $latestInsp ? (int) ($latestInsp->next_mileage ?? ($lastMaintMile + 10000)) : (int) ($v->latest_mileage + 10000);
+                if ((int) $v->latest_mileage >= $goalMileage) {
+                    $overdueCount++;
+                }
+            }
+        @endphp
+
+        <!-- Clinical Stats Summary Banner -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-sm shadow-inner">
+                    <i class="fa-solid fa-square-poll-horizontal"></i>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-[9px] font-black uppercase tracking-wider mb-0.5">รถยนต์ในคลังระบบ</p>
+                    <p class="text-xl font-mono font-black text-slate-800">{{ $totalCount }} <span class="text-xs font-bold text-slate-500">คัน</span></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm shadow-inner">
+                    <i class="fa-solid fa-check-double"></i>
+                </div>
+                <div>
+                    <p class="text-emerald-700 text-[9px] font-black uppercase tracking-wider mb-0.5">สถานะพร้อมใช้งาน</p>
+                    <p class="text-xl font-mono font-black text-slate-800">{{ $availableCount }} <span class="text-xs font-bold text-slate-500">คัน</span></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm shadow-inner">
+                    <i class="fa-solid fa-route"></i>
+                </div>
+                <div>
+                    <p class="text-amber-700 text-[9px] font-black uppercase tracking-wider mb-0.5">กำลังใช้งานภารกิจ</p>
+                    <p class="text-xl font-mono font-black text-slate-800">{{ $busyCount }} <span class="text-xs font-bold text-slate-500">คัน</span></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl border border-rose-200 p-4 shadow-sm flex items-center gap-3 bg-rose-50/5">
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm shadow-inner">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <p class="text-rose-700 text-[9px] font-black uppercase tracking-wider mb-0.5">เกินกำหนดซ่อมบำรุง</p>
+                    <p class="text-xl font-mono font-black text-rose-600">{{ $overdueCount }} <span class="text-xs font-bold text-rose-500">คัน</span></p>
+                </div>
             </div>
         </div>
 
@@ -177,104 +233,92 @@
                     @endforelse
                 </div>
 
-                <!-- Desktop Table View -->
-                <div class="hidden sm:block overflow-x-auto">
-                    <table class="table w-full">
-                        <thead
-                            class="bg-slate-50/50 text-slate-400 font-bold text-[11px] uppercase tracking-widest border-b border-slate-100">
-                            <tr>
-                                <th class="py-5 pl-8 bg-transparent">รูปภาพ</th>
-                                <th class="py-5 bg-transparent text-center">ทะเบียน / ชื่อเรียก</th>
-                                <th class="py-5 bg-transparent">ยี่ห้อ & รุ่น</th>
-                                <th class="py-5 bg-transparent text-center">ประเภท</th>
-                                <th class="py-5 bg-transparent text-center">เลขไมล์ล่าสุด (กม.)</th>
-                                <th class="py-5 bg-transparent text-center">สถานะ</th>
-                                <th class="py-5 pr-8 bg-transparent text-center">จัดการ</th>
+                <!-- Desktop Table View (Hospital-style System) -->
+                <div class="hidden sm:block overflow-x-auto p-6 bg-slate-50/30">
+                    <table class="w-full border-collapse border border-slate-200 shadow-sm bg-white text-xs">
+                        <thead>
+                            <tr class="bg-slate-800 text-white font-bold uppercase tracking-wider text-[11px] border-b border-slate-350">
+                                <th class="py-3.5 px-4 border border-slate-200 text-left bg-slate-800">รูปภาพ (IMAGE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">ทะเบียน / ชื่อเรียก (PLATE/NAME)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-left bg-slate-800">ยี่ห้อ & รุ่น (BRAND/MODEL)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">ประเภท (TYPE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-right bg-slate-800">เลขไมล์ล่าสุด (ODOMETER)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">สถานะการจอง (BOOKING)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">การจัดการ (ACTIONS)</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-50 text-slate-600">
+                        <tbody class="divide-y divide-slate-200 text-slate-700">
                             @forelse($vehicles as $vehicle)
-                                <tr class="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                                <tr class="hover:bg-slate-50 transition-colors group cursor-pointer"
                                     data-vehicle="{{ $vehicle->toJson() }}" onclick="viewVehicleDetailsFromDataset(this)">
-                                    <td class="py-6 pl-8">
-                                        <div
-                                            class="w-20 h-14 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-slate-50 flex items-center justify-center">
+                                    <td class="py-4 px-4 border border-slate-200 text-center w-28">
+                                        <div class="w-20 h-12 rounded border border-slate-200 bg-slate-100 flex items-center justify-center mx-auto overflow-hidden">
                                             @php
                                                 $images = json_decode($vehicle->images, true);
                                                 $firstImage = is_array($images) && count($images) > 0 ? $images[0] : null;
                                             @endphp
                                             @if($firstImage)
                                                 <img src="{{ asset('images/vehicle/' . $firstImage) }}"
-                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                             @else
-                                                <i class="fa-solid fa-car text-slate-200 text-2xl"></i>
+                                                <i class="fa-solid fa-car text-slate-300 text-xl"></i>
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="py-6">
+                                    <td class="py-4 px-4 border border-slate-200 text-center font-bold">
                                         <div class="flex flex-col items-center">
-                                            <span class="font-black text-slate-800 text-[16px]">{{ $vehicle->name }}</span>
-                                            <span class="text-[11px] font-bold text-slate-400 mt-0.5">ID:
-                                                {{ $vehicle->vehicle_id }}</span>
+                                            <span class="text-slate-800 font-mono font-black text-sm">{{ $vehicle->name }}</span>
+                                            <span class="text-[10px] text-slate-400 font-bold mt-0.5">VEH-ID: {{ $vehicle->vehicle_id }}</span>
                                         </div>
                                     </td>
-                                    <td class="py-6">
+                                    <td class="py-4 px-4 border border-slate-200">
                                         <div class="flex flex-col">
-                                            <span
-                                                class="font-black text-slate-700 text-[14px] uppercase tracking-wide">{{ $vehicle->brand ?? '-' }}</span>
-                                            <span
-                                                class="text-[12px] text-slate-400 font-medium">{{ $vehicle->model_name ?? '-' }}</span>
+                                            <span class="font-extrabold text-slate-700 uppercase tracking-wide text-xs">{{ $vehicle->brand ?? '-' }}</span>
+                                            <span class="text-[11px] text-slate-500 font-medium">{{ $vehicle->model_name ?? '-' }}</span>
                                         </div>
                                     </td>
-                                    <td class="py-6 text-center">
-                                        <span
-                                            class="inline-flex items-center px-4 py-1.5 rounded-full text-[12px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                                    <td class="py-4 px-4 border border-slate-200 text-center">
+                                        <span class="inline-flex items-center px-3 py-1 rounded bg-slate-100 text-slate-700 font-bold border border-slate-300 text-[10px]">
                                             {{ $vehicle->type ?? '-' }}
                                         </span>
                                     </td>
-                                    <td class="py-6 text-center">
-                                        <span
-                                            class="text-[14px] font-black {{ $vehicle->latest_mileage > 0 ? 'text-blue-600' : 'text-slate-300' }}">
-                                            {{ $vehicle->latest_mileage ? number_format($vehicle->latest_mileage) : '0' }}
-                                        </span>
+                                    <td class="py-4 px-4 border border-slate-200 text-right font-bold text-slate-850 font-mono text-xs">
+                                        {{ $vehicle->latest_mileage ? number_format($vehicle->latest_mileage) : '0' }} กม.
                                     </td>
-                                    <td class="py-6 text-center">
+                                    <td class="py-4 px-4 border border-slate-200 text-center">
                                         @if($vehicle->status === 'available')
-                                            <span
-                                                class="inline-flex items-center px-4 py-1.5 rounded-full text-[12px] font-bold bg-green-50 text-green-600 border border-green-100 ring-4 ring-green-50/50">
-                                                ว่าง
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-300">
+                                                <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span> ว่าง (AVAILABLE)
                                             </span>
                                         @else
-                                            <span
-                                                class="inline-flex items-center px-4 py-1.5 rounded-full text-[12px] font-bold bg-orange-50 text-orange-600 border border-orange-100">
-                                                ไม่ว่าง
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-rose-50 text-rose-700 border border-rose-300">
+                                                <span class="w-1.5 h-1.5 bg-rose-600 rounded-full"></span> ไม่ว่าง (BUSY)
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="py-6 pr-8 text-center">
-                                        <div class="flex items-center justify-center gap-2">
+                                    <td class="py-4 px-4 border border-slate-200 text-center">
+                                        <div class="flex items-center justify-center gap-2" onclick="event.stopPropagation();">
                                             <button data-vehicle="{{ $vehicle->toJson() }}"
-                                                onclick="event.stopPropagation(); openEditVehicleModalFromDataset(this)"
-                                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm border border-blue-100">
-                                                <i class="fa-solid fa-edit text-sm"></i>
+                                                onclick="openEditVehicleModalFromDataset(this)"
+                                                class="w-8 h-8 flex items-center justify-center rounded bg-sky-50 text-sky-700 border border-sky-300 hover:bg-sky-600 hover:text-white hover:border-sky-600 transition-all shadow-sm">
+                                                <i class="fa-solid fa-edit text-xs"></i>
                                             </button>
                                             <button
-                                                onclick="event.stopPropagation(); confirmDelete({{ $vehicle->vehicle_id }}, '{{ $vehicle->name }}')"
-                                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm border border-red-100">
-                                                <i class="fa-solid fa-trash text-sm"></i>
+                                                onclick="confirmDelete({{ $vehicle->vehicle_id }}, '{{ $vehicle->name }}')"
+                                                class="w-8 h-8 flex items-center justify-center rounded bg-rose-50 text-rose-700 border border-rose-300 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all shadow-sm">
+                                                <i class="fa-solid fa-trash text-xs"></i>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="py-20 text-center">
+                                    <td colspan="7" class="py-16 text-center border border-slate-200">
                                         <div class="flex flex-col items-center gap-3">
-                                            <div
-                                                class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-200">
-                                                <i class="fa-solid fa-car-side text-3xl"></i>
+                                            <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 border border-slate-200">
+                                                <i class="fa-solid fa-car-side text-2xl"></i>
                                             </div>
-                                            <span class="text-slate-400 font-medium">ไม่พบข้อมูลรถยนต์ในระบบ</span>
+                                            <span class="text-slate-400 font-bold text-xs">ไม่พบข้อมูลรถยนต์ในระบบ</span>
                                         </div>
                                     </td>
                                 </tr>
@@ -287,22 +331,117 @@
 
         <!-- Tab 2: Inspections -->
         <div id="tab-inspections" class="tab-pane hidden space-y-8">
-            <!-- Maintenance Summary Grid -->
+            <!-- Maintenance Summary List/Table -->
             <div>
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 shadow-inner">
+                        <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 shadow-inner">
                             <i class="fa-solid fa-gauge-high"></i>
                         </div>
                         <div>
                             <h3 class="font-black text-slate-800 text-lg">Maintenance Dashboard</h3>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">ติดตามสภาพรถตามระยะทาง</p>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">ติดตามและตรวจสอบระยะซ่อมบำรุง</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Desktop Table View (Hospital-style System) -->
+                <div class="hidden lg:block overflow-x-auto p-6 bg-slate-50/30 border border-slate-200 rounded-3xl bg-white shadow-sm mb-6">
+                    <table class="w-full border-collapse border border-slate-200 shadow-sm bg-white text-xs">
+                        <thead>
+                            <tr class="bg-slate-850 text-white font-bold uppercase tracking-wider text-[11px] border-b border-slate-350">
+                                <th class="py-3.5 px-4 border border-slate-200 text-left bg-slate-800">ชื่อรถ/ทะเบียน (VEHICLE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-left bg-slate-800">ยี่ห้อ & รุ่น (BRAND/MODEL)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-right bg-slate-800">ไมล์ล่าสุด (CURRENT MILEAGE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-right bg-slate-800">เป้าหมายบำรุงรักษา (GOAL MILEAGE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-left bg-slate-800">ความคืบหน้าการใช้ (WEAR PROGRESS)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">สถานะสุขภาพ (HEALTH STATUS)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-right bg-slate-800">ระยะคงเหลือ (REMAINING)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">จัดการ (ACTIONS)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-700">
+                            @foreach($vehicles as $v)
+                                @php
+                                    $latestInsp = $v->latestInspection();
+                                    $lastMaintMile = $latestInsp ? (int) $latestInsp->mileage : 0;
+                                    $goalMileage = $latestInsp ? (int) ($latestInsp->next_mileage ?? ($lastMaintMile + 10000)) : (int) ($v->latest_mileage + 10000);
+
+                                    $diff = $goalMileage - $lastMaintMile;
+                                    $currentDist = (int) $v->latest_mileage - $lastMaintMile;
+                                    $progress = $diff > 0 ? min(100, max(0, ($currentDist / $diff) * 100)) : 0;
+
+                                    $isOverdue = (int) $v->latest_mileage >= $goalMileage;
+                                    $isWarning = (int) $v->latest_mileage >= ($goalMileage - 1000) && !$isOverdue;
+
+                                    if ($isOverdue) {
+                                        $badgeClass = 'bg-rose-50 text-rose-700 border-rose-300';
+                                        $statusText = 'OVERDUE (เลยกำหนด)';
+                                        $barColor = 'bg-rose-500';
+                                    } elseif ($isWarning) {
+                                        $badgeClass = 'bg-amber-50 text-amber-700 border-amber-300';
+                                        $statusText = 'DUE SOON (ใกล้ครบ)';
+                                        $barColor = 'bg-amber-500';
+                                    } else {
+                                        $badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-300';
+                                        $statusText = 'HEALTHY (ปกติ)';
+                                        $barColor = 'bg-emerald-500';
+                                    }
+                                    $remaining = $goalMileage - $v->latest_mileage;
+                                @endphp
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="py-3.5 px-4 border border-slate-200 font-mono font-black text-slate-800">
+                                        {{ $v->name }}
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-slate-600 font-medium">
+                                        {{ $v->brand ?? '-' }} {{ $v->model_name ?? '-' }}
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-right font-mono font-bold text-slate-800">
+                                        {{ number_format($v->latest_mileage) }} กม.
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-right font-mono font-bold text-slate-600">
+                                        {{ number_format($goalMileage) }} กม.
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 w-44">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-24 bg-slate-100 rounded-full h-2.5 p-0.5 border border-slate-200 shadow-inner shrink-0">
+                                                <div class="{{ $barColor }} h-full rounded-full transition-all" style="width: {{ min($progress, 100) }}%"></div>
+                                            </div>
+                                            <span class="text-[10px] font-black text-slate-500 font-mono">{{ number_format($progress, 1) }}%</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-center">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-black border {{ $badgeClass }}">
+                                            <span class="w-1.5 h-1.5 {{ $isOverdue ? 'bg-rose-600' : ($isWarning ? 'bg-amber-600' : 'bg-emerald-600') }} rounded-full"></span> {{ $statusText }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-right font-mono font-bold {{ $isOverdue ? 'text-rose-600' : 'text-slate-500' }}">
+                                        @if($isOverdue)
+                                            เลยกำหนด {{ number_format(abs($remaining)) }} กม.
+                                        @else
+                                            เหลือ {{ number_format($remaining) }} กม.
+                                        @endif
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-center">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <button data-vehicle="{{ $v->toJson() }}" onclick="viewVehicleDetailsFromDataset(this)"
+                                                class="w-7 h-7 flex items-center justify-center rounded bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-all shadow-sm">
+                                                <i class="fa-solid fa-file-invoice text-xs"></i>
+                                            </button>
+                                            <button data-vehicle="{{ $v->toJson() }}" onclick="openInspectionModalFromDataset(this)"
+                                                class="w-7 h-7 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-900 text-white border-0 transition-all shadow-sm">
+                                                <i class="fa-solid fa-plus text-xs text-sky-450"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View (For Screens smaller than LG) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:hidden mb-6">
                     @foreach($vehicles as $v)
                         @php
                             $latestInsp = $v->latestInspection();
@@ -315,68 +454,86 @@
 
                             $isOverdue = (int) $v->latest_mileage >= $goalMileage;
                             $isWarning = (int) $v->latest_mileage >= ($goalMileage - 1000) && !$isOverdue;
+
+                            if ($isOverdue) {
+                                $themeBorder = 'border-rose-200 bg-rose-50/5';
+                                $badgeClass = 'bg-rose-505 text-white animate-pulse';
+                                $statusText = 'OVERDUE (เลยกำหนด)';
+                                $barColor = 'bg-rose-500';
+                            } elseif ($isWarning) {
+                                $themeBorder = 'border-amber-200 bg-amber-50/5';
+                                $badgeClass = 'bg-amber-500 text-white';
+                                $statusText = 'DUE SOON (ใกล้ครบ)';
+                                $barColor = 'bg-amber-500';
+                            } else {
+                                $themeBorder = 'border-slate-200';
+                                $badgeClass = 'bg-emerald-500 text-white';
+                                $statusText = 'HEALTHY (ปกติ)';
+                                $barColor = 'bg-emerald-500';
+                            }
                         @endphp
-                        <div
-                            class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-md transition-all group overflow-hidden relative">
-                            @if($isOverdue)
-                                <div class="absolute -top-1 -right-1 w-20 h-20 bg-red-500/10 rounded-full blur-2xl"></div>
-                            @endif
+                        <div class="bg-white rounded-3xl border {{ $themeBorder }} shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative group">
+                            <!-- Card Indicator Bar -->
+                            <div class="h-1.5 w-full {{ $barColor }}"></div>
 
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h4 class="font-black text-slate-800 text-lg group-hover:text-orange-600 transition-colors">
-                                        {{ $v->name }}
-                                    </h4>
-                                    <p class="text-xs text-slate-400 font-medium">{{ $v->brand }} {{ $v->model_name }}</p>
-                                </div>
-                                <div class="text-right">
-                                    @if($isOverdue)
-                                        <span
-                                            class="badge badge-error text-white font-black text-[10px] py-3 px-3 animate-pulse">OVERDUE</span>
-                                    @elseif($isWarning)
-                                        <span class="badge badge-warning text-white font-black text-[10px] py-3 px-3">DUE
-                                            SOON</span>
-                                    @else
-                                        <span class="badge badge-success text-white font-black text-[10px] py-3 px-3">HEALTHY</span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div class="flex justify-between items-end">
+                            <div class="p-6 space-y-6">
+                                <!-- Card Header -->
+                                <div class="flex justify-between items-start gap-2">
                                     <div>
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Current Mileage</p>
-                                        <p class="text-xl font-black text-slate-800">{{ number_format($v->latest_mileage) }}
-                                            <span class="text-xs font-medium text-slate-400">km</span>
+                                        <h4 class="font-mono font-black text-slate-800 text-lg tracking-tight group-hover:text-sky-600 transition-colors">
+                                            {{ $v->name }}
+                                        </h4>
+                                        <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ $v->brand ?? '-' }} • {{ $v->model_name ?? '-' }}</p>
+                                    </div>
+                                    <span class="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded {{ $badgeClass }}">
+                                        {{ $statusText }}
+                                    </span>
+                                </div>
+
+                                <!-- Technical Stats -->
+                                <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-inner">
+                                    <div>
+                                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-wider mb-1">ระยะไมล์ปัจจุบัน</p>
+                                        <p class="text-base font-black font-mono text-slate-800">
+                                            {{ number_format($v->latest_mileage) }} <span class="text-[10px] text-slate-400 font-medium">กม.</span>
                                         </p>
                                     </div>
-                                    <div class="text-right">
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Goal (Maintenance)</p>
-                                        <p class="text-sm font-bold text-slate-600">{{ number_format($goalMileage) }} km</p>
+                                    <div class="text-right border-l border-slate-200 pl-4">
+                                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-wider mb-1">เป้าหมายบำรุงรักษา</p>
+                                        <p class="text-base font-black font-mono text-slate-600">
+                                            {{ number_format($goalMileage) }} <span class="text-[10px] text-slate-400 font-medium">กม.</span>
+                                        </p>
                                     </div>
                                 </div>
 
-                                <div class="space-y-1.5">
-                                    <progress
-                                        class="progress {{ $isOverdue ? 'progress-error' : ($isWarning ? 'progress-warning' : 'progress-success') }} w-full h-3 rounded-full"
-                                        value="{{ min($progress, 100) }}" max="100"></progress>
-                                    <div class="flex justify-between text-[10px] font-bold">
-                                        <span
-                                            class="{{ $isOverdue ? 'text-red-500' : 'text-slate-400' }}">{{ number_format($progress, 1) }}%
-                                            Complete</span>
-                                        <span class="text-slate-400">Next Service In:
-                                            {{ number_format(max(0, $goalMileage - $v->latest_mileage)) }} km</span>
+                                <!-- Technical Progress bar -->
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-[10px] font-black">
+                                        <span class="text-slate-400 uppercase tracking-widest">ความสึกหรอน้ำมัน/ยาง</span>
+                                        <span class="{{ $isOverdue ? 'text-rose-600' : 'text-slate-500' }}">{{ number_format($progress, 1) }}%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-3 p-0.5 border border-slate-200 shadow-inner">
+                                        <div class="{{ $barColor }} h-full rounded-full transition-all duration-1000 shadow" style="width: {{ min($progress, 100) }}%"></div>
+                                    </div>
+                                    <div class="flex justify-between text-[9px] font-bold text-slate-400">
+                                        <span>ล่าสุด: {{ number_format($lastMaintMile) }} กม.</span>
+                                        @if($isOverdue)
+                                            <span class="text-rose-600 font-black">เลยกำหนดมา: {{ number_format(max(0, $v->latest_mileage - $goalMileage)) }} กม.</span>
+                                        @else
+                                            <span>อีก: {{ number_format(max(0, $goalMileage - $v->latest_mileage)) }} กม.</span>
+                                        @endif
                                     </div>
                                 </div>
 
-                                <div class="flex gap-2">
+                                <!-- Buttons -->
+                                <div class="flex gap-2.5 pt-2">
                                     <button data-vehicle="{{ $v->toJson() }}" onclick="viewVehicleDetailsFromDataset(this)"
-                                        class="flex-1 btn btn-ghost btn-sm rounded-xl text-slate-400 hover:text-orange-600 hover:bg-orange-50 border border-transparent hover:border-orange-100 transition-all gap-2">
-                                        <i class="fa-solid fa-circle-info text-xs"></i> Details
+                                        class="flex-1 btn btn-sm bg-white hover:bg-slate-50 text-slate-700 border-slate-200 rounded-xl font-bold text-xs h-9 min-h-0 flex items-center justify-center gap-1.5 transition-all">
+                                        <i class="fa-solid fa-file-invoice text-[11px] text-slate-400"></i> รายละเอียด
                                     </button>
                                     <button data-vehicle="{{ $v->toJson() }}" onclick="openInspectionModalFromDataset(this)"
-                                        class="flex-1 btn bg-orange-500 hover:bg-orange-600 text-white btn-sm rounded-xl border-0 shadow-sm shadow-orange-100 gap-2">
-                                        <i class="fa-solid fa-plus text-xs"></i> Check
+                                        class="flex-1 btn btn-sm bg-slate-850 hover:bg-slate-900 text-white border-0 rounded-xl font-black text-xs h-9 min-h-0 flex items-center justify-center gap-1.5 transition-all">
+                                        <i class="fa-solid fa-plus text-[11px] text-sky-400"></i> ตรวจสภาพ
                                     </button>
                                 </div>
                             </div>
@@ -457,66 +614,78 @@
                     @endforelse
                 </div>
 
-                <!-- Desktop Table View -->
-                <div class="hidden sm:block overflow-x-auto">
-                    <table class="table w-full text-[12px]">
-                        <thead class="bg-white text-slate-500 font-medium border-b border-slate-100">
-                            <tr>
-                                <th class="bg-white"># ID</th>
-                                <th class="bg-white">รถ (vehicle_id)</th>
-                                <th class="bg-white">วันที่ตรวจ (inspection_date)</th>
-                                <th class="bg-white">สถานที่ (location)</th>
-                                <th class="bg-white">เลขไมล์ (mileage)</th>
-                                <th class="bg-white">เป้าหมายถัดไป (next_mileage)</th>
-                                <th class="bg-white">ผู้ตรวจเช็ค (inspector_name)</th>
-                                <th class="bg-white">เอกสาร (file)</th>
-                                <th class="bg-white">สถานะ (status)</th>
-                                <th class="bg-white text-center">จัดการ (Actions)</th>
+                <!-- Desktop Table View (Hospital-style System) -->
+                <div class="hidden sm:block overflow-x-auto p-6 bg-slate-50/30">
+                    <table class="w-full border-collapse border border-slate-200 shadow-sm bg-white text-xs">
+                        <thead>
+                            <tr class="bg-slate-800 text-white font-bold uppercase tracking-wider text-[11px] border-b border-slate-350">
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800"># ID</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-left bg-slate-800">รถ (VEHICLE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">วันที่ตรวจ (INSPECTION DATE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-left bg-slate-800">สถานที่ (LOCATION)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-right bg-slate-800">เลขไมล์ (MILEAGE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-right bg-slate-800">เป้าหมายถัดไป (NEXT DUE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-left bg-slate-800">ผู้ตรวจเช็ค (INSPECTOR)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">เอกสาร (FILE)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">สถานะ (STATUS)</th>
+                                <th class="py-3.5 px-4 border border-slate-200 text-center bg-slate-800">จัดการ (ACTIONS)</th>
                             </tr>
                         </thead>
-                        <tbody class="text-slate-600">
+                        <tbody class="divide-y divide-slate-200 text-slate-700">
                             @forelse($inspections as $insp)
-                                <tr class="hover:bg-slate-50/50 border-b border-slate-50">
-                                    <td>{{ $insp->inspection_id }}</td>
-                                    <td>Id: {{ $insp->vehicle_id }} - {{ $insp->vehicle->name ?? 'N/A' }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($insp->inspection_date)->format('d/m/Y') }}</td>
-                                    <td>{{ $insp->location ?? '-' }}</td>
-                                    <td class="font-bold text-orange-600">{{ number_format((float) $insp->mileage) }} กม.</td>
-                                    <td class="text-blue-600 font-medium italic">
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="py-3.5 px-4 border border-slate-200 text-center font-mono font-bold text-slate-500">
+                                        {{ $insp->inspection_id }}
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 font-bold text-slate-800">
+                                        <div class="flex flex-col">
+                                            <span>{{ $insp->vehicle->name ?? 'N/A' }}</span>
+                                            <span class="text-[10px] text-slate-400 font-normal">VEH-ID: {{ $insp->vehicle_id }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-center font-mono">
+                                        {{ \Carbon\Carbon::parse($insp->inspection_date)->format('d/m/Y') }}
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-slate-600">
+                                        {{ $insp->location ?? '-' }}
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-right font-bold text-orange-600 font-mono">
+                                        {{ number_format((float) $insp->mileage) }} กม.
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-right font-bold text-blue-600 font-mono">
                                         {{ $insp->next_mileage ? number_format((float) $insp->next_mileage) . ' กม.' : '-' }}
                                     </td>
-                                    <td>{{ $insp->inspector_name ?? '-' }}</td>
-                                    <td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-slate-600">
+                                        {{ $insp->inspector_name ?? '-' }}
+                                    </td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-center">
                                         @if($insp->file_vehicle)
                                             <a href="{{ asset('uploads/vehicl_file_maintenance/' . $insp->file_vehicle) }}"
                                                 target="_blank"
-                                                class="btn btn-ghost btn-xs text-blue-600 hover:bg-blue-50 gap-1 rounded-lg">
-                                                <i class="fa-solid fa-file-arrow-down text-[10px]"></i>
-                                                เปิดดู
+                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 transition-all font-bold text-[10px]">
+                                                <i class="fa-solid fa-file-arrow-down"></i> เปิดดู
                                             </a>
                                         @else
                                             <span class="text-slate-300">-</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td class="py-3.5 px-4 border border-slate-200 text-center">
                                         @if($insp->status == 0)
-                                            <span
-                                                class="px-2 py-1 rounded text-[10px] font-medium bg-green-100 text-green-700 leading-none inline-flex items-center gap-1">
-                                                <i class="fa-solid fa-check-circle text-[8px]"></i> ปกติ
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-300">
+                                                <span class="w-1 h-1 bg-emerald-600 rounded-full"></span> ปกติ
                                             </span>
                                         @else
-                                            <span
-                                                class="px-2 py-1 rounded text-[10px] font-medium bg-red-100 text-red-700 leading-none inline-flex items-center gap-1">
-                                                <i class="fa-solid fa-triangle-exclamation text-[8px]"></i> ไม่ปกติ
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-300">
+                                                <span class="w-1 h-1 bg-rose-600 rounded-full"></span> ไม่ปกติ
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="text-center">
-                                        <div class="flex items-center justify-center gap-2">
+                                    <td class="py-3.5 px-4 border border-slate-200 text-center">
+                                        <div class="flex items-center justify-center gap-1.5">
                                             <button data-inspection="{{ json_encode($insp) }}"
                                                 onclick="openEditInspectionModalFromDataset(this)"
-                                                class="btn btn-ghost btn-xs text-orange-600 hover:bg-orange-50 rounded-lg">
-                                                <i class="fa-solid fa-pen-to-square"></i> แก้ไข
+                                                class="w-7 h-7 flex items-center justify-center rounded bg-sky-50 text-sky-700 border border-sky-300 hover:bg-sky-600 hover:text-white hover:border-sky-600 transition-all shadow-sm">
+                                                <i class="fa-solid fa-pen-to-square text-xs"></i>
                                             </button>
                                             <form
                                                 action="{{ route('backend.bookingcar.inspections.destroy', $insp->inspection_id) }}"
@@ -524,8 +693,8 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="btn btn-ghost btn-xs text-red-500 hover:bg-red-50 rounded-lg">
-                                                    <i class="fa-solid fa-trash-can"></i> ลบ
+                                                    class="w-7 h-7 flex items-center justify-center rounded bg-rose-50 text-rose-700 border border-rose-300 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all shadow-sm">
+                                                    <i class="fa-solid fa-trash-can text-xs"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -533,7 +702,14 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="10" class="text-center py-6 text-slate-400">ไม่พบข้อมูล</td>
+                                    <td colspan="10" class="py-16 text-center border border-slate-200">
+                                        <div class="flex flex-col items-center gap-3">
+                                            <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 border border-slate-200">
+                                                <i class="fa-solid fa-microscope text-2xl"></i>
+                                            </div>
+                                            <span class="text-slate-400 font-bold text-xs">ไม่พบข้อมูลการตรวจสภาพ</span>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -970,28 +1146,28 @@
                         </p>
                     </div>
 
-                    <!-- Maintenance History Section -->
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                        <div class="px-6 py-3 bg-slate-50/50 border-b border-slate-100 flex justify-between items-center">
-                            <h4 class="text-slate-700 font-bold text-sm flex items-center gap-2">
-                                <i class="fa-solid fa-clock-rotate-left text-blue-500 text-xs"></i> ประวัติการตรวจเช็ค
+                    <!-- Maintenance History Section (Hospital Grid Style) -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-slate-800 border-b border-slate-300 flex justify-between items-center">
+                            <h4 class="text-white font-bold text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-hospital-user text-sky-400 text-sm"></i> ประวัติการตรวจเช็ค (CLINICAL INSPECTION LOG)
                             </h4>
                         </div>
                         <div class="max-h-[250px] overflow-y-auto">
-                            <table class="table table-compact w-full text-[11px]">
-                                <thead class="sticky top-0 bg-white/95 backdrop-blur-md z-10 border-b border-slate-50">
-                                    <tr class="text-slate-400 font-bold text-[9px] uppercase tracking-wider">
-                                        <th class="py-3 pl-6">วันที่</th>
-                                        <th class="py-3">สถานที่</th>
-                                        <th class="py-3">เลขไมล์</th>
-                                        <th class="py-3">เป้าหมายถัดไป</th>
-                                        <th class="py-3 text-center">สถานะ</th>
-                                        <th class="py-3">ผู้ตรวจ</th>
-                                        <th class="py-3 text-center">เอกสาร</th>
-                                        <th class="py-3 pr-6 text-right">จัดการ</th>
+                            <table class="w-full border-collapse border border-slate-200 text-[11px] bg-white">
+                                <thead class="sticky top-0 bg-slate-100 z-10 border-b border-slate-350 shadow-sm">
+                                    <tr class="text-slate-700 font-black uppercase tracking-wider text-[10px]">
+                                        <th class="py-2.5 px-3 border border-slate-200 text-center bg-slate-100">วันที่ (DATE)</th>
+                                        <th class="py-2.5 px-3 border border-slate-200 text-left bg-slate-100">สถานที่ (LOCATION)</th>
+                                        <th class="py-2.5 px-3 border border-slate-200 text-right bg-slate-100">เลขไมล์ (MILEAGE)</th>
+                                        <th class="py-2.5 px-3 border border-slate-200 text-right bg-slate-100">เป้าหมาย (NEXT DUE)</th>
+                                        <th class="py-2.5 px-3 border border-slate-200 text-center bg-slate-100">สถานะ (STATUS)</th>
+                                        <th class="py-2.5 px-3 border border-slate-200 text-left bg-slate-100">ผู้ตรวจ (INSPECTOR)</th>
+                                        <th class="py-2.5 px-3 border border-slate-200 text-center bg-slate-100">เอกสาร (FILE)</th>
+                                        <th class="py-2.5 px-3 border border-slate-200 text-center bg-slate-100">จัดการ (ACTIONS)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="view_vehicle_inspections_body" class="divide-y divide-slate-50">
+                                <tbody id="view_vehicle_inspections_body" class="divide-y divide-slate-200 text-slate-700">
                                     <!-- Dynamic Content -->
                                 </tbody>
                             </table>
@@ -1514,51 +1690,51 @@
                     inspections.sort((a, b) => new Date(b.inspection_date) - new Date(a.inspection_date));
 
                     if (inspections.length === 0) {
-                        historyBody.innerHTML = '<tr><td colspan="5" class="py-12 text-center text-slate-400 italic">ไม่พบประวัติการตรวจเช็ค</td></tr>';
+                        historyBody.innerHTML = '<tr><td colspan="8" class="py-12 text-center text-slate-400 font-bold border border-slate-200">ไม่พบประวัติการตรวจเช็คสภาพ</td></tr>';
                     } else {
                         inspections.forEach(insp => {
                             const date = insp.inspection_date ? new Date(insp.inspection_date).toLocaleDateString('th-TH') : '-';
-                            const statusColor = insp.status == 0 ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-600 border-red-100';
+                            const statusColor = insp.status == 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-rose-50 text-rose-700 border-rose-300';
                             const statusText = insp.status == 0 ? 'ปกติ' : 'ไม่ปกติ';
                             const fileLink = insp.file_vehicle ?
-                                `<a href="/uploads/vehicl_file_maintenance/${insp.file_vehicle}" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all"><i class="fa-solid fa-file-pdf"></i></a>` : '-';
+                                `<a href="/uploads/vehicl_file_maintenance/${insp.file_vehicle}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 transition-all font-bold text-[10px]"><i class="fa-solid fa-file-arrow-down"></i> เปิดดู</a>` : '-';
 
-                            const nextMileageText = insp.next_mileage ? `${parseInt(insp.next_mileage).toLocaleString()} <span class="text-[9px] text-slate-400 font-medium">กม.</span>` : '-';
+                            const nextMileageText = insp.next_mileage ? `${parseInt(insp.next_mileage).toLocaleString()} กม.` : '-';
                             const locationText = insp.location || '-';
 
                             // Safely escape the inspection object for the data attribute
                             const inspectionJson = JSON.stringify(insp).replace(/'/g, "&apos;");
 
                             const tr = document.createElement('tr');
-                            tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0";
+                            tr.className = "hover:bg-slate-50 transition-colors";
                             tr.innerHTML = `
-                                                                                <td class="py-4 pl-6 font-medium text-slate-500">${date}</td>
-                                                                                <td class="py-4 text-slate-600 text-sm">${locationText}</td>
-                                                                                <td class="py-4 font-black text-slate-800">${parseInt(insp.mileage || 0).toLocaleString()} <span class="text-[10px] text-slate-400">KM</span></td>
-                                                                                <td class="py-4 font-bold text-blue-600">${nextMileageText}</td>
-                                                                                <td class="py-4 text-center">
-                                                                                    <span class="px-3 py-1 rounded-full text-[10px] font-black border ${statusColor}">${statusText}</span>
-                                                                                </td>
-                                                                                <td class="py-4 text-slate-500 text-sm whitespace-nowrap">${insp.inspector_name || '-'}</td>
-                                                                                <td class="py-4 text-center">
-                                                                                    <div class="flex justify-center">${fileLink}</div>
-                                                                                </td>
-                                                                                <td class="py-4 pr-6 text-right">
-                                                                                    <div class="flex items-center justify-end gap-1">
-                                                                                        <button 
-                                                                                            data-inspection='${inspectionJson}'
-                                                                                            onclick="openEditInspectionModalFromDataset(this)"
-                                                                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white transition-all shadow-sm">
-                                                                                            <i class="fa-solid fa-pen-to-square text-[10px]"></i>
-                                                                                        </button>
-                                                                                        <button 
-                                                                                            onclick="deleteInspectionFromModal(${insp.inspection_id})"
-                                                                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm">
-                                                                                            <i class="fa-solid fa-trash-can text-[10px]"></i>
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </td>
-                                                                            `;
+                                <td class="py-3 px-3 border border-slate-200 text-center font-mono font-bold text-slate-500">${date}</td>
+                                <td class="py-3 px-3 border border-slate-200 text-slate-600 font-medium">${locationText}</td>
+                                <td class="py-3 px-3 border border-slate-200 text-right font-mono font-bold text-orange-600">${parseInt(insp.mileage || 0).toLocaleString()} กม.</td>
+                                <td class="py-3 px-3 border border-slate-200 text-right font-mono font-bold text-blue-600">${nextMileageText}</td>
+                                <td class="py-3 px-3 border border-slate-200 text-center">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-black border ${statusColor}">
+                                        <span class="w-1 h-1 ${insp.status == 0 ? 'bg-emerald-600' : 'bg-rose-600'} rounded-full"></span> ${statusText}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 border border-slate-200 text-slate-600 font-medium">${insp.inspector_name || '-'}</td>
+                                <td class="py-3 px-3 border border-slate-200 text-center">${fileLink}</td>
+                                <td class="py-3 px-3 border border-slate-200 text-center">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <button 
+                                            data-inspection='${inspectionJson}'
+                                            onclick="openEditInspectionModalFromDataset(this)"
+                                            class="w-7 h-7 flex items-center justify-center rounded bg-sky-50 text-sky-700 border border-sky-300 hover:bg-sky-600 hover:text-white transition-all shadow-sm">
+                                            <i class="fa-solid fa-pen-to-square text-[10px]"></i>
+                                        </button>
+                                        <button 
+                                            onclick="deleteInspectionFromModal(${insp.inspection_id})"
+                                            class="w-7 h-7 flex items-center justify-center rounded bg-rose-50 text-rose-700 border border-rose-300 hover:bg-rose-600 hover:text-white transition-all shadow-sm">
+                                            <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            `;
                             historyBody.appendChild(tr);
                         });
                     }

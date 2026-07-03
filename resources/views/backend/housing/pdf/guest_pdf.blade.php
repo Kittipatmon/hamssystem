@@ -149,14 +149,15 @@
                     class="dotted-line" style="width: 100px;">{{ $guest->section }}</span>
             </div>
             <div class="row">
-                ซึ่งอยู่บ้านพักพนักงาน
-                @if(str_contains($guest->residence_type, 'บางใหญ่') || str_contains($guest->residence_type, 'สำนักงานใหญ่'))
-                <span class="check-box" style="margin-top: 8px;">&#10003;</span> @else <span class="check-box"
-                style="margin-top: 8px;"></span> @endif โรงงานบางใหญ่
-                @if(str_contains($guest->residence_type, 'ไทรใหญ่')) <span class="check-box"
-                style="margin-top: 8px;">&#10003;</span> @else <span class="check-box"
-                        style="margin-top: 8px;"></span>
-                    @endif โรงงานไทรใหญ่
+                ด้วยข้าพเจ้ามีความต้องการเข้าพักอาศัยในบ้านพักของพนักงาน ที่
+                @foreach(\App\Models\housing\Residence::all() as $res)
+                    @if(!empty($guest->residence_type) && (str_contains($guest->residence_type, $res->name) || ($res->name == 'บางใหญ่' && str_contains($guest->residence_type, 'สำนักงานใหญ่'))))
+                        <span class="check-box" style="margin-top: 8px;">&#10003;</span>
+                    @else
+                        <span class="check-box" style="margin-top: 8px;"></span>
+                    @endif
+                    {{ $res->name }}
+                @endforeach
             </div>
             <div class="form-row row">
                 ห้อง <span class="dotted-line" style="width: 100px;">{{ $guest->room_number }}</span>

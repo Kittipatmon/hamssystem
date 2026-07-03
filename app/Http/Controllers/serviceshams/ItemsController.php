@@ -13,6 +13,36 @@ use Illuminate\Support\Facades\Log;
 class ItemsController extends Controller
 {
     /**
+     * Export Excel Stock Summary
+     */
+    public function exportStockSummary(Request $request)
+    {
+        $items = Items::with('items_type')->orderBy('quantity', 'asc')->get();
+        
+        $year = now()->year;
+
+        // Get withdrawals this year grouped by item_id and month
+        $withdrawalsRecords = \App\Models\serviceshams\Requisition_items::join('requisitions', 'requisition_items.requisition_id', '=', 'requisitions.requisitions_id')
+            ->whereYear('requisitions.created_at', $year)
+            ->selectRaw('item_id, MONTH(requisitions.created_at) as month, SUM(quantity) as total_qty')
+            ->groupBy('item_id', 'month')
+            ->get();
+            
+        $withdrawals = [];
+        foreach ($withdrawalsRecords as $record) {
+            $withdrawals[$record->item_id][$record->month] = $record->total_qty;
+        }
+
+        $headers = [
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="บันทึกรายการสต็อกประจำปี_' . $year . '.xls"',
+            'Pragma' => 'no-cache',
+            'Expires' => '0'
+        ];
+
+        return response(view('serviceshams.items.export_excel', compact('items', 'withdrawals', 'year'))->render(), 200, $headers);
+    }
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
@@ -226,9 +256,15 @@ class ItemsController extends Controller
         ]);
     }
 
-    public function itemsAll()
+    public function itemsAll(Request $request)
     {
-        $items = Items::where('quantity', '>', 0)->get();
+        $query = Items::where('quantity', '>', 0);
+
+        if ($request->filled('category')) {
+            $query->where('type_id', $request->category);
+        }
+
+        $items = $query->orderBy('name')->paginate(24);
         return view('serviceshams.items.itemsall', compact('items'));
     }
 

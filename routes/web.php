@@ -55,8 +55,8 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/backend/welcome', [DataManagementController::class, 'welcomeDataManagement'])->name('backend.welcomedatamanage');
-    Route::resource('backend/policy', \App\Http\Controllers\Backend\PolicyController::class, ['as' => 'backend']);
-    Route::resource('backend/announcement', \App\Http\Controllers\Backend\AnnouncementController::class, ['as' => 'backend']);
+    Route::resource('backend/policy', \App\Http\Controllers\backend\PolicyController::class, ['as' => 'backend']);
+    Route::resource('backend/announcement', \App\Http\Controllers\backend\AnnouncementController::class, ['as' => 'backend']);
 
 
     Route::prefix('datamanage')->name('datamanage.')->group(function () {
@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/serviceshams/welcome', [RequisitionsController::class, 'welcomeService'])->name('serviceshams.welcomeservice');
 
     // Route::resource('items', ItemsController::class);
+    Route::get('items/export', [ItemsController::class, 'exportStockSummary'])->name('items.export');
     Route::get('items', [ItemsController::class, 'index'])->name('items.index');
     Route::get('items/create', [ItemsController::class, 'create'])->name('items.create');
     Route::post('items', [ItemsController::class, 'store'])->name('items.store');
@@ -92,7 +93,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/cartitem', [CartItemsController::class, 'showitems'])->name('cartitem.index');
     Route::post('/cartitem/add', [CartItemsController::class, 'addToCart'])->name('cartitem.add');
 
-    Route::delete('/cartitem/{id}', [CartItemsController::class, 'destroy'])->name('cartitem.destroy');
+    Route::post('/cartitem/destroy/{id}', [CartItemsController::class, 'destroy'])->name('cartitem.destroy');
     Route::post('/cartitem/update/{id}', [CartItemsController::class, 'update'])->name('cartitem.update');
     Route::post('/cartitem/checkout', [CartItemsController::class, 'confirmRequisition'])->name('cartitem.checkout');
 
@@ -108,6 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::get('requisitions/reqpending', [RequisitionsController::class, 'ReqlistPending'])->name('requisitions.reqlistpending');
 
     Route::get('requisitions/reqlistall', [RequisitionsController::class, 'ReqlistAll'])->name('requisitions.reqlistall');
+    Route::get('requisitions/export-summary', [RequisitionsController::class, 'exportSummary'])->name('requisitions.export_summary');
     Route::get('requisitions/detailreqpedding/{id}', [RequisitionsController::class, 'DetailReqPending'])->name('requisitions.detailreqpedding');
     Route::get('requisitions/detailreqlistall/{id}', [RequisitionsController::class, 'DetailReqAlllist'])->name('requisitions.detailreqlistall');
     Route::get('requisitions/detail/pdf/{id}', [RequisitionsController::class, 'DetailExportPdf'])->name('requisitions.detail.pdf');
@@ -207,6 +209,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('housing')->name('housing.')->group(function () {
         Route::get('welcome', [EmployeeHousingController::class, 'welcome'])->name('welcome');
         Route::get('houselist', [EmployeeHousingController::class, 'houselist'])->name('houselist');
+        Route::get('residence-info/{id}', [EmployeeHousingController::class, 'residenceInfo'])->name('residence.info');
         Route::get('request/create', [EmployeeHousingController::class, 'requestForm'])->name('request.create');
         Route::post('request/store', [EmployeeHousingController::class, 'storeRequest'])->name('request.store');
         Route::get('request/{id}/pdf', [EmployeeHousingController::class, 'exportRequestPdf'])->name('request.pdf');
@@ -232,6 +235,11 @@ Route::middleware('auth')->group(function () {
         Route::middleware('hams.report.access')->group(function () {
             Route::get('management', [EmployeeHousingController::class, 'management'])->name('management');
             Route::get('report', [EmployeeHousingController::class, 'reportDashboard'])->name('report');
+            Route::get('residence/create', [EmployeeHousingController::class, 'residenceCreate'])->name('residence.create');
+            Route::post('residence/store', [EmployeeHousingController::class, 'residenceStore'])->name('residence.store');
+            Route::get('residence/{id}/edit', [EmployeeHousingController::class, 'residenceEdit'])->name('residence.edit');
+            Route::post('residence/{id}/update-all', [EmployeeHousingController::class, 'residenceUpdateAll'])->name('residence.update_all');
+            Route::post('room/update', [EmployeeHousingController::class, 'roomUpdate'])->name('room.update');
             Route::post('update-approver', [EmployeeHousingController::class, 'updateApprover'])->name('update_approver');
             Route::post('update-all-approvers', [EmployeeHousingController::class, 'updateAllApprovers'])->name('update_all_approvers');
             Route::post('assign-room', [EmployeeHousingController::class, 'assignRoom'])->name('assign_room');
@@ -262,5 +270,10 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/profileUser', [UserController::class, 'profileUser'])->middleware('auth')->name('profileUser');
 Route::post('/profile/update-avatar', [UserController::class, 'updateAvatar'])->middleware('auth')->name('users.update_avatar');
+
+Route::get('/clear-cache-now', function () {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    return 'Caches cleared successfully!';
+});
 
 require __DIR__ . '/auth.php';

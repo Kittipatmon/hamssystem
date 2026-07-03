@@ -4,6 +4,7 @@ namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Division;
 use App\Models\Section;
 
@@ -11,6 +12,10 @@ class DivisionController extends Controller
 {
     public function index(Request $request)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $query = Division::query();
         if ($request->filled('search')) {
             $search = $request->search;
@@ -39,13 +44,17 @@ class DivisionController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
             'section_id' => 'required',
             'division_name' => 'required|string|max:255',
             'division_fullname' => 'required|string|max:255',
         ]);
 
-        Division::create($request->all());
+        Division::create($validated);
 
         if ($request->ajax()) {
             return response()->json(['success' => true]);
@@ -56,7 +65,11 @@ class DivisionController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
             'section_id' => 'required',
             'division_name' => 'required|string|max:255',
             'division_fullname' => 'required|string|max:255',
@@ -64,7 +77,7 @@ class DivisionController extends Controller
         ]);
 
         $division = Division::findOrFail($id);
-        $division->update($request->all());
+        $division->update($validated);
 
         if ($request->ajax()) {
             return response()->json(['success' => true]);
@@ -75,6 +88,10 @@ class DivisionController extends Controller
 
     public function destroy($id)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $division = Division::findOrFail($id);
         $division->delete();
 

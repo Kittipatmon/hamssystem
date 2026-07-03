@@ -95,7 +95,7 @@ class Requisitions extends Model
     }
 
     public function requisition_items() {
-        return $this->hasMany(Requisition_items::class, 'requisition_id', 'requisitions_id');
+        return $this->hasMany('App\Models\serviceshams\Requisition_items', 'requisition_id', 'requisitions_id');
     }
 
     public const STATUS_PENDING = 'pending';

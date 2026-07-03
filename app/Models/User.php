@@ -237,6 +237,11 @@ class User extends Authenticatable
         return $this->hamsPermission?->is_hams_editor ?? false;
     }
 
+    public function getIsHamsAdminAttribute()
+    {
+        return $this->role === 'admin' || in_array($this->dept_id, [14, 16]) || $this->is_hams_editor;
+    }
+
     public function trainingApplies()
     {
         return $this->hasMany(TrainingApply::class, 'emp_code', 'emp_code');

@@ -497,18 +497,18 @@
                             'icon' => 'fa-building-user',
                             'delay' => 'reveal-delay-1'
                         ],
-                        [
-                            'route' => '#',
-                            'title' => 'ระบบแจ้งซ่อมบำรุง',
-                            'subtitle' => 'Maintenance Request',
-                            'description' => 'แจ้งซ่อมอุปกรณ์และอาคาร ติดตามคิวงาน และสรุปผลการดำเนินการ (เร็วๆ นี้)',
-                            'image' => asset('images/welcome/repairrequest.jpg'),
-                            'status' => 'เร็วๆ นี้',
-                            'status_color' => 'orange',
-                            'icon' => 'fa-tools',
-                            'delay' => 'reveal-delay-2',
-                            'upcoming' => true
-                        ],
+                        // [
+                        //     'route' => '#',
+                        //     'title' => 'ระบบแจ้งซ่อมบำรุง',
+                        //     'subtitle' => 'Maintenance Request',
+                        //     'description' => 'แจ้งซ่อมอุปกรณ์และอาคาร ติดตามคิวงาน และสรุปผลการดำเนินการ (เร็วๆ นี้)',
+                        //     'image' => asset('images/welcome/repairrequest.jpg'),
+                        //     'status' => 'เร็วๆ นี้',
+                        //     'status_color' => 'orange',
+                        //     'icon' => 'fa-tools',
+                        //     'delay' => 'reveal-delay-2',
+                        //     'upcoming' => true
+                        // ],
                     ];
 
                     // Add Admin card if applicable
@@ -807,13 +807,17 @@
         </div>
     </div>
 
-    {{-- ============ ANNOUNCEMENT LIST SECTION ============ --}}
-    <div class="relative py-28 bg-[#00000] overflow-hidden">
+    <div class="relative -mt-1 pt-24 pb-42 bg-cover bg-center overflow-hidden" style="background-image: url('{{ asset('images/welcome/BG2.webp') }}');">
+        {{-- Smooth Gradient Transition from previous section --}}
+        <div class="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-[#FAF7F2] to-transparent pointer-events-none z-0"></div>
+
+        {{-- Soft overlay to make background pattern blend nicely without affecting text contrast --}}
+        {{-- <div class="absolute inset-0 bg-slate-50/92 backdrop-blur-[1px] z-0"></div> --}}
         {{-- Abstract background patterns --}}
-        <div class="absolute inset-0 opacity-[0.015] pointer-events-none" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
+        <div class="absolute inset-0 opacity-[0.015] pointer-events-none z-0" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-            <div id="announcements-list" class="scroll-mt-32 flex flex-col lg:flex-row lg:items-end justify-between mb-16 reveal gap-8">
+            <div id="announcements-list" class="scroll-mt-32 flex flex-col lg:flex-row lg:items-end justify-between mb-8 reveal gap-8">
                 <div class="max-w-2xl">
                     <div class="flex items-center gap-4 mb-6">
                         <div class="w-14 h-14 rounded-2xl bg-white shadow-xl shadow-red-900/5 flex items-center justify-center border border-red-50 group-hover:rotate-6 transition-transform">
@@ -835,21 +839,22 @@
                             <span class="text-red-600">01</span> <span class="mx-1 text-slate-200">/</span> {{ $announcements->count() < 10 ? '0' : '' }}{{ $announcements->count() }}
                         </span>
                     </div>
-                    <div class="flex gap-2">
-                        <button id="annPrevBtn" class="w-12 h-12 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-100 hover:shadow-lg shadow-slate-200/50 flex items-center justify-center transition-all">
-                            <i class="fa-solid fa-arrow-left-long"></i>
-                        </button>
-                        <button id="annNextBtn" class="w-12 h-12 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-100 hover:shadow-lg shadow-slate-200/50 flex items-center justify-center transition-all">
-                            <i class="fa-solid fa-arrow-right-long"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
+        </div>
 
-            @if(isset($announcements) && $announcements->count())
-                <div class="relative group/slider reveal">
-                    {{-- Carousel Container --}}
-                    <div id="announcementSlider" class="flex overflow-x-auto pb-12 scroll-hide snap-x snap-mandatory scroll-smooth gap-10 cursor-grab active:cursor-grabbing items-center min-h-[620px]">
+        @if(isset($announcements) && $announcements->count())
+            <div class="max-w-8xl mx-auto px-4 sm:px-12 relative group/slider reveal mt-6">
+                {{-- Round Prev & Next Navigation Buttons on Left & Right --}}
+                <button id="annPrevBtn" class="absolute left-2 sm:left-4 top-[128px] -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white hover:bg-slate-50 text-slate-700 shadow-[0_4px_20px_rgba(0,0,0,0.15)] border border-slate-200/50 flex items-center justify-center transition-all hover:scale-110 active:scale-95">
+                    <i class="fa-solid fa-chevron-left text-base"></i>
+                </button>
+                <button id="annNextBtn" class="absolute right-2 sm:right-4 top-[128px] -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white hover:bg-slate-50 text-slate-700 shadow-[0_4px_20px_rgba(0,0,0,0.15)] border border-slate-200/50 flex items-center justify-center transition-all hover:scale-110 active:scale-95">
+                    <i class="fa-solid fa-chevron-right text-base"></i>
+                </button>
+
+                {{-- Carousel Container --}}
+                <div id="announcementSlider" class="flex overflow-x-auto pb-6 px-6 scroll-hide snap-x snap-mandatory scroll-smooth gap-6 cursor-grab active:cursor-grabbing items-center min-h-[380px]">
                         @foreach($announcements as $index => $ann)
                             @php
                                 $annData = [
@@ -860,21 +865,28 @@
                                     "is_urgent" => $ann->is_urgent
                                 ];
                             @endphp
-                            <div class="announcement-slide snap-center flex-shrink-0 transition-all duration-700 scale-90 opacity-40 py-10" data-original-index="{{ $index }}">
+                            <div class="announcement-slide snap-center flex-shrink-0 transition-all duration-700 py-2" data-original-index="{{ $index }}">
                                 <button onclick='handleCardClick(this, @json($annData))' 
-                                    class="text-left bg-white rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-white flex flex-col h-[540px] w-[360px] sm:w-[400px] overflow-hidden group/item cursor-pointer transition-all duration-500 hover:border-red-100 active:scale-95">
+                                    class="text-left bg-transparent flex flex-col h-auto w-[360px] sm:w-[400px] overflow-hidden group/item cursor-pointer transition-all duration-500 active:scale-95">
                                     
                                     {{-- Top: Image with Overlays --}}
-                                    <div class="h-64 w-full overflow-hidden bg-slate-50 relative pointer-events-none">
+                                    <div class="h-64 w-full overflow-hidden bg-slate-50/10 relative pointer-events-none rounded-2xl shadow-xl shadow-black/10 transform group-hover/item:-translate-y-1.5 group-hover/item:shadow-[0_25px_45px_rgba(0,0,0,0.18)] transition-all duration-500">
                                         @if($ann->image_path)
                                             <img src="{{ asset($ann->image_path) }}" class="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-1000" alt="Preview">
                                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                                         @else
-                                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#FDFBF7] to-[#F3EEE5]">
-                                                <i class="fa-solid fa-bullhorn text-6xl text-red-100"></i>
+                                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2D2722] to-[#1C1816]">
+                                                <i class="fa-solid fa-bullhorn text-6xl text-white/10"></i>
                                                 <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                                             </div>
                                         @endif
+
+                                        {{-- Hover Overlay --}}
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/item:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                            <span class="text-white text-xs font-bold bg-[#b81515]/95 px-4 py-2 rounded-xl shadow-lg border border-red-500/20 flex items-center gap-1.5 transform translate-y-2 group-hover/item:translate-y-0 transition-all duration-300">
+                                                <i class="fa-solid fa-eye text-sm"></i> คลิกเพื่อดูรายละเอียด
+                                            </span>
+                                        </div>
 
                                         {{-- Official Badge --}}
                                         <div class="absolute top-6 left-6">
@@ -899,19 +911,10 @@
                                     </div>
 
                                     {{-- Body: Text Content --}}
-                                    <div class="p-10 flex flex-col flex-grow">
-                                        <h3 class="text-2xl font-black text-slate-900 mb-5 line-clamp-2 leading-[1.25] group-hover/item:text-red-600 transition-colors tracking-tight">{{ $ann->title }}</h3>
-                                        <p class="text-slate-500 text-[15px] line-clamp-3 mb-8 flex-grow leading-[1.6] font-medium">{{ strip_tags($ann->content) }}</p>
-                                        
-                                        <div class="flex items-center justify-between pt-8 border-t border-slate-50 mt-auto">
-                                            <div class="flex -space-x-2">
-                                                <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">H</div>
-                                                <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200"></div>
-                                            </div>
-                                            <span class="text-slate-900 group-hover:text-red-600 font-black text-[13px] transition-all flex items-center gap-3">
-                                                อ่านรายละเอียด <i class="fa-solid fa-arrow-right-long transition-transform group-hover:translate-x-2"></i>
-                                            </span>
-                                        </div>
+                                    <div class="pt-3 pb-1 px-1 flex flex-col bg-transparent">
+                                        <h3 class="text-lg font-bold text-zinc-600 line-clamp-2 leading-[1.3] group-hover/item:text-[#b81515] transition-colors tracking-tight">
+                                            {{ $ann->title }}
+                                        </h3>
                                     </div>
                                 </button>
                             </div>
@@ -919,16 +922,17 @@
                     </div>
                 </div>
             @else
-                <div class="bg-white/50 backdrop-blur-sm rounded-[3.5rem] border-2 border-dashed border-slate-200 p-24 text-center reveal">
-                    <div class="w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-8 transition-transform hover:rotate-12">
-                        <i class="fa-solid fa-bullhorn text-4xl text-slate-200"></i>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+                    <div class="bg-white/50 backdrop-blur-sm rounded-[3.5rem] border-2 border-dashed border-slate-200 p-24 text-center reveal">
+                        <div class="w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-8 transition-transform hover:rotate-12">
+                            <i class="fa-solid fa-bullhorn text-4xl text-slate-200"></i>
+                        </div>
+                        <h3 class="text-slate-900 font-black text-2xl tracking-tight">ยังไม่มีประกาศล่าสุด</h3>
+                        <p class="text-slate-500 text-base mt-3 max-w-md mx-auto leading-relaxed">คอยติดตามการอัปเดตข้อมูลและประกาศสำคัญจากผู้บริหารได้ที่นี่เร็วๆ นี้</p>
                     </div>
-                    <h3 class="text-slate-900 font-black text-2xl tracking-tight">ยังไม่มีประกาศล่าสุด</h3>
-                    <p class="text-slate-500 text-base mt-3 max-w-md mx-auto leading-relaxed">คอยติดตามการอัปเดตข้อมูลและประกาศสำคัญจากผู้บริหารได้ที่นี่เร็วๆ นี้</p>
                 </div>
             @endif
         </div>
-    </div>
     @push('scripts')
         <script>
             /**
@@ -982,13 +986,9 @@
                             closestIndex = index;
                         }
 
-                        if (distance < slide.offsetWidth / 1.1) {
-                            slide.classList.remove('scale-90', 'opacity-40');
-                            slide.classList.add('scale-100', 'opacity-100');
-                        } else {
-                            slide.classList.remove('scale-100', 'opacity-100');
-                            slide.classList.add('scale-90', 'opacity-40');
-                        }
+                        // Keep all cards clearly visible at full scale and full opacity, aligned on the same row
+                        slide.classList.remove('scale-90', 'opacity-40');
+                        slide.classList.add('scale-100', 'opacity-100');
                     });
 
                     const threshold = slideWidth * 0.5;

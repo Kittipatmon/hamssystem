@@ -25,7 +25,7 @@ class HamsReportAccess
         // 2. Check for Role Admin OR Departments 14, 16
         // Department 14: Human Assets Management & Service Building
         // Department 16: Information Communication Technology
-        if ($user->role === 'admin' || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor) {
+        if ($user->is_hams_admin) {
             return $next($request);
         }
 

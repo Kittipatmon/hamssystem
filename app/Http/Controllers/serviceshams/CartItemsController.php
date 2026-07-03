@@ -59,12 +59,10 @@ class CartItemsController extends Controller
         }
 
         if ($cartItem) {
-            $newQty = $cartItem->cart_quantity + $quantity;
-            if ($newQty > $item->quantity) {
-                return redirect()->back()->with('error', 'จำนวนรวมหลังเพิ่มเกินจำนวนสต็อก');
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'มีสินค้านี้อยู่ในตะกร้าอยู่แล้ว']);
             }
-            $cartItem->cart_quantity = $newQty;
-            $cartItem->save();
+            return redirect()->back()->with('warning', 'มีสินค้านี้อยู่ในตะกร้าอยู่แล้ว');
         } else {
             Cart_items::create([
                 'cart_item_id' => $itemID,
@@ -100,9 +98,15 @@ class CartItemsController extends Controller
         $item = Items::where('item_id', $cartItem->cart_item_id)->first();
 
         if (!$item) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'ไม่พบสินค้าในระบบ'], 404);
+            }
             return redirect()->back()->with('error', 'ไม่พบสินค้าในระบบ');
         }
         if ($quantity > $item->quantity) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'จำนวนชิ้นที่เลือกเกินจำนวนที่มีในสต็อก'], 400);
+            }
             return redirect()->back()->with('error', 'จำนวนชิ้นที่เลือกเกินจำนวนที่มีในสต็อก');
         }
         // if ($itemper_pack > $item->items_per_pack) {
@@ -111,6 +115,14 @@ class CartItemsController extends Controller
         $cartItem->cart_quantity = $quantity;
         // $cartItem->cart_quantity_pack = $itemper_pack;
         $cartItem->save();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'อัปเดตจำนวนสินค้าในตะกร้าสำเร็จ',
+                'cart_quantity' => $cartItem->cart_quantity
+            ]);
+        }
 
         return redirect()->back()->with('success', 'อัปเดตจำนวนสินค้าในตะกร้าสำเร็จ');
     }

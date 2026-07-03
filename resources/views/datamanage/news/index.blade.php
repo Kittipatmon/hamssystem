@@ -209,7 +209,7 @@
                                             @endif
                                         </div>
 
-                                        <div class="relative">
+                                        <div class="relative hidden">
                                             <button type="button"
                                                 onclick="openNotifyModal('{{ $item->news_id }}', '{{ addslashes($item->title) }}', '{{ route('datamanage.news.notifyOutlook', $item) }}')"
                                                 title="แจ้งเตือนผ่าน Outlook"

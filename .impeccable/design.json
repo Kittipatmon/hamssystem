@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-15T09:00:00Z",
+  "title": "Design System: Kumwell HAMS",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Kumwell Red", "canonical": "oklch(54.001% 0.25542 262.302)", "tonalRamp": ["#b81515", "#c32828", "#ce3c3c", "#d95050", "#e46464", "#ef7878", "#fa8c8c", "#ffa0a0"] },
+      "base-100": { "role": "neutral", "displayName": "Base background", "canonical": "oklch(100% 0 0)", "tonalRamp": ["#ffffff", "#fafafa", "#f5f5f5", "#f0f0f0", "#e5e5e5", "#d4d4d4", "#a3a3a3", "#737373"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Text", "purpose": "Hero headlines and system banners." }
+    },
+    "shadows": [
+      { "name": "card-shadow", "value": "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)", "purpose": "Standard depth indicator for interactive items." }
+    ],
+    "motion": [
+      { "name": "ease-out-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Standard interactive transitions." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Standard action button for primary paths.",
+      "html": "<button class=\"ds-btn-primary\">ยืนยันข้อมูล</button>",
+      "css": ".ds-btn-primary { background: #b81515; color: #ffffff; padding: 8px 16px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; } .ds-btn-primary:hover { background-color: #9c1212; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Reliable Dashboard",
+    "overview": "Kumwell HAMS is a professional, trusted, and efficient internal portal designed to manage human assets and support services.",
+    "keyCharacteristics": [
+      "High usability and structured visual data layout.",
+      "Clean forms with accessible contrast ratios."
+    ],
+    "rules": [
+      { "name": "The Red Moderation Rule", "body": "Kumwell Red is used selectively on <= 15% of any page layout to maintain its impact.", "section": "colors" }
+    ],
+    "dos": [
+      "Do maintain a strict 4.5:1 contrast ratio for all status descriptions and body labels."
+    ],
+    "donts": [
+      "Don't use neon accent shadows or glowing button edges."
+    ]
+  }
+}

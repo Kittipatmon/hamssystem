@@ -1,91 +1,90 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# HAMS (Human Assets Management & Service Building)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+ระบบบริหารจัดการทรัพยากรบุคคลและบริการอาคาร (HAMS) พัฒนาด้วย Laravel Framework สำหรับการจัดการข้อมูลภายในองค์กรอย่างมีประสิทธิภาพ
 
-## About Laravel
+## 🚀 กระบวนการทำงานของระบบ (Workflow)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. การเข้าสู่ระบบ (Authentication)
+- **ระบบล็อกอินปกติ:** ใช้รหัสพนักงานและรหัสผ่านที่จัดเก็บในฐานข้อมูล
+- **Microsoft OAuth:** รองรับการล็อกอินผ่านบัญชี Microsoft 365 (Outlook) เพื่อใช้สำหรับการส่งอีเมลแจ้งเตือนและการยืนยันตัวตน
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 2. การจัดการข้อมูล (Data Management)
+- **พนักงาน (Employees):** ดูรายละเอียดข้อมูลพนักงาน (จำกัดสิทธิ์การแก้ไข/ลบ เฉพาะระดับ Admin ผ่านระบบหลังบ้าน)
+- **แผนก (Departments):** รายการแผนกต่างๆ ภายในองค์กร
+- **ข่าวสาร (News):** 
+  - การจัดการข่าวสาร: เพิ่ม แก้ไข และลบข่าวสาร (Admin)
+  - การแสดงผล: ข่าวสารทั้งหมดสำหรับพนักงาน พร้อมระบบค้นหา
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 3. ระบบแจ้งเตือนผ่าน Outlook (Outlook Notification)
+เป็นฟีเจอร์เด่นสำหรับการส่งข่าวสารไปยังอีเมลของพนักงานโดยตรง:
+1. ผู้ดูแลระบบเลือกข่าวสารที่ต้องการแจ้งเตือน
+2. ระบบตรวจสอบสิทธิ์ Microsoft OAuth ของผู้ใช้
+3. หากยังไม่ได้เชื่อมต่อ ระบบจะพาไปยังหน้า Microsoft Sign-in
+4. เมื่อล็อกอินสำเร็จ ระบบจะส่งอีเมลโดยใช้ **Microsoft Graph API** (หรือ SMTP สำรอง) ไปยังผู้รับที่เลือก
 
-## Outlook Notification (News)
+---
 
-To enable the "Send to Outlook" button for News, configure recipients in your `.env`:
+## 🛠 การตั้งค่าระบบ (Configuration)
 
-```
-# Comma-separated email lists
-OUTLOOK_NOTIFY_TO="someone@example.com, group@example.com"
-OUTLOOK_NOTIFY_CC=""
-OUTLOOK_NOTIFY_BCC=""
-# Optional subject prefix
-OUTLOOK_NOTIFY_SUBJECT_PREFIX="[HAMS]"
-```
-
-Note: By default `MAIL_MAILER=log` writes emails to the log. To actually deliver via Outlook/Office 365, configure your mailer (SMTP or Microsoft Graph) in `config/mail.php` and `.env`.
-
-### Require Microsoft login before sending
-
-This app asks the user to sign in with Microsoft before sending Outlook notifications. Configure Azure OAuth in `.env`:
-
-```
-AZURE_CLIENT_ID=
-AZURE_CLIENT_SECRET=
-AZURE_TENANT_ID=common
-AZURE_REDIRECT_URI=https://your-host/auth/microsoft/callback
+### 1. ฐานข้อมูล (Database)
+ตั้งค่าในไฟล์ `.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=hamssystem
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
-Routes used:
-- `GET /auth/microsoft/redirect` → Microsoft login
-- `GET /auth/microsoft/callback` → OAuth callback
+### 2. Microsoft Azure OAuth
+สำหรับการล็อกอินและส่งอีเมล Outlook ต้องตั้งค่า App Registration ใน Azure Portal:
+```env
+AZURE_CLIENT_ID=your_client_id
+AZURE_CLIENT_SECRET=your_client_secret
+AZURE_TENANT_ID=your_tenant_id
+AZURE_REDIRECT_URI=https://your-domain.com/auth/microsoft/callback
+```
 
-If a user clicks "ส่งไปแจ้งเตือน Outlook" without being signed in, they will be redirected to Microsoft login and then the email will be sent automatically after returning.
+### 3. การส่งอีเมล (Mail)
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.office365.com
+MAIL_PORT=587
+MAIL_USERNAME=your_email@kumwell.com
+MAIL_PASSWORD=your_app_password
+MAIL_ENCRYPTION=tls
+```
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 📦 การนำระบบขึ้นโฮสติ้ง (Deployment)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+เพื่อให้ระบบทำงานได้สมบูรณ์ทั้งบน HTTP และ HTTPS รวมถึงหน้าตา CSS ไม่เพี้ยน ให้ทำตามขั้นตอนดังนี้:
 
-## Laravel Sponsors
+1. **Build Assets:** รันคำสั่งในเครื่องตัวเองก่อนอัปโหลด
+   ```bash
+   npm run build
+   ```
+2. **ตั้งค่า Protocol Agnostic:** ในไฟล์ `.env` ของโฮสติ้ง ให้เพิ่มบรรทัดนี้เพื่อแก้ปัญหา Mixed Content:
+   ```env
+   ASSET_URL=/
+   ```
+3. **อัปโหลดไฟล์:**
+   - อัปโหลดโฟลเดอร์ `public/build` ไปทับบนโฮสต์ทุกครั้งที่มีการเปลี่ยนแปลง CSS/JS
+   - อัปโหลดไฟล์ `.env` ที่ตั้งค่าโดเมนจริงเรียบร้อยแล้ว
+4. **ตั้งค่า Azure Portal:**
+   - เพิ่ม Redirect URI ใน Azure เป็น URL จริงของโฮสติ้ง (เช่น `https://hams.appkumwell.com/auth/microsoft/callback`)
+5. **Clear Cache:**
+   ```bash
+   php artisan config:clear
+   php artisan view:clear
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## ⚠️ การแก้ไขปัญหาเบื้องต้น (Troubleshooting)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- **หน้าจอขาว/CSS ไม่โหลด:** ตรวจสอบว่ามีโฟลเดอร์ `public/build` หรือยัง และเช็กค่า `ASSET_URL=/` ใน `.env`
+- **Error "No connection could be made":** ตรวจสอบว่าได้ Start MySQL ใน XAMPP หรือฐานข้อมูลบนโฮสต์ทำงานปกติหรือไม่
+- **Redirect URI Mismatch:** เช็กว่าลิงก์ใน `.env` และใน Azure Portal ตรงกันทุกตัวอักษรหรือไม่ (รวมถึง http/https)

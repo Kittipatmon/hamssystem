@@ -2,63 +2,97 @@
 @section('title', 'สรุปรายงานระบบบ้านพัก')
 
 @section('content')
+<style>
+    /* Hospital Ledger Table Styling */
+    .clinical-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .clinical-table th {
+        background-color: #f1f5f9 !important;
+        color: #1e293b !important;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border: 1px solid #cbd5e1 !important;
+        padding: 12px 16px;
+    }
+    .clinical-table td {
+        border: 1px solid #e2e8f0 !important;
+        padding: 12px 16px;
+        vertical-align: middle;
+        font-size: 13px;
+        background-color: #ffffff;
+    }
+    .clinical-table tr:hover td {
+        background-color: #f8fafc;
+    }
+</style>
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    {{-- Header & Year Filter --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-3xl font-black text-slate-800 tracking-tight">Analytics Dashboard</h1>
-            <p class="text-slate-500 font-medium">สรุปภาพรวมระบบบ้านพักและงานแจ้งซ่อม ประจำปี {{ $year }}</p>
+    
+    <!-- Premium Header (Clinical Theme) -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-slate-200 pb-6">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center shadow-sm border border-red-100 shrink-0">
+                <i class="fa-solid fa-chart-line text-red-600 text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-800">สรุปรายงานภาพรวมระบบบ้านพัก (ANALYTICS REPORT)</h2>
+                <p class="text-slate-500 mt-1 flex items-center gap-2 text-sm font-medium">
+                    <i class="fa-solid fa-calendar text-blue-500"></i>
+                    สรุปภาพรวมระบบบ้านพักและงานแจ้งซ่อม ประจำปี {{ $year }}
+                </p>
+            </div>
         </div>
         
-        <form action="{{ route('housing.report') }}" method="GET" class="flex items-center gap-2">
-            <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">เลือกปีงบประมาณ:</label>
+        <form action="{{ route('housing.report') }}" method="GET" class="flex items-center gap-2 shrink-0">
+            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">เลือกปีงบประมาณ:</label>
             <div class="relative">
                 <select name="year" onchange="this.form.submit()" 
-                    class="appearance-none bg-white border-2 border-slate-100 rounded-2xl px-6 py-2.5 pr-10 text-sm font-bold text-slate-700 shadow-sm hover:border-red-200 transition-all focus:ring-red-500 focus:border-red-500 cursor-pointer">
+                    class="appearance-none bg-white border border-slate-300 rounded-xl px-4 py-2 pr-9 text-xs font-bold text-slate-700 shadow-sm hover:border-slate-400 focus:ring-1 focus:ring-red-500 focus:border-red-500 cursor-pointer h-10">
                     @foreach($years as $y)
                         <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
                     @endforeach
                 </select>
-                <i class="fa-solid fa-calendar-days absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none"></i>
+                <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
             </div>
         </form>
     </div>
     
     {{-- Most Frequent Insight --}}
     @if($topRepairs->isNotEmpty())
-    <div class="mb-8 p-6 bg-gradient-to-r from-red-600 to-red-800 rounded-[2rem] shadow-2xl shadow-red-100 flex flex-col items-start gap-6 overflow-hidden relative group transition-all duration-500 hover:scale-[1.01]">
-        <div class="absolute -right-10 -top-10 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000"></div>
-        
-        <div class="flex items-center gap-6 relative z-10 w-full mb-2">
-            <div class="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center text-white text-xl shadow-lg ring-1 ring-white/30 group-hover:rotate-12 transition-transform duration-500">
+    <div class="mb-8 bg-slate-50 border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-150/50 border-b border-slate-200 flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-white flex items-center justify-center text-amber-500 border border-slate-200 shadow-sm">
                 <i class="fa-solid fa-ranking-star"></i>
             </div>
             <div>
-                <h4 class="text-white/70 font-black tracking-widest uppercase text-[10px]">Data Intelligence Report</h4>
-                <p class="text-white text-xl font-black">5 อันดับงานแจ้งซ่อมที่พบมากที่สุด ประจำปี {{ $year }}</p>
+                <h4 class="text-slate-500 font-bold tracking-widest uppercase text-[9px] leading-none mb-0.5">Data Intelligence Report</h4>
+                <p class="text-slate-800 text-sm font-bold">5 อันดับงานแจ้งซ่อมที่พบมากที่สุด ประจำปี {{ $year }}</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 w-full relative z-10">
+        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
             @foreach($topRepairs as $i => $item)
                 @php
                     $rankColors = [
-                        0 => 'from-amber-300 to-amber-500', // Gold
-                        1 => 'from-slate-200 to-slate-400', // Silver
-                        2 => 'from-orange-300 to-orange-500', // Bronze
-                        3 => 'from-white/20 to-white/10',
-                        4 => 'from-white/20 to-white/10',
+                        0 => 'bg-amber-500 text-white border border-amber-600', // Gold
+                        1 => 'bg-slate-300 text-slate-800 border border-slate-400', // Silver
+                        2 => 'bg-orange-500 text-white border border-orange-600', // Bronze
+                        3 => 'bg-slate-100 text-slate-600 border border-slate-200',
+                        4 => 'bg-slate-100 text-slate-600 border border-slate-200',
                     ];
-                    $isTop3 = $i < 3;
                 @endphp
-                <div class="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col h-full group/card hover:bg-white/20 transition-all">
+                <div class="p-3 bg-white rounded border border-slate-200 flex flex-col h-full hover:bg-slate-50 transition-all">
                     <div class="flex justify-between items-center mb-2">
-                        <span class="w-6 h-6 rounded-lg bg-gradient-to-br {{ $rankColors[$i] ?? 'from-white/20 to-white/10' }} flex items-center justify-center text-[10px] font-black text-red-900 shadow-sm shadow-red-900/20">
+                        <span class="w-5 h-5 rounded {{ $rankColors[$i] ?? 'bg-slate-100 text-slate-500' }} flex items-center justify-center text-[10px] font-black font-mono">
                             {{ $i + 1 }}
                         </span>
-                        <span class="text-[10px] font-black text-white/50 tracking-wider">{{ $item->count }} รายการ</span>
+                        <span class="text-[9px] font-bold text-slate-400 tracking-wider font-mono">{{ $item->count }} รายการ</span>
                     </div>
-                    <div class="text-sm font-black text-white line-clamp-2 leading-tight flex-grow" title="{{ $item->title }}">
+                    <div class="text-xs font-bold text-slate-700 line-clamp-2 leading-tight flex-grow" title="{{ $item->title }}">
                         {{ $item->title }}
                     </div>
                 </div>
@@ -66,62 +100,59 @@
         </div>
     </div>
     @endif
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Card 1: Total Request -->
-        <div class="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 overflow-hidden relative">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-red-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-            <div class="relative z-10">
-                <div class="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-red-100">
-                    <i class="fa-solid fa-file-circle-plus text-xl"></i>
-                </div>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">คำขอเข้าพักทั้งหมด</p>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-black text-slate-800">{{ $requestStats->sum() }}</span>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-11 h-11 bg-red-50 rounded-lg flex items-center justify-center text-red-600 border border-red-100 shrink-0">
+                <i class="fa-solid fa-file-circle-plus text-lg"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">คำขอเข้าพักทั้งหมด</p>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-2xl font-mono font-black text-slate-800">{{ $requestStats->sum() }}</span>
                     <span class="text-xs font-bold text-slate-400">รายการ</span>
                 </div>
             </div>
         </div>
 
         <!-- Card 2: Occupancy Rate -->
-        <div class="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 overflow-hidden relative">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-            <div class="relative z-10">
-                <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-emerald-100">
-                    <i class="fa-solid fa-house-circle-check text-xl"></i>
-                </div>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">อัตราการเข้าพักที่พัก</p>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-black text-slate-800">{{ $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 1) : 0 }}%</span>
-                    <span class="text-xs font-bold text-slate-400">({{ $occupiedRooms }}/{{ $totalRooms }} ห้อง)</span>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-11 h-11 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 border border-emerald-100 shrink-0">
+                <i class="fa-solid fa-house-circle-check text-lg"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">อัตราการเข้าพักที่พัก</p>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-2xl font-mono font-black text-slate-800">{{ $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 1) : 0 }}%</span>
+                    <span class="text-[10px] font-bold text-slate-400">({{ $occupiedRooms }}/{{ $totalRooms }} ห้อง)</span>
                 </div>
             </div>
         </div>
 
         <!-- Card 3: Repairs -->
-        <div class="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 overflow-hidden relative">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-orange-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-            <div class="relative z-10">
-                <div class="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-orange-100">
-                    <i class="fa-solid fa-screwdriver-wrench text-xl"></i>
-                </div>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">แจ้งซ่อมประจำปี</p>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-black text-slate-800">{{ $repairStats->sum() }}</span>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-11 h-11 bg-orange-50 rounded-lg flex items-center justify-center text-orange-600 border border-orange-100 shrink-0">
+                <i class="fa-solid fa-screwdriver-wrench text-lg"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">แจ้งซ่อมประจำปี</p>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-2xl font-mono font-black text-slate-800">{{ $repairStats->sum() }}</span>
                     <span class="text-xs font-bold text-slate-400">รายการ</span>
                 </div>
             </div>
         </div>
 
         <!-- Card 4: Under Repair -->
-        <div class="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 overflow-hidden relative">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-slate-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-            <div class="relative z-10">
-                <div class="w-12 h-12 bg-slate-700 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-slate-200">
-                    <i class="fa-solid fa-hammer text-xl"></i>
-                </div>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">อยู่ระหว่างซ่อมแซม</p>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-black text-slate-800">{{ $underRepair }}</span>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-11 h-11 bg-slate-100 rounded-lg flex items-center justify-center text-slate-650 border border-slate-250 shrink-0">
+                <i class="fa-solid fa-hammer text-lg"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">อยู่ระหว่างซ่อมแซม</p>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-2xl font-mono font-black text-slate-800">{{ $underRepair }}</span>
                     <span class="text-xs font-bold text-slate-400">ห้องพัก</span>
                 </div>
             </div>
@@ -131,14 +162,14 @@
     {{-- Charts Section --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {{-- Trend Chart --}}
-        <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
-            <div class="flex items-center justify-between mb-8">
+        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-6 border-b border-slate-150 pb-4">
                 <div>
-                    <h3 class="text-lg font-black text-slate-800">แนวโน้มการแจ้งซ่อมรายเดือน</h3>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">Monthly Repair Trend</p>
+                    <h3 class="text-base font-black text-slate-800">แนวโน้มการแจ้งซ่อมรายเดือน</h3>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Monthly Repair Trend</p>
                 </div>
-                <div class="p-2 px-3 bg-red-50 rounded-xl text-[10px] font-black text-red-600 border border-red-100 italic">
-                    <i class="fa-solid fa-arrow-trend-up mr-1"></i> Data Insights
+                <div class="px-2 py-0.5 bg-red-50 border border-red-200 rounded text-[9px] font-bold text-red-600">
+                    <i class="fa-solid fa-arrow-trend-up mr-0.5"></i> Data Insights
                 </div>
             </div>
             <div class="h-80">
@@ -147,30 +178,30 @@
         </div>
 
         {{-- Repair Status Pie --}}
-        <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
-            <h3 class="text-lg font-black text-slate-800 mb-8 border-b border-slate-50 pb-4 flex items-center gap-3">
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="text-base font-black text-slate-800 mb-6 border-b border-slate-200 pb-4 flex items-center gap-2">
                 <i class="fa-solid fa-chart-pie text-orange-500"></i> สัดส่วนงานซ่อม
             </h3>
             <div class="relative flex flex-col items-center">
-                <div class="w-full max-w-[220px]">
+                <div class="w-full max-w-[200px]">
                     <canvas id="repairPieChart"></canvas>
                 </div>
-                <div class="mt-8 grid grid-cols-2 gap-4 w-full">
-                    <div class="flex items-center gap-2 p-2 rounded-xl bg-amber-50">
-                        <div class="w-3 h-3 rounded bg-amber-400 shadow-sm shadow-amber-200"></div>
-                        <span class="text-[10px] font-bold text-slate-600">รอกำกับ: {{ $repairStats[0] ?? 0 }}</span>
+                <div class="mt-6 grid grid-cols-2 gap-3 w-full">
+                    <div class="flex items-center gap-2 p-2 rounded bg-amber-50 border border-amber-100">
+                        <div class="w-2.5 h-2.5 rounded bg-amber-400 shadow-sm shrink-0"></div>
+                        <span class="text-[10px] font-bold text-slate-600 truncate">รอกำกับ: {{ $repairStats[0] ?? 0 }}</span>
                     </div>
-                    <div class="flex items-center gap-2 p-2 rounded-xl bg-blue-50">
-                        <div class="w-3 h-3 rounded bg-blue-400 shadow-sm shadow-blue-200"></div>
-                        <span class="text-[10px] font-bold text-slate-600">ดำเนินการ: {{ $repairStats[1] ?? 0 }}</span>
+                    <div class="flex items-center gap-2 p-2 rounded bg-blue-50 border border-blue-100">
+                        <div class="w-2.5 h-2.5 rounded bg-blue-400 shadow-sm shrink-0"></div>
+                        <span class="text-[10px] font-bold text-slate-600 truncate">ดำเนินการ: {{ $repairStats[1] ?? 0 }}</span>
                     </div>
-                    <div class="flex items-center gap-2 p-2 rounded-xl bg-emerald-50">
-                        <div class="w-3 h-3 rounded bg-emerald-400 shadow-sm shadow-emerald-200"></div>
-                        <span class="text-[10px] font-bold text-slate-600">เสร็จสิ้น: {{ $repairStats[2] ?? 0 }}</span>
+                    <div class="flex items-center gap-2 p-2 rounded bg-emerald-50 border border-emerald-100">
+                        <div class="w-2.5 h-2.5 rounded bg-emerald-400 shadow-sm shrink-0"></div>
+                        <span class="text-[10px] font-bold text-slate-600 truncate">เสร็จสิ้น: {{ $repairStats[2] ?? 0 }}</span>
                     </div>
-                    <div class="flex items-center gap-2 p-2 rounded-xl bg-red-50">
-                        <div class="w-3 h-3 rounded bg-red-400 shadow-sm shadow-red-200"></div>
-                        <span class="text-[10px] font-bold text-slate-600">ยกเลิก: {{ $repairStats[3] ?? 0 }}</span>
+                    <div class="flex items-center gap-2 p-2 rounded bg-red-50 border border-red-100">
+                        <div class="w-2.5 h-2.5 rounded bg-red-400 shadow-sm shrink-0"></div>
+                        <span class="text-[10px] font-bold text-slate-600 truncate">ยกเลิก: {{ $repairStats[3] ?? 0 }}</span>
                     </div>
                 </div>
             </div>
@@ -178,54 +209,56 @@
     </div>
 
     {{-- Bottom Section: Residence Statistics --}}
-    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden mb-8">
-        <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-gradient-to-r from-white to-slate-50">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
             <div>
-                <h3 class="text-lg font-black text-slate-800">สถิติแยกตามสถานที่พัก</h3>
-                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Property Performance Allocation</p>
+                <h3 class="text-base font-black text-slate-800">สถิติแยกตามสถานที่พัก</h3>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Property Performance Allocation</p>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
-                <i class="fa-solid fa-hotel"></i>
+            <div class="w-8 h-8 rounded bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400">
+                <i class="fa-solid fa-hotel text-sm"></i>
             </div>
         </div>
-        <div class="overflow-x-auto p-4">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="text-slate-400 font-black uppercase text-[10px] tracking-widest">
-                        <th class="px-6 py-4 text-left">สถานที่พัก</th>
-                        <th class="px-6 py-4 text-center">ห้องทั้งหมด</th>
-                        <th class="px-6 py-4 text-center">เข้าพักแล้ว</th>
-                        <th class="px-6 py-4 text-center">คงเหลือว่าง</th>
-                        <th class="px-6 py-4 text-right">สัดส่วนห้องพัก</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @foreach($residences as $res)
-                        @php
-                            $available = $res->rooms_count - $res->occupied;
-                            $percent = $res->rooms_count > 0 ? ($res->occupied / $res->rooms_count) * 100 : 0;
-                        @endphp
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="px-6 py-4 font-bold text-slate-700">{{ $res->name }}</td>
-                            <td class="px-6 py-4 text-center font-bold text-slate-500">{{ $res->rooms_count }}</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-black">{{ $res->occupied }}</span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-black">{{ $available }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center justify-end gap-3">
-                                    <div class="w-24 h-2 rounded-full bg-slate-100 overflow-hidden hidden sm:block">
-                                        <div class="h-full bg-emerald-400 rounded-full" style="width: {{ $percent }}%"></div>
-                                    </div>
-                                    <span class="text-xs font-black text-slate-700 min-w-[35px] text-right">{{ round($percent, 0) }}%</span>
-                                </div>
-                            </td>
+        <div class="p-4">
+            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                <table class="clinical-table">
+                    <thead>
+                        <tr>
+                            <th class="text-left">สถานที่พัก</th>
+                            <th class="text-center" style="width: 120px;">ห้องทั้งหมด</th>
+                            <th class="text-center" style="width: 120px;">เข้าพักแล้ว</th>
+                            <th class="text-center" style="width: 120px;">คงเหลือว่าง</th>
+                            <th class="text-right" style="width: 180px;">สัดส่วนห้องพัก</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach($residences as $res)
+                            @php
+                                $available = $res->rooms_count - $res->occupied;
+                                $percent = $res->rooms_count > 0 ? ($res->occupied / $res->rooms_count) * 100 : 0;
+                            @endphp
+                            <tr>
+                                <td class="font-bold text-slate-700">{{ $res->name }}</td>
+                                <td class="text-center font-bold text-slate-500 font-mono">{{ $res->rooms_count }}</td>
+                                <td class="text-center font-mono">
+                                    <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-600 rounded border border-emerald-250 text-xs font-bold">{{ $res->occupied }}</span>
+                                </td>
+                                <td class="text-center font-mono">
+                                    <span class="px-2.5 py-0.5 bg-amber-50 text-amber-600 rounded border border-amber-250 text-xs font-bold">{{ $available }}</span>
+                                </td>
+                                <td>
+                                    <div class="flex items-center justify-end gap-3">
+                                        <div class="w-24 h-1.5 rounded-full bg-slate-100 overflow-hidden hidden sm:block">
+                                            <div class="h-full bg-emerald-500" style="width: {{ $percent }}%"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-700 min-w-[35px] text-right font-mono">{{ round($percent, 0) }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -248,15 +281,15 @@
                     label: 'จำนวนรายการแจ้งซ่อม',
                     data: {!! json_encode($monthlyValues) !!},
                     borderColor: '#ef4444',
-                    borderWidth: 4,
+                    borderWidth: 3,
                     fill: true,
                     backgroundColor: gradient,
                     tension: 0.4,
                     pointBackgroundColor: '#fff',
                     pointBorderColor: '#ef4444',
                     pointBorderWidth: 2,
-                    pointRadius: 6,
-                    pointHoverRadius: 8
+                    pointRadius: 5,
+                    pointHoverRadius: 7
                 }]
             },
             options: {
@@ -294,7 +327,7 @@
                     ],
                     backgroundColor: ['#fbbf24', '#60a5fa', '#34d399', '#f87171'],
                     borderWidth: 0,
-                    hoverOffset: 15
+                    hoverOffset: 12
                 }]
             },
             options: {
@@ -304,6 +337,21 @@
                 }
             }
         });
+
+        // Intercept form submit to show loading modal
+        const reportForm = document.querySelector('form');
+        if (reportForm) {
+            reportForm.addEventListener('submit', function() {
+                Swal.fire({
+                    title: 'กำลังประมวลผล...',
+                    text: 'กรุณารอซักครู่ ระบบกำลังดึงข้อมูลรายงาน',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            });
+        }
     });
 </script>
 @endsection

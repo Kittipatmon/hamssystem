@@ -1,0 +1,26 @@
+<?php
+$xml = '<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <Worksheet ss:Name="Summary 2026">
+  <Table>
+   <Row>
+    <Cell><Data ss:Type="String">This is summary</Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
+ <Worksheet ss:Name="Jan 2026">
+  <Table>
+   <Row>
+    <Cell><Data ss:Type="String">This is Jan</Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
+</Workbook>';
+
+file_put_contents('public/test_excel.xls', $xml);
+echo "Created test_excel.xls\n";

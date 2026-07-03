@@ -427,11 +427,20 @@ class NewsController extends Controller
             Log::info('Graph sendMail response', ['status' => $code, 'news_id' => $news->id]);
             return ['ok' => $code >= 200 && $code < 300, 'status' => $code];
         } catch (\Throwable $e) {
+            $statusCode = null;
+            if ($e instanceof \GuzzleHttp\Exception\ClientException && $e->hasResponse()) {
+                $statusCode = $e->getResponse()->getStatusCode();
+                if ($statusCode === 401) {
+                    session()->forget('ms_oauth');
+                    Log::warning('Microsoft Graph token expired or unauthorized (401). Cleared ms_oauth session.');
+                }
+            }
             Log::error('Graph sendMail failed', [
                 'error' => $e->getMessage(),
+                'status_code' => $statusCode,
                 'news_id' => $news->id,
             ]);
-            return ['ok' => false, 'error' => $e->getMessage()];
+            return ['ok' => false, 'status' => $statusCode, 'error' => $e->getMessage()];
         }
     }
 }

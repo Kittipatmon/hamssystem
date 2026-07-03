@@ -16,6 +16,10 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $query = User::with(['department', 'hamsPermission', 'hamsPermissionLatestLog.grantedBy'])
             ->where('role', '!=', 'admin');
 
@@ -74,6 +78,10 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'emp_code' => 'required|unique:userkml2025.employees,emp_code',
             'firstname' => 'required|string|max:255',
@@ -82,7 +90,8 @@ class UserController extends Controller
             'status' => 'required|in:active,resign',
         ]);
 
-        $user = User::create($request->all());
+        $data = $request->except(['password', 'remember_token']);
+        $user = User::create($data);
 
         if ($request->ajax()) {
             return response()->json(['success' => true, 'user' => $user]);
@@ -109,6 +118,10 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $user = User::findOrFail($id);
         
         $request->validate([
@@ -119,7 +132,8 @@ class UserController extends Controller
             'status' => 'required|in:active,resign',
         ]);
 
-        $user->update($request->all());
+        $data = $request->except(['password', 'remember_token']);
+        $user->update($data);
 
         if ($request->ajax()) {
             return response()->json(['success' => true]);
@@ -130,6 +144,10 @@ class UserController extends Controller
 
     public function destroy($id)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $user = User::findOrFail($id);
         $user->delete();
 
@@ -199,6 +217,10 @@ class UserController extends Controller
 
     public function toggleHamsEditor(Request $request, $id)
     {
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
+        }
+
         $user = User::findOrFail($id);
         $currentUser = Auth::user();
 

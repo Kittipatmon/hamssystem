@@ -1,85 +1,61 @@
 @extends('layouts.serviceitem.appservice')
 
 @section('content')
-    <div class="max-w-[1600px] mx-auto px-4 py-4 lg:py-18 space-y-8 uppercase tracking-tight">
+    <div class="max-w-7xl mx-auto px-3 sm:px-8 lg:px-16 py-4 md:py-6 space-y-4 md:space-y-6 text-xs font-semibold">
 
         <!-- Header & Search Box -->
-        <div class="relative z-[50] bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 animate-zoom-in">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                <div class="flex items-center gap-5">
-                    <div class="w-16 h-16 bg-red-500 rounded-3xl flex items-center justify-center shadow-lg shadow-sky-100">
-                        <i class="fa-solid fa-cart-shopping text-white text-2xl"></i>
+        <div class="bg-white p-5 rounded border border-slate-200 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-[#c31919] rounded flex items-center justify-center text-white shadow">
+                        <i class="fa-solid fa-cart-shopping text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-black text-slate-800 tracking-tighter leading-none">ระบบเบิกพัสดุ / ของใช้
-                        </h1>
-                        <p class="text-[13px] text-slate-400 font-bold mt-1.5 flex items-center gap-2">
-                            <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600 font-mono">HAMS CATALOG</span>
-                            <span>•</span>
-                            <span class="uppercase">เลือกรายการที่ต้องการและเพิ่มลงในตะกร้า</span>
-                        </p>
+                        <h1 class="text-base font-black text-slate-800 uppercase tracking-wide">ระบบเบิกพัสดุพนักงาน (HAMS Catalog)</h1>
+                        <p class="text-[10px] text-slate-400 font-bold mt-0.5">ค้นหาพัสดุอุปกรณ์ที่ต้องการ กำหนดจำนวน และกดเพิ่มลงตะกร้าเพื่อส่งคำขอเบิกพัสดุ</p>
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-1 max-w-3xl">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 max-w-3xl text-xs">
                     <!-- Search Box -->
                     <div class="relative flex-1">
-                        <input type="text" id="searchInput" name="q" autocomplete="off" value="{{ request('q') }}"
-                            placeholder="ค้นหาพัสดุ รหัส หรือชื่อ..."
-                            class="w-full h-14 pl-14 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-700 font-bold focus:bg-white focus:border-red-500 transition-all outline-none placeholder:text-slate-300" />
-                        <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300">
-                            <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                        <input type="text" id="searchInput" autocomplete="off" value="{{ request('q') }}"
+                            placeholder="ระบุรหัสพัสดุ หรือชื่อที่ต้องการค้นหา..."
+                            class="w-full h-9 pl-9 pr-3 bg-slate-50 border border-slate-200 rounded font-bold focus:bg-white focus:border-red-600 focus:ring-1 focus:ring-red-600 outline-none transition-all">
+                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
                         </div>
                     </div>
 
                     <!-- Category Dropdown -->
-                    <div class="dropdown dropdown-end sm:w-80">
+                    <div class="dropdown dropdown-end sm:w-60 relative">
                         @php
                             $selectedCategory = \App\Models\serviceshams\Items_type::find(request('category'));
                             $categories = \App\Models\serviceshams\Items_type::where('status', '1')->get();
                         @endphp
                         <label tabindex="0"
-                            class="w-full h-14 bg-red-500 text-white rounded-2xl flex items-center justify-between px-6 cursor-pointer hover:bg-red-600 transition-all shadow-xl shadow-red-100 active:scale-95 border-b-4 border-red-700">
-                            <div class="flex items-center gap-3 font-black text-sm uppercase">
-                                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                                    <i class="fa-solid fa-layer-group text-white"></i>
-                                </div>
-                                <div class="flex flex-col items-start leading-none text-left">
-                                    <span class="text-[9px] opacity-70 mb-0.5">FILTER CATEGORY</span>
-                                    <span
-                                        class="truncate max-w-[120px] font-black">{{ $selectedCategory->name ?? 'ทุกหมวดหมู่' }}</span>
-                                </div>
+                            class="w-full h-9 bg-red-600 text-white rounded flex items-center justify-between px-4 cursor-pointer hover:bg-red-700 transition-all shadow-sm active:scale-95 font-bold">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-layer-group text-xs"></i>
+                                <span class="truncate max-w-[120px]">{{ $selectedCategory->name ?? 'ทุกหมวดหมู่พัสดุ' }}</span>
                             </div>
-                            <i class="fa-solid fa-chevron-down text-xs opacity-70"></i>
+                            <i class="fa-solid fa-chevron-down text-[10px] opacity-70"></i>
                         </label>
                         <ul tabindex="0"
-                            class="dropdown-content z-[300] menu p-4 shadow-2xl bg-white rounded-[2.5rem] w-full sm:w-[22rem] mt-4 border border-slate-100 space-y-1">
-                            <div class="px-5 py-2 mb-2">
-                                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Select a Category
-                                </p>
-                            </div>
+                            class="dropdown-content z-[300] menu p-3 shadow-xl bg-white rounded border border-slate-200 w-full sm:w-60 mt-1 space-y-1 text-slate-700 font-semibold">
                             <li>
                                 <a href="{{ route('items.itemsalllist') }}"
-                                    class="flex items-center gap-4 py-4 px-6 {{ !request('category') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} rounded-2xl font-black transition-all mb-1 border-b border-slate-50">
-                                    <div
-                                        class="w-10 h-10 rounded-xl flex items-center justify-center {{ !request('category') ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-400' }}">
-                                        <i class="fa-solid fa-border-all text-sm"></i>
-                                    </div>
-                                    <div class="flex flex-col text-left">
-                                        <span class="text-sm">ทั้งหมด</span>
-                                        <span class="text-[9px] opacity-50 font-bold uppercase">All Items Catalog</span>
-                                    </div>
+                                    class="flex items-center gap-2 py-2 px-3 {{ !request('category') ? 'bg-red-50 text-[#c31919] font-bold' : 'hover:bg-slate-50' }} rounded transition-all">
+                                    <i class="fa-solid fa-border-all text-xs"></i>
+                                    <span>พัสดุทั้งหมด</span>
                                 </a>
                             </li>
-                            <div class="grid grid-cols-1 gap-1 max-h-[400px] overflow-y-auto pr-1">
+                            <div class="max-h-60 overflow-y-auto divide-y divide-slate-100">
                                 @foreach($categories as $category)
                                     <li>
                                         <a href="{{ route('items.itemsalllist') . '?category=' . $category->item_type_id }}"
-                                            class="flex items-center gap-4 py-3.5 px-6 {{ request('category') == $category->item_type_id ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }} rounded-2xl font-black transition-all">
-                                            <div
-                                                class="w-2 h-2 rounded-full {{ request('category') == $category->item_type_id ? 'bg-sky-500' : 'bg-slate-200 opacity-50' }}">
-                                            </div>
-                                            <span class="text-[13px]">{{ $category->name }}</span>
+                                            class="flex items-center gap-2 py-2 px-3 {{ request('category') == $category->item_type_id ? 'bg-red-50 text-[#c31919] font-bold' : 'hover:bg-slate-50' }} rounded transition-all">
+                                            <span class="text-[11px]">{{ $category->name }}</span>
                                         </a>
                                     </li>
                                 @endforeach
@@ -91,93 +67,91 @@
         </div>
 
         <!-- Items Grid -->
-        <div id="itemsGrid"
-            class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-6">
+        <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-3 sm:gap-4">
             @forelse($items as $item)
-                <div
-                    class="bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-100 sm:hover:-translate-y-2 transition-all duration-300 flex flex-col group overflow-hidden">
+                <div class="bg-white rounded border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group overflow-hidden">
                     <!-- Image Section -->
-                    <div
-                        class="aspect-square bg-slate-50/50 flex items-center justify-center p-4 sm:p-8 relative overflow-hidden">
-                        <div
-                            class="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                        </div>
+                    <div class="aspect-square bg-slate-50/50 flex items-center justify-center p-3 relative overflow-hidden border-b border-slate-200">
                         @if ($item->item_pic)
                             <img src="{{ asset('images/items/' . $item->item_pic) }}" alt="{{ $item->name }}"
-                                class="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-500">
+                                class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
                         @else
-                            <div class="flex flex-col items-center gap-3 text-slate-300">
-                                <i class="fa-solid fa-image text-4xl opacity-20"></i>
-                                <span class="text-[10px] font-black uppercase tracking-widest">No Preview</span>
+                            <div class="flex flex-col items-center gap-1.5 text-slate-300">
+                                <i class="fa-solid fa-image text-3xl opacity-20"></i>
+                                <span class="text-[9px] font-bold uppercase tracking-wider">ไม่มีภาพพัสดุ</span>
                             </div>
                         @endif
 
                         <!-- Stock Badge Overlay -->
-                        @if($item->quantity <= 5)
-                            <div class="absolute top-4 left-4">
-                                <span
-                                    class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-[9px] font-black uppercase shadow-sm border border-red-200">
-                                    Low Stock
+                        @if($item->quantity <= 5 && $item->quantity > 0)
+                            <div class="absolute top-2.5 left-2.5">
+                                <span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-[9px] font-bold border border-amber-200 shadow-sm">
+                                    สต็อกต่ำ
+                                </span>
+                            </div>
+                        @elseif($item->quantity == 0)
+                            <div class="absolute top-2.5 left-2.5">
+                                <span class="px-2 py-0.5 bg-red-50 text-red-700 rounded text-[9px] font-bold border border-red-200 shadow-sm">
+                                    พัสดุหมด
                                 </span>
                             </div>
                         @endif
                     </div>
 
                     <!-- Content Section -->
-                    <div class="p-3 sm:p-6 flex flex-col items-center text-center flex-1">
-                        <span
-                            class="text-[8px] sm:text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 leading-none">{{ $item->item_code ?? 'CODE-NULL' }}</span>
-                        <h2
-                            class="text-[12px] sm:text-[14px] font-black text-slate-800 line-clamp-2 leading-tight h-8 sm:h-10 group-hover:text-sky-600 transition-colors uppercase">
-                            {{ $item->name }}
-                        </h2>
+                    <div class="p-3 flex flex-col flex-1 justify-between space-y-3">
+                        <div class="space-y-1.5">
+                            <span class="text-[9px] font-bold text-slate-400 font-mono tracking-wider">{{ $item->item_code ?? 'CODE-NULL' }}</span>
+                            <h2 class="text-[12px] font-bold text-slate-800 line-clamp-2 leading-tight uppercase min-h-[32px]">
+                                {{ $item->name }}
+                            </h2>
+                        </div>
 
-                        <div class="w-full h-px bg-slate-50 my-3 sm:my-4"></div>
-
-                        <div class="flex items-center justify-center gap-3 sm:gap-6 mb-4 sm:mb-6">
-                            <div class="flex flex-col">
-                                <span
-                                    class="text-[7.5px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">In
-                                    Stock</span>
-                                <span
-                                    class="text-[14px] sm:text-[16px] font-black text-emerald-600 font-mono leading-none">{{ $item->quantity }}</span>
+                        <!-- Specs clinical-sheet style -->
+                        <div class="border border-slate-200 rounded divide-y divide-slate-100 text-[10px]">
+                            <div class="p-1.5 flex justify-between items-center bg-slate-50/50">
+                                <span class="text-slate-400">สต็อกคงเหลือ</span>
+                                <span class="font-bold {{ $item->quantity <= 5 ? 'text-red-600' : 'text-emerald-700' }}">{{ $item->quantity }} ชิ้น</span>
                             </div>
-                            <div class="w-px h-6 bg-slate-100"></div>
-                            <div class="flex flex-col">
-                                <span
-                                    class="text-[7.5px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Price/Unit</span>
-                                <span
-                                    class="text-[14px] sm:text-[16px] font-black text-black-600 font-mono leading-none">฿{{ number_format($item->per_unit ?? 0, 2) }}</span>
+                            <div class="p-1.5 flex justify-between items-center">
+                                <span class="text-slate-400">ราคาต่อหน่วย</span>
+                                <span class="font-bold text-slate-700">฿{{ number_format($item->per_unit ?? 0, 2) }}</span>
                             </div>
                         </div>
 
                         <!-- Add to Cart Form -->
-                        <form method="POST" action="{{ url('/cartitem/add') }}" class="w-full mt-auto">
+                        <form method="POST" action="{{ url('/cartitem/add') }}" class="w-full m-0 p-0">
                             @csrf
                             <input type="hidden" name="item_id" value="{{ $item->item_id }}">
-                            <div class="flex items-stretch gap-2">
+                            <div class="flex items-stretch gap-1">
                                 <input name="quantity" type="number" min="1" max="{{ $item->quantity }}" value="1"
-                                    class="w-10 sm:w-16 h-10 sm:h-12 text-center text-[12px] sm:text-[14px] font-black bg-slate-50 border-2 border-slate-50 rounded-xl sm:rounded-2xl focus:bg-white focus:border-sky-200 focus:outline-none transition-all"
+                                    class="w-12 h-8 text-center bg-slate-50 border border-slate-200 rounded text-xs font-bold focus:bg-white focus:border-red-500 focus:outline-none outline-none transition-all"
                                     @if($item->quantity == 0) disabled @endif>
                                 <button type="submit"
-                                    class="flex-1 h-10 sm:h-12 bg-sky-500 hover:bg-sky-600 text-white rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[12px] uppercase transition-all shadow-lg shadow-sky-100 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none active:scale-95 flex items-center justify-center gap-1.5"
+                                    class="flex-1 h-8 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-[10px] uppercase transition-all disabled:bg-slate-150 disabled:text-slate-400 disabled:shadow-none active:scale-95 flex items-center justify-center gap-1 shadow-sm"
                                     @if($item->quantity == 0) disabled @endif>
-                                    <i class="fa-solid fa-plus text-[9px] sm:text-[10px]"></i>
-                                    ADD CART
+                                    <i class="fa-solid fa-plus text-[8px]"></i>
+                                    <span class="hidden sm:inline">เพิ่มลงตะกร้า</span>
+                                    <span class="sm:hidden">ใส่ตะกร้า</span>
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
             @empty
-                <div class="col-span-full py-20 text-center">
-                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fa-solid fa-magnifying-glass text-slate-200 text-3xl"></i>
+                <div class="col-span-full py-16 text-center">
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-150">
+                        <i class="fa-solid fa-magnifying-glass text-slate-300"></i>
                     </div>
-                    <h3 class="text-xl font-black text-slate-800 uppercase">ไม่พบพัสดุที่ต้องการ</h3>
-                    <p class="text-slate-400 font-bold mt-2 uppercase text-xs">No items found matching your criteria</p>
+                    <h3 class="text-sm font-bold text-slate-800">ไม่พบอุปกรณ์พัสดุที่ต้องการ</h3>
+                    <p class="text-slate-400 text-[10px] mt-1">ทดลองค้นหาด้วยรหัสหรือชื่อพัสดุชนิดอื่น</p>
                 </div>
             @endforelse
+        </div>
+
+        <!-- Pagination -->
+        <div id="paginationContainer" class="mt-8 flex justify-center no-print">
+            {{ $items->appends(request()->query())->links() }}
         </div>
     </div>
 
@@ -185,6 +159,7 @@
         (function () {
             const input = document.getElementById('searchInput');
             const grid = document.getElementById('itemsGrid');
+            const originalGridHtml = grid.innerHTML; // Store original paginated HTML
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const priceFmt = new Intl.NumberFormat('th-TH', {
                 minimumFractionDigits: 2,
@@ -195,66 +170,84 @@
 
             function buildItemCard(item) {
                 const disabled = Number(item.quantity) === 0;
-                const isLowStock = Number(item.quantity) <= 5;
+                const isLowStock = Number(item.quantity) <= 5 && Number(item.quantity) > 0;
+                const isOutOfStock = Number(item.quantity) === 0;
                 const img = item.item_pic
-                    ? `<img src="${window.location.origin}/images/items/${item.item_pic}" alt="${item.name}" class="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-500">`
-                    : `<div class="flex flex-col items-center gap-3 text-slate-300">
-                                                            <i class="fa-solid fa-image text-3xl sm:text-4xl opacity-20"></i>
-                                                            <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">No Preview</span>
-                                                          </div>`;
+                    ? `${window.location.origin}/images/items/${item.item_pic}`
+                    : '';
+                const imgTag = img
+                    ? `<img src="${img}" alt="${item.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-350">`
+                    : `<div class="flex flex-col items-center gap-1.5 text-slate-300">
+                           <i class="fa-solid fa-image text-3xl opacity-20"></i>
+                           <span class="text-[9px] font-bold">ไม่มีภาพพัสดุ</span>
+                       </div>`;
+
+                let overlayBadge = '';
+                if (isLowStock) {
+                    overlayBadge = '<div class="absolute top-2.5 left-2.5"><span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-[9px] font-bold border border-amber-200 shadow-sm">สต็อกต่ำ</span></div>';
+                } else if (isOutOfStock) {
+                    overlayBadge = '<div class="absolute top-2.5 left-2.5"><span class="px-2 py-0.5 bg-red-50 text-red-700 rounded text-[9px] font-bold border border-red-200 shadow-sm">พัสดุหมด</span></div>';
+                }
 
                 return `
-                                                    <div class="bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-100 sm:hover:-translate-y-2 transition-all duration-300 flex flex-col group overflow-hidden animate-zoom-in">
-                                                        <div class="aspect-square bg-slate-50/50 flex items-center justify-center p-4 sm:p-8 relative overflow-hidden">
-                                                            <div class="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                            ${img}
-                                                            ${isLowStock ? '<div class="absolute top-3 sm:top-4 left-3 sm:left-4"><span class="px-2 sm:px-3 py-0.5 sm:py-1 bg-red-100 text-red-600 rounded-full text-[8px] sm:text-[9px] font-black uppercase shadow-sm border border-red-200">Low Stock</span></div>' : ''}
-                                                        </div>
-                                                        <div class="p-3 sm:p-6 flex flex-col items-center text-center flex-1">
-                                                            <span class="text-[8px] sm:text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 leading-none">${item.item_code ?? 'CODE-NULL'}</span>
-                                                            <h2 class="text-[12px] sm:text-[14px] font-black text-slate-800 line-clamp-2 leading-tight h-8 sm:h-10 group-hover:text-sky-600 transition-colors uppercase">${item.name}</h2>
-                                                            <div class="w-full h-px bg-slate-50 my-3 sm:my-4"></div>
-                                                            <div class="flex items-center justify-center gap-3 sm:gap-6 mb-4 sm:mb-6">
-                                                                <div class="flex flex-col">
-                                                                    <span class="text-[7.5px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">In Stock</span>
-                                                                    <span class="text-[14px] sm:text-[16px] font-black text-emerald-600 font-mono leading-none">${item.quantity ?? 0}</span>
-                                                                </div>
-                                                                <div class="w-px h-6 bg-slate-100"></div>
-                                                                <div class="flex flex-col">
-                                                                    <span class="text-[7.5px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Price/Unit</span>
-                                                                    <span class="text-[14px] sm:text-[16px] font-black text-sky-600 font-mono leading-none">฿${priceFmt.format(Number(item.per_unit ?? 0))}</span>
-                                                                </div>
-                                                            </div>
-                                                            <form method="POST" action="${window.location.origin}/cartitem/add" class="w-full mt-auto">
-                                                                <input type="hidden" name="_token" value="${csrf}">
-                                                                <input type="hidden" name="item_id" value="${item.item_id}">
-                                                                <div class="flex items-stretch gap-2">
-                                                                    <input name="quantity" type="number" min="1" max="${item.quantity ?? 0}" value="1" class="w-10 sm:w-16 h-10 sm:h-12 text-center text-[12px] sm:text-[14px] font-black bg-slate-50 border-2 border-slate-50 rounded-xl sm:rounded-2xl focus:bg-white focus:border-sky-200 focus:outline-none transition-all" ${disabled ? 'disabled' : ''}>
-                                                                    <button type="submit" class="flex-1 h-10 sm:h-12 bg-sky-500 hover:bg-sky-600 text-white rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[12px] uppercase transition-all shadow-lg shadow-sky-100 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none active:scale-95 flex items-center justify-center gap-1.5" ${disabled ? 'disabled' : ''}>
-                                                                        <i class="fa-solid fa-plus text-[9px] sm:text-[10px]"></i> ADD CART
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>`;
+                    <div class="bg-white rounded border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group overflow-hidden">
+                        <div class="aspect-square bg-slate-50/50 flex items-center justify-center p-3 relative overflow-hidden border-b border-slate-200">
+                            ${imgTag}
+                            ${overlayBadge}
+                        </div>
+                        <div class="p-3 flex flex-col flex-1 justify-between space-y-3">
+                            <div class="space-y-1.5">
+                                <span class="text-[9px] font-bold text-slate-400 font-mono tracking-wider">${item.item_code ?? 'CODE-NULL'}</span>
+                                <h2 class="text-[12px] font-bold text-slate-800 line-clamp-2 leading-tight uppercase min-h-[32px]">${item.name}</h2>
+                            </div>
+                            <div class="border border-slate-200 rounded divide-y divide-slate-100 text-[10px]">
+                                <div class="p-1.5 flex justify-between items-center bg-slate-50/50">
+                                    <span class="text-slate-400">สต็อกคงเหลือ</span>
+                                    <span class="font-bold ${Number(item.quantity) <= 5 ? 'text-red-600' : 'text-emerald-700'}">${item.quantity} ชิ้น</span>
+                                </div>
+                                <div class="p-1.5 flex justify-between items-center">
+                                    <span class="text-slate-400">ราคาต่อหน่วย</span>
+                                    <span class="font-bold text-slate-700">฿${priceFmt.format(Number(item.per_unit ?? 0))}</span>
+                                </div>
+                            </div>
+                            <form method="POST" action="${window.location.origin}/cartitem/add" class="w-full m-0 p-0">
+                                <input type="hidden" name="_token" value="${csrf}">
+                                <input type="hidden" name="item_id" value="${item.item_id}">
+                                <div class="flex items-stretch gap-1">
+                                    <input name="quantity" type="number" min="1" max="${item.quantity ?? 0}" value="1" class="w-12 h-8 text-center bg-slate-50 border border-slate-200 rounded text-xs font-bold focus:bg-white focus:border-red-500 focus:outline-none outline-none transition-all" ${disabled ? 'disabled' : ''}>
+                                    <button type="submit" class="flex-1 h-8 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-[10px] uppercase transition-all disabled:bg-slate-150 disabled:text-slate-400 disabled:shadow-none active:scale-95 flex items-center justify-center gap-1 shadow-sm" ${disabled ? 'disabled' : ''}>
+                                        <i class="fa-solid fa-plus text-[8px]"></i> <span class="hidden sm:inline">เพิ่มลงตะกร้า</span><span class="sm:hidden">ใส่ตะกร้า</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>`;
             }
 
             function render(items) {
                 if (!Array.isArray(items) || items.length === 0) {
                     grid.innerHTML = `
-                                                            <div class="col-span-full py-20 text-center">
-                                                                <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                                                    <i class="fa-solid fa-magnifying-glass text-slate-200 text-3xl"></i>
-                                                                </div>
-                                                                <h3 class="text-xl font-black text-slate-800 uppercase">ไม่พบพัสดุที่ต้องการ</h3>
-                                                                <p class="text-slate-400 font-bold mt-2 uppercase text-xs">Try searching for something else</p>
-                                                            </div>`;
+                        <div class="col-span-full py-16 text-center">
+                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-150">
+                                <i class="fa-solid fa-magnifying-glass text-slate-300"></i>
+                            </div>
+                            <h3 class="text-sm font-bold text-slate-800">ไม่พบอุปกรณ์พัสดุที่ต้องการ</h3>
+                            <p class="text-slate-400 text-[10px] mt-1">ทดลองค้นหาด้วยรหัสหรือชื่อพัสดุชนิดอื่น</p>
+                        </div>`;
                     return;
                 }
                 grid.innerHTML = items.map(buildItemCard).join('');
             }
 
             async function search(q) {
+                const paginationEl = document.getElementById('paginationContainer');
+                if (q && q.trim() !== '') {
+                    if (paginationEl) paginationEl.classList.add('hidden');
+                } else {
+                    if (paginationEl) paginationEl.classList.remove('hidden');
+                    grid.innerHTML = originalGridHtml; // Restore original paginated view
+                    return;
+                }
                 const url = new URL(`${window.location.origin}/items/search`);
                 if (q && q.trim() !== '') url.searchParams.set('query', q.trim());
                 const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
@@ -270,28 +263,4 @@
             });
         })();
     </script>
-
-    <style>
-        @keyframes zoom-in {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .animate-zoom-in {
-            animation: zoom-in 0.4s ease-out forwards;
-        }
-
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-    </style>
 @endsection

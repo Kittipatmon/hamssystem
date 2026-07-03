@@ -1,282 +1,380 @@
 @extends('layouts.sidebar')
 
-@section('title', 'ระบบตรวจสอบการแจ้งเตือน')
+@section('title', 'ระบบตรวจสอบการแจ้งเตือนส่วนกลาง')
 
 @section('content')
-<div class="min-h-screen bg-[#f8fafc] dark:bg-zinc-950 px-4 sm:px-6 lg:px-10 py-10">
-    <div class="max-w-[1600px] mx-auto space-y-10 font-noto">
+<div class="min-h-screen bg-slate-100 dark:bg-zinc-950 px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-[1600px] mx-auto space-y-8 font-noto">
         
-        <!-- Premium Header Banner -->
-        <div class="relative overflow-hidden bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-slate-200 dark:border-zinc-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-10 group animate-zoom-in">
-            <!-- Decorative background elements -->
-            <div class="absolute -top-24 -right-24 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-colors duration-700"></div>
-            <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-colors duration-700"></div>
-            
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-                <div class="space-y-4">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-full">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                        </span>
-                        <span class="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-[0.2em]">LIVE SYSTEM ALERTS</span>
-                    </div>
-                    <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-                        แจ้งเตือน<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-600 font-black">ระบบ</span>
-                    </h1>
-                    <p class="text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-widest text-[11px] max-w-xl leading-relaxed">
-                        ศูนย์ควบคุมการแจ้งเตือนพัสดุ ห้องประชุม และรายการจองรถส่วนกลางที่ <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-300 px-2 rounded">รอดำเนินการ</span> ของคุณ
-                    </p>
+        {{-- ════════════════════════════════════════════════════════════════
+             HEADER BANNER (COMMAND CENTER STYLE)
+             ════════════════════════════════════════════════════════════════ --}}
+        <div class="bg-white dark:bg-zinc-900 border-l-4 border-l-amber-500 border border-slate-300 dark:border-zinc-800 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded mb-3">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-widest">LIVE SYSTEM ALERTS</span>
                 </div>
-
-                <div class="flex flex-col items-end gap-3">
-                    <div class="px-8 py-5 bg-slate-900 dark:bg-zinc-800 rounded-3xl shadow-2xl shadow-slate-900/20 relative overflow-hidden group/tile">
-                        <div class="absolute top-0 right-0 p-2 opacity-10 group-hover/tile:rotate-12 transition-transform">
-                            <i class="fa-solid fa-bell text-5xl text-white"></i>
-                        </div>
-                        <span class="relative z-10 block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">PENDING TOTAL</span>
-                        <div class="relative z-10 flex items-baseline gap-2">
-                            <span class="text-5xl font-black text-white tracking-tighter">{{ $requisitionCount + $reservationCount + $vehicleBookingCount + $housingTasksCount }}</span>
-                            <span class="text-slate-400 text-xs font-bold uppercase">รายการ</span>
-                        </div>
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
+                    ศูนย์ควบคุมการแจ้งเตือนส่วนกลาง <span class="text-slate-400 font-medium">(Command Center)</span>
+                </h1>
+                <p class="text-slate-600 dark:text-zinc-400 text-sm">
+                    รายการคำขอเบิกพัสดุ การจองห้องประชุม การจองรถ และงานบ้านพักพนักงานที่อยู่ในสถานะ <span class="font-bold text-amber-600">รอดำเนินการ</span>
+                </p>
+            </div>
+            
+            <div class="flex items-center bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 px-6 py-4 rounded-lg min-w-[200px]">
+                <div class="flex-1">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">TOTAL PENDING TASKS</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-4xl font-bold text-slate-900 dark:text-white leading-none">
+                            {{ $requisitionCount + $reservationCount + $vehicleBookingCount + $housingTasksCount }}
+                        </span>
+                        <span class="text-sm font-semibold text-slate-500">รายการ</span>
                     </div>
+                </div>
+                <div class="w-12 h-12 flex items-center justify-center bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded">
+                    <i class="fa-solid fa-bell text-xl"></i>
                 </div>
             </div>
         </div>
 
-        <!-- High-Impact Status Tiles -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up">
+        {{-- ════════════════════════════════════════════════════════════════
+             KPI SUMMARY TILES
+             ════════════════════════════════════════════════════════════════ --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @php
                 $statCards = [
-                    ['title' => 'คำขอเบิกพัสดุ', 'count' => $requisitionCount, 'color' => 'blue', 'icon' => 'fa-shopping-cart'],
-                    ['title' => 'ห้องประชุมรอนุมัติ', 'count' => $reservationCount, 'color' => 'emerald', 'icon' => 'fa-door-open'],
-                    ['title' => 'จองรถรอนุมัติ', 'count' => $vehicleBookingCount, 'color' => 'amber', 'icon' => 'fa-car-side'],
-                    ['title' => 'งานบ้านพักรอดำเนินการ', 'count' => $housingTasksCount, 'color' => 'purple', 'icon' => 'fa-home-user'],
+                    ['title' => 'คำขอเบิกพัสดุรอตรวจสอบ', 'count' => $requisitionCount, 'color' => 'blue', 'icon' => 'fa-box-open', 'link' => route('requisitions.reqlistall')],
+                    ['title' => 'ห้องประชุมรออนุมัติ', 'count' => $reservationCount, 'color' => 'emerald', 'icon' => 'fa-door-open', 'link' => route('backend.bookingmeeting.reservations.index')],
+                    ['title' => 'การจองรถรออนุมัติ', 'count' => $vehicleBookingCount, 'color' => 'amber', 'icon' => 'fa-car', 'link' => route('bookingcar.dashboard')],
+                    ['title' => 'งานบ้านพักรอดำเนินการ', 'count' => $housingTasksCount, 'color' => 'purple', 'icon' => 'fa-building-user', 'link' => route('housing.management')],
                 ];
             @endphp
 
             @foreach($statCards as $stat)
-            <div class="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 border border-slate-200 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:border-{{ $stat['color'] }}-400 transition-all duration-300 group relative overflow-hidden">
-                <div class="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500">
-                    <i class="fa-solid {{ $stat['icon'] }} text-8xl -rotate-12"></i>
+            <a href="{{ $stat['link'] }}" class="bg-white dark:bg-zinc-900 border-t-4 border-{{ $stat['color'] }}-500 border border-slate-300 dark:border-zinc-800 p-5 flex items-center justify-between shadow-sm hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors group">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase mb-1">{{ $stat['title'] }}</p>
+                    <p class="text-3xl font-bold text-slate-900 dark:text-white">{{ $stat['count'] }}</p>
                 </div>
-                
-                <div class="flex flex-col h-full relative z-10">
-                    <div class="flex items-center justify-between mb-6">
-                        <div class="flex items-center justify-center w-12 h-12 rounded-2xl bg-{{ $stat['color'] }}-50 text-{{ $stat['color'] }}-600 dark:bg-{{ $stat['color'] }}-900/20 dark:text-{{ $stat['color'] }}-400 border border-{{ $stat['color'] }}-100 dark:border-{{ $stat['color'] }}-800">
-                            <i class="fa-solid {{ $stat['icon'] }} text-lg"></i>
-                        </div>
-                        <div class="text-right">
-                            <span class="block text-[32px] font-black text-slate-900 dark:text-white tracking-tighter leading-none">{{ $stat['count'] }}</span>
-                        </div>
-                    </div>
-                    <div class="mt-auto">
-                        <h3 class="text-[14px] font-black text-slate-800 dark:text-zinc-200 uppercase tracking-widest leading-none">{{ $stat['title'] }}</h3>
-                        <div class="w-10 h-1 bg-{{ $stat['color'] }}-500 mt-3 rounded-full group-hover:w-full transition-all duration-500"></div>
-                    </div>
+                <div class="w-10 h-10 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 text-{{ $stat['color'] }}-600 rounded group-hover:bg-{{ $stat['color'] }}-100 transition-colors">
+                    <i class="fa-solid {{ $stat['icon'] }} text-lg"></i>
                 </div>
-            </div>
+            </a>
             @endforeach
         </div>
 
-        <!-- Task Monitoring Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            @php
-                $catAlerts = [
-                    ['id' => 'requisitions', 'title' => 'PENDING REQUISITIONS', 'th_title' => 'รายการรอเบิกพัสดุ', 'route' => 'requisitions.reqlistall', 'theme' => 'blue', 'icon' => 'fa-box', 'data' => $requisitions],
-                    ['id' => 'reservations', 'title' => 'MEETING APPROVAL', 'th_title' => 'ห้องประชุมรออนุมัติ', 'route' => 'backend.bookingmeeting.reservations.index', 'theme' => 'emerald', 'icon' => 'fa-calendar-check', 'data' => $reservations],
-                    ['id' => 'vehicleBookings', 'title' => 'VEHICLE APPROVAL', 'th_title' => 'การจองรถรออนุมัติ', 'route' => 'bookingcar.dashboard', 'theme' => 'amber', 'icon' => 'fa-car-burst', 'data' => $vehicleBookings],
-                    ['id' => 'housingTasks', 'title' => 'HOUSING MONITORING', 'th_title' => 'รายการเกี่ยวกับงานบ้านพัก', 'route' => 'housing.management', 'theme' => 'purple', 'icon' => 'fa-home-user', 'data' => $housingTasks]
-                ];
-            @endphp
-
-            @foreach($catAlerts as $cat)
-            <div class="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-slate-200 dark:border-zinc-800 shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden flex flex-col min-h-[550px] animate-fade-in-up">
-                <div class="px-10 py-8 bg-slate-50 dark:bg-zinc-800/50 border-b border-slate-100 dark:border-zinc-800">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-5">
-                            <div class="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-900 flex items-center justify-center shadow-lg border border-slate-100 dark:border-zinc-800 text-{{ $cat['theme'] }}-600">
-                                <i class="fa-solid {{ $cat['icon'] }} text-2xl"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-xs font-black text-{{ $cat['theme'] }}-600 dark:text-{{ $cat['theme'] }}-400 uppercase tracking-[0.3em] mb-1">{{ $cat['title'] }}</h2>
-                                <h3 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ $cat['th_title'] }}</h3>
-                            </div>
-                        </div>
-                        <div class="flex items-center bg-white dark:bg-zinc-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-800">
-                            <span class="text-xl font-black text-slate-900 dark:text-white mr-2">{{ $cat['data']->count() }}</span>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">รายการ</span>
-                        </div>
+        {{-- ════════════════════════════════════════════════════════════════
+             DATA TABLES (CLINICAL/LEDGER STYLE)
+             ════════════════════════════════════════════════════════════════ --}}
+        
+        {{-- 1. REQUISITIONS TABLE --}}
+        <div class="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-300 dark:border-zinc-700 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-sm">
+                        <i class="fa-solid fa-box text-sm"></i>
                     </div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white">รายการคำขอเบิกพัสดุ</h2>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded border border-blue-200">{{ $requisitions->count() }} รายการ</span>
                 </div>
-
-                <div class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-white dark:bg-zinc-900/30">
-                    @forelse($cat['data'] as $item)
-                        @include('backend.welcomedatamanage_item_card', ['item' => $item, 'theme' => $cat['theme'], 'type' => $cat['id'], 'statusType' => 'pending'])
-                    @empty
-                        <div class="h-full flex flex-col items-center justify-center py-20 grayscale opacity-40">
-                             <div class="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-6 border-2 border-dashed border-slate-200">
-                                <i class="fa-solid {{ $cat['icon'] }} text-3xl text-slate-400"></i>
-                             </div>
-                             <p class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">ไม่มีรายการรอดำเนินการ</p>
-                        </div>
-                    @endforelse
-                </div>
-                
-                @if($cat['data']->count() > 0)
-                    <div class="px-10 py-6 bg-slate-50 dark:bg-zinc-800/50 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between">
-                         <div class="flex -space-x-2">
-                             @for($i=0; $i<min(3, $cat['data']->count()); $i++)
-                                <div class="w-8 h-8 rounded-full bg-{{ $cat['theme'] }}-100 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[10px] font-black text-{{ $cat['theme'] }}-600">
-                                    {{ substr($cat['data'][$i]->user->first_name ?? 'U', 0, 1) }}
-                                </div>
-                             @endfor
-                             @if($cat['data']->count() > 3)
-                                <div class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[10px] font-black text-slate-600">
-                                    +{{ $cat['data']->count() - 3 }}
-                                </div>
-                             @endif
-                         </div>
-                        <a href="{{ $cat['route'] !== '#' ? route($cat['route']) : '#' }}" class="group flex items-center gap-3 px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all hover:shadow-xl hover:px-10 hover:bg-black active:scale-95">
-                            จัดการรายการทั้งหมด
-                            <i class="fa-solid fa-arrow-right-long transition-transform group-hover:translate-x-2"></i>
-                        </a>
-                    </div>
-                @endif
-            </div>
-            @endforeach
-        </div>
-    </div>
-</div>
-
-<!-- Task Detail Modal -->
-<div id="taskDetailModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="window.closeTaskDetail()"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-white dark:bg-zinc-900 rounded-[2.5rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-slate-200 dark:border-zinc-800 animate-zoom-in">
-            <div class="px-8 py-6 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between bg-slate-50/50 dark:bg-zinc-800/50">
-                <div class="flex items-center gap-4">
-                    <div id="modalIcon" class="w-12 h-12 rounded-2xl bg-white dark:bg-zinc-900 flex items-center justify-center shadow-lg border border-slate-100 dark:border-zinc-800 text-amber-600">
-                        <i class="fa-solid fa-file-lines text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Detailed View</h3>
-                        <h2 id="modalTitle" class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">รายละเอียดรายการ</h2>
-                    </div>
-                </div>
-                <button onclick="window.closeTaskDetail()" class="w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors">
-                    <i class="fa-solid fa-xmark text-slate-400"></i>
-                </button>
+                <a href="{{ route('requisitions.reqlistall') }}" class="text-sm font-bold text-blue-600 hover:text-blue-800 uppercase tracking-wide">จัดการทั้งหมด &rarr;</a>
             </div>
             
-            <div id="modalBody" class="p-10 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                <!-- Data will be injected here -->
-                <div class="flex flex-col items-center justify-center py-20 animate-pulse">
-                    <div class="w-12 h-12 rounded-full border-4 border-amber-500 border-t-transparent animate-spin mb-4"></div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">กำลังดึงข้อมูลระบบ...</p>
-                </div>
-            </div>
-
-            <div class="px-8 py-6 bg-slate-50 dark:bg-zinc-800/50 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-end gap-4">
-                <button onclick="window.closeTaskDetail()" class="px-8 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all">ยกเลิก</button>
-                <a id="modalActionBtn" href="#" class="px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:shadow-xl transition-all">ไปหน้าจัดการ</a>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 dark:bg-zinc-800/80 border-b-2 border-slate-300 dark:border-zinc-700">
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-32">รหัสคำขอ</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider">รายละเอียด</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-32">จำนวน/มูลค่า</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-40">วันที่ส่งคำขอ</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-32">สถานะ</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-24 text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-zinc-800">
+                        @forelse($requisitions as $req)
+                        <tr class="hover:bg-blue-50/50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="py-3 px-6 text-sm font-bold text-slate-900 dark:text-white">REQ-{{ $req->requisitions_code ?? $req->requisitions_id }}</td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm font-semibold text-slate-800 dark:text-zinc-200">คำขอเบิกพัสดุ/อุปกรณ์สำนักงาน</div>
+                                <div class="text-xs text-slate-500">รหัสอ้างอิงภายใน: {{ $req->id_requisitions_items ?? '-' }}</div>
+                            </td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm font-bold text-slate-700">{{ $req->item_quantity ?? 0 }} รายการ</div>
+                                <div class="text-xs text-slate-500 font-mono">฿{{ number_format($req->total_price ?? 0, 2) }}</div>
+                            </td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm text-slate-700 dark:text-zinc-300">{{ $req->created_at->format('d/m/Y') }}</div>
+                                <div class="text-xs text-slate-500">{{ $req->created_at->format('H:i') }} น.</div>
+                            </td>
+                            <td class="py-3 px-6">
+                                <span class="inline-block px-2 py-1 bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-bold uppercase rounded">
+                                    {{ $req->status_label ?? $req->status ?? 'รอตรวจสอบ' }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <a href="{{ route('requisitions.reqlistall') }}" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-700 rounded border border-slate-200 transition-colors" title="ตรวจสอบรายละเอียด">
+                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-slate-400 bg-slate-50/50 dark:bg-zinc-900">
+                                <i class="fa-solid fa-box-open text-2xl mb-2"></i>
+                                <p class="text-sm font-bold">ไม่มีรายการคำขอเบิกพัสดุใหม่</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
+
+        {{-- 2. RESERVATIONS TABLE --}}
+        <div class="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-300 dark:border-zinc-700 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center bg-emerald-600 text-white rounded-sm">
+                        <i class="fa-solid fa-door-open text-sm"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white">รายการจองห้องประชุมรออนุมัติ</h2>
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded border border-emerald-200">{{ $reservations->count() }} รายการ</span>
+                </div>
+                <a href="{{ route('backend.bookingmeeting.reservations.index') }}" class="text-sm font-bold text-emerald-600 hover:text-emerald-800 uppercase tracking-wide">จัดการทั้งหมด &rarr;</a>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 dark:bg-zinc-800/80 border-b-2 border-slate-300 dark:border-zinc-700">
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-32">รหัสการจอง</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider">หัวข้อการประชุม / สถานที่</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-48">ช่วงเวลาที่จอง</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-24 text-center">ผู้เข้าร่วม</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-32">สถานะ</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-24 text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-zinc-800">
+                        @forelse($reservations as $res)
+                        <tr class="hover:bg-emerald-50/50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="py-3 px-6 text-sm font-bold text-slate-900 dark:text-white">RES-{{ $res->reservation_code }}</td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm font-semibold text-slate-800 dark:text-zinc-200 line-clamp-1">{{ $res->topic }}</div>
+                                <div class="text-xs text-slate-600 font-medium flex items-center gap-1 mt-0.5">
+                                    <i class="fa-solid fa-location-dot text-emerald-500"></i> {{ $res->room->room_name ?? 'ไม่ได้ระบุ' }}
+                                </div>
+                            </td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm font-bold text-slate-700 bg-slate-100 dark:bg-zinc-800 inline-block px-2 py-0.5 border border-slate-200 dark:border-zinc-700 rounded text-center">
+                                    {{ $res->start_time ?? '-' }} <br> <span class="text-xs font-normal text-slate-500">ถึง</span> {{ $res->end_time ?? '-' }}
+                                </div>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <span class="text-sm font-bold text-slate-700">{{ $res->attendees ?? 0 }}</span> <span class="text-xs text-slate-500">ท่าน</span>
+                            </td>
+                            <td class="py-3 px-6">
+                                <span class="inline-block px-2 py-1 bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-bold uppercase rounded">
+                                    {{ $res->status == 'รออนุมัติ' ? 'รอเจ้าหน้าที่ยืนยัน' : $res->status }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <a href="{{ route('backend.bookingmeeting.reservations.index') }}" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-700 rounded border border-slate-200 transition-colors" title="ตรวจสอบรายละเอียด">
+                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-slate-400 bg-slate-50/50 dark:bg-zinc-900">
+                                <i class="fa-solid fa-calendar-check text-2xl mb-2"></i>
+                                <p class="text-sm font-bold">ไม่มีรายการจองห้องประชุมใหม่</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- 3. VEHICLE BOOKINGS TABLE --}}
+        <div class="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-300 dark:border-zinc-700 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center bg-amber-500 text-white rounded-sm">
+                        <i class="fa-solid fa-car text-sm"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white">รายการจองรถรออนุมัติ</h2>
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded border border-amber-200">{{ $vehicleBookings->count() }} รายการ</span>
+                </div>
+                <a href="{{ route('bookingcar.dashboard') }}" class="text-sm font-bold text-amber-600 hover:text-amber-700 uppercase tracking-wide">จัดการทั้งหมด &rarr;</a>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 dark:bg-zinc-800/80 border-b-2 border-slate-300 dark:border-zinc-700">
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-32">รหัสการจอง</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider">วัตถุประสงค์ / จุดหมาย</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-48">ช่วงเวลาที่จอง</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-40">คนขับรถ</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-32">สถานะ</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-24 text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-zinc-800">
+                        @forelse($vehicleBookings as $veh)
+                        <tr class="hover:bg-amber-50/50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="py-3 px-6 text-sm font-bold text-slate-900 dark:text-white">VEH-{{ $veh->booking_code }}</td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm font-semibold text-slate-800 dark:text-zinc-200 line-clamp-1">{{ $veh->purpose }}</div>
+                                <div class="text-xs text-slate-600 font-medium flex items-center gap-1 mt-0.5">
+                                    <i class="fa-solid fa-map-pin text-amber-500"></i> {{ $veh->destination }} ({{ $veh->province }})
+                                </div>
+                            </td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm font-bold text-slate-700 bg-slate-100 dark:bg-zinc-800 inline-block px-2 py-0.5 border border-slate-200 dark:border-zinc-700 rounded text-center">
+                                    {{ $veh->start_time ?? '-' }} <br> <span class="text-xs font-normal text-slate-500">ถึง</span> {{ $veh->end_time ?? '-' }}
+                                </div>
+                            </td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm text-slate-700 dark:text-zinc-300">{{ $veh->driver_name ?? 'ยังไม่จัดสรร' }}</div>
+                            </td>
+                            <td class="py-3 px-6">
+                                <span class="inline-block px-2 py-1 bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-bold uppercase rounded">
+                                    {{ $veh->status == 'รออนุมัติ' ? 'รอแผนก HAMS อนุมัติ' : $veh->status }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <a href="{{ route('bookingcar.dashboard') }}" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-700 rounded border border-slate-200 transition-colors" title="ตรวจสอบรายละเอียด">
+                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-slate-400 bg-slate-50/50 dark:bg-zinc-900">
+                                <i class="fa-solid fa-car-side text-2xl mb-2"></i>
+                                <p class="text-sm font-bold">ไม่มีรายการจองรถใหม่</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- 4. HOUSING TASKS TABLE --}}
+        <div class="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 dark:bg-zinc-800 border-b border-slate-300 dark:border-zinc-700 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center bg-purple-600 text-white rounded-sm">
+                        <i class="fa-solid fa-building-user text-sm"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white">รายการงานบ้านพักพนักงาน</h2>
+                    <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-0.5 rounded border border-purple-200">{{ $housingTasks->count() }} รายการ</span>
+                </div>
+                <a href="{{ route('housing.management') }}" class="text-sm font-bold text-purple-600 hover:text-purple-800 uppercase tracking-wide">จัดการทั้งหมด &rarr;</a>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 dark:bg-zinc-800/80 border-b-2 border-slate-300 dark:border-zinc-700">
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-36">รหัสอ้างอิง</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-36">ประเภทรายการ</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider">สถานที่ / รายละเอียด</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-40">วันที่ส่งคำขอ</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-40">สถานะ</th>
+                            <th class="py-3 px-6 text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider w-24 text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-zinc-800">
+                        @forelse($housingTasks as $hse)
+                            @php
+                                $isHousingRequest = in_array(($hse->task_type ?? ''), ['request', 'agreement', 'guest', 'leave']);
+                                $currentStep = 'รอกำเนินการ';
+                                if ($isHousingRequest) {
+                                    $steps = [
+                                        ['label' => 'ผู้บังคับบัญชา', 'status' => $hse->commander_status],
+                                        ['label' => 'ผจก. HAMS', 'status' => $hse->managerhams_status],
+                                        ['label' => 'คณะกรรมการ', 'status' => $hse->Committee_status]
+                                    ];
+                                    foreach($steps as $s) {
+                                        if ($s['status'] === 0 || is_null($s['status'])) {
+                                            $currentStep = 'รอ' . $s['label'];
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                $code = match($hse->task_type ?? '') {
+                                    'repair' => 'RPR-' . $hse->repair_code,
+                                    'request' => 'HSG-REQ-' . $hse->requests_code,
+                                    'agreement' => 'HSG-AGR-' . $hse->agreement_code,
+                                    'guest' => 'HSG-GST-' . $hse->guest_code,
+                                    'leave' => 'HSG-LVE-' . $hse->leave_code,
+                                    default => 'HSG-' . ($hse->id ?? '-')
+                                };
+
+                                $typeLabel = match($hse->task_type ?? '') {
+                                    'repair' => 'แจ้งซ่อมบำรุง',
+                                    'request' => 'คำขอเข้าพักอาศัย',
+                                    'agreement' => 'ข้อตกลงเข้าพัก',
+                                    'guest' => 'ขอนำญาติเข้าพัก',
+                                    'leave' => 'แจ้งย้ายออก',
+                                    default => 'อื่นๆ'
+                                };
+                                
+                                $locationLabel = $hse->room->room_number ?? $hse->residence_address ?? $hse->site ?? 'บ้านพักพนักงาน';
+                            @endphp
+                        <tr class="hover:bg-purple-50/50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="py-3 px-6 text-sm font-bold text-slate-900 dark:text-white">{{ $code }}</td>
+                            <td class="py-3 px-6">
+                                <span class="bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-1 rounded border border-purple-200 text-xs font-bold">{{ $typeLabel }}</span>
+                            </td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm font-semibold text-slate-800 dark:text-zinc-200 line-clamp-1">{{ $hse->title ?? $hse->topic ?? '-' }}</div>
+                                <div class="text-xs text-slate-600 font-medium flex items-center gap-1 mt-0.5">
+                                    <i class="fa-solid fa-building text-purple-500"></i> {{ $locationLabel }}
+                                </div>
+                            </td>
+                            <td class="py-3 px-6">
+                                <div class="text-sm text-slate-700 dark:text-zinc-300">{{ $hse->created_at->format('d/m/Y') }}</div>
+                                <div class="text-xs text-slate-500">{{ $hse->created_at->format('H:i') }} น.</div>
+                            </td>
+                            <td class="py-3 px-6">
+                                <div class="inline-block px-2 py-1 bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-bold uppercase rounded mb-1">
+                                    {{ $isHousingRequest ? ($hse->Committee_status === 0 || is_null($hse->Committee_status) ? 'รออนุมัติ' : 'รอดำเนินการ') : ($hse->status ?? 'รอดำเนินการ') }}
+                                </div>
+                                <div class="text-[10px] font-bold text-amber-600">{{ $currentStep }}</div>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <a href="{{ route('housing.management') }}" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 hover:bg-purple-100 text-slate-600 hover:text-purple-700 rounded border border-slate-200 transition-colors" title="ตรวจสอบรายละเอียด">
+                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-slate-400 bg-slate-50/50 dark:bg-zinc-900">
+                                <i class="fa-solid fa-house-chimney text-2xl mb-2"></i>
+                                <p class="text-sm font-bold">ไม่มีรายการงานบ้านพักใหม่</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
-
-<script>
-    window.showTaskDetailFromElement = function(el) {
-        const modal = document.getElementById('taskDetailModal');
-        const body = document.getElementById('modalBody');
-        const actionBtn = document.getElementById('modalActionBtn');
-        const title = document.getElementById('modalTitle');
-        const data = JSON.parse(el.getAttribute('data-task-json'));
-        
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-
-        // Set action button URL
-        let detailUrl = '#';
-        if (data.type === 'requisitions') detailUrl = "{{ route('requisitions.reqlistall') }}";
-        else if (data.type === 'reservations') detailUrl = "{{ route('backend.bookingmeeting.reservations.index') }}";
-        else if (data.type === 'vehicleBookings') detailUrl = "{{ route('bookingcar.dashboard') }}";
-        else if (data.type === 'housingTasks') detailUrl = "{{ route('housing.management') }}";
-        actionBtn.href = detailUrl;
-
-        // Build Details HTML
-        let detailsHtml = `
-            <div class="space-y-6">
-                <div class="grid grid-cols-2 gap-8">
-                    <div class="space-y-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">รหัสรายการ</span>
-                        <span class="text-lg font-black text-slate-900 dark:text-white uppercase leading-none">${data.code}</span>
-                    </div>
-                    <div class="space-y-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">สถานะปัจจุบัน</span>
-                        <span class="inline-flex px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-black uppercase border border-amber-100">${data.status}</span>
-                    </div>
-                </div>
-                
-                <div class="p-8 bg-slate-50 dark:bg-zinc-800/80 rounded-[2rem] border border-slate-100 dark:border-zinc-700 space-y-6">
-                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-zinc-700 pb-3">ข้อมูลรายละเอียด</h4>
-                    <div class="grid grid-cols-1 gap-4">
-                        ${data.details.map(d => `
-                            <div class="flex items-center justify-between">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase">${d.label}</span>
-                                <span class="text-[11px] font-black text-slate-800 dark:text-white uppercase">${d.value}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                
-                <div class="flex items-start gap-4 p-5 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/30">
-                    <i class="fa-solid fa-circle-info text-blue-500 mt-1"></i>
-                    <p class="text-[11px] font-bold text-blue-700/80 dark:text-blue-400/80 leading-relaxed uppercase">
-                        นี่คือข้อมูลสรุปจากระบบ Monitoring หากต้องการดูเอกสารต้นฉบับหรือจัดการรายการ กรุณากดปุ่ม "ไปหน้าจัดการ"
-                    </p>
-                </div>
-            </div>
-        `;
-        
-        body.innerHTML = detailsHtml;
-        title.innerText = data.title;
-    };
-
-    window.closeTaskDetail = function() {
-        document.getElementById('taskDetailModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    };
-</script>
-
-<style>
-    @font-face {
-        font-family: 'Outfit';
-        src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;400;700;900&display=swap');
-    }
-    
-    .max-w-1600px { max-width: 1600px; }
-
-    @keyframes zoom-in { 
-        from { opacity: 0; transform: scale(0.98) translateY(10px); } 
-        to { opacity: 1; transform: scale(1) translateY(0); } 
-    }
-    
-    @keyframes fade-in-up { 
-        from { opacity: 0; transform: translateY(30px); } 
-        to { opacity: 1; transform: translateY(0); } 
-    }
-
-    .animate-zoom-in { animation: zoom-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    .animate-fade-in-up { 
-        opacity: 0;
-        animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-    }
-
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; }
-</style>
 @endsection

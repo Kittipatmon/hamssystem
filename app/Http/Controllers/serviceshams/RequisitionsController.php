@@ -33,6 +33,7 @@ class RequisitionsController extends Controller
         $allReqCount = Requisitions::count();
 
         $checklistPendingCount = Requisitions::where('packing_staff_status', Requisitions::PACKING_STATUS_PENDING)
+            ->where('approve_status', Requisitions::APPROVE_STATUS_APPROVED)
             ->where('status', Requisitions::STATUS_PENDING)
             ->count();
         $packingDoneCount = Requisitions::where('packing_staff_status', '!=', Requisitions::PACKING_STATUS_PENDING)
@@ -112,6 +113,81 @@ class RequisitionsController extends Controller
         $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
 
         return view('serviceshams.requisitions.reqlistall', compact('requisitions', 'requisition_items', 'years', 'approvers', 'isHamsOrAdmin'));
+    }
+
+    public function exportSummary(Request $request)
+    {
+        $start_month = $request->input('start_month');
+        $end_month = $request->input('end_month');
+
+        if (!$start_month || !$end_month) {
+            return redirect()->back()->with('error', 'กรุณาระบุเดือนที่ต้องการออกรายงาน');
+        }
+
+        $start_date = Carbon::parse($start_month . '-01')->startOfMonth();
+        $end_date = Carbon::parse($end_month . '-01')->endOfMonth();
+
+        $query = Requisitions::with(['user', 'requisition_items.item'])
+            ->whereNotIn('status', [Requisitions::STATUS_CANCELLED, Requisitions::STATUS_REJECTED])
+            ->whereBetween('created_at', [$start_date, $end_date]);
+
+        // Access Control
+        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        if (!$isHamsOrAdmin) {
+            $query->where('requester_id', Auth::user()->id);
+        }
+
+        $requisitions = $query->get();
+
+        // Group by requester
+        $summary = [];
+        foreach ($requisitions as $req) {
+            $userId = $req->requester_id;
+            if (!isset($summary[$userId])) {
+                $summary[$userId] = [
+                    'user' => $req->user,
+                    'total_count' => 0,
+                    'total_price' => 0,
+                    'items' => [],
+                ];
+            }
+            $summary[$userId]['total_count'] += 1;
+            $summary[$userId]['total_price'] += (float)$req->total_price;
+
+            $dateStr = Carbon::parse($req->created_at)->format('d/m/Y');
+            foreach ($req->requisition_items as $item) {
+                $itemCode = optional($item->item)->item_code ?? '-';
+                $itemName = optional($item->item)->name ?? 'ไม่ทราบชื่อ';
+                $summary[$userId]['items'][] = [
+                    'code' => $itemCode,
+                    'name' => $itemName,
+                    'quantity' => $item->quantity,
+                    'date' => $dateStr
+                ];
+            }
+        }
+
+        // Sort by total_count descending
+        usort($summary, function($a, $b) {
+            if ($a['total_count'] == $b['total_count']) {
+                return $b['total_price'] <=> $a['total_price'];
+            }
+            return $b['total_count'] <=> $a['total_count'];
+        });
+
+        $monthRange = $start_date->locale('th')->isoFormat('MMMM YYYY') . ' - ' . $end_date->locale('th')->isoFormat('MMMM YYYY');
+        if ($start_month === $end_month) {
+            $monthRange = $start_date->locale('th')->isoFormat('MMMM YYYY');
+        }
+
+        $filename = "สรุปประวัติการเบิกอุปกรณ์_" . $start_month . "_ถึง_" . $end_month . ".xls";
+        $headers = [
+            'Content-Type' => 'application/vnd.ms-excel',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"; filename*=UTF-8\'\'' . rawurlencode($filename),
+            'Cache-Control' => 'max-age=0',
+        ];
+
+        return response()->view('serviceshams.requisitions.export_summary_excel', compact('summary', 'monthRange'))->withHeaders($headers);
     }
 
     public function updateAllApprovers(Request $request)
@@ -203,6 +279,7 @@ class RequisitionsController extends Controller
     public function reqChecklist()
     {
         $requisitions = Requisitions::where('packing_staff_status', Requisitions::PACKING_STATUS_PENDING)
+            ->where('approve_status', Requisitions::APPROVE_STATUS_APPROVED)
             ->where('status', Requisitions::STATUS_PENDING)
             ->orderBy('created_at', 'desc')
             ->get();

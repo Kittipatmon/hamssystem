@@ -28,12 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force HTTPS for Cloudflare Tunnel
-        if (str_contains(request()->header('host', ''), 'trycloudflare.com') || 
-            request()->header('x-forwarded-proto') === 'https' || 
-            !app()->isLocal()) {
-            URL::forceScheme('https');
-        }
+        // ปล่อยให้ Laravel จัดการ Scheme ตาม Request จริง (เข้า HTTP เป็น HTTP, เข้า HTTPS เป็น HTTPS)
 
         // ---------------------------------------------------------
         // 2. เพิ่มโค้ดนี้ในฟังก์ชัน boot()

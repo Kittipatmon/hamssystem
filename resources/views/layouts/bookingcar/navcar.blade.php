@@ -1,6 +1,6 @@
 <!-- Navbar (Tailwind + DaisyUI + Font Awesome) -->
 <nav
-    class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
+    class="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-lg border-b border-red-100 shadow-sm transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 md:px-6">
         <div class="h-16 flex items-center justify-between">
 
@@ -22,7 +22,7 @@
             </a>
 
             <!-- Right: Navigation Links -->
-            <div class="hidden xl:flex items-center gap-2 lg:gap-3">
+            <div class="hidden lg:flex items-center gap-2 lg:gap-3">
 
                 <!-- หน้าแรก -->
                 <a href="{{ route('welcome') }}"
@@ -200,14 +200,14 @@
 
             <!-- Mobile menu button -->
             <button
-                class="xl:hidden flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 border border-slate-200 shadow-sm relative z-[110]"
+                class="lg:hidden flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 border border-slate-200 shadow-sm relative z-[110]"
                 onclick="document.getElementById('mnav').classList.toggle('hidden')">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
 
         <!-- Mobile nav -->
-        <div id="mnav" class="xl:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[75vh] overflow-y-auto custom-scrollbar">
+        <div id="mnav" class="lg:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[75vh] overflow-y-auto custom-scrollbar">
             <div class="flex flex-col gap-1.5 px-2">
                 <a href="{{ route('welcome') }}"
                     class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('welcome') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">

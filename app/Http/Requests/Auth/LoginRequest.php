@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Cache;
 
 class LoginRequest extends FormRequest
 {
@@ -44,16 +45,16 @@ class LoginRequest extends FormRequest
         $user = \App\Models\User::where('emp_code', $this->emp_code)->first();
 
         if (!$user) {
-            RateLimiter::hit($this->throttleKey());
+            $this->recordFailedLogin();
             throw ValidationException::withMessages([
-                'emp_code' => 'รหัสหรือ user กรอกผิดพลาด',
+                'emp_code' => 'ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง',
             ]);
         }
 
         if ($user->status === \App\Models\User::STATUS_RESIGN) {
-            RateLimiter::hit($this->throttleKey());
+            $this->recordFailedLogin();
             throw ValidationException::withMessages([
-                'emp_code' => 'รหัสหรือ user กรอกผิดพลาด',
+                'emp_code' => 'ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง',
             ]);
         }
 
@@ -72,14 +73,22 @@ class LoginRequest extends FormRequest
         }
 
         if (!$isMatch) {
-            RateLimiter::hit($this->throttleKey());
+            $this->recordFailedLogin();
             throw ValidationException::withMessages([
-                'emp_code' => 'รหัสหรือ user กรอกผิดพลาด',
+                'emp_code' => 'ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง',
             ]);
         }
 
+        // อัปเกรดรหัสผ่าน (Rehash) เพื่อให้ Login ครั้งต่อไปเร็วขึ้นและปลอดภัยขึ้น
+        // - กรณีที่ในฐานข้อมูลเป็น Plain text จะถูกเข้ารหัสทันที
+        // - กรณีที่ Hash เดิมมี Cost (Rounds) สูงเกินไปจนทำให้ช้า จะถูกปรับให้เป็นค่าใหม่ตาม .env
+        if (\Illuminate\Support\Facades\Hash::needsRehash($user->password) || $user->password === $this->password) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($this->password);
+            $user->save();
+        }
+
         Auth::login($user, $this->boolean('remember'));
-        RateLimiter::clear($this->throttleKey());
+        $this->clearRateLimit();
     }
 
     /**
@@ -87,22 +96,52 @@ class LoginRequest extends FormRequest
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function ensureIsNotRateLimited(): void
+    public function recordFailedLogin(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            return;
+        session()->increment('login_attempts');
+
+        $key = $this->throttleKey();
+        $attemptsKey = $key . ':attempts';
+        
+        $attempts = Cache::increment($attemptsKey);
+        
+        if ($attempts == 1) {
+            Cache::put($attemptsKey, 1, now()->addHour());
         }
 
-        event(new Lockout($this));
+        if ($attempts >= 5) {
+            $lockKey = $key . ':lock';
+            $minutes = 2;
+            Cache::put($lockKey, now()->addMinutes($minutes), now()->addMinutes($minutes));
+        }
+    }
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+    public function ensureIsNotRateLimited(): void
+    {
+        $key = $this->throttleKey();
+        $lockKey = $key . ':lock';
 
-        throw ValidationException::withMessages([
-            'emp_code' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
-        ]);
+        if (Cache::has($lockKey)) {
+            event(new Lockout($this));
+            
+            $lockTime = Cache::get($lockKey);
+            $seconds = now()->diffInSeconds($lockTime, false);
+            
+            if ($seconds > 0) {
+                $roundedSeconds = ceil($seconds);
+                throw ValidationException::withMessages([
+                    'emp_code' => "คุณเข้าสู่ระบบผิดพลาดหลายครั้ง กรุณาลองใหม่ในอีก {$roundedSeconds} วินาที",
+                ]);
+            }
+        }
+    }
+    
+    public function clearRateLimit(): void
+    {
+        session()->forget('login_attempts');
+        $key = $this->throttleKey();
+        Cache::forget($key . ':attempts');
+        Cache::forget($key . ':lock');
     }
 
     /**

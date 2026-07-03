@@ -4,6 +4,7 @@ namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Section;
 
 class SectionController extends Controller
@@ -32,12 +33,16 @@ class SectionController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
             'section_code' => 'required|string|max:255',
             'section_name' => 'required|string|max:255',
         ]);
 
-        Section::create($request->all());
+        Section::create($validated);
 
         if ($request->ajax()) {
             return response()->json(['success' => true]);
@@ -48,14 +53,18 @@ class SectionController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
             'section_code' => 'required|string|max:255',
             'section_name' => 'required|string|max:255',
             'section_status' => 'required|integer',
         ]);
 
         $section = Section::findOrFail($id);
-        $section->update($request->all());
+        $section->update($validated);
 
         if ($request->ajax()) {
             return response()->json(['success' => true]);
@@ -66,6 +75,10 @@ class SectionController extends Controller
 
     public function destroy($id)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $section = Section::findOrFail($id);
         $section->delete();
 

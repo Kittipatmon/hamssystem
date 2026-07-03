@@ -7,6 +7,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
+    @if(request()->secure())
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    @endif
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -15,6 +18,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;400;600&family=Prompt:wght@200;400;600&display=swap"
         rel="stylesheet">
+
     <style>
         html {
             scroll-behavior: smooth;
@@ -29,7 +33,7 @@
 </head>
 
 <body class="font-sans antialiased bg-[#FAF9F6]">
-    <div class="min-h-screen">
+    <div class="min-h-screen pt-16">
         @include('layouts.navigation')
 
         <!-- Page Heading -->
@@ -42,7 +46,7 @@
         @endisset
 
         <!-- Page Content -->
-        <main class="p-6 pt-[88px]">
+        <main class="p-6">
             @yield('content')
         </main>
 

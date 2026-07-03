@@ -3,98 +3,95 @@
     <div class="max-w-7xl mx-auto">
 
         <!-- Flash Messages -->
-        @if(session('success'))
-            <div class="alert alert-success shadow-lg mb-4">
-                <div>
-                    <i class="fa-solid fa-circle-check"></i>
-                    <span>{{ session('success') }}</span>
+        <div class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 max-w-md w-full pointer-events-none">
+            @if(session('success'))
+                <div class="alert alert-success shadow-lg pointer-events-auto transition-all duration-500 ease-in-out fixed-alert flex items-center justify-between p-4 rounded-xl border border-emerald-500/20">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-white text-lg"></i>
+                        <span class="text-white font-medium text-sm">{{ session('success') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="btn btn-ghost btn-xs btn-circle text-white/80 hover:text-white">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
-            </div>
-        @endif
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-error shadow-lg pointer-events-auto transition-all duration-500 ease-in-out fixed-alert flex items-center justify-between p-4 rounded-xl border border-red-500/20">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-white text-lg"></i>
+                        <span class="text-white font-medium text-sm">{{ session('error') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="btn btn-ghost btn-xs btn-circle text-white/80 hover:text-white">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            @endif
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(() => {
+                    const alerts = document.querySelectorAll('.fixed-alert');
+                    alerts.forEach(alert => {
+                        alert.style.opacity = '0';
+                        alert.style.transform = 'translateY(-10px)';
+                        setTimeout(() => alert.remove(), 500);
+                    });
+                }, 6000);
+            });
+        </script>
 
         @php
             $isReturnError = $errors->any() && collect($errors->keys())->contains(fn($k) => str_starts_with($k, 'mileage_') || str_starts_with($k, 'attachment_') || str_starts_with($k, 'note_returning'));
         @endphp
 
-        @if(session('error'))
-            <div class="alert alert-error shadow-lg mb-4">
-                <div>
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <span>{{ session('error') }}</span>
-                </div>
-            </div>
-        @endif
-
         <!-- Main Container -->
         <div class="flex flex-col-reverse lg:grid lg:grid-cols-4 gap-6">
 
-            <!-- Left Column: Vehicle Information (Bottom on Mobile) -->
-            <div class="lg:col-span-1 space-y-4">
-                <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-car text-[#c31919] mr-2"></i>
-                    ข้อมูลรถส่วนกลาง</h2>
-                @foreach($previewVehicles as $vehicle)
-                    <div class="card bg-white shadow-sm border border-slate-200 p-0 transition-transform hover:scale-[1.02]">
-                        <!-- Vehicle Image -->
-                        <figure class="h-32 bg-slate-100 relative border-b border-slate-200 flex items-center justify-center">
-                            @php
-                                $images = is_string($vehicle->images) ? json_decode($vehicle->images, true) : $vehicle->images;
-                                $firstImage = !empty($images) && is_array($images) ? $images[0] : null;
-
-                                $imagePathUrl = null;
-                                if ($firstImage) {
-                                    if (file_exists(public_path('images/vehicle/' . $firstImage))) {
-                                        $imagePathUrl = asset('images/vehicle/' . $firstImage);
-                                    } elseif (file_exists(public_path('images/' . $firstImage))) {
-                                        $imagePathUrl = asset('images/' . $firstImage);
-                                    } elseif (file_exists(public_path($firstImage))) {
-                                        $imagePathUrl = asset($firstImage);
-                                    }
-                                }
-                              @endphp
-
-                            @if($imagePathUrl)
-                                <img src="{{ $imagePathUrl }}" alt="{{ $vehicle->name }}" class="w-full h-full object-cover"
-                                    onerror="this.style.display='none'">
-                            @else
-                                <div class="text-slate-400 flex flex-col items-center">
-                                    <i class="fa-regular fa-image text-2xl mb-1"></i>
-                                    <span class="text-xs">ไม่มีรูปภาพ</span>
-                                </div>
-                            @endif
-                        </figure>
-
-                        <!-- Vehicle Info -->
-                        <div class="p-4">
-                            <h3 class="font-bold text-[#c31919] uppercase text-sm mb-1">{{ $vehicle->name }}
-                                ({{ $vehicle->model_name }})</h3>
-                            <p class="text-[11px] text-slate-600 mb-2 truncate" title="{{ $vehicle->brand }}">
-                                ยี่ห้อ: {{ $vehicle->brand ?? '-' }} | ทะเบียนรถ: {{ $vehicle->name }}
-                            </p>
-
-                            <div class="space-y-1 mb-3 text-xs text-slate-700">
-                                <p class="flex items-center"><i class="fa-solid fa-users w-5 text-center text-slate-400"></i>
-                                    <span>ที่นั่ง: <span class="font-medium">{{ $vehicle->seat }}</span> ที่นั่ง</span>
-                                </p>
-                                <p class="flex items-start"><i
-                                        class="fa-solid fa-gas-pump w-5 text-center text-slate-400 mt-1"></i>
-                                    <span class="break-words whitespace-normal flex-1">เชื้อเพลิง:
-                                        {{ $vehicle->filling_type ?? '-' }}</span>
-                                </p>
-                                <p class="flex items-start"><i
-                                        class="fa-solid fa-car-side w-5 text-center text-slate-400 mt-1"></i>
-                                    <span class="break-words whitespace-normal flex-1">ประเภท:
-                                        {{ $vehicle->type ?? '-' }}</span>
-                                </p>
-                            </div>
-
-                            @if($vehicle->desciption)
-                                <div class="mt-2 text-xs text-slate-600 line-clamp-2" title="{{ $vehicle->desciption }}">
-                                    <i class="fa-solid fa-circle-info text-slate-400 mr-1"></i> {{ $vehicle->desciption }}
-                                </div>
-                            @endif
-                        </div>
+            <!-- Left Column: This Month's Bookings -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-0 overflow-hidden min-h-[400px] flex flex-col">
+                    <div class="p-5 border-b border-slate-100">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-receipt text-[#c31919]"></i> <span id="sidebar_month_title">รายการจองเดือนนี้</span>
+                        </h2>
                     </div>
-                @endforeach
+                    
+                    <div id="sidebar_bookings_container" class="flex-1 flex flex-col min-h-0 overflow-hidden">
+                        @if(isset($thisMonthBookings) && $thisMonthBookings->count() > 0)
+                            <div class="flex-1 overflow-y-auto max-h-[600px] p-0 custom-scrollbar">
+                                @foreach($thisMonthBookings as $booking)
+                                    <div class="p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <h3 class="font-bold text-sm text-slate-800 truncate">{{ $booking->vehicle->name ?? 'รถส่วนกลาง' }}</h3>
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ $booking->status === 'อนุมัติแล้ว' ? 'bg-green-100 text-green-700' : ($booking->status === 'รออนุมัติ' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-600') }}">
+                                                {{ $booking->status }}
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-600 mb-1 truncate"><i class="fa-solid fa-location-dot text-slate-400 mr-1"></i> {{ $booking->destination }}</p>
+                                        <div class="flex items-center text-[11px] text-slate-500">
+                                            <i class="fa-regular fa-calendar text-slate-400 mr-1"></i>
+                                            {{ \Carbon\Carbon::parse($booking->start_time)->format('d/m/y') }} 
+                                            @if(!\Carbon\Carbon::parse($booking->start_time)->isSameDay(\Carbon\Carbon::parse($booking->end_time)))
+                                                - {{ \Carbon\Carbon::parse($booking->end_time)->format('d/m/y') }}
+                                            @endif
+                                            <span class="ml-2"><i class="fa-regular fa-clock text-slate-400 mr-1"></i> {{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }} น.</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="flex-1 flex flex-col items-center justify-center text-center p-6">
+                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                                    <i class="fa-regular fa-calendar-xmark text-2xl text-slate-300"></i>
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-700 mb-1">ไม่มีการจองในเดือนนี้</h3>
+                                <p class="text-[11px] text-slate-400">กดปุ่มสีแดงด้านบนเพื่อสร้างรายการจอง</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             <!-- Right Column: Calendar & Bookings (Top on Mobile) -->
@@ -110,7 +107,7 @@
                             <i class="fa-solid fa-plus mr-1"></i> เพิ่มการจอง
                         </button>
                     </div>
-                    <div id='calendar' class="fc-theme-standard"></div>
+                    <div id='calendar' class="fc-theme-standard min-h-[380px] lg:min-h-[620px]"></div>
                 </div>
 
                 <!-- Upcoming/Pending Bookings Board -->
@@ -259,112 +256,7 @@
                     </div>
                 </div>
 
-                <!-- Recently Returned Bookings Board -->
-                <div class="bg-white rounded-xl shadow-lg border border-gray-200/60 overflow-hidden mt-6">
-                    <div
-                        class="bg-gradient-to-r from-emerald-600 to-teal-700 p-3 md:p-4 shrink-0 shadow-md relative overflow-hidden">
-                        <div class="absolute inset-0 bg-black/5"></div>
-                        <div class="relative z-10 flex items-center justify-between">
-                            <h3 class="text-white text-md md:text-lg font-bold tracking-tight flex items-center">
-                                <i class="fa-solid fa-square-check mr-2 text-emerald-200"></i>บันทึกการเดินทางที่เสร็จสิ้น
-                                (ล่าสุด)
-                            </h3>
-                            <div class="bg-white/20 px-2.5 py-1 text-xs text-white rounded-full font-medium">
-                                {{ $returnedBookings->count() }} รายการ
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="p-3 md:p-5 bg-slate-50">
-                        <div class="space-y-3 md:space-y-4 max-h-[400px] overflow-y-auto pr-1 md:pr-2 custom-scrollbar">
-                            @forelse ($returnedBookings as $booking)
-                                @php
-                                    $bookingStart = \Carbon\Carbon::parse($booking->start_time);
-                                    $bookingEnd = \Carbon\Carbon::parse($booking->end_time);
-                                    $returnedAt = $booking->returned_at ? \Carbon\Carbon::parse($booking->returned_at) : null;
-                                @endphp
-
-                                <div
-                                    class="bg-white p-3 md:p-4 rounded-xl border border-slate-100 shadow-sm opacity-80 hover:opacity-100 transition-all duration-300 relative overflow-hidden group">
-                                    <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500 rounded-l-xl"></div>
-                                    <div class="absolute top-3 right-3 md:right-4">
-                                        <span
-                                            class="inline-flex flex-col items-center bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-lg border border-emerald-100 shadow-sm relative overflow-hidden">
-                                            <span
-                                                class="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-emerald-800 mb-0.5">สถานะ</span>
-                                            <span class="text-[10px] md:text-xs font-bold whitespace-nowrap"><i
-                                                    class="fa-solid fa-circle-check mr-1"></i>ส่งคืนรถแล้ว</span>
-                                        </span>
-                                    </div>
-
-                                    <div class="flex flex-col xl:flex-row gap-3 md:gap-4 xl:gap-5">
-                                        <!-- Details Block -->
-                                        <div class="flex-1 min-w-0 pr-16 md:pr-24">
-                                            <div class="flex items-center gap-2 mb-2 mt-1">
-                                                <h4 class="text-sm md:text-md font-black text-slate-800 truncate group-hover:text-emerald-600 transition-colors">
-                                                    {{ $booking->vehicle->name ?? 'รถส่วนกลาง' }}
-                                                </h4>
-                                                @if($booking->vehicle->model_name)
-                                                    <span class="badge badge-xs bg-slate-100 text-slate-500 border-none px-2 py-2 h-auto rounded font-bold">
-                                                        {{ $booking->vehicle->model_name }}
-                                                    </span>
-                                                @endif
-                                            </div>
-
-                                            <div class="grid grid-cols-1 gap-y-1.5 gap-x-3">
-                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
-                                                    <i class="fa-solid fa-user-tie w-4 mt-0.5 text-slate-400"></i>
-                                                    <span class="truncate ml-1"><strong>ผู้จอง:</strong>
-                                                        {{ ($booking->user->first_name ?? 'N/A') . ' ' . ($booking->user->last_name ?? '') }}</span>
-                                                </div>
-                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
-                                                    <i class="fa-solid fa-briefcase w-4 mt-0.5 text-slate-400"></i>
-                                                    <span class="truncate ml-1"><strong>เจ้าของงาน:</strong> {{ $booking->requester_name ?? '-' }}</span>
-                                                </div>
-                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
-                                                    <i class="fa-solid fa-users w-4 mt-0.5 text-slate-400"></i>
-                                                    <span class="truncate ml-1 mr-4"><strong>จำนวนผู้โดยสาร:</strong> {{ $booking->passenger_count ?? 1 }} คน</span>
-                                                    <span class="badge badge-xs {{ $booking->driver_request ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-400 border-slate-100' }} rounded-lg font-bold px-2 py-2">
-                                                        <i class="fa-solid fa-steering-wheel mr-1"></i> {{ $booking->driver_request ? 'ขอพนักงานขับรถ' : 'ขับเอง' }}
-                                                    </span>
-                                                </div>
-                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
-                                                    <i class="fa-solid fa-location-dot w-4 mt-0.5 text-slate-400"></i>
-                                                    <span class="truncate ml-1"
-                                                        title="{{ $booking->destination }} (อ.{{ $booking->district }} จ.{{ $booking->province }})">
-                                                        <strong>ปลายทาง:</strong>
-                                                        {{ $booking->destination }} 
-                                                        <span class="text-slate-400 font-medium">
-                                                            (อ.{{ $booking->district }} จ.{{ $booking->province }})
-                                                        </span>
-                                                    </span>
-                                                </div>
-                                                <div class="text-xs md:text-sm flex items-start text-slate-600">
-                                                    <i class="fa-solid fa-clock w-4 mt-0.5 text-slate-400"></i>
-                                                    <span class="truncate ml-1"><strong>เวลา:</strong>
-                                                        {{ $bookingStart->format('d/m/Y H:i') }} -
-                                                        {{ $bookingStart->isSameDay($bookingEnd) ? $bookingEnd->format('H:i') : $bookingEnd->format('d/m/Y H:i') }}</span>
-                                                </div>
-                                                @if($returnedAt)
-                                                    <div class="text-xs md:text-sm flex items-start text-emerald-600 font-medium">
-                                                        <i class="fa-solid fa-calendar-check w-4 mt-0.5 text-emerald-400"></i>
-                                                        <span class="truncate ml-1"><strong>คืนเมื่อ:</strong>
-                                                            {{ $returnedAt->format('d/m/Y H:i') }} น.</span>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="text-center py-8 px-4 rounded-xl bg-white border border-slate-100">
-                                    <h4 class="text-sm md:text-md font-bold text-slate-400 mb-1 italic">
-                                        ไม่มีบันทึกการเดินทางที่เสร็จสิ้นล่าสุด</h4>
-                                </div>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -372,7 +264,7 @@
 
     <!-- Booking Modal -->
     <dialog id="booking_modal" class="modal">
-        <div class="modal-box w-11/12 max-w-4xl p-6 relative overflow-y-auto overflow-x-hidden">
+        <div class="modal-box w-11/12 max-w-4xl p-6 relative overflow-y-auto overflow-x-hidden max-h-[85vh]">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
                 onclick="document.getElementById('booking_modal').close()"><i class="fa-solid fa-xmark"></i></button>
             <h3 class="font-bold text-lg mb-4 text-[#c31919] pb-2 border-b border-slate-100">
@@ -718,7 +610,7 @@
         </dialog>
         <!-- Return Car Modal (For Users) -->
         <dialog id="return_car_modal" class="modal">
-            <div class="modal-box w-11/12 max-w-2xl p-0 overflow-hidden rounded-2xl border-0 shadow-2xl">
+            <div class="modal-box w-11/12 max-w-2xl p-0 overflow-y-auto rounded-2xl border-0 shadow-2xl max-h-[85vh]">
                 <div class="bg-gradient-to-r from-orange-500 to-red-600 p-6">
                     <div class="flex justify-between items-center text-white">
                         <h3 class="font-bold text-xl flex items-center gap-2">
@@ -1404,22 +1296,35 @@
                     fetch(`/bookingcar/check-availability?start_date=${startDate}&end_date=${endDate}&start_time=${startTime}&end_time=${endTime}`)
                         .then(response => response.json())
                         .then(data => {
-                            const occupiedIds = data.occupied_vehicle_ids.map(id => id.toString());
+                            const conflictIds = (data.conflict_vehicle_ids || []).map(id => id.toString());
+                            const unreturnedIds = (data.unreturned_vehicle_ids || []).map(id => id.toString());
                             const options = vehicleSelect.options;
 
                             for (let i = 0; i < options.length; i++) {
                                 const opt = options[i];
                                 if (opt.value === "" || !opt.dataset.originalText) continue;
 
-                                if (occupiedIds.includes(opt.value)) {
+                                if (conflictIds.includes(opt.value)) {
                                     opt.disabled = true;
-                                    opt.innerHTML = opt.dataset.originalText + ' (รถคันนี้ไม่ว่างช่วงเวลานี้)';
+                                    opt.innerHTML = opt.dataset.originalText + ' (มีคิวจองชนกับช่วงเวลานี้)';
+                                    opt.classList.add('text-slate-400', 'bg-slate-50');
+                                } else if (unreturnedIds.includes(opt.value)) {
+                                    opt.disabled = true;
+                                    opt.innerHTML = opt.dataset.originalText + ' (รถคันนี้ยังไม่ได้ถูกส่งคืนจากคิวก่อนหน้า)';
                                     opt.classList.add('text-slate-400', 'bg-slate-50');
                                 } else {
                                     opt.disabled = false;
                                     opt.innerHTML = opt.dataset.originalText;
                                     opt.classList.remove('text-slate-400', 'bg-slate-50');
                                 }
+                            }
+
+                            // Refresh Select2 dropdown to reflect new option text and disabled states
+                            if (typeof $ !== 'undefined' && $.fn.select2) {
+                                $('#vehicle_select').select2({
+                                    width: '100%',
+                                    dropdownParent: $('#booking_modal .modal-box')
+                                });
                             }
                         })
                         .catch(error => console.error('Error checking availability:', error));
@@ -1482,6 +1387,89 @@
                 const currentUserId = {{ $currentUserId ?? 'null' }};
                 const isHamsOrAdmin = {{ $isHamsOrAdmin ? 'true' : 'false' }};
 
+                const allCalendarBookings = @json($calendarBookings);
+                const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+                const thaiMonthsShort = ['มี.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']; // index 0 is actually ม.ค. but wait! index 0 = ม.ค.
+                thaiMonthsShort[0] = 'ม.ค.';
+
+                function updateSidebarBookings(viewStart) {
+                    const date = new Date(viewStart);
+                    // Add 15 days to handle if viewStart is slightly off the month
+                    date.setDate(date.getDate() + 15);
+                    const month = date.getMonth();
+                    const year = date.getFullYear();
+                    
+                    const titleEl = document.getElementById('sidebar_month_title');
+                    if(titleEl) {
+                        titleEl.textContent = 'รายการจองเดือน' + thaiMonths[month] + ' ' + (year + 543);
+                    }
+                    
+                    const container = document.getElementById('sidebar_bookings_container');
+                    if(!container) return;
+                    
+                    const monthBookings = allCalendarBookings.filter(b => {
+                        const bDate = new Date(b.start);
+                        return bDate.getMonth() === month && bDate.getFullYear() === year;
+                    });
+                    
+                    if (monthBookings.length > 0) {
+                        let html = '<div class="flex-1 overflow-y-auto max-h-[600px] p-4 space-y-3 custom-scrollbar">';
+                        monthBookings.forEach((b, index) => {
+                            const props = b.extendedProps;
+                            
+                            let statusClass = 'border border-slate-200 text-slate-600 bg-slate-50';
+                            if (props.status === 'อนุมัติแล้ว') statusClass = 'border border-green-200 text-green-600 bg-green-50';
+                            else if (props.status === 'รออนุมัติ') statusClass = 'border border-orange-200 text-orange-600 bg-orange-50';
+                            else if (props.status === 'ยกเลิก' || props.status === 'ไม่อนุมัติ') statusClass = 'border border-red-200 text-red-600 bg-red-50';
+
+                            const startDate = new Date(b.start);
+                            const endDate = new Date(b.end);
+                            const isSameDay = startDate.toDateString() === endDate.toDateString();
+                            
+                            const startDay = startDate.getDate();
+                            const startMonthShort = thaiMonthsShort[startDate.getMonth()];
+                            
+                            const startStr = startDay + ' ' + startMonthShort;
+                            const endStr = endDate.getDate() + ' ' + thaiMonthsShort[endDate.getMonth()];
+                            
+                            const requesterName = (props.requester_name && props.requester_name !== '-') ? props.requester_name : 'ไม่ระบุชื่อ';
+                            
+                            html += `
+                                <div class="bg-white rounded-lg shadow-[0_2px_8px_-3px_rgba(0,0,0,0.1)] border border-slate-200 p-3 flex relative overflow-hidden hover:shadow-md transition-shadow">
+                                    <div class="border border-slate-200 rounded flex flex-col items-center justify-center w-[46px] h-[46px] shrink-0 mr-3 shadow-sm bg-white mt-0.5">
+                                        <span class="text-[9px] text-slate-400 font-bold mb-0.5">${startMonthShort}</span>
+                                        <span class="text-base font-black text-slate-700 leading-none">${startDay}</span>
+                                    </div>
+                                    
+                                    <div class="flex-1 min-w-0 flex flex-col justify-between">
+                                        <div>
+                                            <h3 class="font-bold text-[11px] text-[#c31919] truncate uppercase mb-0.5">${props.vehicle_name} - ${props.user}</h3>
+                                            <p class="text-[11px] font-medium text-slate-700 truncate">${props.destination}</p>
+                                            ${!isSameDay ? `<p class="text-[10px] text-[#c31919] mt-1 font-medium"><i class="fa-solid fa-calendar-days mr-1"></i> จองข้ามวัน: ${startStr} - ${endStr}</p>` : ''}
+                                        </div>
+                                        <div class="flex justify-between items-end mt-1.5">
+                                            <span class="text-[10px] text-slate-400">${requesterName}</span>
+                                            <span class="text-[9px] font-bold px-2 py-0.5 rounded ${statusClass}">${props.status}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = `
+                            <div class="flex-1 flex flex-col items-center justify-center text-center p-6">
+                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                                    <i class="fa-regular fa-calendar-xmark text-2xl text-slate-300"></i>
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-700 mb-1">ไม่มีการจองในเดือนนี้</h3>
+                                <p class="text-[11px] text-slate-400">กดปุ่มสีแดงด้านบนเพื่อสร้างรายการจอง</p>
+                            </div>
+                        `;
+                    }
+                }
+
                 var calendarEl = document.getElementById('calendar');
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     locale: 'th',
@@ -1490,6 +1478,16 @@
                         left: 'prev,next today',
                         center: 'title',
                         right: 'dayGridMonth,timeGridWeek'
+                    },
+                    datesSet: function (info) {
+                        updateSidebarBookings(info.view.currentStart);
+                    },
+                    dayHeaderContent: function(arg) {
+                        const daysShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+                        const daysLong = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+                        return {
+                            html: `<span class="lg:hidden">${daysShort[arg.date.getDay()]}</span><span class="hidden lg:inline">${daysLong[arg.date.getDay()]}</span>`
+                        };
                     },
                     events: @json($calendarBookings),
                     eventTextColor: '#ffffff',
@@ -1546,8 +1544,14 @@
                         const eventStart = info.event.start;
                         const isPast = new Date(eventStart) < new Date();
 
-                        // Show cancel button ONLY when status is 'รออนุมัติ', the user owns the booking, and it hasn't started
-                        if (currentUserId == props.user_id && props.status === 'รออนุมัติ' && !isPast) {
+                        // Show cancel button when the user owns the booking, it is not canceled/rejected, and (if approved) it has not started yet
+                        const canCancel = currentUserId == props.user_id && 
+                                          props.status !== 'ยกเลิก' && 
+                                          props.status !== 'ไม่อนุมัติ' && 
+                                          props.return_status !== 'ส่งคืนแล้ว' &&
+                                          (props.status === 'รออนุมัติ' || !isPast);
+
+                        if (canCancel) {
                             actionButtonsHtml += `
                                 <button id="btn-cancel-booking" class="mt-2 w-full bg-red-100 text-red-600 hover:bg-red-200 py-2 rounded-lg font-medium transition-colors text-sm border border-red-200">
                                     <i class="fa-solid fa-xmark mr-1"></i> ยกเลิกการจอง

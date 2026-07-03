@@ -12,33 +12,43 @@ class BackendReportController extends Controller
 {
     public function index(Request $request)
     {
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        $year = $request->input('year', Carbon::now()->format('Y'));
+        $month = $request->input('month', Carbon::now()->format('m'));
+        $day = $request->input('day');
+
+        $reservationQuery = Reservation::query();
+        if ($year) {
+            $reservationQuery->whereYear('reservation_date', $year);
+        }
+        if ($month) {
+            $reservationQuery->whereMonth('reservation_date', $month);
+        }
+        if ($day) {
+            $reservationQuery->whereDay('reservation_date', $day);
+        }
 
         // Overall Stats for the selected period
         $stats = [
             'total_rooms' => Rooms::where('status', 1)->count(),
-            'total_reservations' => Reservation::whereBetween('reservation_date', [$startDate, $endDate])->count(),
-            'acknowledged_reservations' => Reservation::whereBetween('reservation_date', [$startDate, $endDate])->where('status', 'acknowledge')->count(),
-            'rejected_reservations' => Reservation::whereBetween('reservation_date', [$startDate, $endDate])->where('status', 'rejected')->count(),
-            'cancelled_reservations' => Reservation::whereBetween('reservation_date', [$startDate, $endDate])->where('status', 'cancelled')->count(),
+            'total_reservations' => (clone $reservationQuery)->count(),
+            'acknowledged_reservations' => (clone $reservationQuery)->where('status', 'acknowledge')->count(),
+            'rejected_reservations' => (clone $reservationQuery)->where('status', 'rejected')->count(),
+            'cancelled_reservations' => (clone $reservationQuery)->where('status', 'cancelled')->count(),
         ];
 
         // Chart Data: Reservations grouped by room
-        $roomStats = Reservation::join('rooms', 'reservations.room_id', '=', 'rooms.room_id')
+        $roomStats = (clone $reservationQuery)->join('rooms', 'reservations.room_id', '=', 'rooms.room_id')
             ->selectRaw('rooms.room_name, COUNT(reservations.reservation_id) as count')
-            ->whereBetween('reservations.reservation_date', [$startDate, $endDate])
             ->groupBy('rooms.room_id', 'rooms.room_name')
             ->pluck('count', 'room_name')
             ->toArray();
 
         // Details list for export / viewing
-        $reservations = Reservation::with(['user', 'room'])
-            ->whereBetween('reservation_date', [$startDate, $endDate])
+        $reservations = (clone $reservationQuery)->with(['user', 'room'])
             ->orderBy('reservation_date', 'desc')
             ->paginate(20)
             ->withQueryString();
 
-        return view('backend.bookingmeeting.report.index', compact('stats', 'roomStats', 'reservations', 'startDate', 'endDate'));
+        return view('backend.bookingmeeting.report.index', compact('stats', 'roomStats', 'reservations', 'year', 'month', 'day'));
     }
 }

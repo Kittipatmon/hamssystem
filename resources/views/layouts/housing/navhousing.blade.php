@@ -22,7 +22,7 @@
             </a>
 
             <!-- Right: Navigation Links -->
-            <div class="hidden xl:flex items-center gap-2 lg:gap-3">
+            <div class="hidden lg:flex items-center gap-2 lg:gap-3">
 
                 <!-- หน้าแรก -->
                 <a href="{{ route('welcome') }}"
@@ -130,9 +130,9 @@
                 <!-- แบบฟอร์ม (dropdown) -->
                 <div class="dropdown dropdown-hover dropdown-end">
                     <label tabindex="0"
-                        class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ request()->routeIs('housing.request.*') || request()->routeIs('housing.agreement.*') || request()->routeIs('housing.guest.*') || request()->routeIs('housing.leave.*') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
+                        class="flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ request()->routeIs('housing.request.*') || request()->routeIs('housing.agreement.*') || request()->routeIs('housing.guest.*') || request()->routeIs('housing.leave.*') || request()->routeIs('housing.repair.*') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
                         <i
-                            class="fa-solid fa-file-circle-plus {{ request()->routeIs('housing.request.*') || request()->routeIs('housing.agreement.*') || request()->routeIs('housing.guest.*') || request()->routeIs('housing.leave.*') ? '' : 'text-slate-400' }}"></i>
+                            class="fa-solid fa-file-circle-plus {{ request()->routeIs('housing.request.*') || request()->routeIs('housing.agreement.*') || request()->routeIs('housing.guest.*') || request()->routeIs('housing.leave.*') || request()->routeIs('housing.repair.*') ? '' : 'text-slate-400' }}"></i>
                         <span>แบบฟอร์ม</span>
                         <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
                     </label>
@@ -246,9 +246,9 @@
                     <!-- จัดการข้อมูล (dropdown) -->
                     <div class="dropdown dropdown-hover dropdown-end">
                         <label tabindex="0"
-                            class="relative flex items-center gap-2 px-4 py-2 text-[14px] font-semibold text-slate-600 rounded-full transition-all duration-300 hover:bg-red-50 hover:text-red-600 cursor-pointer {{ request()->routeIs('housing.management') ? 'bg-red-600 text-white shadow-md shadow-red-200' : '' }}">
+                            class="relative flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ request()->routeIs('housing.management') || request()->routeIs('housing.houselist') || request()->routeIs('housing.committee_chart') || request()->routeIs('housing.report') ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
                             <i
-                                class="fa-solid fa-server {{ request()->routeIs('housing.management') ? '' : 'text-slate-400' }}"></i>
+                                class="fa-solid fa-server {{ request()->routeIs('housing.management') || request()->routeIs('housing.houselist') || request()->routeIs('housing.committee_chart') || request()->routeIs('housing.report') ? '' : 'text-slate-400' }}"></i>
                             <span>จัดการ</span>
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-70 ml-1"></i>
                             
@@ -407,14 +407,14 @@
 
             <!-- Mobile menu button -->
             <button
-                class="xl:hidden flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 border border-slate-200 shadow-sm relative z-[110]"
+                class="lg:hidden flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 border border-slate-200 shadow-sm relative z-[110]"
                 onclick="document.getElementById('mnav-housing').classList.toggle('hidden')">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
 
         <!-- Mobile nav -->
-        <div id="mnav-housing" class="xl:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[75vh] overflow-y-auto custom-scrollbar">
+        <div id="mnav-housing" class="lg:hidden hidden pb-4 pt-2 border-t border-slate-100 animate-fadeIn max-h-[75vh] overflow-y-auto custom-scrollbar">
             <div class="flex flex-col gap-1.5 px-2">
                 <a href="{{ route('welcome') }}"
                     class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('welcome') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
@@ -437,14 +437,14 @@
                     ติดตามสถานะ
                 </a>
 
-                <details class="group [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['housing.request.*', 'housing.agreement.*', 'housing.guest.*', 'housing.leave.*']) ? 'open' : '' }}>
+                <details class="group [&_summary::-webkit-details-marker]:hidden" {{ request()->routeIs(['housing.request.*', 'housing.agreement.*', 'housing.guest.*', 'housing.leave.*', 'housing.repair.*']) ? 'open' : '' }}>
                     <summary
-                        class="flex items-center justify-between px-4 py-3 text-[15px] font-medium transition-all duration-300 {{ request()->routeIs(['housing.request.*', 'housing.agreement.*', 'housing.guest.*', 'housing.leave.*']) ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }} rounded-xl cursor-pointer">
+                        class="flex items-center justify-between px-4 py-3 text-[15px] font-medium transition-all duration-300 {{ request()->routeIs(['housing.request.*', 'housing.agreement.*', 'housing.guest.*', 'housing.leave.*', 'housing.repair.*']) ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }} rounded-xl cursor-pointer">
                         <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-file-circle-plus w-5 text-center {{ request()->routeIs(['housing.request.*', 'housing.agreement.*', 'housing.guest.*', 'housing.leave.*']) ? 'text-white' : 'text-slate-400' }}"></i> แบบฟอร์ม
+                            <i class="fa-solid fa-file-circle-plus w-5 text-center {{ request()->routeIs(['housing.request.*', 'housing.agreement.*', 'housing.guest.*', 'housing.leave.*', 'housing.repair.*']) ? 'text-white' : 'text-slate-400' }}"></i> แบบฟอร์ม
                         </div>
                         <i
-                            class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180 {{ request()->routeIs(['housing.request.*', 'housing.agreement.*', 'housing.guest.*', 'housing.leave.*']) ? 'text-white' : '' }}"></i>
+                            class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-open:-rotate-180 {{ request()->routeIs(['housing.request.*', 'housing.agreement.*', 'housing.guest.*', 'housing.leave.*', 'housing.repair.*']) ? 'text-white' : '' }}"></i>
                     </summary>
                     <div class="mt-1 mb-2 ml-4 pl-4 border-l-2 border-red-100 flex flex-col gap-1">
                         <a href="{{ route('housing.request.create') }}"
@@ -476,9 +476,9 @@
 
                 @if($isHamsOrAdmin)
                     <a href="{{ route('housing.management') }}"
-                        class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('housing.management') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
+                        class="flex items-center gap-3 px-4 py-3 text-[15px] font-medium rounded-xl transition-all duration-300 {{ request()->routeIs('housing.management') || request()->routeIs('housing.houselist') || request()->routeIs('housing.committee_chart') || request()->routeIs('housing.report') ? 'bg-red-600 text-white font-bold shadow-md shadow-red-100' : 'text-slate-600 hover:bg-slate-50' }}">
                         <i
-                            class="fa-solid fa-server w-5 text-center {{ request()->routeIs('housing.management') ? 'text-white' : 'text-slate-400' }}"></i>
+                            class="fa-solid fa-server w-5 text-center {{ request()->routeIs('housing.management') || request()->routeIs('housing.houselist') || request()->routeIs('housing.committee_chart') || request()->routeIs('housing.report') ? 'text-white' : 'text-slate-400' }}"></i>
                         จัดการข้อมูล
                     </a>
                     <a href="{{ route('housing.committee_chart') }}"
