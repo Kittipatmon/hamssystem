@@ -13,9 +13,8 @@ use App\Http\Controllers\serviceshams\ItemsTypeController;
 use App\Http\Controllers\serviceshams\ChecklistController;
 
 use App\Http\Controllers\backend\UserController;
+use App\Http\Controllers\backend\SystemLogController;
 use App\Http\Controllers\MicrosoftAuthController;
-use App\Http\Controllers\bookingmeeting\RoomsController;
-use App\Http\Controllers\bookingmeeting\ReservationsController;
 use App\Http\Controllers\backend\BackendVehicleController;
 use App\Http\Controllers\bookingcar\BookingCarController;
 use App\Http\Controllers\housing\EmployeeHousingController;
@@ -141,22 +140,6 @@ Route::middleware('auth')->group(function () {
     // Route::get('requisitions/reqchecklist', [RequisitionsController::class, 'ReqlistChecklist'])->name('requisitions.reqlistchecklist');
 
 
-    //rooms
-    Route::resource('rooms', RoomsController::class);
-    //reservations
-    Route::get('reservations/welcomemeeting', [ReservationsController::class, 'welcomeReservations'])->name('reservations.welcomemeeting');
-    Route::post('reservations/store', [ReservationsController::class, 'store'])->name('reservations.store');
-    Route::get('reservations/events', [ReservationsController::class, 'events'])->name('reservations.events');
-    Route::post('reservations/cancel/{id}', [ReservationsController::class, 'cancel'])->name('reservations.cancel');
-
-    // Backend Booking Meeting
-    Route::prefix('backend/bookingmeeting')->name('backend.bookingmeeting.')->group(function () {
-        Route::resource('rooms', \App\Http\Controllers\bookingmeeting\BackendRoomsController::class);
-        Route::put('reservations/{id}/update-status', [\App\Http\Controllers\bookingmeeting\BackendReservationsController::class, 'updateStatus'])->name('reservations.update_status');
-        Route::resource('reservations', \App\Http\Controllers\bookingmeeting\BackendReservationsController::class);
-        Route::get('report', [\App\Http\Controllers\bookingmeeting\BackendReportController::class, 'index'])->name('report.index')->middleware('hams.report.access');
-    });
-
     //bookingcar
     Route::prefix('bookingcar')->name('bookingcar.')->group(function () {
         Route::get('welcome', [BookingCarController::class, 'welcome'])->name('welcome');
@@ -192,15 +175,32 @@ Route::middleware('auth')->group(function () {
         Route::delete('inspections/{id}', [BackendVehicleController::class, 'destroyInspection'])->name('inspections.destroy');
     });
 
-    // HAMS Editor Permission
+    // Backend Booking Meeting Room Routes
+    Route::prefix('backend/bookingmeeting')->name('backend.bookingmeeting.')->group(function () {
+        Route::resource('rooms', \App\Http\Controllers\bookingmeeting\BackendRoomsController::class);
+        Route::post('reservations/{id}/update-status', [\App\Http\Controllers\bookingmeeting\BackendReservationsController::class, 'updateStatus'])->name('reservations.update_status');
+        Route::resource('reservations', \App\Http\Controllers\bookingmeeting\BackendReservationsController::class);
+        Route::get('report', [\App\Http\Controllers\bookingmeeting\BackendReportController::class, 'index'])->name('report.index');
+    });
+
+
     Route::post('users/{id}/toggle-hams-editor', [UserController::class, 'toggleHamsEditor'])->name('users.toggle_hams_editor');
+    Route::put('users/{id}/role', [UserController::class, 'updateRole'])->name('users.update_role');
 
     // Backend Management
     Route::resource('users', UserController::class);
+    Route::get('system-logs', [SystemLogController::class, 'index'])->name('system-logs.index');
+    Route::get('system-logs/archives', [SystemLogController::class, 'archives'])->name('system-logs.archives');
+    Route::get('system-logs/archives/{filename}', [SystemLogController::class, 'downloadArchive'])->name('system-logs.download-archive');
+    
+    // Security Alerts Dashboard
+    Route::get('security-alerts', [\App\Http\Controllers\backend\SecurityAlertController::class, 'index'])->name('security-alerts.index');
+    Route::post('security-alerts/toggle-ban', [\App\Http\Controllers\backend\SecurityAlertController::class, 'toggleBanIp'])->name('security-alerts.toggle-ban');
     Route::resource('usertypes', \App\Http\Controllers\backend\UserTypeController::class);
     Route::resource('sections', \App\Http\Controllers\backend\SectionController::class);
     Route::resource('divisions', \App\Http\Controllers\backend\DivisionController::class);
     Route::resource('departments', \App\Http\Controllers\backend\DepartmentController::class);
+    Route::get('managers', [\App\Http\Controllers\backend\DepartmentController::class, 'managers'])->name('managers.index');
 
     // API-like route for User filtering (as used in users/index.blade.php)
     Route::get('api/users', [UserController::class, 'index'])->name('api.users.index');
@@ -264,12 +264,111 @@ Route::middleware('auth')->group(function () {
         Route::post('repair/finish', [EmployeeHousingController::class, 'finishRepair'])->name('repair.finish');
     });
 
+    // Parking System
+    Route::prefix('parking')->name('parking.')->group(function () {
+        Route::get('api/notifications/check-new', [\App\Http\Controllers\NotificationController::class, 'checkNewRequests'])->name('api.notifications.check_new');
+        Route::get('dashboard', [\App\Http\Controllers\Parking\DashboardController::class, 'index'])->name('dashboard');
+        
+        // Employee Parking
+        Route::get('employees', [\App\Http\Controllers\Parking\EmployeeParkingController::class, 'index'])->name('employees.index');
+        Route::get('employees/create', [\App\Http\Controllers\Parking\EmployeeParkingController::class, 'create'])->name('employees.create');
+        Route::post('employees', [\App\Http\Controllers\Parking\EmployeeParkingController::class, 'store'])->name('employees.store');
+        Route::get('employees/{id}/edit', [\App\Http\Controllers\Parking\EmployeeParkingController::class, 'edit'])->name('employees.edit');
+        Route::put('employees/{id}', [\App\Http\Controllers\Parking\EmployeeParkingController::class, 'update'])->name('employees.update');
+        Route::delete('employees/{id}', [\App\Http\Controllers\Parking\EmployeeParkingController::class, 'destroy'])->name('employees.destroy');
 
+        // Map
+        // Map (View is public for employees, but editing requires Admin)
+        Route::get('map', [\App\Http\Controllers\Parking\ParkingMapController::class, 'index'])->name('map');
+        
+        Route::middleware('hams.report.access')->group(function () {
+            Route::post('map/save-layout', [\App\Http\Controllers\Parking\ParkingMapController::class, 'saveLayout'])->name('map.save_layout');
+            Route::post('map/add-slot', [\App\Http\Controllers\Parking\ParkingMapController::class, 'addSlot'])->name('map.add_slot');
+            Route::delete('map/delete-slot/{slot_number}', [\App\Http\Controllers\Parking\ParkingMapController::class, 'deleteSlot'])->name('map.delete_slot');
+            Route::post('map/add-element', [\App\Http\Controllers\Parking\ParkingMapController::class, 'addElement'])->name('map.add_element');
+            Route::delete('map/delete-element/{id}', [\App\Http\Controllers\Parking\ParkingMapController::class, 'deleteElement'])->name('map.delete_element');
+        });
+
+        // Visitor Reservation
+        Route::get('visitors/approvals', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'approvals'])->name('visitors.approvals');
+        Route::get('visitors', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'index'])->name('visitors.index');
+        Route::post('visitors/{id}/cancel', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'cancel'])->name('visitors.cancel');
+        Route::post('visitors/{id}/toggle-lock', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'toggleLock'])->name('visitors.toggleLock');
+        Route::post('visitors/{id}/check-in', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'checkIn'])->name('visitors.checkin');
+        Route::post('visitors/{id}/check-out', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'checkout'])->name('visitors.checkout');
+        
+        Route::post('visitors/{id}/approve', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'approve'])->name('visitors.approve');
+        Route::post('visitors/{id}/reject', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'reject'])->name('visitors.reject');
+        Route::post('visitors/{id}/acknowledge', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'acknowledge'])->name('visitors.acknowledge');
+    });
 
 });
 
+// Public Visitor Reservation Routes
+Route::get('parking/visitors/create', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'create'])->name('parking.visitors.create');
+Route::post('parking/visitors', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'store'])->middleware('throttle:5,1')->name('parking.visitors.store');
+
+// Employee Reservation Routes
+Route::get('parking/employee-reservations', [\App\Http\Controllers\Parking\EmployeeReservationController::class, 'index'])->name('parking.employee_reservations.index');
+Route::get('parking/employee-reservations/create', [\App\Http\Controllers\Parking\EmployeeReservationController::class, 'create'])->name('parking.employee_reservations.create');
+Route::post('parking/employee-reservations', [\App\Http\Controllers\Parking\EmployeeReservationController::class, 'store'])->name('parking.employee_reservations.store');
+Route::get('parking/api/departments/{dept_id}/manager', [\App\Http\Controllers\Parking\EmployeeReservationController::class, 'getManager'])->name('parking.api.department_manager');
+
+// Public Map Routes (for selectors and visitors)
+Route::get('parking/map/full', [\App\Http\Controllers\Parking\ParkingMapController::class, 'mapFull'])->name('parking.map.full');
+Route::get('parking/map/building', [\App\Http\Controllers\Parking\ParkingMapController::class, 'mapBuilding'])->name('parking.map.building');
+
+
+// Public Visitor self-registration routes (accessed via QR Code)
+Route::get('parking/register-visitor', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'guestCreate'])->name('parking.visitors.guestCreate');
+Route::post('parking/register-visitor', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'guestStore'])->middleware('throttle:3,1')->name('parking.visitors.guestStore');
+Route::get('parking/register-visitor/success/{id}', [\App\Http\Controllers\Parking\VisitorReservationController::class, 'guestSuccess'])->name('parking.visitors.guestSuccess');
+
+
 Route::get('/profileUser', [UserController::class, 'profileUser'])->middleware('auth')->name('profileUser');
 Route::post('/profile/update-avatar', [UserController::class, 'updateAvatar'])->middleware('auth')->name('users.update_avatar');
+
+// Toggle Services Section on Welcome Page setting route
+Route::post('backend/settings/toggle-services', function (\Illuminate\Http\Request $request) {
+    $showServices = (bool) $request->input('show_services');
+    
+    $settings = \Illuminate\Support\Facades\Storage::exists('settings.json') ? json_decode(\Illuminate\Support\Facades\Storage::get('settings.json'), true) : [];
+    $settings['show_services'] = $showServices;
+    
+    \Illuminate\Support\Facades\Storage::put('settings.json', json_encode($settings));
+    return response()->json(['success' => true, 'message' => $showServices ? 'เปิดแสดงผลงานสนับสนุนและบริการแล้ว' : 'ปิดแสดงผลงานสนับสนุนและบริการแล้ว']);
+})->middleware('auth')->name('backend.settings.toggle-services');
+
+Route::post('backend/settings/save-systems', function (\Illuminate\Http\Request $request) {
+    $showServices = (bool) $request->input('show_services', true);
+    $disabled = [
+        'office_supplies' => (bool) $request->input('office_supplies'),
+        'car_booking' => (bool) $request->input('car_booking'),
+        'employee_housing' => (bool) $request->input('employee_housing'),
+        'parking_system' => (bool) $request->input('parking_system'),
+        'central_data' => (bool) $request->input('central_data'),
+    ];
+    
+    \Illuminate\Support\Facades\Storage::put('settings.json', json_encode([
+        'show_services' => $showServices,
+        'disabled_systems' => $disabled
+    ]));
+    
+    return response()->json(['success' => true, 'message' => 'บันทึกการตั้งค่าระบบเรียบร้อยแล้ว']);
+})->middleware('auth')->name('backend.settings.save-systems');
+
+Route::post('backend/settings/toggle-parking-auto-reset', function (\Illuminate\Http\Request $request) {
+    if (!\Illuminate\Support\Facades\Auth::user()->is_hams_admin) {
+        return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+    }
+    $enabled = filter_var($request->input('enabled'), FILTER_VALIDATE_BOOLEAN);
+    
+    $settings = \Illuminate\Support\Facades\Storage::exists('settings.json') ? json_decode(\Illuminate\Support\Facades\Storage::get('settings.json'), true) : [];
+    $settings['parking_auto_reset'] = $enabled;
+    
+    \Illuminate\Support\Facades\Storage::put('settings.json', json_encode($settings));
+    return response()->json(['success' => true, 'message' => $enabled ? 'เปิดระบบรีเซ็ตที่จอดรถอัตโนมัติแล้ว' : 'ปิดระบบรีเซ็ตที่จอดรถอัตโนมัติแล้ว', 'enabled' => $enabled]);
+})->middleware('auth')->name('backend.settings.toggle-parking-auto-reset');
 
 Route::get('/clear-cache-now', function () {
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');

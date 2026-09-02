@@ -12,7 +12,7 @@ class DepartmentController extends Controller
 {
     public function index(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -33,7 +33,7 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -53,7 +53,7 @@ class DepartmentController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -73,7 +73,7 @@ class DepartmentController extends Controller
 
     public function destroy($id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -85,5 +85,25 @@ class DepartmentController extends Controller
         }
 
         return redirect()->route('departments.index')->with('success', 'ลบแผนกเรียบร้อยแล้ว');
+    }
+
+    public function managers(Request $request)
+    {
+        if (!in_array(Auth::user()->role, ['admin', 'editor']) && !in_array(Auth::user()->dept_id, [14, 16])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $query = Department::with('manager');
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
+        }
+        $departments = $query->get();
+
+        if ($request->ajax()) {
+            return response()->json($departments);
+        }
+
+        return view('backend.department.managers', compact('departments'));
     }
 }

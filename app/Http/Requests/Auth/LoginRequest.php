@@ -114,6 +114,16 @@ class LoginRequest extends FormRequest
             $minutes = 2;
             Cache::put($lockKey, now()->addMinutes($minutes), now()->addMinutes($minutes));
         }
+
+        // Record failed login to Security Alerts dashboard
+        activity('login_failed')
+            ->withProperties([
+                'ip' => $this->ip(),
+                'email' => $this->input('emp_code'),
+                'attempts' => $attempts,
+                'risk' => $attempts >= 5
+            ])
+            ->log('Failed login attempt');
     }
 
     public function ensureIsNotRateLimited(): void

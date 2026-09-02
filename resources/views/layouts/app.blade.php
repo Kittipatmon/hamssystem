@@ -68,6 +68,54 @@
                     toast: true
                 });
             @endif
+
+            // Notification Polling Script
+            let lastCheckedTime = localStorage.getItem('lastNotificationCheckTime') || '';
+
+            function checkNewRequests() {
+                fetch(`/parking/api/notifications/check-new?last_checked=${encodeURIComponent(lastCheckedTime)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (data.has_new && lastCheckedTime !== '') {
+                                data.notifications.forEach(notif => {
+                                    Swal.fire({
+                                        icon: 'info',
+                                        title: notif.title,
+                                        text: notif.message,
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 7000,
+                                        timerProgressBar: true,
+                                        customClass: {
+                                            popup: 'rounded-xl shadow-lg border border-slate-100',
+                                            title: 'font-bold text-sm',
+                                            htmlContainer: 'text-xs text-slate-600'
+                                        },
+                                        didOpen: (toast) => {
+                                            toast.addEventListener('mouseenter', Swal.stopTimer);
+                                            toast.addEventListener('mouseleave', Swal.resumeTimer);
+                                            toast.style.cursor = 'pointer';
+                                            toast.addEventListener('click', () => {
+                                                window.location.href = notif.url;
+                                            });
+                                        }
+                                    });
+                                });
+                            }
+                            lastCheckedTime = data.timestamp;
+                            localStorage.setItem('lastNotificationCheckTime', lastCheckedTime);
+                        }
+                    })
+                    .catch(err => console.error('Notification check error:', err));
+            }
+
+            // Check immediately on load
+            checkNewRequests();
+            
+            // Polling every 15 seconds
+            setInterval(checkNewRequests, 15000);
         });
     </script>
 </body>

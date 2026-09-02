@@ -85,7 +85,7 @@ class RequisitionsController extends Controller
         $query = Requisitions::orderBy('created_at', 'desc');
 
         // Access Control: Non-HAMS/Admin only see their own OR those they need to approve
-        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isHamsOrAdmin) {
             $query->where(function ($q) {
                 $q->where('requester_id', Auth::id())
@@ -110,7 +110,7 @@ class RequisitionsController extends Controller
             ->with('department')
             ->get();
 
-        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
 
         return view('serviceshams.requisitions.reqlistall', compact('requisitions', 'requisition_items', 'years', 'approvers', 'isHamsOrAdmin'));
     }
@@ -132,7 +132,7 @@ class RequisitionsController extends Controller
             ->whereBetween('created_at', [$start_date, $end_date]);
 
         // Access Control
-        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isHamsOrAdmin) {
             $query->where('requester_id', Auth::user()->id);
         }
@@ -232,7 +232,7 @@ class RequisitionsController extends Controller
 
         // Access Control
         $isOwner = $requisition->requester_id === Auth::id();
-        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isOwner && !$isHamsOrAdmin) {
             return redirect()->route('requisitions.reqlistpending')->with('error', 'Unauthorized access.');
         }
@@ -247,7 +247,7 @@ class RequisitionsController extends Controller
 
         // Access Control
         $isOwner = $requisition->requester_id === Auth::id();
-        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isOwner && !$isHamsOrAdmin) {
             return redirect()->route('requisitions.reqlistall')->with('error', 'Unauthorized access.');
         }
@@ -262,7 +262,7 @@ class RequisitionsController extends Controller
 
         // Access Control
         $isOwner = $requisition->requester_id === Auth::id();
-        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isOwner && !$isHamsOrAdmin) {
             return redirect()->route('requisitions.reqlistall')->with('error', 'Unauthorized access.');
         }
@@ -496,7 +496,7 @@ class RequisitionsController extends Controller
             ->orderBy('created_at', 'desc');
 
         // Access Control: Non-HAMS/Admin only see their own
-        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isHamsOrAdmin) {
             $query->where('requester_id', Auth::user()->id);
         }
@@ -521,7 +521,7 @@ class RequisitionsController extends Controller
             ->orderBy('created_at', 'desc');
 
         // Access Control: Non-HAMS/Admin only see their own
-        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isHamsOrAdmin) {
             $query->where('requester_id', Auth::user()->id);
         }
@@ -570,7 +570,7 @@ class RequisitionsController extends Controller
             ->orderBy('created_at', 'desc');
 
         // Access Control: Non-HAMS/Admin only see their own
-        $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+        $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
         if (!$isHamsOrAdmin) {
             $query->where('requester_id', Auth::user()->id);
         }

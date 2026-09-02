@@ -47,7 +47,7 @@
                 </a>
 
                 @php
-                    $isHamsOrAdmin = Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]));
+                    $isHamsOrAdmin = Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]));
 
                     $pCarBookingsTotal = 0;
                     if ($isHamsOrAdmin) {
@@ -58,7 +58,7 @@
                     @php
                         $isReportRoute = request()->routeIs('bookingcar.dashboard') || request()->routeIs('bookingcar.report') || request()->routeIs('backend.bookingcar.table');
                     @endphp
-                    <div class="dropdown dropdown-hover dropdown-end">
+                    <div class="dropdown dropdown-end">
                         <label tabindex="0"
                             class="relative flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-full transition-all duration-300 cursor-pointer {{ $isReportRoute ? 'bg-red-600 text-white shadow-md shadow-red-200' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }}">
                             <i class="fa-solid fa-server {{ $isReportRoute ? 'text-white' : 'text-slate-400' }}"></i>
@@ -125,7 +125,7 @@
                 @endguest
 
                 @if(Auth::check())
-                    <div class="dropdown dropdown-end dropdown-hover">
+                    <div class="dropdown dropdown-end">
                         <label tabindex="0"
                             class="flex items-center gap-2 pl-2 pr-4 py-1.5 text-[14px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-full transition-all duration-300 hover:bg-red-50 hover:border-red-200 hover:text-red-700 cursor-pointer shadow-sm">
                             <div
@@ -196,6 +196,174 @@
                         </ul>
                     </div>
                 @endif
+
+                @php
+                    $realNotifs = collect();
+
+                    if (Auth::check()) {
+                        $u = Auth::user();
+
+                        // Booking Car pending reservations
+                        if (\Illuminate\Support\Facades\Schema::hasTable('booking_cars')) {
+                            try {
+                                $carRes = \App\Models\bookingcar\BookingCar::whereIn('status', ['pending', '0', 0])
+                                    ->latest()->take(5)->get();
+                                foreach ($carRes as $item) {
+                                    $realNotifs->push([
+                                        'title' => 'คำขอจองรถยนต์ส่วนกลาง (' . ($item->driver_name ?? $item->destination ?? 'คำขอใหม่') . ')',
+                                        'desc' => 'รอการพิจารณาอนุมัติใช้งานรถยนต์',
+                                        'time' => $item->created_at ? $item->created_at->diffForHumans() : 'เมื่อเร็วๆ นี้',
+                                        'url' => route('bookingcar.welcome'),
+                                        'icon' => 'fa-car',
+                                        'color' => 'bg-orange-100 text-orange-600',
+                                    ]);
+                                }
+                            } catch (\Throwable $e) {}
+                        }
+
+                        // Also check general pending approvals if car table is empty
+                        if ($realNotifs->isEmpty() && \Illuminate\Support\Facades\Schema::hasTable('visitor_reservations')) {
+                            try {
+                                $visRes = \App\Models\parking\VisitorReservation::where('manager_approval', 'pending')
+                                    ->latest()->take(3)->get();
+                                foreach ($visRes as $item) {
+                                    $info = $item->car_registration ?: ($item->guest_name ?: 'ไม่ระบุข้อมูล');
+                                    $realNotifs->push([
+                                        'title' => 'คำขอจองที่จอดรถแขก (' . $info . ')',
+                                        'desc' => 'รอการอนุมัติ / ตรวจสอบสิทธิ์ที่จอดรถ',
+                                        'time' => $item->created_at ? $item->created_at->diffForHumans() : 'เมื่อเร็วๆ นี้',
+                                        'url' => route('parking.visitors.approvals'),
+                                        'icon' => 'fa-square-parking',
+                                        'color' => 'bg-red-100 text-red-600',
+                                    ]);
+                                }
+                            } catch (\Throwable $e) {}
+                        }
+
+                        $realNotifs = $realNotifs->take(5);
+                    }
+                    $notifCount = $realNotifs->count();
+                @endphp
+
+                <!-- Notification Dropdown -->
+                <div class="dropdown dropdown-end">
+                    <label tabindex="0" data-count="{{ $notifCount }}" onclick="markHamsNotifSeen(this, '{{ $notifCount }}')" class="hams-notif-label relative flex items-center justify-center w-9 h-9 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-300 cursor-pointer shadow-sm border border-slate-100 hover:border-red-100" title="การแจ้งเตือน">
+                        <i class="fa-regular fa-bell text-lg"></i>
+                        @if($notifCount > 0)
+                            <span class="notif-badge absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm ring-2 ring-white animate-pulse">
+                                {{ $notifCount }}
+                            </span>
+                        @endif
+                    </label>
+                    <div tabindex="0" class="dropdown-content menu bg-white rounded-2xl mt-2 p-0 w-80 sm:w-96 shadow-2xl border border-slate-100 gap-0 animate-fadeIn z-[110] overflow-hidden">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between px-4 py-3 bg-slate-50/80 border-b border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800 text-[15px]">การแจ้งเตือนจองรถ</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold {{ $notifCount > 0 ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500' }}">
+                                {{ $notifCount > 0 ? $notifCount . ' รายการใหม่' : 'ไม่มีใหม่' }}
+                            </span>
+                        </div>
+
+                        <!-- Notification List Items -->
+                        <div class="max-h-[320px] overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
+                            @forelse($realNotifs as $notif)
+                                <a href="{{ $notif['url'] }}" class="flex items-start gap-3 p-3.5 hover:bg-red-50/50 transition-colors group">
+                                    <div class="w-9 h-9 rounded-full {{ $notif['color'] }} flex items-center justify-center flex-shrink-0 text-sm font-bold shadow-sm">
+                                        <i class="fa-solid {{ $notif['icon'] }}"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-bold text-slate-800 truncate group-hover:text-red-600">{{ $notif['title'] }}</p>
+                                        <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ $notif['desc'] }}</p>
+                                        <span class="text-[10px] text-slate-400 mt-1 block">{{ $notif['time'] }}</span>
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="py-8 text-center px-4">
+                                    <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2 text-lg">
+                                        <i class="fa-solid fa-bell-slash"></i>
+                                    </div>
+                                    <p class="text-xs font-bold text-slate-600">ไม่มีการแจ้งเตือนใหม่ในขณะนี้</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">ระบบจะแสดงการแจ้งเตือนเมื่อมีรายการรออนุมัติหรืออัปเดต</p>
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="p-3 bg-slate-50/50 border-t border-slate-100">
+                            <button type="button" onclick="document.getElementById('all_notif_modal_car').showModal();" class="flex items-center justify-center w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md shadow-red-200 transition-all cursor-pointer">
+                                ดูการแจ้งเตือนทั้งหมด
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal: All Notifications -->
+                <dialog id="all_notif_modal_car" class="modal modal-bottom sm:modal-middle z-[200]">
+                    <div class="modal-box bg-white rounded-3xl p-0 max-w-2xl overflow-hidden shadow-2xl border border-slate-100 text-left">
+                        <!-- Modal Header -->
+                        <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-lg backdrop-blur-sm shadow-inner">
+                                    <i class="fa-solid fa-car"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-black text-lg leading-tight">การแจ้งเตือนระบบบริการจองรถยนต์</h3>
+                                    <p class="text-xs text-red-100 font-medium">รวมคำขอจองรถและอนุมัติใช้งานยานพาหนะ</p>
+                                </div>
+                            </div>
+                            <form method="dialog">
+                                <button class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                                    <i class="fa-solid fa-xmark text-base"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="p-6 max-h-[60vh] overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
+                            @forelse($realNotifs as $notif)
+                                <a href="{{ $notif['url'] }}" class="flex items-start gap-4 py-4 px-3 rounded-2xl hover:bg-red-50/60 transition-all duration-200 group">
+                                    <div class="w-11 h-11 rounded-2xl {{ $notif['color'] }} flex items-center justify-center flex-shrink-0 text-base font-bold shadow-sm group-hover:scale-105 transition-transform">
+                                        <i class="fa-solid {{ $notif['icon'] }}"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <h4 class="text-xs font-bold text-slate-800 group-hover:text-red-600 transition-colors truncate">{{ $notif['title'] }}</h4>
+                                            <span class="text-[11px] font-semibold text-slate-400 flex-shrink-0">{{ $notif['time'] }}</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ $notif['desc'] }}</p>
+                                        <div class="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-red-600 group-hover:translate-x-1 transition-transform">
+                                            <span>เปิดหน้ารายการนี้</span>
+                                            <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                                        </div>
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="py-12 text-center">
+                                    <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-2xl">
+                                        <i class="fa-solid fa-bell-slash"></i>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-slate-700">ไม่มีการแจ้งเตือนที่ค้างอยู่</h4>
+                                    <p class="text-xs text-slate-400 mt-1">ทุกรายการคำขอถูกดำเนินการอนุมัติเรียบร้อยแล้ว</p>
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                            <span class="text-xs text-slate-500 font-medium">รายการรอดำเนินการ {{ $notifCount }} รายการ</span>
+                            <form method="dialog">
+                                <button class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer">
+                                    ปิดหน้าต่าง
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <form method="dialog" class="modal-backdrop bg-slate-900/50 backdrop-blur-xs">
+                        <button>close</button>
+                    </form>
+                </dialog>
             </div>
 
             <!-- Mobile menu button -->

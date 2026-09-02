@@ -33,23 +33,7 @@
                 <h2 class="text-2xl font-bold text-slate-800 tracking-tight">ไม่มีสิทธิ์เข้าถึง</h2>
                 <p class="text-slate-500 font-medium leading-relaxed">คุณไม่มีสิทธิเข้าถึงหน้ารายงานที่เลือกไว้ <br class="hidden sm:block">สิทธิ์นี้ถูกจำกัดไว้สำหรับเจ้าหน้าที่เฉพาะแผนกหรือผู้ดูแลระบบเท่านั้น</p>
                 
-                <div class="mt-4 p-5 rounded-[2rem] bg-slate-50 border border-slate-100/50 inline-block w-full">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">เฉพาะผู้มีสิทธิ์ดังต่อไปนี้:</p>
-                    <div class="flex flex-wrap justify-center gap-3">
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-slate-100 group">
-                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                            <span class="text-slate-700 text-[11px] font-bold">ฝ่าย HAMS (14)</span>
-                        </div>
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-slate-100 group">
-                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                            <span class="text-slate-700 text-[11px] font-bold">ฝ่าย ICT (16)</span>
-                        </div>
-                        <div class="flex items-center gap-2 px-4 py-2 bg-red-600 rounded-xl shadow-md border border-red-700 group">
-                            <i class="fa-solid fa-shield-halved text-white text-[10px]"></i>
-                            <span class="text-white text-[11px] font-black">ADMIN ROLE</span>
-                        </div>
-                    </div>
-                </div>
+
             </div>
 
             <div class="flex flex-col gap-4 mt-8">

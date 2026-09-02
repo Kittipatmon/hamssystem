@@ -3,44 +3,38 @@
 
 @section('content')
 <style>
-    /* Clinical Registry Theme Styles */
+    /* Vuexy Theme Styles */
     .clinical-card {
         background: #ffffff;
-        border: 2px solid #cbd5e1;
+        border: 0;
         border-radius: 8px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.05);
         overflow: hidden;
     }
     .dark .clinical-card {
-        background: #1e2129;
-        border-color: #475569;
+        background: #283046;
     }
     .clinical-card-header {
-        background: #f1f5f9;
-        border-bottom: 2px solid #cbd5e1;
-        padding: 12px 16px;
+        background: transparent;
+        border-bottom: 1px solid #ebe9f1;
+        padding: 16px 20px;
         font-weight: 700;
-        color: #1e293b;
+        color: #5e5873;
         display: flex;
         align-items: center;
         gap: 8px;
         text-transform: uppercase;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         letter-spacing: 0.05em;
     }
     .dark .clinical-card-header {
-        background: #121418;
-        border-bottom-color: #475569;
-        color: #f1f5f9;
+        border-bottom-color: #3b4252;
+        color: #d0d2d6;
     }
-    .clinical-card-header.accent-red {
-        border-left: 5px solid #D71920;
-    }
-    .clinical-card-header.accent-blue {
-        border-left: 5px solid #3b82f6;
-    }
+    .clinical-card-header.accent-red,
+    .clinical-card-header.accent-blue,
     .clinical-card-header.accent-green {
-        border-left: 5px solid #10b981;
+        border-left: 0;
     }
     
     /* Grid details table style */
@@ -49,32 +43,34 @@
         border-collapse: collapse;
     }
     .clinical-grid-table td {
-        border: 1px solid #e2e8f0;
-        padding: 12px 16px;
+        border: 0;
+        border-bottom: 1px solid #ebe9f1;
+        padding: 14px 20px;
         vertical-align: middle;
     }
     .dark .clinical-grid-table td {
-        border-color: #334155;
+        border-bottom-color: #3b4252;
+    }
+    .clinical-grid-table tr:last-child td {
+        border-bottom: 0;
     }
     .clinical-grid-table td.label-cell {
-        background-color: #f8fafc;
+        background-color: transparent;
         font-weight: 600;
-        color: #475569;
+        color: #5e5873;
         width: 25%;
         font-size: 0.85rem;
     }
     .dark .clinical-grid-table td.label-cell {
-        background-color: #181b22;
-        color: #94a3b8;
+        color: #d0d2d6;
     }
     .clinical-grid-table td.value-cell {
-        background-color: #ffffff;
-        color: #0f172a;
+        background-color: transparent;
+        color: #6e6b7b;
         font-size: 0.95rem;
     }
     .dark .clinical-grid-table td.value-cell {
-        background-color: #1e2129;
-        color: #e2e8f0;
+        color: #b4b7bd;
     }
 
     /* Badge styles */
@@ -83,38 +79,37 @@
         align-items: center;
         gap: 6px;
         padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 0.85rem;
+        border-radius: 9999px;
+        font-size: 0.8rem;
         font-weight: 700;
-        border: 1px solid transparent;
+        border: 0;
     }
 
-    /* Stamp/Seal effect for Registry status */
+    /* Stamp/Seal effect for Registry status (Refactored to Vuexy Badge) */
     .registry-stamp {
-        border: 3px double currentColor;
-        font-family: 'Courier New', Courier, monospace;
-        font-weight: bold;
+        font-family: inherit;
+        font-weight: 700;
         text-transform: uppercase;
-        padding: 8px 16px;
-        border-radius: 4px;
+        padding: 6px 16px;
+        border-radius: 9999px;
         display: inline-block;
-        transform: rotate(-3deg);
-        letter-spacing: 0.1em;
-        font-size: 1.1rem;
+        letter-spacing: 0.05em;
+        font-size: 0.85rem;
+        border: 0;
     }
 </style>
 
 <div class="container mx-auto px-4 py-8 max-w-7xl">
     {{-- Header / Navigation Bar --}}
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-4 border-b-2 border-slate-300 dark:border-slate-700">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-4 border-b-2 border-slate-200 dark:border-slate-700">
         <div>
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded bg-[#D71920] flex items-center justify-center text-white">
-                    <i class="fa-solid fa-hospital-user text-xl"></i>
+                    <i class="fa-solid fa-user-tie text-xl"></i>
                 </div>
                 <div>
                     <h1 class="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">
-                        EMPLOYEE CLINICAL REGISTRY
+                        รายละเอียดข้อมูลพนักงาน (Employee Profile)
                     </h1>
                     <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">
                         HAMS.REGISTRY.ID // {{ $user->emp_code }}
@@ -123,10 +118,10 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('users.index') }}" class="btn bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-600 btn-sm gap-2 rounded">
+            <a href="{{ route('users.index') }}" class="btn bg-transparent hover:bg-[#7367F0]/10 text-slate-500 hover:text-[#7367F0] border-0 btn-sm gap-2 rounded-lg transition-colors">
                 <i class="fa-solid fa-arrow-left-long"></i> ย้อนกลับหน้าหลัก
             </a>
-            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-kumwell-red btn-sm gap-2 rounded px-4">
+            <a href="{{ route('users.edit', $user->id) }}" class="btn bg-[#7367F0] hover:bg-[#6357E0] text-white border-0 btn-sm gap-2 rounded-lg px-4 shadow-md shadow-[#7367F0]/30 transition-colors">
                 <i class="fa-solid fa-user-pen"></i> แก้ไขข้อมูลพนักงาน
             </a>
         </div>
@@ -145,7 +140,7 @@
                 <div class="p-6 flex flex-col items-center text-center bg-slate-50/50 dark:bg-slate-900/10">
                     
                     {{-- Profile image representation --}}
-                    <div class="w-32 h-32 rounded-lg border-4 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col items-center justify-center shadow-inner relative overflow-hidden mb-4">
+                    <div class="w-32 h-32 rounded-lg border-4 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col items-center justify-center shadow-inner relative overflow-hidden mb-4">
                         <div class="absolute top-0 left-0 w-full h-1 bg-[#D71920]"></div>
                         <i class="fa-solid fa-user-tie text-5xl text-slate-400 dark:text-slate-500"></i>
                         <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500 mt-2 tracking-widest">PHOTO AREA</span>
@@ -158,7 +153,7 @@
                         CODE: {{ $user->emp_code }}
                     </span>
 
-                    <div class="w-full border-t-2 border-dashed border-slate-300 dark:border-slate-700 my-4"></div>
+                    <div class="w-full border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-4"></div>
 
                     <div class="w-full space-y-3">
                         <div class="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
@@ -322,7 +317,7 @@
             </div>
 
             {{-- Audit/Metadata Log Info --}}
-            <div class="p-4 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg flex flex-col md:flex-row justify-between items-center text-[11px] font-mono text-slate-500 dark:text-slate-400 gap-4">
+            <div class="p-4 bg-slate-100 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-lg flex flex-col md:flex-row justify-between items-center text-[11px] font-mono text-slate-500 dark:text-slate-400 gap-4">
                 <span>SYSTEM REFERENCE: HAMS-USR-{{ $user->id }}</span>
                 <span>LAST MODIFIED: {{ $user->updated_at ? $user->updated_at->format('d/m/Y H:i:s') : 'N/A' }}</span>
             </div>

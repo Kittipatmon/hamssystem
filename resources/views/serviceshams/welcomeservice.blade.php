@@ -3,7 +3,7 @@
 
     @php
         $isHams = Auth::check() && (
-            Auth::user()->role === 'admin' ||
+            in_array(Auth::user()->role, ['admin', 'editor']) ||
             in_array(Auth::user()->dept_id, [14, 16])
         );
     @endphp

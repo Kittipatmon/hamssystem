@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div class="flex gap-2">
-                @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]) || Auth::user()->is_hams_editor)
+                @if(in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]) || Auth::user()->is_hams_editor)
                     <a href="{{ route('housing.residence.create') }}" 
                         class="btn bg-red-600 hover:bg-red-700 text-white rounded-2xl px-5 text-xs sm:text-sm h-11 flex items-center gap-2 border-0 shadow-sm transition-all hover:scale-102 active:scale-95">
                         <i class="fa-solid fa-square-plus"></i> เพิ่มอาคารและห้องพัก
@@ -185,7 +185,7 @@
                                     <i class="fa-solid fa-map text-xs text-sky-400"></i>
                                 </button>
                             @endif
-                            @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]) || Auth::user()->is_hams_editor)
+                            @if(in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]) || Auth::user()->is_hams_editor)
                                 <a href="{{ route('housing.residence.edit', $res->residence_id) }}" 
                                     class="text-slate-400 hover:text-sky-400 transition-colors ml-2" title="แก้ไขข้อมูลอาคาร">
                                     <i class="fa-solid fa-pen-to-square text-xs"></i>

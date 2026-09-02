@@ -231,7 +231,7 @@
                 $userId = Auth::id();
                 $user = Auth::user();
 
-                if ($user && ($user->role === 'admin' || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor)) {
+                if ($user && (in_array($user->role, ['admin', 'editor']) || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor)) {
                     $pRequestsTotal = \App\Models\housing\ResidenceRequest::whereIn('send_status', [0, 1, 2])->count();
                     $pAgreementsTotal = \App\Models\housing\ResidenceAgreement::whereIn('send_status', [0, 1, 2])->count();
                     $pGuestsTotal = \App\Models\housing\ResidentGuestRequest::whereIn('send_status', [0, 1, 2])->count();
@@ -400,7 +400,7 @@
                                                     <form id="delete-form-request-{{ $r->id }}" method="POST" action="{{ route('housing.destroy', ['type' => 'request', 'id' => $r->id]) }}" class="hidden">
                                                         @csrf @method('DELETE')
                                                     </form>
-                                                    @if($user->role === 'admin' || in_array($user->dept_id, [14, 16]))
+                                                    @if(in_array($user->role, ['admin', 'editor']) || in_array($user->dept_id, [14, 16]))
                                                         <button onclick="confirmDelete('request', {{ $r->id }})" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition-all flex items-center justify-center border border-red-200" title="ลบข้อมูล">
                                                             <i class="fa-solid fa-trash-can text-xs"></i>
                                                         </button>

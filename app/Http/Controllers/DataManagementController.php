@@ -21,13 +21,6 @@ class DataManagementController extends Controller
             ->get();
         $requisitionCount = $requisitions->count();
 
-        // 2. Meeting Rooms (จองห้องประชุม) - Focus on Pending/Waiting
-        $reservations = \App\Models\bookingmeeting\Reservation::where('user_id', $userId)
-            ->whereIn('status', ['รออนุมัติ', 'รอดำเนินการ', 'pending']) // Common pending labels
-            ->with('room')
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $reservationCount = $reservations->count();
 
         // 3. Vehicle Bookings (จองรถ) - Focus on Waiting Approval
         $vehicleBookings = \App\Models\bookingcar\BookingCar::where('user_id', $userId)
@@ -74,11 +67,63 @@ class DataManagementController extends Controller
 
         $housingTasksCount = $housingTasks->count();
 
+        // 5. Parking Reservations (จองที่จอดรถ) - Focus on Pending
+        $pendingParkingReservations = collect();
+        $user = auth()->user();
+        
+        $managedDeptIds = \App\Models\Department::where('manager_id', $user->id)->pluck('id');
+        if ($managedDeptIds->isNotEmpty() || $user->is_hams_admin || in_array($user->role, ['admin', 'editor'])) {
+            $employeeQuery = \App\Models\parking\EmployeeReservation::where('manager_approval', 'pending')
+                ->with(['user', 'department', 'slot.zone']);
+            if (!$user->is_hams_admin && !in_array($user->role, ['admin', 'editor'])) {
+                $employeeQuery->whereIn('dept_id', $managedDeptIds);
+            }
+            $pendingParkingReservations = $pendingParkingReservations->merge(
+                $employeeQuery->get()->map(function($r) { $r->task_type = 'employee_manager'; return $r; })
+            );
+        }
+
+        if ($user->is_hams_admin) {
+            $visitorQuery = \App\Models\parking\VisitorReservation::where('manager_approval', 'pending')
+                ->with(['contactUser.department', 'slot.zone']);
+            $pendingParkingReservations = $pendingParkingReservations->merge(
+                $visitorQuery->get()->map(function($r) { $r->task_type = 'visitor_hams'; return $r; })
+            );
+            
+            $hamsEmpQuery = \App\Models\parking\EmployeeReservation::where('manager_approval', 'approved')
+                ->where('hams_status', 'pending')
+                ->with(['user', 'slot.zone']);
+            $pendingParkingReservations = $pendingParkingReservations->merge(
+                $hamsEmpQuery->get()->map(function($r) { $r->task_type = 'employee_hams'; return $r; })
+            );
+        }
+
+        if ($pendingParkingReservations->isEmpty()) {
+            $myVisitor = \App\Models\parking\VisitorReservation::where('contact_user_id', $user->id)
+                ->where('manager_approval', 'pending')
+                ->with(['slot.zone'])
+                ->get()->map(function($r) { $r->task_type = 'my_visitor'; return $r; });
+            $pendingParkingReservations = $pendingParkingReservations->merge($myVisitor);
+
+            $myEmp = \App\Models\parking\EmployeeReservation::where('user_id', $user->id)
+                ->where(function($q) {
+                    $q->where('manager_approval', 'pending')
+                      ->orWhere(function($sq) {
+                          $sq->where('manager_approval', 'approved')->where('hams_status', 'pending');
+                      });
+                })
+                ->with(['slot.zone'])
+                ->get()->map(function($r) { $r->task_type = 'my_employee'; return $r; });
+            $pendingParkingReservations = $pendingParkingReservations->merge($myEmp);
+        }
+
+        $parkingReservationsCount = $pendingParkingReservations->count();
+
         return view('backend.welcomedatamanage', compact(
             'requisitions', 'requisitionCount',
-            'reservations', 'reservationCount',
             'vehicleBookings', 'vehicleBookingCount',
-            'housingTasks', 'housingTasksCount'
+            'housingTasks', 'housingTasksCount',
+            'pendingParkingReservations', 'parkingReservationsCount'
         ));
     }
 }

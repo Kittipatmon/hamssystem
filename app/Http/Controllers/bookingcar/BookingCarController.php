@@ -65,7 +65,7 @@ class BookingCarController extends Controller
 
         // Get current user details for passing to view
         $currentUser = Auth::user();
-        $isHamsOrAdmin = $currentUser && (in_array($currentUser->dept_id ?? 0, [14, 16]) || ($currentUser->role ?? '') === 'admin');
+        $isHamsOrAdmin = $currentUser && (in_array($currentUser->dept_id ?? 0, [14, 16]) || in_array(($currentUser->role ?? ''), ['admin', 'editor']));
         $currentUserId = $currentUser ? $currentUser->id : null;
 
         // Fetch approved and pending bookings for the calendar (All relevant ones)
@@ -291,7 +291,7 @@ class BookingCarController extends Controller
     public function dashboard(Request $request)
     {
         $user = Auth::user();
-        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || in_array(($user->role ?? ''), ['admin', 'editor']));
         if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
         }
@@ -513,7 +513,7 @@ class BookingCarController extends Controller
     public function report(Request $request)
     {
         $user = Auth::user();
-        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || in_array(($user->role ?? ''), ['admin', 'editor']));
 
         if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
@@ -612,7 +612,7 @@ class BookingCarController extends Controller
     public function edit($id)
     {
         $user = Auth::user();
-        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || in_array(($user->role ?? ''), ['admin', 'editor']));
 
         if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
@@ -635,7 +635,7 @@ class BookingCarController extends Controller
     public function update(Request $request, $id)
     {
         $user = Auth::user();
-        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || in_array(($user->role ?? ''), ['admin', 'editor']));
 
         if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
@@ -766,7 +766,7 @@ class BookingCarController extends Controller
     public function approve(Request $request, $id)
     {
         $user = Auth::user();
-        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || ($user->role ?? '') === 'admin');
+        $isAuthorized = $user && (in_array($user->dept_id ?? 0, [14, 16]) || in_array(($user->role ?? ''), ['admin', 'editor']));
 
         if (!$isAuthorized) {
             return redirect()->route('bookingcar.welcome')->with('error', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ (เฉพาะแผนก HAMS หรือผู้ที่ได้รับอนุญาต)');
@@ -886,7 +886,7 @@ class BookingCarController extends Controller
 
         $isOwner = $user && $user->id === $booking->user_id;
         $isHamsOrIct = $user && in_array($user->dept_id ?? 0, [14, 16]);
-        $isAdmin = $user && ($user->role ?? '') === 'admin';
+        $isAdmin = $user && in_array(($user->role ?? ''), ['admin', 'editor']);
 
         if (!$isHamsOrIct && !$isOwner && !$isAdmin) {
             return redirect()->back()->with('error', 'คุณไม่มีสิทธิ์ทำรายการนี้');

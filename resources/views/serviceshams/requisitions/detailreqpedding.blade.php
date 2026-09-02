@@ -4,7 +4,7 @@
     @php
         $isOwner = Auth::check() && $requisition->requester_id === Auth::id();
         $isHamsOrAdmin = Auth::check() && (
-            Auth::user()->role === 'admin' ||
+            in_array(Auth::user()->role, ['admin', 'editor']) ||
             in_array(Auth::user()->dept_id, [14, 16])
         );
     @endphp

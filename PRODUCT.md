@@ -25,3 +25,4 @@ Avoid overly complex animations, heavy gradient text, excessive glassmorphism, c
 - Contrast ratio of at least 4.5:1 for standard body text.
 - Keyboard navigability for forms and major dropdown menus.
 - Clear error state cues that do not rely solely on color.
+

@@ -175,7 +175,7 @@
      <Cell ss:MergeAcross="1" ss:StyleID="TotalRow"><Data ss:Type="String">ยอดรวมทั้งหมด</Data></Cell>
      <Cell ss:StyleID="TotalRow"><Data ss:Type="Number">{{ $grandTotalCount }}</Data></Cell>
      <Cell ss:StyleID="TotalRowNumber"><Data ss:Type="Number">{{ $grandTotalPrice }}</Data></Cell>
-     <Cell ss:MergeAcross="3" ss:StyleID="TotalRow"><Data ss:Type="String"></Data></Cell>
+     <Cell ss:MergeAcross="3" ss:StyleID="TotalRow"><Data ss:Type="String">-</Data></Cell>
    </Row>
   </Table>
  </Worksheet>

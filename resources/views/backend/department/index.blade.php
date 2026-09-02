@@ -2,83 +2,105 @@
 @section('title', 'ข้อมูลแผนก (Department)')
 @section('content')
 
-<div class="min-h-screen bg-slate-100 dark:bg-zinc-950 px-4 sm:px-6 lg:px-8 py-8">
-    <div class="max-w-[1600px] mx-auto space-y-6 font-noto">
+<div class="min-h-screen bg-[#F8F8F9] dark:bg-[#161D31] px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-[1600px] mx-auto space-y-6 font-sans">
 
         {{-- ════════════════════════════════════════════════════════════════
-             HEADER BANNER (CLINICAL COMMAND STYLE)
+             HEADER BANNER (VUEXY STYLE)
              ════════════════════════════════════════════════════════════════ --}}
-        <div class="bg-white dark:bg-zinc-900 border-l-4 border-l-red-600 border border-slate-300 dark:border-zinc-800 p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-sm">
+        <div class="bg-white dark:bg-[#283046] rounded-[6px] shadow-[0_4px_24px_0_rgba(34,41,47,0.05)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded mb-3">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-                    </span>
-                    <span class="text-[10px] font-bold text-red-700 dark:text-red-400 uppercase tracking-widest">ORGANIZATION DIRECTORY</span>
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 bg-[#7367F0]/10 rounded mb-2">
+                    <span class="text-[10px] font-bold text-[#7367F0] uppercase tracking-widest">ORGANIZATION DIRECTORY</span>
                 </div>
-                <h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
+                <h1 class="text-2xl font-semibold text-[#5E5873] dark:text-white mb-1">
                     รายชื่อแผนกองค์กร (Department Registry)
                 </h1>
-                <p class="text-slate-600 dark:text-zinc-400 text-sm">
+                <p class="text-[#B9B9C3] text-sm">
                     สืบค้นและตรวจสอบรายชื่อแผนก ชื่อเต็ม สังกัดฝ่าย และสถานะการใช้งานของแผนกในระบบงานทั้งหมด
                 </p>
-            </div>
-            
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto font-bold">
-                {{-- Search Box --}}
-                <div class="relative flex-grow sm:w-80 group">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 transition-colors group-focus-within:text-red-600">
-                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
-                    </div>
-                    <input type="text" id="searchInput" value="{{ request('search') }}" 
-                        class="w-full pl-10 pr-10 py-3 text-sm rounded border border-slate-300 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 focus:bg-white focus:ring-1 focus:ring-red-600 focus:border-red-600 outline-none text-slate-900 dark:text-white font-medium"
-                        placeholder="พิมพ์ค้นหาแผนก หรือชื่อเต็ม...">
-                    <div id="searchLoader" class="absolute inset-y-0 right-0 pr-3.5 flex items-center hidden">
-                        <span class="loading loading-spinner loading-xs text-red-600"></span>
-                    </div>
-                </div>
             </div>
         </div>
 
         {{-- ════════════════════════════════════════════════════════════════
-             DATA TABLE (CLINICAL/LEDGER STYLE)
+             DATA TABLE (VUEXY STYLE)
              ════════════════════════════════════════════════════════════════ --}}
-        <div class="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-800 shadow-sm overflow-hidden relative">
+        <div class="bg-white dark:bg-[#283046] rounded-[6px] shadow-[0_4px_24px_0_rgba(34,41,47,0.05)] overflow-hidden p-4">
+            
+            <!-- Table Controls (Vuexy Style) -->
+            <div class="pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#EBE9F1] dark:border-zinc-800">
+                <div class="flex items-center gap-2 text-sm text-[#6E6B7B] dark:text-[#B4B7BD]">
+                    <span>Show</span>
+                    <select class="border border-[#D8D6DE] dark:border-zinc-700 rounded-[5px] px-3 py-1 outline-none bg-white dark:bg-[#283046] cursor-pointer hover:border-slate-400">
+                        <option>10</option>
+                        <option>25</option>
+                        <option>50</option>
+                    </select>
+                    <span>entries</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-[#6E6B7B] dark:text-[#B4B7BD]">
+                    <span>Search</span>
+                    <div class="relative group">
+                        <input type="text" id="searchInput" value="{{ request('search') }}" 
+                            class="border border-[#D8D6DE] dark:border-zinc-700 rounded-[5px] pl-3 pr-10 py-1.5 outline-none bg-white dark:bg-[#283046] focus:border-[#7367F0] w-48 sm:w-64 hover:border-slate-400" 
+                            placeholder="Search...">
+                        <div id="searchLoader" class="absolute inset-y-0 right-0 pr-3 flex items-center hidden">
+                            <span class="loading loading-spinner loading-xs text-[#7367F0]"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table id="departments-table" class="w-full text-left border-collapse whitespace-nowrap">
                     <thead>
-                        <tr class="bg-slate-850 dark:bg-zinc-850 bg-slate-800 text-white border-b border-slate-300 dark:border-zinc-700">
-                            <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider w-24 text-center border-r border-slate-700 dark:border-zinc-700">ลำดับ</th>
-                            <th class="py-3 px-6 text-xs font-bold uppercase tracking-wider border-r border-slate-700 dark:border-zinc-700">รหัสและรายละเอียดแผนก</th>
-                            <th class="py-3 px-6 text-xs font-bold uppercase tracking-wider w-48 text-center">สถานะการใช้งาน</th>
+                        <tr class="bg-[#F3F2F7] dark:bg-[#161D31] text-[#5E5873] dark:text-[#B4B7BD] text-xs font-semibold uppercase tracking-wider border-b border-[#EBE9F1] dark:border-zinc-800">
+                            <th class="py-3 pl-8 pr-3 text-left w-12">
+                                <input type="checkbox" id="selectAll" class="rounded border-[#D8D6DE] dark:border-zinc-700 text-[#7367F0] focus:ring-[#7367F0]">
+                            </th>
+                            <th class="py-3 px-6 w-24 text-left">ลำดับ</th>
+                            <th class="py-3 px-6">รหัสและรายละเอียดแผนก</th>
+                            <th class="py-3 pl-4 pr-8 text-left w-48">สถานะการใช้งาน</th>
                         </tr>
                     </thead>
-                    <tbody id="departmentsBody" class="divide-y divide-slate-200 dark:divide-zinc-800">
+                    <tbody id="departmentsBody" class="divide-y divide-[#EBE9F1] dark:divide-zinc-850">
                         @foreach ($departments as $department)
-                            <tr class="odd:bg-white even:bg-slate-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900/40 hover:bg-red-50/10 dark:hover:bg-red-950/5 transition-colors">
-                                <td class="py-4 px-4 text-center border-r border-slate-200 dark:border-zinc-800 font-bold text-slate-400 dark:text-zinc-500">
+                            @php
+                                $colors = [
+                                    'bg-[#7367F0]/10 text-[#7367F0]', 
+                                    'bg-[#00CFE8]/10 text-[#00CFE8]', 
+                                    'bg-[#FF9F43]/10 text-[#FF9F43]', 
+                                    'bg-[#EA5455]/10 text-[#EA5455]',
+                                    'bg-[#28C76F]/10 text-[#28C76F]'
+                                ];
+                                $avatarColor = $colors[$department->id % count($colors)];
+                            @endphp
+                            <tr class="hover:bg-[#FAF9FF] dark:hover:bg-[#343D55] transition-colors">
+                                <td class="py-3.5 pl-8 pr-3 text-left">
+                                    <input type="checkbox" class="row-checkbox rounded border-[#D8D6DE] dark:border-zinc-700 text-[#7367F0] focus:ring-[#7367F0]">
+                                </td>
+                                <td class="py-3.5 px-6 text-left text-sm font-semibold text-[#B9B9C3]">
                                     {{ $loop->iteration }}
                                 </td>
-                                <td class="py-4 px-6 border-r border-slate-200 dark:border-zinc-800">
+                                <td class="py-3.5 px-6">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded border border-slate-300 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-500 dark:text-zinc-400">
+                                        <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm {{ $avatarColor }} shrink-0">
                                             <i class="fa-solid fa-building text-xs"></i>
                                         </div>
                                         <div class="flex flex-col">
-                                            <span class="font-bold text-slate-900 dark:text-white text-sm">{{ $department->name }}</span>
-                                            <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">DEPT-{{ str_pad($department->id, 3, '0', STR_PAD_LEFT) }}</span>
+                                            <span class="font-semibold text-[#5E5873] dark:text-white text-sm">{{ $department->name }}</span>
+                                            <span class="text-xs text-[#B9B9C3] mt-0.5 uppercase tracking-wider">DEPT-{{ str_pad($department->id, 3, '0', STR_PAD_LEFT) }}</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-4 px-6 text-center">
+                                <td class="py-3.5 pl-4 pr-8 text-left">
                                     @if($department->department_status == 0)
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 text-xs font-bold">
-                                            <i class="fa-solid fa-check-circle mr-1.5 text-[10px]"></i> ใช้งานปกติ
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#28C76F]/10 text-[#28C76F] text-xs font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#28C76F] mr-1.5"></span> ใช้งานปกติ
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded bg-slate-100 text-slate-800 dark:bg-zinc-800 dark:text-zinc-400 border border-slate-300 dark:border-zinc-700 text-xs font-bold">
-                                            ไม่ใช้งาน
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#EA5455]/10 text-[#EA5455] text-xs font-semibold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#EA5455] mr-1.5"></span> ไม่ใช้งาน
                                         </span>
                                     @endif
                                 </td>
@@ -92,94 +114,71 @@
 </div>
 
 @push('scripts')
+    <!-- jQuery & DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <style>
+        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter {
+            display: none !important; /* Hide default length and filter boxes */
+        }
+        .dataTables_wrapper .dataTables_info {
+            color: #6E6B7B !important;
+            font-size: 0.825rem;
+            padding-top: 1.25rem !important;
+        }
+        .dataTables_wrapper .dataTables_paginate {
+            padding-top: 1.25rem !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #7367F0 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 0.375rem;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #7367F0/10 !important;
+            color: #7367F0 !important;
+            border: none !important;
+        }
+    </style>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
     <script>
-        // --- AJAX Search Logic ---
-        const searchInput = document.getElementById('searchInput');
-        const searchLoader = document.getElementById('searchLoader');
-        const departmentsBody = document.getElementById('departmentsBody');
-
-        let searchTimeout;
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                const query = this.value;
-                
-                searchLoader.classList.remove('hidden');
-                
-                searchTimeout = setTimeout(() => {
-                    fetchResults(query);
-                }, 500);
-            });
-        }
-
-        function fetchResults(query) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('search', query);
-
-            fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
+        $(document).ready(function() {
+            var table = $('#departments-table').DataTable({
+                "dom": 'rtip',
+                "order": [[ 1, "asc" ]],
+                "pageLength": 10,
+                "columnDefs": [
+                    { "orderable": false, "targets": [0] }
+                ],
+                "language": {
+                    "zeroRecords": "ไม่พบข้อมูลแผนก",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+                    "infoEmpty": "Showing 0 to 0 of 0 entries",
+                    "infoFiltered": "(filtered from _MAX_ total entries)",
+                    "paginate": {
+                        "next": "Next",
+                        "previous": "Previous"
+                    }
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                renderTable(data);
-                searchLoader.classList.add('hidden');
-            })
-            .catch(error => {
-                console.error('Error fetching results:', error);
-                searchLoader.classList.add('hidden');
             });
-        }
 
-        function renderTable(data) {
-            departmentsBody.innerHTML = '';
-            
-            if (data.length === 0) {
-                departmentsBody.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="py-12 text-center text-slate-400 bg-slate-50/50 dark:bg-zinc-900/40 italic font-bold">
-                            <i class="fa-solid fa-folder-open text-2xl mb-2 block"></i>
-                            ไม่พบข้อมูลแผนกตามเงื่อนไข
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            data.forEach((d, index) => {
-                const row = document.createElement('tr');
-                row.className = 'odd:bg-white even:bg-slate-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900/40 hover:bg-red-50/10 dark:hover:bg-red-950/5 transition-colors';
-                
-                row.innerHTML = `
-                    <td class="py-4 px-4 text-center border-r border-slate-200 dark:border-zinc-800 font-bold text-slate-400 dark:text-zinc-500">${index + 1}</td>
-                    <td class="py-4 px-6 border-r border-slate-200 dark:border-zinc-800">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded border border-slate-300 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-500 dark:text-zinc-400">
-                                <i class="fa-solid fa-building text-xs"></i>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="font-bold text-slate-900 dark:text-white text-sm">${d.name}</span>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">DEPT-${(d.id || 0).toString().padStart(3, '0')}</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4 px-6 text-center">
-                        ${(d.department_status == 0 || d.department_status === undefined) ? `
-                            <span class="inline-flex items-center px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 text-xs font-bold">
-                                <i class="fa-solid fa-check-circle mr-1.5 text-[10px]"></i> ใช้งานปกติ
-                            </span>
-                        ` : `
-                            <span class="inline-flex items-center px-2.5 py-1 rounded bg-slate-100 text-slate-800 dark:bg-zinc-800 dark:text-zinc-400 border border-slate-300 dark:border-zinc-700 text-xs font-bold">
-                                ไม่ใช้งาน
-                            </span>
-                        `}
-                    </td>
-                `;
-                departmentsBody.appendChild(row);
+            // Toggle all checkboxes
+            $('#selectAll').on('click', function() {
+                var rows = table.rows({ 'search': 'applied' }).nodes();
+                $('.row-checkbox', rows).prop('checked', this.checked);
             });
-        }
+
+            // Bind Custom Search Input
+            $('#searchInput').on('keyup', function() {
+                table.search(this.value).draw();
+            });
+
+            // Handle entry limit selector (optional: bind default select if present)
+            $('.dataTables_wrapper select').on('change', function() {
+                table.page.len(parseInt($(this).val())).draw();
+            });
+        });
     </script>
 @endpush
 @endsection

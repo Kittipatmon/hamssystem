@@ -30,7 +30,7 @@
         }
 
         .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-            background: #D71920;
+            background: #7367F0;
         }
 
         /* Helper class to hide elements via JS */
@@ -67,7 +67,7 @@
         }
 
         .btn-kumwell-red {
-            background-color: #D71920;
+            background-color: #7367F0;
             color: white;
             transition: all 0.2s ease;
         }
@@ -102,92 +102,25 @@
         /* -------------------------------------------------------------
            CLINICAL GRID & HOSPITAL STRUCTURE DESIGN SYSTEM
            ------------------------------------------------------------- */
-        .clinical-sidebar {
-            background-color: #ffffff;
-            border-right: 2px solid #cbd5e1;
-        }
-        .dark .clinical-sidebar {
-            background-color: #1a1d24;
-            border-right: 2px solid #334155;
-        }
-        .clinical-header {
-            border-bottom: 2px solid #cbd5e1;
-            background-color: #f8fafc;
-        }
-        .dark .clinical-header {
-            border-bottom: 2px solid #334155;
-            background-color: #121418;
-        }
+        .clinical-sidebar { background-color: #ffffff; border-right: 1px solid #e2e8f0; }
+.dark .clinical-sidebar { background-color: #28243d; border-right: 1px solid #3b3559; }
+        .clinical-header { background-color: #ffffff; border-bottom: 1px solid #e2e8f0; }
+.dark .clinical-header { background-color: #28243d; border-bottom: 1px solid #3b3559; }
         
         /* Menu Grid Cards (Folder/Registry Style) */
-        .menu-grid-item {
-            border: 1.5px solid #cbd5e1 !important;
-            border-radius: 6px !important;
-            background-color: #ffffff !important;
-            color: #334155 !important;
-            transition: all 0.15s ease-in-out;
-            font-weight: 600;
-        }
-        .dark .menu-grid-item {
-            border-color: #475569 !important;
-            background-color: #242933 !important;
-            color: #cbd5e1 !important;
-        }
-        .menu-grid-item:hover {
-            border-color: #D71920 !important;
-            background-color: #fef2f2 !important;
-            color: #D71920 !important;
-        }
-        .dark .menu-grid-item:hover {
-            border-color: #D71920 !important;
-            background-color: #271c1f !important;
-            color: #ff8a8a !important;
-        }
-        .menu-grid-item.active-menu {
-            background-color: #D71920 !important;
-            border-color: #b71515 !important;
-            color: #ffffff !important;
-        }
-        .dark .menu-grid-item.active-menu {
-            background-color: #D71920 !important;
-            border-color: #a11318 !important;
-            color: #ffffff !important;
-        }
+        .menu-grid-item { border-radius: 0.5rem !important; background-color: transparent !important; color: #475569 !important; transition: all 0.2s ease-in-out; font-weight: 500; margin-bottom: 0.25rem; border: none !important; }
+.dark .menu-grid-item { color: #cbd5e1 !important; border: none !important; background-color: transparent !important; }
+        .menu-grid-item:hover { background-color: rgba(115, 103, 240, 0.08) !important; color: #7367F0 !important; border: none !important; }
+.dark .menu-grid-item:hover { background-color: rgba(115, 103, 240, 0.16) !important; color: #7367F0 !important; border: none !important; }
+        .menu-grid-item.active-menu { background-color: #7367F0 !important; box-shadow: 0 2px 6px 0 rgba(115, 103, 240, 0.3) !important; color: #ffffff !important; border: none !important; }
+.dark .menu-grid-item.active-menu { background-color: #7367F0 !important; box-shadow: 0 2px 6px 0 rgba(115, 103, 240, 0.3) !important; color: #ffffff !important; border: none !important; }
 
-        .clinical-section-header {
-            font-size: 10px !important;
-            font-weight: 800 !important;
-            letter-spacing: 0.1em;
-            color: #475569;
-            text-transform: uppercase;
-            padding: 6px 12px;
-            background-color: #f1f5f9;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            display: block;
-        }
-        .dark .clinical-section-header {
-            color: #94a3b8;
-            background-color: #121418;
-            border-color: #475569;
-        }
+        .clinical-section-header { font-size: 11px !important; font-weight: 500 !important; color: #94a3b8; text-transform: uppercase; padding: 12px 16px 4px 16px; display: block; border: none; background: transparent; }
+.dark .clinical-section-header { color: #64748b; background: transparent; border: none; }
 
         /* Submenu Clinical Panel */
-        .submenu-clinical-panel {
-            background-color: #f8fafc;
-            border-left: 2px solid #cbd5e1;
-            border-right: 2px solid #cbd5e1;
-            border-bottom: 2px solid #cbd5e1;
-            border-bottom-left-radius: 6px;
-            border-bottom-right-radius: 6px;
-            margin-top: -3px;
-            padding: 8px 12px;
-        }
-        .dark .submenu-clinical-panel {
-            background-color: #121418;
-            border-color: #475569;
-        }
+        .submenu-clinical-panel { background-color: transparent; padding: 4px 0 4px 12px; margin-top: 0; border: none; }
+.dark .submenu-clinical-panel { background-color: transparent; border: none; }
 
         /* Hospital Grid Table Layout */
         .clinical-table {
@@ -252,7 +185,7 @@
                 extend: {
                     colors: {
                         kumwell: {
-                            red: '#D71920',
+                            red: '#7367F0',
                             dark: '#121418',
                             card: '#1E2129',
                             hover: '#2A2E38'
@@ -293,13 +226,13 @@
                 <div id="sidebar-logo"
                     class="flex items-center gap-2.5 overflow-hidden whitespace-nowrap transition-all duration-300 opacity-100">
                     <div
-                        class="w-9 h-9 rounded bg-[#D71920] flex items-center justify-center flex-shrink-0 shadow-sm border border-red-700">
+                        class="w-9 h-9 rounded bg-[#7367F0] flex items-center justify-center flex-shrink-0 shadow-sm border border-indigo-700">
                         <span class="font-black text-white text-lg tracking-wider">K</span>
                     </div>
                     <a href="{{ route('welcome') }}">
                         <div class="flex flex-col leading-none">
                             <span class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Kumwell</span>
-                            <span class="text-[9px] text-[#D71920] font-black uppercase tracking-widest mt-1">HA SYSTEM</span>
+                            <span class="text-[9px] text-[#7367F0] font-black uppercase tracking-widest mt-1">HA SYSTEM</span>
                         </div>
                     </a>
                 </div>
@@ -314,8 +247,9 @@
             @php
                 $inventoryActive = request()->routeIs('items.*') || request()->routeIs('datamanage.news.*');
                 $policyActive = request()->routeIs('backend.policy.*') || request()->routeIs('backend.announcement.*');
-                $hamsActive = request()->routeIs('users.*') || request()->routeIs('usertypes.*') || request()->routeIs('sections.*') || request()->routeIs('divisions.*') || request()->routeIs('departments.*');
-                $meetingActive = request()->routeIs('backend.bookingmeeting.rooms.*') || request()->routeIs('backend.bookingmeeting.reservations.*') || request()->routeIs('backend.bookingmeeting.report.*');
+                $hamsActive = request()->routeIs('users.*') || request()->routeIs('usertypes.*') || request()->routeIs('sections.*') || request()->routeIs('divisions.*') || request()->routeIs('departments.*') || request()->routeIs('managers.*');
+                $systemLogsActive = request()->routeIs('system-logs.*');
+                $securityAlertsActive = request()->routeIs('security-alerts.*');
                 $housingActive = request()->routeIs('housing.*');
                 $isDashboard = request()->routeIs('backend.welcomedatamanage') || request()->routeIs('housing.welcome');
             @endphp
@@ -333,7 +267,7 @@
                         </a>
 
                         <!-- policy management -->
-                        @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))
+                        @if(in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]))
                             <div class="relative group">
                                 <button onclick="toggleDropdown('dropdown-policy')"
                                     class="w-full flex items-center justify-between px-3 py-2.5 menu-grid-item {{ $policyActive ? 'active-menu' : '' }}"
@@ -347,35 +281,53 @@
 
                                 <div id="dropdown-policy" class="{{ $policyActive ? '' : 'hidden' }} submenu-clinical-panel space-y-1">
                                     <a href="{{ route('backend.policy.index', ['type' => 'policy']) }}"
-                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->get('type') === 'policy' ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-600' : '' }}">- นโยบาย</a>
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/10 transition-colors {{ request()->get('type') === 'policy' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/5 font-bold border-l-2 border-indigo-600' : '' }}">- นโยบาย</a>
                                     <a href="{{ route('backend.policy.index', ['type' => 'operation']) }}"
-                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->get('type') === 'operation' ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-600' : '' }}">- หมวดหมู่การดำเนินงาน</a>
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/10 transition-colors {{ request()->get('type') === 'operation' ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/5 font-bold border-l-2 border-indigo-600' : '' }}">- หมวดหมู่การดำเนินงาน</a>
                                     <a href="{{ route('backend.announcement.index') }}"
-                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->routeIs('backend.announcement.*') ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-600' : '' }}">- จัดการประกาศ / แจ้งให้ทราบ</a>
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/10 transition-colors {{ request()->routeIs('backend.announcement.*') ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/5 font-bold border-l-2 border-indigo-600' : '' }}">- จัดการประกาศ / แจ้งให้ทราบ</a>
                                 </div>
                             </div>
                         @endif
 
                         <!-- hams user management -->
-                        @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))
+                        @if(in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]))
                             <div class="relative group">
                                 <button onclick="toggleDropdown('dropdown-hr')"
                                     class="w-full flex items-center justify-between px-3 py-2.5 menu-grid-item {{ $hamsActive ? 'active-menu' : '' }}"
                                     id="btn-hr">
                                     <div class="flex items-center min-w-0">
                                         <i id="icon-hr" class="fa-solid fa-user-group text-sm w-5 text-center mr-2.5 shrink-0"></i>
-                                        <span class="sidebar-text text-[13px] truncate">HAMS User</span>
+                                        <span class="sidebar-text text-[13px] truncate">HAMS User / สิทธิ์</span>
                                     </div>
                                     <i id="arrow-hr" class="sidebar-text fa-solid fa-chevron-down text-[9px] transition-transform duration-300 {{ $hamsActive ? 'rotate-180' : '' }}"></i>
                                 </button>
 
                                 <div id="dropdown-hr" class="{{ $hamsActive ? '' : 'hidden' }} submenu-clinical-panel space-y-1">
                                     <a href="{{ route('users.index') }}"
-                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->routeIs('users.*') ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-650' : '' }}">- ข้อมูลพนักงาน</a>
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/10 transition-colors {{ request()->routeIs('users.*') ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/5 font-bold border-l-2 border-indigo-600' : '' }}">- ข้อมูลพนักงาน</a>
                                     <a href="{{ route('departments.index') }}"
-                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors {{ request()->routeIs('departments.*') ? 'text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-950/5 font-bold border-l-2 border-red-650' : '' }}">- ข้อมูลแผนก</a>
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/10 transition-colors {{ request()->routeIs('departments.*') && !request()->routeIs('managers.*') ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/5 font-bold border-l-2 border-indigo-600' : '' }}">- ข้อมูลแผนก</a>
+                                    <a href="{{ route('managers.index') }}"
+                                        class="block px-2.5 py-1.5 rounded text-[12px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/10 transition-colors {{ request()->routeIs('managers.*') ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/5 font-bold border-l-2 border-indigo-600' : '' }}">- ข้อมูลหัวหน้าแผนก</a>
                                 </div>
                             </div>
+                        @endif
+
+                        <!-- System Logs -->
+                        @if(Auth::user()->role === 'admin')
+                            <a href="{{ route('system-logs.index') }}"
+                                class="group relative flex items-center px-3 py-2.5 menu-grid-item {{ $systemLogsActive ? 'active-menu' : '' }}">
+                                <i id="logs-icon" class="fa-solid fa-clock-rotate-left text-sm w-5 text-center mr-2.5 shrink-0"></i>
+                                <span class="sidebar-text text-[13px]">บันทึกระบบ (System Logs)</span>
+                            </a>
+                            
+                            <!-- Security Alerts -->
+                            <a href="{{ route('security-alerts.index') }}"
+                                class="group relative flex items-center px-3 py-2.5 menu-grid-item {{ $securityAlertsActive ? 'active-menu' : '' }}">
+                                <i id="security-icon" class="fa-solid fa-shield-halved text-sm w-5 text-center mr-2.5 shrink-0 group-hover:text-white transition-colors {{ $securityAlertsActive ? 'text-white' : '' }}"></i>
+                                <span class="sidebar-text text-[13px]">การแจ้งเตือนการโจมตีระบบ</span>
+                            </a>
                         @endif
                     </div>
                 </div>
@@ -388,16 +340,16 @@
                     <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Preferences</span>
                 </div>
 
-                <div class="sidebar-text flex items-center justify-between px-3 py-2 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-900 shadow-sm transition-all hover:border-[#D71920]/30 group">
+                <div class="sidebar-text flex items-center justify-between px-3 py-2 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-900 shadow-sm transition-all hover:border-[#7367F0]/30 group">
                     <div class="flex items-center gap-2">
-                        <div class="w-6.5 h-6.5 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-[#D71920] transition-colors duration-300">
+                        <div class="w-6.5 h-6.5 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-[#7367F0] transition-colors duration-300">
                             <i class="fa-solid fa-moon text-xs"></i>
                         </div>
                         <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">Dark Mode</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
-                        <div class="w-12 h-6 bg-slate-200 dark:bg-slate-800 rounded-full peer-focus:ring-2 peer-focus:ring-[#D71920]/20 peer-checked:bg-[#D71920] transition-all duration-300 shadow-inner">
+                        <div class="w-19 h-6 bg-slate-200 dark:bg-slate-800 rounded-full peer-focus:ring-2 peer-focus:ring-[#7367F0]/20 peer-checked:bg-[#7367F0] transition-all duration-300 shadow-inner">
                             <div class="absolute inset-0 flex items-center justify-between px-2 pointer-events-none opacity-40">
                                 <i class="fa-solid fa-sun text-[9px] text-yellow-600"></i>
                                 <i class="fa-solid fa-moon text-[9px] text-blue-400"></i>
@@ -407,9 +359,20 @@
                     </label>
                 </div>
 
+                <!-- System Config Modal Trigger -->
+                <button type="button" onclick="openSystemSettingsModal()" class="sidebar-text flex items-center justify-between px-3 py-2.5 w-full rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-900 shadow-sm transition-all hover:border-[#7367F0]/30 group text-left">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6.5 h-6.5 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-[#7367F0] transition-colors duration-300">
+                            <i class="fa-solid fa-sliders text-xs"></i>
+                        </div>
+                        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">ตั้งค่าเปิด-ปิดระบบ</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:translate-x-0.5 transition-transform"></i>
+                </button>
+
                 <!-- Admin Card style layout -->
                 <div id="user-profile" class="flex items-center gap-3 p-3 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-900 shadow-sm relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-[#D71920]"></div>
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[#7367F0]"></div>
                     <div class="w-9 h-9 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 font-bold shrink-0">
                         <i class="fa-solid fa-id-card text-sm"></i>
                     </div>
@@ -437,7 +400,7 @@
                             @yield('title', 'Dashboard')
                         </h1>
                     </div>
-                    <div class="text-sm text-red-500">
+                    <div class="text-sm text-indigo-500">
                         <span id="current-date"></span>
                     </div>
                 </div>
@@ -654,13 +617,58 @@
             }
         });
 
+        function toggleServicesSectionSidebar(isChecked) {
+            fetch('{{ route('backend.settings.toggle-services') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ show_services: isChecked })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message,
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                    } else {
+                        alert(data.message);
+                    }
+                    
+                    // If we are on the dashboard and there's a local toggle, sync its status
+                    const localToggle = document.getElementById('toggle_services_btn');
+                    if (localToggle) {
+                        localToggle.checked = isChecked;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling services section:', error);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด!',
+                        text: 'ไม่สามารถบันทึกการตั้งค่าได้สำเร็จ'
+                    });
+                } else {
+                    alert('ไม่สามารถบันทึกการตั้งค่าได้สำเร็จ');
+                }
+                document.getElementById('toggle_services_btn_sidebar').checked = !isChecked;
+            });
+        }
+
         const dateElement = document.getElementById('current-date');
         if (dateElement) {
             const now = new Date();
             dateElement.textContent = now.toDateString();
         }
-
-
 
         @if(session('success'))
             Swal.fire({
@@ -672,10 +680,155 @@
             });
         @endif
     </script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    @yield('scripts')
-    @stack('scripts')
 
+<!-- System Settings Modal -->
+<div id="systemSettingsModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[1050] flex items-center justify-center hidden p-4">
+    @php
+        $sysSettings = \Illuminate\Support\Facades\Storage::exists('settings.json') ? json_decode(\Illuminate\Support\Facades\Storage::get('settings.json'), true) : [];
+        $showServices = $sysSettings['show_services'] ?? true;
+        $disabledSys = $sysSettings['disabled_systems'] ?? [];
+    @endphp
+    <div class="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-zinc-800 max-w-md w-full overflow-hidden flex flex-col transform transition-all duration-300 scale-95 opacity-0 font-noto" id="systemSettingsModalContent">
+        <!-- Header -->
+        <div class="p-6 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-850">
+            <div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-indigo-600"></i> ตั้งค่าเปิด-ปิดบริการหน้าแรก
+                </h3>
+                <p class="text-slate-500 text-xs mt-1">เลือกเปิด-ปิดการแสดงผลของระบบต่างๆ ในหน้าหลัก</p>
+            </div>
+            <button type="button" onclick="closeSystemSettingsModal()" class="btn btn-sm btn-circle btn-ghost text-slate-400 hover:text-slate-700 dark:hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Form Body -->
+        <div class="pl-6 py-6 pr-4 space-y-4 max-h-[60vh] overflow-y-auto">
+
+            <span class="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest block mb-2">เลือกเปิด-ปิดใช้งานระบบย่อย</span>
+
+            <!-- Checkbox List of systems -->
+            <div class="space-y-3 mr-1.5">
+                @php
+                    $systemList = [
+                        ['id' => 'office_supplies', 'title' => 'ระบบเบิกอุปกรณ์สำนักงาน', 'icon' => 'fa-box-open', 'desc' => 'ระบบเบิกพัสดุและสต็อกพัสดุ'],
+                        ['id' => 'car_booking', 'title' => 'ระบบจองรถส่วนกลาง', 'icon' => 'fa-car-side', 'desc' => 'ระบบจองคิวรถส่วนกลางและคนขับ'],
+                        ['id' => 'employee_housing', 'title' => 'ระบบบ้านพักพนักงาน', 'icon' => 'fa-building-user', 'desc' => 'ระบบสิทธิเข้าพักอาศัยพนักงาน'],
+                        ['id' => 'parking_system', 'title' => 'ระบบลานจอดรถ', 'icon' => 'fa-square-parking', 'desc' => 'ระบบลานจอดรถพนักงานและแขก']
+                    ];
+                @endphp
+
+                @foreach($systemList as $sys)
+                <label class="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/30 rounded-xl cursor-pointer border border-transparent hover:border-slate-100 dark:hover:border-zinc-800 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-500">
+                            <i class="fa-solid {{ $sys['icon'] }} text-sm"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ $sys['title'] }}</span>
+                            <p class="text-slate-400 text-[10px] mt-0.5">{{ $sys['desc'] }}</p>
+                        </div>
+                    </div>
+                    <!-- Checked means enabled/showing (disabled = false) -->
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="settings_show_{{ $sys['id'] }}" class="sr-only peer" {{ !($disabledSys[$sys['id']] ?? false) ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-2.5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        <span class="text-[11px] font-bold ml-2 w-8 text-slate-400 dark:text-zinc-555 peer-checked:text-emerald-500 transition-colors select-none">
+                            <span class="inline peer-checked:hidden">ปิด</span>
+                            <span class="hidden peer-checked:inline">เปิด</span>
+                        </span>
+                    </label>
+                </label>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 flex justify-end gap-2">
+            <button type="button" onclick="closeSystemSettingsModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 bg-transparent rounded-lg">ยกเลิก</button>
+            <button type="button" onclick="saveSystemSettings()" class="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm">บันทึกการตั้งค่า</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openSystemSettingsModal() {
+        const modal = document.getElementById('systemSettingsModal');
+        const content = document.getElementById('systemSettingsModalContent');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95', 'opacity-0');
+        }, 10);
+    }
+
+    function closeSystemSettingsModal() {
+        const modal = document.getElementById('systemSettingsModal');
+        const content = document.getElementById('systemSettingsModalContent');
+        modal.classList.add('opacity-0');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    function saveSystemSettings() {
+        const showServices = document.getElementById('settings_show_services') ? document.getElementById('settings_show_services').checked : true;
+        
+        // Inverted: checked (show) -> disabled = false
+        const officeSupplies = document.getElementById('settings_show_office_supplies') ? !document.getElementById('settings_show_office_supplies').checked : false;
+        const carBooking = document.getElementById('settings_show_car_booking') ? !document.getElementById('settings_show_car_booking').checked : false;
+        const employeeHousing = document.getElementById('settings_show_employee_housing') ? !document.getElementById('settings_show_employee_housing').checked : false;
+        const parkingSystem = document.getElementById('settings_show_parking_system') ? !document.getElementById('settings_show_parking_system').checked : false;
+        const centralData = document.getElementById('settings_show_central_data') ? !document.getElementById('settings_show_central_data').checked : false;
+
+        fetch('{{ route('backend.settings.save-systems') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                show_services: showServices,
+                office_supplies: officeSupplies,
+                car_booking: carBooking,
+                employee_housing: employeeHousing,
+                parking_system: parkingSystem,
+                central_data: centralData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeSystemSettingsModal();
+                setTimeout(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'สำเร็จ',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        // Reload page to apply new homepage settings if on welcome page
+                        if (window.location.pathname === '/') {
+                            window.location.reload();
+                        }
+                    });
+                }, 300);
+            }
+        })
+        .catch(error => {
+            console.error('Error saving settings:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: 'ไม่สามารถบันทึกการตั้งค่าได้สำเร็จ'
+            });
+        });
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+@yield('scripts')
+@stack('scripts')
 </body>
-
 </html>

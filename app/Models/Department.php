@@ -31,6 +31,11 @@ class Department extends Model
         return $this->hasMany(User::class, 'dept_id', 'id');
     }
 
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'manager_id', 'id');
+    }
+
     // Status mapping (Static as schema doesn't show status column)
     public function getStatusLabelAttribute() { return 'ใช้งาน'; }
     public function getStatusColorAttribute() { return 'success'; }

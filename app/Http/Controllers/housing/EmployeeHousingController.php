@@ -492,7 +492,7 @@ class EmployeeHousingController extends Controller
         }
 
         // 1. Admin, HAMS (dept 14, 16) or hams_editor has full access
-        if ($user->role === 'admin' || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor) {
+        if ($user->role === 'admin' || in_array($user->role, ['admin', 'editor']) || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor) {
             return true;
         }
 
@@ -1276,7 +1276,7 @@ class EmployeeHousingController extends Controller
 
         // Security Check: Only owner or official can delete
         $user = Auth::user();
-        $isHams = ($user->role === 'admin' || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor);
+        $isHams = (in_array($user->role, ['admin', 'editor']) || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor);
 
         if ($type === 'residence') {
             if (!$isHams) {
@@ -1370,7 +1370,7 @@ class EmployeeHousingController extends Controller
         // --- Custom Authorization Check ---
         // 1. Check if user has HAMS management rights
         $user = Auth::user();
-        $isHams = ($user->role === 'admin' || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor);
+        $isHams = (in_array($user->role, ['admin', 'editor']) || in_array($user->dept_id, [14, 16]) || $user->is_hams_editor);
 
         // 2. Determine who should be the assigned approver for this specific step
         $assignedApproverId = null;
@@ -1616,7 +1616,7 @@ class EmployeeHousingController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             $dept_id = $user->dept_id;
-            if ($user->role === 'admin' || in_array($dept_id, [14, 16])) {
+            if (in_array($user->role, ['admin', 'editor']) || in_array($dept_id, [14, 16])) {
                 $isHams = true;
             }
         }

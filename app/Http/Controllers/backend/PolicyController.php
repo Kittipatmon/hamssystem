@@ -11,7 +11,7 @@ class PolicyController extends Controller
 {
     public function index(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -23,7 +23,7 @@ class PolicyController extends Controller
 
     public function create()
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -32,7 +32,7 @@ class PolicyController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -51,7 +51,7 @@ class PolicyController extends Controller
 
     public function edit(Policy $policy)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -60,7 +60,7 @@ class PolicyController extends Controller
 
     public function update(Request $request, Policy $policy)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -79,7 +79,7 @@ class PolicyController extends Controller
 
     public function destroy(Policy $policy)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 

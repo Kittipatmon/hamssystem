@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, LogsActivity;
 
     protected $connection = 'userkml2025';
     protected $table = 'employees';
@@ -39,6 +40,14 @@ class User extends Authenticatable
         'updated_at' => 'datetime',
         'resign_date' => 'date',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
     protected $appends = [
         'fullname',
@@ -99,8 +108,10 @@ class User extends Authenticatable
         // For compatibility with code that still sets level_user
         if ($value >= 10 || $value === 'admin') {
             $this->attributes['role'] = 'admin';
+        } elseif ($value === 3 || $value === 'editor') {
+            $this->attributes['role'] = 'editor';
         } else {
-            $this->attributes['role'] = 'staff';
+            $this->attributes['role'] = 'viewer';
         }
     }
 
@@ -142,23 +153,29 @@ class User extends Authenticatable
         return $query->where('status', 'active');
     }
 
-    // ระดับผู้ใช้งาน (Mmapped to role enum)
+    // ระดับผู้ใช้งาน (Mapped to role column)
     const LEVEL_USER_SYSTEM_ADMIN = 'admin';
-    const LEVEL_USER_OPERATION_STAFF = 'staff';
+    const LEVEL_USER_EDITOR = 'editor';
+    const LEVEL_USER_VIEWER = 'viewer';
     const HAMS_STATUS_ACTIVE = 1;
 
     public static function getLevelUserOptions()
     {
         return [
             self::LEVEL_USER_SYSTEM_ADMIN => [
-                'label' => 'System Administrator',
+                'label' => 'Admin',
                 'color' => 'error',
                 'icon' => 'mdi mdi-shield-account',
             ],
-            self::LEVEL_USER_OPERATION_STAFF => [
-                'label' => 'Staff',
+            self::LEVEL_USER_EDITOR => [
+                'label' => 'Editor',
                 'color' => 'info',
-                'icon' => 'mdi mdi-account',
+                'icon' => 'mdi mdi-pencil',
+            ],
+            self::LEVEL_USER_VIEWER => [
+                'label' => 'Viewer',
+                'color' => 'secondary',
+                'icon' => 'mdi mdi-eye',
             ],
         ];
     }
@@ -239,7 +256,25 @@ class User extends Authenticatable
 
     public function getIsHamsAdminAttribute()
     {
-        return $this->role === 'admin' || in_array($this->dept_id, [14, 16]) || $this->is_hams_editor;
+        return in_array($this->role, ['admin', 'editor']) || in_array($this->dept_id, [14, 16]) || $this->is_hams_editor;
+    }
+
+    public function getRoleAttribute()
+    {
+        if ($this->getRawOriginal('role') === 'admin') {
+            return 'admin';
+        }
+
+        if ($this->hamsPermission && $this->hamsPermission->role) {
+            return $this->hamsPermission->role;
+        }
+
+        return 'viewer';
+    }
+
+    public function isOnline()
+    {
+        return \Illuminate\Support\Facades\Cache::has('user-is-online-' . $this->id);
     }
 
     public function trainingApplies()

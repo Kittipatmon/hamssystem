@@ -20,7 +20,7 @@
                     <h2 class="text-xl font-bold text-gray-800 dark:text-white">ห้อง {{ $room->room_number }}</h2>
                     <p class="text-xs text-slate-400 font-medium">พื้นที่: {{ $room->residence->name }}</p>
                 </div>
-                @if(Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]) || Auth::user()->is_hams_editor)
+                @if(in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]) || Auth::user()->is_hams_editor)
                     <button onclick="openEditRoomModal()"
                         class="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-650 font-bold text-xs flex items-center gap-1 transition-all">
                         <i class="fa-solid fa-pen-to-square"></i> แก้ไขห้อง

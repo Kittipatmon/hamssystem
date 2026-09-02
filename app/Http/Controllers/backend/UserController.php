@@ -16,22 +16,22 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor', 'viewer'])) {
             abort(403, 'Unauthorized action.');
         }
 
-        $query = User::with(['department', 'hamsPermission', 'hamsPermissionLatestLog.grantedBy'])
-            ->where('role', '!=', 'admin');
+        $query = User::with(['department', 'hamsPermission', 'hamsPermissionLatestLog.grantedBy']);
 
         // Filtering Logic
         if ($request->filled('emp_code')) {
             $query->where('emp_code', 'like', '%' . trim($request->emp_code) . '%');
         }
-        if ($request->filled('fullname')) {
-            $search = trim($request->fullname);
+        if ($request->filled('search')) {
+            $search = trim($request->search);
             $query->where(function($q) use ($search) {
                 $q->where('firstname', 'like', '%' . $search . '%')
                   ->orWhere('lastname', 'like', '%' . $search . '%')
+                  ->orWhere('emp_code', 'like', '%' . $search . '%')
                   ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%$search%"]);
             });
         }
@@ -42,7 +42,30 @@ class UserController extends Controller
             $query->where('employee_type', $request->employee_type);
         }
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            if ($request->status === 'online') {
+                $onlineIds = [];
+                $allUsers = User::pluck('id');
+                foreach ($allUsers as $id) {
+                    if (\Illuminate\Support\Facades\Cache::has('user-is-online-' . $id)) {
+                        $onlineIds[] = $id;
+                    }
+                }
+                // If no one is online, whereIn will return empty which is correct
+                $query->whereIn('id', empty($onlineIds) ? [0] : $onlineIds);
+            } elseif ($request->status === 'offline') {
+                $onlineIds = [];
+                $allUsers = User::pluck('id');
+                foreach ($allUsers as $id) {
+                    if (\Illuminate\Support\Facades\Cache::has('user-is-online-' . $id)) {
+                        $onlineIds[] = $id;
+                    }
+                }
+                if (!empty($onlineIds)) {
+                    $query->whereNotIn('id', $onlineIds);
+                }
+            } else {
+                $query->where('status', $request->status);
+            }
         }
         if ($request->filled('department')) {
             $query->where('dept_id', $request->department);
@@ -52,8 +75,7 @@ class UserController extends Controller
         }
         // skip division/section filters as they don't exist in new schema
 
-        $perPage = $request->get('per_page', 50);
-        $users = $query->paginate($perPage);
+        $users = $query->get();
 
         if ($request->expectsJson()) {
             return response()->json($users);
@@ -78,20 +100,40 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized action.');
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
+            abort(403, 'Unauthorized action. Editor or Admin required.');
         }
 
         $request->validate([
             'emp_code' => 'required|unique:userkml2025.employees,emp_code',
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'role' => 'required|in:admin,staff',
+            'role' => 'sometimes|in:admin,editor,viewer',
             'status' => 'required|in:active,resign',
         ]);
 
-        $data = $request->except(['password', 'remember_token']);
+        if (Auth::user()->role !== 'admin') {
+            $request->request->remove('role'); // Editor cannot assign roles
+        }
+
+        $data = $request->except(['password', 'remember_token', 'role']);
+        $data['role'] = 'staff'; // Default for the shared employees table
         $user = User::create($data);
+
+        // Store actual HAMS role
+        $role = $request->input('role', 'viewer');
+        if ($role === 'admin' && Auth::user()->getRawOriginal('role') !== 'admin') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'เฉพาะผู้ดูแลระบบหลัก (Central Admin) เท่านั้นที่สามารถมอบสิทธิ์ Admin ได้ (โปรดติดต่อฝ่าย IT)'], 403);
+            }
+            return redirect()->back()->with('error', 'เฉพาะผู้ดูแลระบบหลัก (Central Admin) เท่านั้นที่สามารถมอบสิทธิ์ Admin ได้ (โปรดติดต่อฝ่าย IT)');
+        }
+
+        \App\Models\HamsPermission::ensureRoleColumnExists();
+        \App\Models\HamsPermission::updateOrCreate(
+            ['user_id' => $user->id],
+            ['role' => $role]
+        );
 
         if ($request->ajax()) {
             return response()->json(['success' => true, 'user' => $user]);
@@ -118,7 +160,7 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -128,12 +170,36 @@ class UserController extends Controller
             'emp_code' => 'required|unique:userkml2025.employees,emp_code,' . $id,
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'role' => 'required|in:admin,staff',
+            'role' => 'sometimes|in:admin,editor,viewer',
             'status' => 'required|in:active,resign',
         ]);
 
-        $data = $request->except(['password', 'remember_token']);
+        if (Auth::user()->role !== 'admin') {
+            $request->request->remove('role'); // Editor cannot assign roles
+        }
+
+        $data = $request->except(['password', 'remember_token', 'role']);
+        // Don't modify the employees.role column
         $user->update($data);
+
+        // Store actual HAMS role if provided
+        if ($request->has('role')) {
+            $role = $request->role;
+            $oldRole = $user->role;
+            $isChangingAdminRole = ($oldRole === 'admin' || $role === 'admin');
+
+            if ($isChangingAdminRole && Auth::user()->getRawOriginal('role') !== 'admin') {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'เฉพาะผู้ดูแลระบบหลัก (Central Admin) เท่านั้นที่สามารถปรับเปลี่ยนสิทธิ์ Admin ได้ (โปรดติดต่อฝ่าย IT)'], 403);
+                }
+                return redirect()->back()->with('error', 'เฉพาะผู้ดูแลระบบหลัก (Central Admin) เท่านั้นที่สามารถปรับเปลี่ยนสิทธิ์ Admin ได้ (โปรดติดต่อฝ่าย IT)');
+            }
+            \App\Models\HamsPermission::ensureRoleColumnExists();
+            \App\Models\HamsPermission::updateOrCreate(
+                ['user_id' => $user->id],
+                ['role' => $role]
+            );
+        }
 
         if ($request->ajax()) {
             return response()->json(['success' => true]);
@@ -144,7 +210,7 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'editor'])) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -162,7 +228,37 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $user->load(['department']);
-        return view('backend.users.profile', compact('user'));
+
+        // 1. My Parking Reservations
+        $myReservations = \App\Models\parking\VisitorReservation::where('contact_user_id', $user->id)
+            ->with(['contactUser', 'slot'])
+            ->orderBy('checkin_datetime', 'desc')
+            ->get();
+
+        // 2. Pending Manager Approvals
+        $managedDeptIds = \App\Models\Department::where('manager_id', $user->id)->pluck('id');
+        $pendingManagerReservations = collect();
+        if ($managedDeptIds->isNotEmpty()) {
+            $managedUserIds = \App\Models\User::whereIn('dept_id', $managedDeptIds)->pluck('id');
+            $pendingManagerReservations = \App\Models\parking\VisitorReservation::whereIn('contact_user_id', $managedUserIds)
+                ->where('manager_approval', 'pending')
+                ->with(['contactUser', 'slot'])
+                ->orderBy('checkin_datetime', 'desc')
+                ->get();
+        }
+
+        // 3. Pending HAMS Acknowledgement
+        $pendingHamsReservations = collect();
+        $isHamsAdmin = \App\Models\HamsPermission::where('user_id', $user->id)->value('is_hams_editor') || in_array($user->role, ['admin', 'editor']);
+        if ($isHamsAdmin) {
+            $pendingHamsReservations = \App\Models\parking\VisitorReservation::where('manager_approval', 'approved')
+                ->where('hams_status', 'pending')
+                ->with(['contactUser', 'slot'])
+                ->orderBy('checkin_datetime', 'desc')
+                ->get();
+        }
+
+        return view('backend.users.profile', compact('user', 'myReservations', 'pendingManagerReservations', 'pendingHamsReservations', 'isHamsAdmin'));
     }
 
     public function updateAvatar(Request $request)
@@ -241,6 +337,54 @@ class UserController extends Controller
             'is_hams_editor' => $permission->is_hams_editor,
             'grantor_name' => $currentUser->fullname,
             'message' => 'ปรับปรุงสิทธิ์ HAMS Editor เรียบร้อยแล้ว'
+        ]);
+    }
+
+    public function updateRole(Request $request, $id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized action. Only Admin can update roles.'], 403);
+        }
+
+        $request->validate([
+            'role' => 'required|in:admin,editor,viewer',
+            'reason' => 'nullable|string|max:1000'
+        ]);
+
+        if ($request->role === 'admin' && Auth::user()->getRawOriginal('role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'เฉพาะผู้ดูแลระบบหลัก (Central Admin) เท่านั้นที่สามารถมอบสิทธิ์ Admin ได้ (โปรดติดต่อฝ่าย IT)'], 403);
+        }
+
+        \App\Models\HamsPermission::ensureRoleColumnExists();
+        $user = User::findOrFail($id);
+        $permission = \App\Models\HamsPermission::firstOrCreate(['user_id' => $user->id]);
+        $oldRole = $permission->role ?? 'viewer';
+        $isChangingAdminRole = ($oldRole === 'admin' || $request->role === 'admin');
+
+        if ($isChangingAdminRole && Auth::user()->getRawOriginal('role') !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'เฉพาะผู้ดูแลระบบหลัก (Central Admin) เท่านั้นที่สามารถปรับเปลี่ยนสิทธิ์ Admin ได้ (โปรดติดต่อฝ่าย IT)'], 403);
+        }
+        
+        // Prevent changing own role to avoid locking oneself out
+        if ($user->id === Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Cannot change your own role.'], 422);
+        }
+
+        $permission->role = $request->role;
+        $permission->save();
+
+        // Log the role change with reason
+        \App\Models\HamsPermissionLog::ensureReasonColumnExists();
+        \App\Models\HamsPermissionLog::create([
+            'target_user_id' => $user->id,
+            'granted_by_user_id' => Auth::id(),
+            'action' => "changed role from {$oldRole} to {$request->role}",
+            'reason' => $request->reason
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'อัปเดตสิทธิ์ผู้ใช้งานเรียบร้อยแล้ว'
         ]);
     }
 }

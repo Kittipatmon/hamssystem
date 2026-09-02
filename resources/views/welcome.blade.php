@@ -426,6 +426,7 @@
         </style>
 
 
+    @if(\Illuminate\Support\Facades\Storage::exists('settings.json') ? (json_decode(\Illuminate\Support\Facades\Storage::get('settings.json'), true)['show_services'] ?? true) : true)
     {{-- ============ SERVICES SECTION ============ --}}
     <div class="relative py-24 bg-[#FAF7F2] overflow-hidden">
         {{-- Decorative Glow --}}
@@ -452,8 +453,12 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 reveal">
                 @php
+                    $sysSettings = \Illuminate\Support\Facades\Storage::exists('settings.json') ? json_decode(\Illuminate\Support\Facades\Storage::get('settings.json'), true) : [];
+                    $disabledSys = $sysSettings['disabled_systems'] ?? [];
+
                     $services = [
                         [
+                            'id' => 'office_supplies',
                             'route' => route('items.itemsalllist'),
                             'title' => 'ระบบเบิกอุปกรณ์สำนักงาน',
                             'subtitle' => 'Asset & Supply Management',
@@ -464,18 +469,9 @@
                             'icon' => 'fa-box-open',
                             'delay' => 'reveal-delay-1'
                         ],
+
                         [
-                            'route' => route('reservations.welcomemeeting'),
-                            'title' => 'ระบบจองห้องประชุม',
-                            'subtitle' => 'Meeting Room Booking',
-                            'description' => 'จองห้องประชุมออนไลน์ เช็คตารางเวลา และจัดการเครื่องอำนวยความสะดวก',
-                            'image' => asset('images/welcome/bookingmeet.jpg'),
-                            'status' => 'พร้อมใช้งาน',
-                            'status_color' => 'emerald',
-                            'icon' => 'fa-calendar-check',
-                            'delay' => 'reveal-delay-2'
-                        ],
-                        [
+                            'id' => 'car_booking',
                             'route' => route('bookingcar.welcome'),
                             'title' => 'ระบบจองรถส่วนกลาง',
                             'subtitle' => 'Smart Transportation',
@@ -487,6 +483,7 @@
                             'delay' => 'reveal-delay-3'
                         ],
                         [
+                            'id' => 'employee_housing',
                             'route' => route('housing.welcome'),
                             'title' => 'ระบบบ้านพักพนักงาน',
                             'subtitle' => 'Residence Management',
@@ -497,40 +494,51 @@
                             'icon' => 'fa-building-user',
                             'delay' => 'reveal-delay-1'
                         ],
-                        // [
-                        //     'route' => '#',
-                        //     'title' => 'ระบบแจ้งซ่อมบำรุง',
-                        //     'subtitle' => 'Maintenance Request',
-                        //     'description' => 'แจ้งซ่อมอุปกรณ์และอาคาร ติดตามคิวงาน และสรุปผลการดำเนินการ (เร็วๆ นี้)',
-                        //     'image' => asset('images/welcome/repairrequest.jpg'),
-                        //     'status' => 'เร็วๆ นี้',
-                        //     'status_color' => 'orange',
-                        //     'icon' => 'fa-tools',
-                        //     'delay' => 'reveal-delay-2',
-                        //     'upcoming' => true
-                        // ],
+                    ];
+
+                    // Add Parking card (visible to everyone)
+                    $isParkingAdmin = Auth::check() && Auth::user()->is_hams_admin;
+                    
+                    $services[] = [
+                        'id' => 'parking_system',
+                        'route' => Auth::check() ? ($isParkingAdmin ? url('/parking/dashboard') : route('parking.map.full')) : 'javascript:void(0)',
+                        'onclick' => !Auth::check() ? 'document.getElementById(\'guestParkingModal\').classList.remove(\'hidden\');' : null,
+                        'title' => 'ระบบลานจอดรถ',
+                        'subtitle' => 'Parking Management',
+                        'description' => $isParkingAdmin ? 'จัดการลานจอดรถสำหรับพนักงาน จองที่จอดรถแขก และดูแผนผังแบบ Real-time' : 'ดูแผนผังและตรวจสอบสถานะช่องจอดรถแบบ Real-time',
+                        'image' => asset('images/welcome/parking.png'),
+                        'status' => 'พร้อมใช้งาน',
+                        'status_color' => 'emerald',
+                        'icon' => 'fa-square-parking',
+                        'delay' => 'reveal-delay-2'
                     ];
 
                     // Add Admin card if applicable
-                    if (Auth::check() && (Auth::user()->role === 'admin' || in_array(Auth::user()->dept_id, [14, 16]))) {
+                    if (Auth::check() && (in_array(Auth::user()->role, ['admin', 'editor']) || in_array(Auth::user()->dept_id, [14, 16]))) {
                         $services[] = [
+                            'id' => 'central_data',
                             'route' => route('backend.welcomedatamanage'),
                             'title' => 'ระบบจัดการข้อมูลหลังบ้าน',
                             'subtitle' => 'Central Data Control',
                             'description' => 'ศูนย์ควบคุมข้อมูล Master Data พนักงาน อาคาร และการตั้งค่าระบบทั้งหมด',
                             'image' => asset('images/welcome/data.png'),
-                            'status' => 'ผู้ดูแลระบบ',
+                            'status' => 'ผู้ดูแลระบบ / ผู้แก้ไข',
                             'status_color' => 'indigo',
                             'icon' => 'fa-database',
                             'delay' => 'reveal-delay-3'
                         ];
                     }
+
+                    // Filter out disabled systems based on the settings.json
+                    $services = array_filter($services, function ($svc) use ($disabledSys) {
+                        return !($disabledSys[$svc['id']] ?? false);
+                    });
                 @endphp
 
                 @foreach($services as $svc)
                     <div class="{{ $svc['delay'] }}">
                         <a href="{{ $svc['route'] }}" 
-                           @if(isset($svc['upcoming'])) onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'ระบบส่วนนี้จะเปิดให้บริการในอนาคตอันใกล้.', 'warning'); return false;" @endif
+                           @if(isset($svc['onclick'])) onclick="{{ $svc['onclick'] }}" @elseif(isset($svc['upcoming'])) onclick="Swal.fire('อยู่ระหว่างพัฒนา!', 'ระบบส่วนนี้จะเปิดให้บริการในอนาคตอันใกล้.', 'warning'); return false;" @endif
                            class="group relative block bg-white rounded-[2.5rem] p-4 shadow-2xl shadow-slate-200/40 border border-white hover:border-red-100 transition-all duration-500 hover:-translate-y-2 overflow-hidden h-full">
                             
                             {{-- Image Container --}}
@@ -568,8 +576,9 @@
                     </div>
                 @endforeach
             </div>
-        </div>
-    </div>    </div>
+    </div>
+    @endif
+    </div>
 
     {{-- ============ POLICY & OPERATIONS SECTION ============ --}}
     <div class="relative py-20 overflow-hidden">
@@ -1273,4 +1282,77 @@
             });
         </script>
     @endpush
+
+    <!-- Guest Parking Selection Modal -->
+    <div id="guestParkingModal" class="hidden fixed inset-0 z-[200] overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 transition-opacity bg-slate-900/60 backdrop-blur-md" aria-hidden="true" onclick="document.getElementById('guestParkingModal').classList.add('hidden')"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <!-- Modal Panel -->
+            <div class="inline-block align-bottom bg-white rounded-[2.5rem] text-center overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl w-full relative border border-white/50">
+                
+                <!-- Close Button -->
+                <button type="button" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-slate-100/50 text-slate-400 hover:text-red-500 hover:bg-red-50 focus:outline-none transition-all duration-300" onclick="document.getElementById('guestParkingModal').classList.add('hidden')">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+
+                <!-- Header -->
+                <div class="bg-gradient-to-b from-slate-50 to-white px-8 pt-12 pb-8 border-b border-slate-100">
+                    <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg shadow-emerald-500/30">
+                        <i class="fa-solid fa-square-parking"></i>
+                    </div>
+                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">
+                        ระบบลานจอดรถ
+                    </h2>
+                    <p class="text-slate-500 mt-2 font-medium">กรุณาเลือกประเภทผู้ใช้งานเพื่อเข้าสู่ระบบ</p>
+                </div>
+
+                <!-- Cards Container -->
+                <div class="bg-white px-8 py-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                        
+                        <!-- Guest Parking Card -->
+                        <a href="{{ route('parking.visitors.create') }}" class="group relative block p-8 bg-white rounded-[2rem] border-2 border-slate-100 hover:border-rose-400 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-rose-500/20 transition-all duration-500 overflow-hidden hover:-translate-y-1">
+                            <div class="absolute inset-0 bg-gradient-to-br from-rose-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                                <h3 class="text-2xl font-black text-slate-800 mb-4 group-hover:text-rose-600 transition-colors">จองที่จอดรถแขก</h3>
+                                
+                                <div class="w-full h-px bg-slate-100 my-4"></div>
+                                
+                                <p class="text-sm text-slate-500 font-medium leading-relaxed text-center px-2 group-hover:text-slate-600 transition-colors">
+                                    สำหรับบุคคลภายนอก (Visitor) สามารถลงทะเบียนเพื่อจองช่องจอดรถล่วงหน้าได้ทันที <span class="text-rose-500 font-bold">โดยไม่ต้องเข้าสู่ระบบ</span>
+                                </p>
+                            </div>
+                        </a>
+
+                        <!-- Employee Parking Card -->
+                        <a href="{{ route('login') }}" class="group relative block p-8 bg-white rounded-[2rem] border-2 border-slate-100 hover:border-blue-400 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 overflow-hidden hover:-translate-y-1">
+                            <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div class="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                    <i class="fa-solid fa-car"></i>
+                                </div>
+                                <h3 class="text-2xl font-black text-slate-800 mb-4 group-hover:text-blue-600 transition-colors">ลานจอดรถพนักงาน</h3>
+                                
+                                <div class="w-full h-px bg-slate-100 my-4"></div>
+                                
+                                <p class="text-sm text-slate-500 font-medium leading-relaxed text-center px-2 group-hover:text-slate-600 transition-colors">
+                                    สงวนสิทธิ์เฉพาะพนักงาน HAMS กรุณา <span class="text-blue-500 font-bold">เข้าสู่ระบบ</span> เพื่อตรวจสอบผังลานจอดรถแบบ Real-time
+                                </p>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

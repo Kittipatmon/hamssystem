@@ -12,6 +12,10 @@ use SocialiteProviders\Manager\SocialiteWasCalled;
 use SocialiteProviders\Azure\AzureExtendSocialite;
 
 use Illuminate\Support\Facades\URL;
+use App\Listeners\LogSuccessfulLogin;
+use App\Listeners\LogFailedLogin;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Failed;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,5 +41,8 @@ class AppServiceProvider extends ServiceProvider
             SocialiteWasCalled::class,
             [AzureExtendSocialite::class, 'handle']
         );
+
+        // Event::listen(Login::class, LogSuccessfulLogin::class);
+        // Event::listen(Failed::class, LogFailedLogin::class);
     }
 }

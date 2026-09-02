@@ -418,6 +418,117 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Parking Approvals Section -->
+                    <div class="mt-12 bg-white dark:bg-slate-800 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+                        <div class="p-8 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
+                            <h3 class="text-xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                                <i class="fa-solid fa-car text-kumwell-red"></i>
+                                Parking Reservations & Approvals
+                            </h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">ติดตามสถานะและอนุมัติคำขอจองที่จอดรถ</p>
+                        </div>
+
+                        <div class="p-8 space-y-8">
+                            <!-- Pending Manager Approvals -->
+                            @if(isset($pendingManagerReservations) && $pendingManagerReservations->count() > 0)
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-l-4 border-orange-500 pl-3">
+                                        Pending Manager Approvals ({{ $pendingManagerReservations->count() }})
+                                    </h4>
+                                    <div class="space-y-4">
+                                        @foreach($pendingManagerReservations as $req)
+                                            <div class="flex flex-col md:flex-row items-center justify-between p-4 bg-orange-50 dark:bg-orange-500/10 rounded-xl border border-orange-100 dark:border-orange-500/20">
+                                                <div>
+                                                    <p class="font-bold text-gray-900 dark:text-white">{{ $req->guest_name }} ({{ $req->car_registration }})</p>
+                                                    <p class="text-sm text-gray-600 dark:text-gray-400">Request by: {{ optional($req->contactUser)->firstname }} • {{ \Carbon\Carbon::parse($req->checkin_datetime)->format('d M Y H:i') }}</p>
+                                                </div>
+                                                <div class="flex gap-2 mt-4 md:mt-0">
+                                                    <form action="{{ route('visitors.approve', $req->id) }}" method="POST">
+                                                        @csrf
+                                                        <button class="px-4 py-2 bg-green-500 text-white text-xs font-bold rounded-lg hover:bg-green-600 transition-colors">อนุมัติ</button>
+                                                    </form>
+                                                    <form action="{{ route('visitors.reject', $req->id) }}" method="POST">
+                                                        @csrf
+                                                        <button class="px-4 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-colors">ปฏิเสธ</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Pending HAMS Acknowledgements -->
+                            @if(isset($pendingHamsReservations) && $pendingHamsReservations->count() > 0)
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-l-4 border-blue-500 pl-3">
+                                        Pending HAMS Acknowledgement ({{ $pendingHamsReservations->count() }})
+                                    </h4>
+                                    <div class="space-y-4">
+                                        @foreach($pendingHamsReservations as $req)
+                                            <div class="flex flex-col md:flex-row items-center justify-between p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-100 dark:border-blue-500/20">
+                                                <div>
+                                                    <p class="font-bold text-gray-900 dark:text-white">{{ $req->guest_name }} ({{ $req->car_registration }})</p>
+                                                    <p class="text-sm text-gray-600 dark:text-gray-400">Request by: {{ optional($req->contactUser)->firstname }} • {{ \Carbon\Carbon::parse($req->checkin_datetime)->format('d M Y H:i') }}</p>
+                                                    <p class="text-xs text-blue-600 mt-1"><i class="fa-solid fa-check-circle"></i> Manager Approved</p>
+                                                </div>
+                                                <div class="mt-4 md:mt-0">
+                                                    <form action="{{ route('visitors.acknowledge', $req->id) }}" method="POST">
+                                                        @csrf
+                                                        <button class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-lg hover:bg-blue-600 transition-colors">รับทราบ</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- My Reservations -->
+                            @if(isset($myReservations) && $myReservations->count() > 0)
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-l-4 border-gray-400 pl-3">
+                                        My Parking Requests
+                                    </h4>
+                                    <div class="space-y-4">
+                                        @foreach($myReservations->take(5) as $req)
+                                            <div class="p-4 bg-gray-50 dark:bg-slate-700/30 rounded-xl border border-gray-200 dark:border-slate-600">
+                                                <div class="flex justify-between items-start">
+                                                    <div>
+                                                        <p class="font-bold text-gray-900 dark:text-white">{{ $req->guest_name }} ({{ $req->car_registration }})</p>
+                                                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ \Carbon\Carbon::parse($req->checkin_datetime)->format('d M Y H:i') }}</p>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        @if($req->manager_approval == 'pending')
+                                                            <span class="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded font-bold">รออนุมัติ</span>
+                                                        @elseif($req->manager_approval == 'rejected')
+                                                            <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded font-bold">ปฏิเสธ</span>
+                                                        @else
+                                                            <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-bold">อนุมัติแล้ว</span>
+                                                        @endif
+                                                        
+                                                        @if($req->manager_approval == 'approved' && $req->hams_status == 'pending')
+                                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-bold ml-1">รอ HAMS รับทราบ</span>
+                                                        @elseif($req->hams_status == 'acknowledged')
+                                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-bold ml-1">HAMS รับทราบแล้ว</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if((!isset($pendingManagerReservations) || $pendingManagerReservations->isEmpty()) && (!isset($pendingHamsReservations) || $pendingHamsReservations->isEmpty()) && (!isset($myReservations) || $myReservations->isEmpty()))
+                                <div class="text-center py-8 text-gray-400">
+                                    <i class="fa-solid fa-inbox text-4xl mb-3 opacity-50"></i>
+                                    <p>ไม่มีข้อมูลการจองที่จอดรถ</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
